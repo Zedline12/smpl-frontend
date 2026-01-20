@@ -1,4 +1,5 @@
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
+import { Suspense } from "react";
 
 export default function SignUpPage() {
   return (
@@ -13,7 +14,9 @@ export default function SignUpPage() {
       </div>
 
       <div className="relative z-10 w-full">
-        <SignUpForm />
+         <Suspense fallback={<div>Loading...</div>}>
+            <SignUpForm />
+          </Suspense>
       </div>
     </div>
   );
