@@ -24,10 +24,12 @@ export const aiMediaService = {
       body,
     });
   },
-  async calculateCost(data: { resolution: Resolution }) {
+  async calculateCost(data: {
+    resolution: Resolution;
+  }): Promise<{ creditsCost: number }> {
     return await fetch("/api/ai-media/calculate-cost", {
       method: "POST",
       body: JSON.stringify(data),
-    });
+    }).then((res) => res.json().then((data) => data.creditsCost));
   },
 };
