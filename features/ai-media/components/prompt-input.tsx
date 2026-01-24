@@ -21,7 +21,9 @@ export function PromptInput({ projectId }: PromptInputProps) {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
   const [imageSlots, setImageSlots] = useState<(File | null)[]>([null]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || "");
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    "694ecece580530ed4e35bb0c",
+  );
   const [isFocused, setIsFocused] = useState(false);
   const fileInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -61,7 +63,7 @@ export function PromptInput({ projectId }: PromptInputProps) {
 
   const handleFileChange = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -83,7 +85,7 @@ export function PromptInput({ projectId }: PromptInputProps) {
     setIsGenerating(true);
     try {
       const referenceImages = imageSlots.filter(
-        (slot): slot is File => slot !== null
+        (slot): slot is File => slot !== null,
       );
       await aiMediaService.generateMedia({
         prompt,
@@ -179,7 +181,7 @@ export function PromptInput({ projectId }: PromptInputProps) {
         {/* Content Area */}
         <div className="p-2 text-white">
           <div className="flex flex-row  gap-4">
-            <div className="flex flex-row items-center  p-2 bg-secondary rounded-lg h-20 self-start">
+            <div className="flex flex-row items-center  p-2 bg-gradient-to-r from-primary to-tertiary rounded-lg h-20 self-start">
               <button
                 type="button"
                 onClick={handleRemoveSlot}

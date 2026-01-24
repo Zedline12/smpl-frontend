@@ -65,7 +65,7 @@ export function SignInForm() {
                 id="email"
                 type="email"
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 bg-gray-50/50 focus:bg-white"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200  focus:bg-white"
                 placeholder="name@company.com"
                 value={formData.email}
                 onChange={(e) =>

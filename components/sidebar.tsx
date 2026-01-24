@@ -22,14 +22,13 @@ export function WorkspaceSidebar() {
 
       <div
         id="hs-sidebar-basic-usage"
-        className="hs-overlay [--auto-close:lg] hidden lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 w-64
+        className=" hs-overlay [--auto-close:lg] hidden lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 w-64
 hs-overlay-open:translate-x-0
 -translate-x-full transition-all duration-300 transform
 h-full
 hidden
 
-fixed top-0 start-0 bottom-0 z-60
-bg-white border-e border-gray-200"
+fixed top-0 start-0 bottom-0 z-60"
         role="dialog"
         aria-label="Sidebar"
       >
@@ -37,7 +36,7 @@ bg-white border-e border-gray-200"
           {/* Header */}
           <header className=" p-4 flex justify-between items-center gap-x-2">
             <Image
-              src="/logo-black.png"
+              src="/logo-white.png"
               alt="SMPL Logo"
               width={62}
               height={62}
@@ -79,7 +78,7 @@ bg-white border-e border-gray-200"
               <ul className="space-y-1">
                 <li>
                   <a
-                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-black font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                    className=" flex items-center text-foreground gap-x-2.5 py-3 px-2.5   text-sm  font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
                     href="#"
                   >
                     <svg
@@ -88,7 +87,7 @@ bg-white border-e border-gray-200"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="text-gray-500 size-5"
+                      className="text-muted size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -102,7 +101,7 @@ bg-white border-e border-gray-200"
 
                 <li>
                   <a
-                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-black font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-foreground font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
                     href="#"
                   >
                     <svg
@@ -111,7 +110,7 @@ bg-white border-e border-gray-200"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="text-gray-500 size-5"
+                      className="text-muted size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -122,23 +121,19 @@ bg-white border-e border-gray-200"
                     AI Tools
                   </a>
                 </li>
-             
+
                 <li className="text-gray-500 px-2.5 text-sm font-medium mt-7 mb-3">
                   Your Content
                 </li>
                 <li>
-                  <a
-                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-black font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
-                   
-                  >
-                    <Link className="flex gap-x-2.5 flex-row" href="/projects">
+                  <a className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-foreground font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="text-gray-500 size-5"
+                      className="text-muted size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -146,13 +141,12 @@ bg-white border-e border-gray-200"
                         d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
                       />
                     </svg>
-                      Projects
-                      </Link>
+                    Projects
                   </a>
                 </li>
                 <li>
                   <a
-                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-black font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-foreground font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
                     href="#"
                   >
                     <svg
@@ -161,7 +155,7 @@ bg-white border-e border-gray-200"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="text-gray-500 size-5"
+                      className="text-muted size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -174,7 +168,7 @@ bg-white border-e border-gray-200"
                 </li>
                 <li>
                   <a
-                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-black font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                    className=" flex items-center gap-x-2.5 py-3 px-2.5   text-sm text-foreground font-medium rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
                     href="#"
                   >
                     <svg
@@ -183,7 +177,7 @@ bg-white border-e border-gray-200"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="text-gray-500 size-5"
+                      className="text-muted size-5"
                     >
                       <path
                         strokeLinecap="round"

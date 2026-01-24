@@ -1,23 +1,52 @@
-"use client";
+
 import { PromptInput } from "@/features/ai-media/components/prompt-input";
-import { GalleryGrid } from "@/components/gallery-grid";
-import { useLatestGenerations } from "@/features/projects/hooks/use-latest-generations";
+import { MediaFeature } from "@/features/media/components/MediaFeature";
+import { MediaGrid } from "@/features/media/components/MediaGrid";
+import { fetchWithToken } from "@/lib/fetcher";
+import { Media } from "@/lib/types/project.type";
 import Image from "next/image";
-export default function WorkspacePage() {
-  const { latestGenerations } = useLatestGenerations();
+export default async function WorkspacePage() {
+   
 
-  return (
-    <div className="p-8 max-w-6xl mx-auto space-y-12">
-      <section className="w-1/2 flex items-center fixed bottom-10 z-10">
-        <PromptInput />
+  return ( 
+    <div className="relative min-h-screen bg-grid overflow-hidden">
+  {/* Glow 1 */}
+  <div className="
+    absolute
+    top-[-150px]
+    left-[-150px]
+    w-[400px]
+    h-[400px]
+    bg-[#8663ff]
+    rounded-full
+    blur-[120px]
+    opacity-40
+  " />
+
+  {/* Glow 2 */}
+  <div className="
+    absolute
+    bottom-[-150px]
+    right-[-150px]
+    w-[500px]
+    h-[500px]
+    bg-[#6b41ff]
+    rounded-full
+    blur-[140px]
+    opacity-30
+  " />
+
+  {/* Content */}
+  <main className=" z-10">
+    
+    <div className="p-8  max-w-6xl mx-auto space-y-12">
+     
+
+      <section>
+        <MediaFeature/>
       </section>
-      {/* Shopify Section */}
-
-      <h1 className="text-black text-2xl font-bold ">Latest Generations</h1>
-      <section className="pt-8 border-t border-gray-200">
-        <GalleryGrid media={latestGenerations} />
-      </section>
-
     </div>
+  </main>
+</div>
   );
 }

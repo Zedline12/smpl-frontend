@@ -1,10 +1,10 @@
 import React from "react";
 import Image from "next/image";
-import { Media } from "@/lib/types/project.type";
+import { Media } from "@/features/media/types/media";
 
 export function MediaCard({ media }: { media: Media }) {
   return (
-    <div className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all">
+    <div className="group relative aspect-square  rounded-xl overflow-hidden  shadow-sm hover:shadow-md transition-all">
       <div className="relative w-full h-full">
         <Image
           src={media.url}

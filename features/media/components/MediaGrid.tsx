@@ -1,12 +1,11 @@
+"use client";
 import React from "react";
-import { Media } from "@/lib/types/project.type";
-import { MediaCard } from "./media-card";
+import { Media } from "@/features/media/types/media";
+import { MediaCard } from "@/features/media/components/MediaCard";
+import { fetchWithToken } from "@/lib/fetcher";
+import { PromptInput } from "@/features/ai-media/components/prompt-input";
 
-interface GalleryGridProps {
-  media?: Media[];
-}
-
-export function GalleryGrid({ media = [] }: GalleryGridProps) {
+export function MediaGrid({ media }: { media: Media[] }) {
   if (media.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
@@ -16,8 +15,7 @@ export function GalleryGrid({ media = [] }: GalleryGridProps) {
   }
 
   return (
-    <div className="space-y-6">
-     
+    <div className=" p-4 space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {media.map((item) => (
           <MediaCard key={item.id} media={item} />

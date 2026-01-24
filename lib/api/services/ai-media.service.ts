@@ -19,13 +19,13 @@ export const aiMediaService = {
       body = formData;
     }
 
-    return await apiFetch("ai-media/generate", {
+    return await fetch("/api/ai-media/generate", {
       method: "POST",
       body,
     });
   },
   async calculateCost(data: { resolution: Resolution }) {
-    return await apiFetch("ai-media/calculate-cost", {
+    return await fetch("/api/ai-media/calculate-cost", {
       method: "POST",
       body: JSON.stringify(data),
     });

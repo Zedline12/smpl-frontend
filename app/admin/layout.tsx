@@ -12,7 +12,7 @@ export default function AdminLayout({
       <AdminNavbar />
       <div className="flex">
         <AdminSidebar />
-        <main className="flex-1 p-6 md:p-8 overflow-x-hidden">{children}</main>
+        <main className="space-y-8 max-w-7xl mx-auto flex-1 p-6 md:p-8 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );
