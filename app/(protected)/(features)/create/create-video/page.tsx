@@ -35,7 +35,9 @@ export default function CreateVideoPage() {
         aspectRatio,
         resolution,
         durationSeconds,
-         referenceImages: referenceImages.filter((img) => img !== null) as File[],
+        referenceImages: referenceImages.filter(
+          (img) => img !== null,
+        ) as File[],
         // type: "video", // Function signature says GenerateVideoRequest, verify if type is needed.
         // Previous code had type: "video". GenerateVideoRequest doesn't seem to have type field based on step 354 diff?
         // Step 354: GenerateVideoRequest { prompt, projectId, referenceImages, durationSeconds, resolution, aspectRatio }. No type.
@@ -47,28 +49,27 @@ export default function CreateVideoPage() {
   };
 
   return (
-   
-     <>
-          <div className="md:grid hidden  h-full  grid-cols-3 gap-6 text-foreground">
-            <div className="col-span-1 ">
-              <CreateVideoParameter />
-            </div>
-            <div className="relative col-span-2 px-5   flex flex-col gap-2">
-              <MediaExplorer />
-    
-              <div className="absolute border border-neutral-800 rounded-lg p-5 bottom-0 left-0 w-full">
-                <VideoGenerationInput onGeneration={handleGeneration} />
-              </div>
-            </div>
+    <>
+      <div className="md:grid hidden  h-full  grid-cols-3 gap-6 text-foreground">
+        <div className="col-span-1 ">
+          <CreateVideoParameter />
+        </div>
+        <div className="relative col-span-2 px-5   flex flex-col gap-2">
+          <MediaExplorer />
+
+          <div className="absolute border border-neutral-800 rounded-lg p-5 bottom-0 left-0 w-full">
+            <VideoGenerationInput onGeneration={handleGeneration} />
           </div>
-          <div className="p-5 md:hidden  block h-full grid grid-cols-1 gap-6 text-foreground">
-            <div className="col-span-1 ">
-              <MediaExplorer />
-            </div>
-            <section className=" w-full   z-10 flex items-center justify-center">
-              <PromptComposer />
-            </section>
-          </div>
-        </>
+        </div>
+      </div>
+      <div className="p-5 md:hidden  block h-full grid grid-cols-1 gap-6 text-foreground">
+        <div className="col-span-1 ">
+          <MediaExplorer />
+        </div>
+        <section className=" w-full   z-10 flex items-center justify-center">
+          <PromptComposer />
+        </section>
+      </div>
+    </>
   );
 }

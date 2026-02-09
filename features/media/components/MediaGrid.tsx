@@ -22,7 +22,7 @@ export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspect
   if (layout === "grid") {
     return (
       <div className=" p-4  min-h-[calc(100vh-600px)]">
-        <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 gap-6">
           {media.map((item) => (
             <MediaCard key={item.id} media={item} width={imagesWidth} height={calculateHeight(aspectRatio, imagesWidth)} />
           ))}

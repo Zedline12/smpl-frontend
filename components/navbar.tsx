@@ -23,7 +23,7 @@ export function Navbar() {
       <div className="flex items-center gap-6">
         {user ? (
           <>
-            <Link href="/subscription-plans">
+            <Link className="hidden sm:block" href="/subscription-plans">
               <div className="grid grid-cols-2 gap-3 items-center px-3 py-1.5 rounded-full  border border-gray-200">
                 <div className="flex flex-row items-center border-r-2 border-r-gray-200">
                   <svg
@@ -54,7 +54,7 @@ export function Navbar() {
             </Link>
 
             <Menu
-              className="pl-6 border-l border-gray-100"
+              className="pl-6 sm:border-l border-gray-100"
               trigger={
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm hover:shadow-md transition-shadow">
                   {user!.avatarUrl ? (

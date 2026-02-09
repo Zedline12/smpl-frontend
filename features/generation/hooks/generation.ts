@@ -81,7 +81,6 @@ export function useVideoGenerationMutation() {
   return useMutation({
     mutationFn: (data: GenerateVideoRequest) => videoGeneration(data),
     onSuccess: (data) => {
-      console.log("success", data);
       queryClient.refetchQueries({
         queryKey: ["generation-queues"],
       });

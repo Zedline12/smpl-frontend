@@ -133,7 +133,8 @@ export default function MediaExplorer({
           imagesWidth={200}
           layout="grid"
           media={media}
-          key={selectedProject?.id}
+            key={selectedProject?.id}
+            
         />
       )}
     </div>

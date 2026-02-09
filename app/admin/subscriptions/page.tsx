@@ -6,6 +6,17 @@ import {
   SubscriptionsStatistics,
 } from "@/features/admin/subscriptions/types/types";
 import { fetchWithToken } from "@/lib/fetcher";
+interface PaymentStats {
+  totalRevenue: number;
+  salesCount: number;
+  subStats: {
+    active: number;
+    canceled: number;
+    pastDue: number;
+    trialing: number;
+    total: number;
+  };
+}
 
 export default async function SubscriptionsPage() {
   const statres = (
@@ -17,7 +28,11 @@ export default async function SubscriptionsPage() {
   ).json();
   const analytics = analyticsres.then((d) => d.data) as Promise<
     SubscriptionsAnalytics[]
-  >;
+    >;
+  const json = await fetchWithToken("/payments/stats").then((res) =>
+      res.json(),
+    );
+    const subStats: PaymentStats = json.data;
   return (
     <>
       <div>
@@ -28,12 +43,57 @@ export default async function SubscriptionsPage() {
           Track your app subscriptions here.
         </p>
       </div>
-      <Tabs>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="bg-transparent text-foreground border-white/30">
+          <Tabs>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <Card className="bg-background-light text-foreground border-white/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Subscriptions
+                Total Revenue
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-secondary"
+              >
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl  font-bold">
+                ${subStats.totalRevenue.toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-background-light text-foreground border-white/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sales</CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-secondary"
+              >
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <path d="M2 10h20" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{subStats.salesCount}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-background-light text-foreground border-white/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Subscriptions
               </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -51,18 +111,13 @@ export default async function SubscriptionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl  font-bold">
-                {(await stats).totalSubscriptions}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                +20.1% from last month
-              </p>
+              <div className="text-2xl font-bold">{subStats.subStats.active}</div>
             </CardContent>
           </Card>
-          <Card className="bg-transparent text-foreground border-white/30">
+          <Card className="bg-background-light text-foreground border-white/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Active Subscriptions
+                Canceled Subscriptions
               </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +127,7 @@ export default async function SubscriptionsPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                className="h-4 w-4 text-green-500"
+                className="h-4 w-4 text-secondary"
               >
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -80,18 +135,15 @@ export default async function SubscriptionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl text-green-500 font-bold">
-                {(await stats).activeSubscriptions}
+              <div className="text-2xl font-bold">
+                {subStats.subStats.canceled}
               </div>
-              <p className="text-xs text-muted-foreground">
-                +180.1% from last month
-              </p>
             </CardContent>
           </Card>
-          <Card className="bg-transparent text-foreground border-white/30">
+          <Card className="bg-background-light text-foreground border-white/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                unActive Subscriptions
+                Past Due Subscriptions
               </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +153,7 @@ export default async function SubscriptionsPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                className="h-4 w-4 text-red-500"
+                className="h-4 w-4 text-secondary"
               >
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -109,18 +161,13 @@ export default async function SubscriptionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl text-red-500 font-bold">
-                {(await stats).unActiveSubscriptions}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                +19% from last month
-              </p>
+              <div className="text-2xl font-bold">{subStats.subStats.pastDue}</div>
             </CardContent>
           </Card>
         </div>
       </Tabs>
-      <div className="mt-30 grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-             <Card className=" bg-transparent text-foreground border-white/30">
+      <div className="mt-30  grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+             <Card className=" bg-background-light text-foreground border-white/30">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             Subscriptions Plans

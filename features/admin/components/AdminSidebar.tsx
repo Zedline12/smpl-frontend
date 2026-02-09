@@ -16,9 +16,6 @@ const sidebarLinks = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
-  { icon: FileText, label: "Content", href: "/admin/content" },
-  { icon: BarChart3, label: "Analytics", href: "/admin/analytics" },
-  { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
 export const AdminSidebar = () => {
