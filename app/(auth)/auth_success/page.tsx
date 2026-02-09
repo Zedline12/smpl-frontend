@@ -1,63 +1,65 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { exchangeToken } from "@/features/auth/actions/auth";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AuthSuccessPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const exchangeTokenValue = searchParams.get("exchange_token");
-  console.log(exchangeTokenValue);
+  const searchParams = useSearchParams();
+
+  const exchangeToken = searchParams.get("exchange_token");
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const processedRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (processedRef.current) return;
-
-    if (!exchangeTokenValue) {
-      setError("No exchange token provided");
+    if (!exchangeToken) {
+      setError("Missing exchange token");
       setLoading(false);
       return;
     }
 
-    processedRef.current = true;
-
-    const performExchange = async () => {
+    const exchange = async () => {
       try {
-        const result = await exchangeToken(exchangeTokenValue);
-        if ("success" in result && result.success) {
-          router.push("/");
-        } else if ("error" in result) {
-          setError(result.message || "Failed to exchange token");
-        } else {
-          setError("Unknown response from server");
+        const res = await fetch("/api/auth/exchange-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ exchangeToken }),
+        });
+     
+        if (!res.ok) {
+          throw new Error("Token exchange failed");
         }
+
+       // router.replace("/"); // 👈 better than push for auth
       } catch (err) {
-        setError("An unexpected error occurred");
+        console.log(err)
+        setError("Authentication failed");
       } finally {
         setLoading(false);
       }
     };
 
-    performExchange();
-  }, [exchangeTokenValue, router]);
+    exchange();
+  }, [exchangeToken, router]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        Authenticating...
+        <div className="animate-pulse text-lg">Authenticating…</div>
       </div>
     );
-  if (error)
+  }
+
+  if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center text-red-500">
-        Error: {error}
+        {error}
       </div>
     );
+  }
 
-  return (
-    <h1>Hello</h1>
-  );
+  return null;
 }

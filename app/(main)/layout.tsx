@@ -1,6 +1,8 @@
+"use client";
 import BottomNavbar from "@/components/BottomNavbar";
 import { WorkspaceNavbar } from "@/components/navbar";
 import { WorkspaceSidebar } from "@/components/sidebar";
+import { useAuthBootstrap } from "@/features/auth/hooks/useAuthBootstrap";
 import { User } from "@/features/user/types/user";
 import { fetchWithToken } from "@/lib/fetcher";
 const bottomNavbarItems = [
@@ -30,6 +32,7 @@ export default function MainLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useAuthBootstrap();
   return (
     <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
       {/* NAVBAR */}

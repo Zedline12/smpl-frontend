@@ -54,38 +54,41 @@ export async function login(
 }
 
 export async function exchangeToken(exchangeToken: string) {
-  const response = await fetchWithToken("/auth/exchange-token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ exchangeToken }),
-  });
+  try {
+    const response = await fetchWithToken("/auth/exchange-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ exchangeToken }),
+    });
 
-  if (!response.ok) {
-    console.log("error");
-    return { error: true, message: "Token exchange failed" };
+    if (!response.ok) {
+      console.log("error");
+      return { error: true, message: "Token exchange failed" };
+    }
+
+    const result = await response.json();
+    const { token, refreshToken } = result.data;
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    cookieStore.set("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+    console.log("hereee")
+    console.log("token", cookieStore.get("token"))
+    return { success: true };
   }
-
-  const result = await response.json();
-  console.log(result);
-  const { token, refreshToken } = result.data; // Handle potential wrapping
-
-  const cookieStore = await cookies();
-
-  cookieStore.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-
-  cookieStore.set("refresh_token", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-
-  return { success: true };
+  catch (err) {
+    console.log(err)
+  }
 }
