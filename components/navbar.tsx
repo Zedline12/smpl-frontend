@@ -47,7 +47,7 @@ export function Navbar() {
 
                 <div className="bg-black flex rounded-full items-center h-5 justify-center">
                   <span className="text-[10px] text-center text-white font-semibold ">
-                    {user!.plan} Plan
+                    {user!.plan}
                   </span>
                 </div>
               </div>

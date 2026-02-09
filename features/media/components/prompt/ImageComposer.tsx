@@ -6,23 +6,22 @@ import {
   MediaTypeEnum,
 } from "../../types/media";
 import PromptComposerFooter from "./PromptComposerFooter";
-import { useGenerationCostQuery } from "@/features/generation/hooks/generation";
+import { useGenerationCostQuery, useImageGenerationMutation } from "@/features/generation/hooks/generation";
 import { Textarea } from "@/components/ui/textarea";
 import ImageSlots from "./ImageSlots";
 import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
 import { Menu, MenuItem } from "@/components/menu";
 import ResolutionSelectorComponent from "@/features/generation/components/selectors/ResolutionSelector";
 import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 interface ImageComposerProps {
   isFocused: boolean;
-  isGenerating: boolean;
-  onGeneration: () => void;
 }
 export default function ImageComposer({
   isFocused,
-  isGenerating,
-  onGeneration,
 }: ImageComposerProps) {
+  const router=useRouter()
   const {
     resolution,
     aspectRatio,
@@ -38,7 +37,42 @@ export default function ImageComposer({
     resolution,
     MediaTypeEnum.IMAGE,
   );
+    const imageGeneration = useImageGenerationMutation();
+  const handleGeneration = async () => {
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+    if (!projectId) {
+      toast.error("Please select a project");
+      return;
+    }
 
+    try {
+      console.log({
+        prompt,
+        projectId,
+        aspectRatio,
+        resolution,
+        referenceImages: referenceImages.filter(
+          (img) => img !== null,
+        ) as File[],
+      });
+      await imageGeneration.mutateAsync({
+        prompt,
+        projectId,
+        aspectRatio,
+        resolution,
+        referenceImages: referenceImages.filter(
+          (img) => img !== null,
+        ) as File[],
+      });
+      console.log("mutated");
+      router.push(`/create/create-image`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <>
       <div style={{ zIndex: 1 }} className=" flex flex-row  gap-4">
@@ -55,11 +89,11 @@ export default function ImageComposer({
         />
       </div>
       <PromptComposerFooter
-        isGenerating={isGenerating}
+        isGenerating={imageGeneration.isPending}
         creditsCost={generation?.creditsCost ?? 0}
         isFocused={isFocused}
         disabled={!prompt.trim()}
-        onGeneration={onGeneration}
+        onGeneration={handleGeneration}
       >
         <Menu
           direction="up"

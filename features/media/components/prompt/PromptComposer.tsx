@@ -4,12 +4,18 @@ import PromptInputHeader from "@/features/media/components/prompt/PromptComposer
 import { MediaType } from "@/features/media/types/media";
 import { GenerateMediaRequest } from "@/features/media/types/api";
 import { useImageGenerationMutation } from "@/features/generation/hooks/generation";
-import { GenerateImageRequest, GenerateVideoRequest } from "@/features/generation/types/api";
+import {
+  GenerateImageRequest,
+  GenerateVideoRequest,
+} from "@/features/generation/types/api";
 import ImageComposer from "./ImageComposer";
 import VideoComposer from "./VideoComposer";
+import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 export interface MediaComposerHandle {
   isValid: boolean;
-  getPayload(): GenerateImageRequest | GenerateVideoRequest ;
+  getPayload(): GenerateImageRequest | GenerateVideoRequest;
   reset(): void;
 }
 
@@ -18,19 +24,12 @@ interface PromptComposerProps {
   onGeneration: (data: GenerateMediaRequest) => void;
 }
 export default function PromptComposer() {
+  const router = useRouter();
   const [mediaType, setMediaType] = useState<MediaType>("image");
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const composerRef = useRef<MediaComposerHandle>(null);
-  const  Generation  = useImageGenerationMutation();
-   
-  const handleGenerate = async () => {
-    // if (!composerRef.current?.isValid) return;
+  const imageGeneration = useImageGenerationMutation();
 
-    // const payload = composerRef.current.getPayload();
-    // const data=mediaGeneration.mutateAsync(payload)
-  //  composerRef.current.reset();
-  };
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -67,15 +66,11 @@ export default function PromptComposer() {
       <div className="p-2 ">
         {mediaType === "image" && (
           <ImageComposer
-            isGenerating={false}
-            onGeneration={handleGenerate}
             isFocused={isFocused}
           />
         )}
         {mediaType === "video" && (
           <VideoComposer
-            isGenerating={false}
-            onGeneration={handleGenerate}
             isFocused={isFocused}
           />
         )}

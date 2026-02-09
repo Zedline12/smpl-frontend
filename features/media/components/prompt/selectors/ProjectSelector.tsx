@@ -1,14 +1,17 @@
 import { MenuItem, Menu } from "@/components/menu";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
 import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
+import { useVideoGenerationStore } from "@/stores/useVideoGenerationStore";
 import { useEffect } from "react";
 
 export default function ProjectSelector() {
   const { projectId, setProjectId } = useImageGenerationStore();
+  const {setProjectId: setVideoProjectId} = useVideoGenerationStore();
   const { data: projects = [] } = useProjectsQuery();
   useEffect(() => {
     if (!projectId && projects.length > 0) {
       setProjectId(projects[0].id);
+      setVideoProjectId(projects[0].id)
     }
   }, [projects, projectId, setProjectId]);
   return (
@@ -35,7 +38,7 @@ export default function ProjectSelector() {
             <span
               className="w-full text-left hover:bg-background-lighter p-3"
               key={project.id}
-              onClick={() => setProjectId(project.id)}
+              onClick={() => { setProjectId(project.id),setVideoProjectId(project.id) }}
             >
               {project.name}
             </span>

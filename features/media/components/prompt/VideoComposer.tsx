@@ -8,24 +8,26 @@ import {
 import { AspectRatioSelector } from "./selectors/AspectRatioSelector";
 import { ResolutionSelector } from "./selectors/ResolutionSelector";
 import PromptComposerFooter from "./PromptComposerFooter";
-import { useGenerationCostQuery } from "@/features/generation/hooks/generation";
+import {
+  useGenerationCostQuery,
+  useVideoGenerationMutation,
+} from "@/features/generation/hooks/generation";
 import { Textarea } from "@/components/ui/textarea";
 import { useVideoGenerationStore } from "@/stores/useVideoGenerationStore";
 import ImageSlots from "./ImageSlots";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 interface VideoComposerProps {
   isFocused: boolean;
-  isGenerating: boolean;
-  onGeneration: () => void;
 }
-export default function VideoComposer({
-  isFocused,
-  isGenerating,
-  onGeneration,
-}: VideoComposerProps) {
+export default function VideoComposer({ isFocused }: VideoComposerProps) {
+  const router = useRouter();
   const {
     resolution,
     aspectRatio,
     prompt,
+    durationSeconds,
+    projectId,
     setResolution,
     setAspectRatio,
     setPrompt,
@@ -36,6 +38,37 @@ export default function VideoComposer({
     resolution,
     MediaTypeEnum.VIDEO,
   );
+  const videoGeneration = useVideoGenerationMutation();
+
+  const handleGeneration = async () => {
+    if (!prompt) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+    if (!projectId) {
+      toast.error("Please select a project");
+      return;
+    }
+
+    try {
+      await videoGeneration.mutateAsync({
+        prompt,
+        aspectRatio,
+        resolution,
+        durationSeconds,
+        referenceImages: referenceImages.filter(
+          (img) => img !== null,
+        ) as File[],
+        // type: "video", // Function signature says GenerateVideoRequest, verify if type is needed.
+        // Previous code had type: "video". GenerateVideoRequest doesn't seem to have type field based on step 354 diff?
+        // Step 354: GenerateVideoRequest { prompt, projectId, referenceImages, durationSeconds, resolution, aspectRatio }. No type.
+        projectId: projectId,
+      });
+      router.push(`/create/create-video`);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <>
@@ -57,7 +90,7 @@ export default function VideoComposer({
         creditsCost={generation?.creditsCost ?? 0}
         isFocused={isFocused}
         disabled={!prompt.trim()}
-        onGeneration={onGeneration}
+        onGeneration={handleGeneration}
       >
         <ResolutionSelector
           options={VIDEO_RESOLUTIONS}
