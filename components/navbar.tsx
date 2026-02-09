@@ -94,12 +94,13 @@ export function Navbar() {
               {" "}
               Log In
             </Button>
-            <Link
-              href="/signup"
-              className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
+            <Button
+              onClick={() => openLoginModal()}
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >
+              {" "}
               Sign Up
-            </Link>
+            </Button>
           </div>
         )}
       </div>

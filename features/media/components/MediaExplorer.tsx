@@ -3,20 +3,26 @@ import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation
 import { Project } from "@/lib/types/project.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import {  useMediaQuery } from "../queries/media";
+import { useMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
 import { Sparkles, Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
-interface MediaExplorerProps{
+interface MediaExplorerProps {
   defaultProjectId?: string;
+  defaultMediaType?: MediaType;
 }
-export default function MediaExplorer({defaultProjectId}: MediaExplorerProps) {
+export default function MediaExplorer({
+  defaultProjectId,
+  defaultMediaType,
+}: MediaExplorerProps) {
   const queryClient = useQueryClient();
   const { data: projects = [], isLoading } = useProjectsQuery();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [mediaType, setMediaType] = useState<MediaType>("image");
+  const [mediaType, setMediaType] = useState<MediaType>(
+    defaultMediaType ?? "image",
+  );
   const {
     data: media = [],
     isFetching: isMediaFetching,
@@ -32,7 +38,9 @@ export default function MediaExplorer({defaultProjectId}: MediaExplorerProps) {
       queryClient.refetchQueries({ queryKey: ["media"] });
     }
     if (defaultProjectId) {
-      setSelectedProject(projects.find((p) => p.id === defaultProjectId) ?? null);
+      setSelectedProject(
+        projects.find((p) => p.id === defaultProjectId) ?? null,
+      );
     }
   }, [queues]);
   return (
@@ -61,28 +69,28 @@ export default function MediaExplorer({defaultProjectId}: MediaExplorerProps) {
           </button>
         </div>
         {!defaultProjectId && (
-        <div>
-          <select
-            value={(defaultProjectId ?? selectedProject?.id) || ""}
-            onChange={(e) => {
-              const projectId = e.target.value;
-              if (projectId === "") {
-                setSelectedProject(null);
-              } else {
-                const project = projects.find((p) => p.id === projectId);
-                setSelectedProject(project || null);
-              }
-            }}
-            className="bg-neutral-900 border border-neutral-800 text-white text-sm rounded-lg focus:ring-neutral-500 focus:border-neutral-500 block w-full p-2.5"
-          >
-            <option value="">ALL</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div>
+            <select
+              value={(defaultProjectId ?? selectedProject?.id) || ""}
+              onChange={(e) => {
+                const projectId = e.target.value;
+                if (projectId === "") {
+                  setSelectedProject(null);
+                } else {
+                  const project = projects.find((p) => p.id === projectId);
+                  setSelectedProject(project || null);
+                }
+              }}
+              className="bg-neutral-900 border border-neutral-800 text-white text-sm rounded-lg focus:ring-neutral-500 focus:border-neutral-500 block w-full p-2.5"
+            >
+              <option value="">ALL</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
       </div>
 
