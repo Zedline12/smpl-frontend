@@ -28,14 +28,14 @@ export default function AuthSuccessPage() {
           },
           body: JSON.stringify({ exchangeToken }),
         });
-     
+
         if (!res.ok) {
           throw new Error("Token exchange failed");
         }
 
-       // router.replace("/"); // 👈 better than push for auth
+        router.replace("/"); // 👈 better than push for auth
       } catch (err) {
-        console.log(err)
+        console.log(err);
         setError("Authentication failed");
       } finally {
         setLoading(false);
