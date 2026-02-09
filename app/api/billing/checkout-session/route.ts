@@ -13,15 +13,11 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({ subscriptionPlanId }),
     });
-    console.log(await response.json());
-
+    const json = await response.json();
     if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
+      return NextResponse.json(json, { status: response.status });
     }
-
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(json);
   } catch (error) {
     console.error("Checkout session error:", error);
     return NextResponse.json(
