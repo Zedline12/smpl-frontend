@@ -100,7 +100,7 @@ export function MenuItem({
         context?.close();
       }}
       className={cn(
-        "group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors cursor-pointer",
+        "disabled:opacity-50 disabled:cursor-not-allowed group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors cursor-pointer",
         variant === "default" &&
           "text-primary-foreground hover:bg-neutral-800/50",
         variant === "danger" &&

@@ -1,5 +1,5 @@
 import { MenuItem, Menu } from "@/components/menu";
-import { useProjectsQuery } from "@/features/media/queries/media";
+import { useProjectsQuery } from "@/features/projects/hooks/projects";
 import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
 import { useEffect } from "react";
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { useUpdateProjectMutation } from "../hooks/projects";
 
 export function UpdateProjectNameForm({
   projectId,
@@ -17,14 +18,14 @@ export function UpdateProjectNameForm({
   onSuccess?: () => void;
 }) {
   const [name, setName] = useState(initialName);
-  const mutation = useUpdateProjectName();
+  const mutation = useUpdateProjectMutation();
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         mutation.mutate(
-          { id: projectId, name },
+          { id: projectId, body: {name} },
           {
             onSuccess: () => {
               onSuccess?.();
@@ -54,7 +55,7 @@ export function UpdateProjectNameForm({
       <div className="flex justify-end pt-2">
         <Button
           type="submit"
-          disabled={mutation.isPending || !name.trim()}
+          disabled={mutation.isPending || !name.trim() || name === initialName}
           variant="primary"
           className="w-full sm:w-auto"
         >

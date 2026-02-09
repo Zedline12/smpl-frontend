@@ -1,10 +1,6 @@
 "use client";
-import { useEffect } from "react";
-import { useProjectsQuery } from "../../queries/media";
 import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
 import { Button } from "@/components/ui/button";
-import { Menu, MenuItem } from "@/components/menu";
-import { useAuthStore } from "@/stores/useAuthStore";
 import ProjectSelector from "./selectors/ProjectSelector";
 import { useAuth } from "@/providers/AuthProvider";
 
@@ -26,12 +22,6 @@ export default function PromptComposerFooter({
 }: PromptComposerFooterProps) {
   const { projectId, setProjectId } = useImageGenerationStore();
   const { user } = useAuth();
-  const { data: projects = [] } = useProjectsQuery();
-  useEffect(() => {
-    if (!projectId && projects.length > 0) {
-      setProjectId(projects[0].id);
-    }
-  }, [projects, projectId, setProjectId]);
   return (
     <div
       className={`z-50 transition-all duration-500 ease-in-out  ${

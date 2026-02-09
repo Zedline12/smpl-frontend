@@ -1,13 +1,6 @@
 "use client";
 import { MenuItem, Menu } from "@/components/menu";
 import {
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalTitle,
-} from "@/components/modal";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -15,31 +8,17 @@ import {
 } from "@/components/ui/dialog";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
 import { UpdateProjectNameForm } from "@/features/projects/forms/updateProjectForm";
-import { ProjectWithStatsAndMedia } from "@/features/projects/types/project";
+import { useProjectQuery } from "@/features/projects/hooks/projects";
 import { downloadUrlsZip } from "@/lib/handle-downloads";
 import { Download, Edit, Image, Trash, Video } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const [project, setProject] = useState<ProjectWithStatsAndMedia | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchProject = async () => {
-      const res = await fetch(`/api/projects/${id}?include=stats,media`);
-      const json = await res.json();
-      console.log(json.data);
-      setProject(json.data); // depending on your API shape
-      setIsLoading(false);
-    };
-
-    fetchProject();
-  }, [id]);
+  const { data: project, isLoading } = useProjectQuery(id);
 
   if (isLoading) return <div>Loading...</div>;
   if (!project) return <div>Not found</div>;
@@ -69,7 +48,9 @@ export default function ProjectDetailsPage() {
           </div>
         </div>
         <Menu>
+          
           <MenuItem
+            disabled={project.media.length === 0}
             icon={<Download size={16} />}
             onClick={() =>
               downloadUrlsZip(
@@ -113,23 +94,6 @@ export default function ProjectDetailsPage() {
           />
         </DialogContent>
       </Dialog>
-      {/* <Modal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)}>
-  <ModalContent>
-    <ModalHeader>
-      <ModalTitle>My Modal Title</ModalTitle>
-    </ModalHeader>
-    <div className="py-4">
-           <UpdateProjectNameForm
-  projectId={project.id}
-  initialName={project.name}
-        onSuccess={() => {
-    toast.success("Project name updated successfully");
-    // optional: close an edit modal, show a toast, etc.
-  }}
-/>
-    </div>
-  </ModalContent>
-</Modal> */}
 
       <MediaExplorer defaultProjectId={id} />
     </div>

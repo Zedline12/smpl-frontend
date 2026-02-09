@@ -9,8 +9,8 @@ import {
 } from "@/features/media/types/media";
 import AspectRatioSelector from "./selectors/AspectRatioSelector";
 import ProjectSelector from "./selectors/ProjectSelector";
-import { useProjectsQuery } from "@/features/media/queries/media";
 import { useEffect } from "react";
+import { useProjectsQuery } from "@/features/projects/hooks/projects";
 
 export default function CreateImageParameter() {
   const {

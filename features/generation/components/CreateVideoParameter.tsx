@@ -11,8 +11,8 @@ import {
 import AspectRatioSelector from "./selectors/AspectRatioSelector";
 import DurationSelector from "./selectors/DurationSelector";
 import ProjectSelector from "./selectors/ProjectSelector";
-import { useProjectsQuery } from "@/features/media/queries/media";
 import { useEffect } from "react";
+import { useProjectsQuery } from "@/features/projects/hooks/projects";
 
 export default function CreateVideoParameter() {
   const {

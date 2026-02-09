@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({ subscriptionPlanId }),
     });
+    console.log(await response.json());
 
     if (!response.ok) {
       const error = await response.json();

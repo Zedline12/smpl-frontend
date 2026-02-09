@@ -9,13 +9,7 @@ import { MediaType, ImageResolution, VideoResolution } from "@/features/media/ty
 import { GenerateMediaRequest } from "@/features/media/types/api";
 import { toast } from "sonner";
 
-export function useProjectsQuery() {
-  return useQuery({
-    queryKey: ["projects", "me"],
-    queryFn: fetchMyProjects,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
+
 export function useMediaQuery(projectId?: string, type?: MediaType) {
   return useQuery({
     queryKey: ["media", projectId, type],

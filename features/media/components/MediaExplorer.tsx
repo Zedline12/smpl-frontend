@@ -3,11 +3,12 @@ import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation
 import { Project } from "@/lib/types/project.type";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { useProjectsQuery, useMediaQuery } from "../queries/media";
+import {  useMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
 import { Sparkles, Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
+import { useProjectsQuery } from "@/features/projects/hooks/projects";
 interface MediaExplorerProps{
   defaultProjectId?: string;
 }
