@@ -38,7 +38,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
       const { referenceImages } = get();
       let newDuration = get().durationSeconds;
 
-      if (resolution === "1080p" || resolution === "4K") {
+      if (resolution === "1080p" || resolution === "4k") {
         newDuration = 8;
       } else if (referenceImages.some((img) => img !== null)) {
         newDuration = 8;
@@ -60,7 +60,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
       const { resolution, referenceImages } = get();
       if (
         (resolution === "1080p" ||
-          resolution === "4K" ||
+          resolution === "4k" ||
           referenceImages.some((img) => img !== null)) &&
         durationSeconds !== 8
       ) {
@@ -79,7 +79,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
       const hasImages = referenceImages.some((img) => img !== null);
       const { resolution } = get();
 
-      if (hasImages || resolution === "1080p" || resolution === "4K") {
+      if (hasImages || resolution === "1080p" || resolution === "4k") {
         newDuration = 8;
       }
       set({ referenceImages, durationSeconds: newDuration });

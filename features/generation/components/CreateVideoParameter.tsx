@@ -43,7 +43,7 @@ export default function CreateVideoParameter() {
 
   const isDurationForced =
     resolution === "1080p" ||
-    resolution === "4K" ||
+    resolution === "4k" ||
     referenceImages.some((img) => img !== null);
 
   return (
