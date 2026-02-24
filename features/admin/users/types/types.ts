@@ -6,6 +6,7 @@ export interface UserAdmin {
   lastName: string;
   email: string;
   id: string;
+  creditsBalance?: number;
   subscriptionPlan: Pick<
     SubscriptionPlanAdmin,
     "id" | "name" | "billingPeriod"

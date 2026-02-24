@@ -55,7 +55,9 @@ export default function CreateVideoPage() {
           <CreateVideoParameter />
         </div>
         <div className="relative col-span-2 px-5   flex flex-col gap-2">
-          <MediaExplorer />
+          <div className="h-[700px]"> 
+            <MediaExplorer />
+          </div>
 
           <div className="absolute border border-neutral-800 rounded-lg p-5 bottom-0 left-0 w-full">
             <VideoGenerationInput onGeneration={handleGeneration} />
@@ -63,7 +65,7 @@ export default function CreateVideoPage() {
         </div>
       </div>
       <div className="p-5 md:hidden  block h-full grid grid-cols-1 gap-6 text-foreground">
-        <div className="col-span-1 ">
+        <div className="col-span-1 h-[600px] ">
           <MediaExplorer />
         </div>
         <section className=" w-full   z-10 flex items-center justify-center">

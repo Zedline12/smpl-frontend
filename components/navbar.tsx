@@ -23,7 +23,7 @@ export function Navbar() {
       <div className="flex items-center gap-6">
         {user ? (
           <>
-            <Link className="hidden sm:block" href="/subscription-plans">
+            <Link  className="hidden sm:block" href={`${user.subscription.name == "Free Plan" ? "/subscription-plans" : "/my-subscription"}`} >
               <div className="grid grid-cols-2 gap-3 items-center px-3 py-1.5 rounded-full  border border-gray-200">
                 <div className="flex flex-row items-center border-r-2 border-r-gray-200">
                   <svg
@@ -75,7 +75,7 @@ export function Navbar() {
               }
               align="right"
             >
-              {user.plan != "Free Plan" && (
+              {user.subscription.name != "Free Plan" && (
                 <MenuItem
                   type="submit"
                   variant="default"

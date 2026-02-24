@@ -4,7 +4,7 @@ import { fetchWithToken } from "@/lib/fetcher";
 import { Media } from "@/features/media/types/media";
 
 export default async function OnboardPage() {
-  const json = await fetchWithToken("/media").then((res) => res.json());
+  const json = await fetchWithToken("/media?limit=30").then((res) => res.json());
   const media: Media[] = json.data;
   return (
     <div className="w-full h-full">
@@ -14,7 +14,7 @@ export default async function OnboardPage() {
 
       <div className="">
         <section className=" overflow-y-auto  ">
-          <MediaGrid media={media} breakpointCols={{ default: 6,1600:5, 1450:4, 1200: 3, 940: 2 }} />
+          <MediaGrid media={media} breakpointCols={{ default: 3,1600:4, 1450:4, 1200: 3, 940: 2 }} />
         </section>
       </div>
     </div>

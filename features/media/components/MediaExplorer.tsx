@@ -44,7 +44,7 @@ export default function MediaExplorer({
     }
   }, [queues]);
   return (
-    <div className="w-full">
+    <div className="max-h-full overflow-y-auto w-full custom-scrollbar ">
       <div className="flex justify-between items-center w-full">
         <div className="flex gap-2">
           <button

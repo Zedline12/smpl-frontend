@@ -11,9 +11,9 @@ type MediaGridProps = {
   aspectRatio?:AspectRatio
 };
 
-export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspectRatio = "1:1", breakpointCols }: MediaGridProps) {
+export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspectRatio = "1:1", breakpointCols = { default: 6,1600:5, 1450:4, 1200: 3, 940: 2 } }: MediaGridProps) {
   if (!media.length) {
-    return (
+    return (    
       <div className="flex items-center justify-center h-full">
         <p className="text-primary-foreground text-lg">Start Generating !</p>
       </div>
@@ -33,7 +33,7 @@ export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspect
 
   return (
     <Masonry
-      breakpointCols={{ default: 6,1600:5, 1450:4, 1200: 3, 940: 2 }}
+      breakpointCols={breakpointCols}
       className="flex gap-1 "
       columnClassName="space-y-3 "
     

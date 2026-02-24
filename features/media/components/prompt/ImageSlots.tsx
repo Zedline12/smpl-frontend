@@ -15,8 +15,9 @@ export default function ImageSlots({ imageSlots, onChange }: ImageSlotsProps) {
       };
     
       const handleRemoveSlot = () => {
-        if (imageSlots.length > 1) {
+        if (imageSlots.length >= 1) {
           onChange(imageSlots.slice(0, -1));
+          console.log(imageSlots.length)
         }
       };
     
