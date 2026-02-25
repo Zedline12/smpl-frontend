@@ -35,12 +35,7 @@ export default function CreateVideoPage() {
         aspectRatio,
         resolution,
         durationSeconds,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
-        // type: "video", // Function signature says GenerateVideoRequest, verify if type is needed.
-        // Previous code had type: "video". GenerateVideoRequest doesn't seem to have type field based on step 354 diff?
-        // Step 354: GenerateVideoRequest { prompt, projectId, referenceImages, durationSeconds, resolution, aspectRatio }. No type.
+        referenceImages,
         projectId: projectId,
       });
     } catch (e) {

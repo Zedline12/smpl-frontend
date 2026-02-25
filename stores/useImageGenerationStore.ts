@@ -6,8 +6,8 @@ type ImageGenerationState = {
   prompt: string;
   aspectRatio: AspectRatio;
   resolution: ImageResolution;
-  referenceImages: (File | null)[];
-  setReferenceImages: (v: (File | null)[]) => void;
+  referenceImages: string[];
+  setReferenceImages: (v: string[]) => void;
   setPrompt: (v: string) => void;
   setAspectRatio: (v: AspectRatio) => void;
   setResolution: (v: ImageResolution) => void;
@@ -27,7 +27,7 @@ export const useImageGenerationStore = create<ImageGenerationState>((set) => ({
   setAspectRatio: (aspectRatio) => set({ aspectRatio }),
   setResolution: (resolution) => set({ resolution }),
   setProjectId: (projectId) => set({ projectId }),
-  
+
   reset: () =>
     set({
       prompt: "",

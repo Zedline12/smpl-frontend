@@ -18,16 +18,20 @@ import {
 } from "@/features/generation/hooks/generation";
 import { Textarea } from "@/components/ui/textarea";
 import { useVideoGenerationStore } from "@/stores/useVideoGenerationStore";
-import ImageSlots from "./ImageSlots";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Menu, MenuItem } from "@/components/menu";
 import DurationSelector from "@/features/generation/components/selectors/DurationSelector";
+import { MediaManagerDialog } from "./MediaManagerDialog";
+import { Plus, X } from "lucide-react";
+
 interface VideoComposerProps {
   isFocused: boolean;
 }
+
 export default function VideoComposer({ isFocused }: VideoComposerProps) {
   const router = useRouter();
+  const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
   const {
     resolution,
     aspectRatio,
@@ -47,12 +51,12 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
   );
   const videoGeneration = useVideoGenerationMutation();
   const isDurationForced =
-    resolution === "1080p" ||
-    resolution === "4k" ||
-    referenceImages.some((img) => img !== null);
-  if(isDurationForced && durationSeconds !== 8){
+    resolution === "1080p" || resolution === "4k" || referenceImages.length > 0;
+
+  if (isDurationForced && durationSeconds !== 8) {
     setDurationSeconds(8);
   }
+
   const handleGeneration = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
@@ -69,12 +73,7 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         aspectRatio,
         resolution,
         durationSeconds,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
-        // type: "video", // Function signature says GenerateVideoRequest, verify if type is needed.
-        // Previous code had type: "video". GenerateVideoRequest doesn't seem to have type field based on step 354 diff?
-        // Step 354: GenerateVideoRequest { prompt, projectId, referenceImages, durationSeconds, resolution, aspectRatio }. No type.
+        referenceImages,
         projectId: projectId,
       });
       router.push(`/create/create-video`);
@@ -83,13 +82,37 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
     }
   };
 
+  const removeReferenceImage = (url: string) => {
+    setReferenceImages(referenceImages.filter((img) => img !== url));
+  };
+
   return (
     <>
-      <div style={{ zIndex: 1 }} className=" flex flex-row  gap-4">
-        <ImageSlots
-          imageSlots={referenceImages}
-          onChange={setReferenceImages}
-        />
+      <div style={{ zIndex: 1 }} className=" flex flex-row items-start gap-4">
+        <div className="flex flex-row gap-2 flex-wrap max-w-[400px]">
+          {referenceImages.map((url, index) => (
+            <div
+              key={url + index}
+              className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5"
+            >
+              <img src={url} alt="Ref" className="w-full h-full object-cover" />
+              <button
+                onClick={() => removeReferenceImage(url)}
+                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3 text-white" />
+              </button>
+            </div>
+          ))}
+          {referenceImages.length < 4 && (
+            <button
+              onClick={() => setIsMediaManagerOpen(true)}
+              className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex items-center justify-center transition-all group"
+            >
+              <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
+          )}
+        </div>
 
         <Textarea
           value={prompt}
@@ -98,6 +121,13 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
           className="flex-1 min-h-[100px] text-lg text-white  bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
         />
       </div>
+
+      <MediaManagerDialog
+        open={isMediaManagerOpen}
+        onOpenChange={setIsMediaManagerOpen}
+        selectedImages={referenceImages}
+        onSelect={setReferenceImages}
+      />
       <PromptComposerFooter
         isGenerating={false}
         creditsCost={generation?.creditsCost ?? 0}

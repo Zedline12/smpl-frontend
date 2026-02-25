@@ -35,7 +35,7 @@ export function useGenerateImageAction() {
       prompt,
       aspectRatio,
       resolution,
-      referenceImages: referenceImages.filter(Boolean) as File[],
+      referenceImages,
       projectId: projectId!,
     };
 

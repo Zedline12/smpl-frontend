@@ -23,23 +23,13 @@ export default function CreateImagePage() {
     }
 
     try {
-      console.log({
-        prompt,
-        projectId,
-        aspectRatio,
-        resolution,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
-      });
+   ;
       await imageGeneration.mutateAsync({
         prompt,
         projectId,
         aspectRatio,
         resolution,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
+        referenceImages
       });
     } catch (error) {
       console.error(error);

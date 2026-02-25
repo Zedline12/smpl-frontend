@@ -6,22 +6,26 @@ import {
   MediaTypeEnum,
 } from "../../types/media";
 import PromptComposerFooter from "./PromptComposerFooter";
-import { useGenerationCostQuery, useImageGenerationMutation } from "@/features/generation/hooks/generation";
+import {
+  useGenerationCostQuery,
+  useImageGenerationMutation,
+} from "@/features/generation/hooks/generation";
 import { Textarea } from "@/components/ui/textarea";
-import ImageSlots from "./ImageSlots";
 import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
 import { Menu, MenuItem } from "@/components/menu";
 import ResolutionSelectorComponent from "@/features/generation/components/selectors/ResolutionSelector";
 import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { MediaManagerDialog } from "./MediaManagerDialog";
+import { Plus, X } from "lucide-react";
+import { useState } from "react";
 interface ImageComposerProps {
   isFocused: boolean;
 }
-export default function ImageComposer({
-  isFocused,
-}: ImageComposerProps) {
-  const router=useRouter()
+export default function ImageComposer({ isFocused }: ImageComposerProps) {
+  const router = useRouter();
+  const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
   const {
     resolution,
     aspectRatio,
@@ -37,7 +41,7 @@ export default function ImageComposer({
     resolution,
     MediaTypeEnum.IMAGE,
   );
-    const imageGeneration = useImageGenerationMutation();
+  const imageGeneration = useImageGenerationMutation();
   const handleGeneration = async () => {
     if (!prompt) {
       toast.error("Please enter a prompt");
@@ -54,18 +58,14 @@ export default function ImageComposer({
         projectId,
         aspectRatio,
         resolution,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
+        referenceImages,
       });
       await imageGeneration.mutateAsync({
         prompt,
         projectId,
         aspectRatio,
         resolution,
-        referenceImages: referenceImages.filter(
-          (img) => img !== null,
-        ) as File[],
+        referenceImages,
       });
       console.log("mutated");
       router.push(`/create/create-image`);
@@ -73,13 +73,38 @@ export default function ImageComposer({
       console.error(error);
     }
   };
+
+  const removeReferenceImage = (url: string) => {
+    setReferenceImages(referenceImages.filter((img) => img !== url));
+  };
+
   return (
     <>
-      <div style={{ zIndex: 1 }} className=" flex flex-row  gap-4">
-        <ImageSlots
-          imageSlots={referenceImages}
-          onChange={setReferenceImages}
-        />
+      <div style={{ zIndex: 1 }} className=" flex flex-row items-start gap-4">
+        <div className="flex flex-row gap-2 flex-wrap max-w-[400px]">
+          {referenceImages.map((url, index) => (
+            <div
+              key={url + index}
+              className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5"
+            >
+              <img src={url} alt="Ref" className="w-full h-full object-cover" />
+              <button
+                onClick={() => removeReferenceImage(url)}
+                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3 text-white" />
+              </button>
+            </div>
+          ))}
+          {referenceImages.length < 15 && (
+            <button
+              onClick={() => setIsMediaManagerOpen(true)}
+              className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex items-center justify-center transition-all group"
+            >
+              <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+            </button>
+          )}
+        </div>
 
         <Textarea
           value={prompt}
@@ -88,6 +113,13 @@ export default function ImageComposer({
           className="flex-1 min-h-[100px] text-lg text-white  bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
         />
       </div>
+
+      <MediaManagerDialog
+        open={isMediaManagerOpen}
+        onOpenChange={setIsMediaManagerOpen}
+        selectedImages={referenceImages}
+        onSelect={setReferenceImages}
+      />
       <PromptComposerFooter
         isGenerating={imageGeneration.isPending}
         creditsCost={generation?.creditsCost ?? 0}
