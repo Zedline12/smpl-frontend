@@ -159,13 +159,13 @@ export function MediaManagerDialog({
             <TabsList className="bg-transparent h-12 gap-6 p-0">
               <TabsTrigger
                 value="library"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full px-0"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary-foreground  cursor-pointer  text-secondary-foreground rounded-none h-full px-0"
               >
                 Library
               </TabsTrigger>
               <TabsTrigger
                 value="upload"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full px-0"
+                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary-foreground cursor-pointer   text-secondary-foregorund rounded-none h-full px-0"
               >
                 Upload
               </TabsTrigger>
@@ -186,7 +186,7 @@ export function MediaManagerDialog({
                 <p>No images found in your library</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4  max-h-100">
                 {libraryImages.length > 0 && libraryImages.map((item) => (
                   <div
                     key={item.publicId}
