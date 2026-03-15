@@ -40,7 +40,7 @@ export function MediaManagerDialog({
   onSelect,
 }: MediaManagerDialogProps) {
   const [activeTab, setActiveTab] = useState("library");
-  const [libraryImages, setLibraryImages] = useState<MediaItem[]>([]);
+  const [libraryImages, setLibraryImages] = useState<string[]>([]);
   const [isLoadingLibrary, setIsLoadingLibrary] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [tempSelection, setTempSelection] = useState<string[]>([]);
@@ -57,7 +57,7 @@ export function MediaManagerDialog({
     setIsLoadingLibrary(true);
     try {
       const res = await fetch("/api/media/reference-images");
-        const json = await res.json();
+      const json = await res.json();
         setLibraryImages(json.data || []);
     } catch (error) {
       toast.error("Failed to load image library");
@@ -70,43 +70,28 @@ export function MediaManagerDialog({
     setIsUploading(true);
     try {
       // 1. get signature
-        const sigRes = await fetch("/api/media/upload-signature");
-        const json=await sigRes.json();
-        const { timestamp, signature, apiKey, cloudName, folder } = json.data;
-
-      // 2. upload to cloudinary
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", apiKey);
-      formData.append("timestamp", timestamp.toString());
-      formData.append("signature", signature);
-      formData.append("folder", folder || "your-app");
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
+        const sigRes = await fetch("/api/media/upload-signature", {
           method: "POST",
-          body: formData,
-        },
-      );
+          body: JSON.stringify({
+            contentType: file.type,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      const json = await sigRes.json();
+        const { url } = json.data;
+          await fetch(url, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": file.type,
+    },
+         });
 
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
-      const uploadedUrl = data.secure_url;
 
       toast.success("Image uploaded successfully");
 
-      // Auto-select the uploaded image
-      if (tempSelection.length < 5) {
-        setTempSelection((prev) => [...prev, uploadedUrl]);
-      } else {
-        toast.info(
-          "Maximum of 5 images already selected. Uploaded image added to library.",
-        );
-      }
-
-      // Refresh library to show the new image
       fetchLibrary();
       setActiveTab("library");
     } catch (error) {
@@ -187,30 +172,30 @@ export function MediaManagerDialog({
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4  max-h-100">
-                {libraryImages.length > 0 && libraryImages.map((item) => (
+                {libraryImages.length > 0 && libraryImages.map((item,index) => (
                   <div
-                    key={item.publicId}
+                    key={index}
                     className={cn(
                       "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
-                      tempSelection.includes(item.url)
+                      tempSelection.includes(item)
                         ? "border-primary shadow-[0_0_0_1px_var(--primary)]"
                         : "border-transparent hover:border-white/20",
                     )}
-                    onClick={() => toggleSelection(item.url)}
+                    onClick={() => toggleSelection(item)}
                   >
                     <img
-                      src={item.url}
+                      src={item}
                       alt="Ref"
                       className="w-full h-full object-cover"
                     />
-                    {tempSelection.includes(item.url) && (
+                    {tempSelection.includes(item) && (
                       <div className="absolute top-2 right-2 bg-primary rounded-full p-1 h-5 w-5 flex items-center justify-center">
                         <Check className="w-3 h-3 text-white stroke-[3px]" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <p className="text-[10px] font-medium uppercase tracking-wider">
-                        {tempSelection.includes(item.url)
+                        {tempSelection.includes(item)
                           ? "Deselect"
                           : "Select"}
                       </p>
