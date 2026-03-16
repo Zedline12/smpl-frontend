@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { MediaManagerDialog } from "./MediaManagerDialog";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/providers/AuthProvider";
 interface ImageComposerProps {
   isFocused: boolean;
 }
@@ -37,12 +38,17 @@ export default function ImageComposer({ isFocused }: ImageComposerProps) {
     referenceImages,
     setReferenceImages,
   } = useImageGenerationStore();
+  const { user } = useAuth();
   const { data: generation } = useGenerationCostQuery(
     resolution,
     MediaTypeEnum.IMAGE,
   );
   const imageGeneration = useImageGenerationMutation();
   const handleGeneration = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     if (!prompt) {
       toast.error("Please enter a prompt");
       return;
@@ -98,7 +104,13 @@ export default function ImageComposer({ isFocused }: ImageComposerProps) {
           ))}
           {referenceImages.length < 15 && (
             <button
-              onClick={() => setIsMediaManagerOpen(true)}
+              onClick={() => {
+                if (!user) {
+                  router.push("/login");
+                  return;
+                }
+                setIsMediaManagerOpen(true)
+              }}
               className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex items-center justify-center transition-all group"
             >
               <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
