@@ -58,7 +58,7 @@ export function MediaManagerDialog({
     try {
       const res = await fetch("/api/media/reference-images");
       const json = await res.json();
-        setLibraryImages(json.data || []);
+      setLibraryImages(json.data || []);
     } catch (error) {
       toast.error("Failed to load image library");
     } finally {
@@ -70,25 +70,24 @@ export function MediaManagerDialog({
     setIsUploading(true);
     try {
       // 1. get signature
-        const sigRes = await fetch("/api/media/upload-signature", {
-          method: "POST",
-          body: JSON.stringify({
-            contentType: file.type,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      const sigRes = await fetch("/api/media/upload-signature", {
+        method: "POST",
+        body: JSON.stringify({
+          contentType: file.type,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const json = await sigRes.json();
-        const { url } = json.data;
-          await fetch(url, {
-    method: "PUT",
-    body: file,
-    headers: {
-      "Content-Type": file.type,
-    },
-         });
-
+      const { url } = json.data;
+      await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
 
       toast.success("Image uploaded successfully");
 
@@ -115,7 +114,7 @@ export function MediaManagerDialog({
       if (prev.includes(url)) {
         return prev.filter((item) => item !== url);
       }
-      if (prev.length >= 5) {
+      if (prev.length >= 3) {
         toast.warning("You can only select up to 5 reference images");
         return prev;
       }
@@ -172,36 +171,35 @@ export function MediaManagerDialog({
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4  max-h-100">
-                {libraryImages.length > 0 && libraryImages.map((item,index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
-                      tempSelection.includes(item)
-                        ? "border-primary shadow-[0_0_0_1px_var(--primary)]"
-                        : "border-transparent hover:border-white/20",
-                    )}
-                    onClick={() => toggleSelection(item)}
-                  >
-                    <img
-                      src={item}
-                      alt="Ref"
-                      className="w-full h-full object-cover"
-                    />
-                    {tempSelection.includes(item) && (
-                      <div className="absolute top-2 right-2 bg-primary rounded-full p-1 h-5 w-5 flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white stroke-[3px]" />
+                {libraryImages.length > 0 &&
+                  libraryImages.map((item, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
+                        tempSelection.includes(item)
+                          ? "border-primary shadow-[0_0_0_1px_var(--primary)]"
+                          : "border-transparent hover:border-white/20",
+                      )}
+                      onClick={() => toggleSelection(item)}
+                    >
+                      <img
+                        src={item}
+                        alt="Ref"
+                        className="w-full h-full object-cover"
+                      />
+                      {tempSelection.includes(item) && (
+                        <div className="absolute top-2 right-2 bg-primary rounded-full p-1 h-5 w-5 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white stroke-[3px]" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-[10px] font-medium uppercase tracking-wider">
+                          {tempSelection.includes(item) ? "Deselect" : "Select"}
+                        </p>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <p className="text-[10px] font-medium uppercase tracking-wider">
-                        {tempSelection.includes(item)
-                          ? "Deselect"
-                          : "Select"}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </TabsContent>
