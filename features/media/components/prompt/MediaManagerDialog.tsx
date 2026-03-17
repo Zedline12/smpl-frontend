@@ -115,7 +115,7 @@ export function MediaManagerDialog({
         return prev.filter((item) => item !== url);
       }
       if (prev.length >= 3) {
-        toast.warning("You can only select up to 5 reference images");
+        toast.warning("You can only select up to 3 reference images");
         return prev;
       }
       return [...prev, url];
