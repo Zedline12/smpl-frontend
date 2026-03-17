@@ -3,10 +3,10 @@ import { fetchWithToken } from "@/lib/fetcher";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     const body = await req.json();
 
     const response = await fetchWithToken(`/subscription-plans/${id}`, {
@@ -18,7 +18,7 @@ export async function PATCH(
       const errorData = await response.json().catch(() => null);
       return NextResponse.json(
         { error: errorData?.message || "Failed to update subscription plan" },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -28,7 +28,7 @@ export async function PATCH(
     console.error("Error updating subscription plan:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
