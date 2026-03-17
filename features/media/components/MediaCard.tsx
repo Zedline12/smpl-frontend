@@ -25,9 +25,9 @@ export function MediaCard({
       <DialogTrigger asChild>
         <div
           style={{ height }}
-          className="cursor-pointer w-full group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+          className="cursor-pointer w-full  group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
         >
-          <div className="relative w-full h-full">
+          <div className="relative  h-full">
             {media.type === "video" ? (
               <>
                 <LazyVideo

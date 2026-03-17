@@ -1,10 +1,12 @@
-
+"use server";
 
 import { SubscriptionGrid } from "@/features/subscribe/components/subscription-grid";
 import { fetchWithToken } from "@/lib/fetcher";
 
 export default async function SubscribePage() {
-  const json = await fetchWithToken("/subscription-plans").then(d => d.json())
+  const json = await fetchWithToken("/subscription-plans").then((d) =>
+    d.json(),
+  );
   const subscriptionPlans = json.data;
 
   return (
@@ -18,8 +20,6 @@ export default async function SubscribePage() {
           time.
         </p>
       </div>
-
-   
 
       {json.error ? (
         <div className="text-center p-4 bg-red-50 text-red-600 rounded-lg">

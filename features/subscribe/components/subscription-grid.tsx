@@ -37,7 +37,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   return (
     <>
       <SubscriptionToggle period={period} onChange={setPeriod} />
-      <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+      <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4  ">
         {filteredPlans.map((plan) => (
           <SubscriptionCard key={plan.id} plan={plan} />
         ))}

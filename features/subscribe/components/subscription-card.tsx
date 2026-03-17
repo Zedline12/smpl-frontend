@@ -11,17 +11,21 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
   const { user } = useAuth();
   const { startCheckout, isLoading } = useCheckout();
 
-  const planName = plan.name.toLowerCase();
-  const isBasic = planName.includes("basic");
-  const isStandard = planName.includes("standard");
-  const isPro = planName.includes("pro");
-  const isPremium = planName.includes("premium");
+
   // const isPremiumOrPro = !isBasic && !isStandard;
 
   return (
     <div
-      className={`relative rounded-2xl p-8 border hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden group border-neutral-700/50 hover:bg-background-light bg-transparent`}
+      className={`relative rounded-2xl p-8 border hover:shadow-xl transition-all duration-300 flex flex-col h-full  overflow-hidden group border-neutral-700/50 hover:bg-background-light bg-transparent ${plan.isMostPopular ? "border-primary/50" : ""}`}
     >
+      {plan.isMostPopular && (
+        <div className="bg-gradient-primary text-primary-foreground w-fit text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg border border-white/20 mb-4">
+          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          Most Popular
+        </div>
+      )}
       <div className="mb-6 relative">
         <h3 className="font-extrabold mb-2 transition-all duration-300 text-2xl text-primary-foreground">
           {plan.name}
@@ -59,13 +63,9 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
         onClick={() => startCheckout(plan.id)}
         disabled={isLoading || user?.subscription?.id === plan.id}
         className={`w-full py-3 px-6 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-primary-foreground ${
-          isPro
-            ? "bg-gradient-secondary border-none"
-            : isPremium
-              ? "bg-gradient-primary border-none"
-              : isBasic
-                ? "hidden"
-                : "bg-transparent border border-neutral-700 hover:bg-background-light"
+          plan.isMostPopular
+            ? "bg-gradient-primary border-none"
+            :"bg-transparent border border-neutral-700 hover:bg-background-light"
         }`}
       >
         {isLoading ? (

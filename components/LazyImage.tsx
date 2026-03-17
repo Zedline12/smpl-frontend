@@ -31,7 +31,7 @@ export default function LazyImage({
            
             height
           }}
-      className={`relative w-full ${aspectMap[aspectRatio]} rounded-xl overflow-hidden bg-gray-200`}
+      className={`relative w-full ${aspectMap[aspectRatio]}  rounded-xl overflow-hidden bg-gray-200`}
     >
       {/* Skeleton UNDER the image */}
       <div className="absolute inset-0 animate-pulse bg-gray-300" />

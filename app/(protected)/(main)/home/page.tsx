@@ -10,7 +10,7 @@ export default async function WorkspacePage() {
     redirect("/onboard");
   }
 
-  const json = await fetchWithToken("/media?limit=30").then((res) =>
+  const json = await fetchWithToken("/media?limit=50").then((res) =>
     res.json(),
   );
   const media: Media[] = json.data;
@@ -18,7 +18,6 @@ export default async function WorkspacePage() {
     <div className="w-full p-5 mt-5">
       <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
-      
       </section>
       <MediaGrid
         imagesWidth={250}
