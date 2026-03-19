@@ -21,14 +21,15 @@ export default async function AdminLayout({
     redirect("/admin/login");
   }
   return (
-    <div className="min-h-screen bg-background text-white selection:bg-blue-500/30">
-      <AdminNavbar />
-      <div className="flex">
-        <AdminSidebar />
-        <main className="space-y-8 max-w-7xl mx-auto flex-1 p-6 md:p-8 overflow-x-hidden">
-          {children}
-        </main>
-      </div>
-    </div>
+    <h1>.</h1>
+    // <div className="min-h-screen bg-background text-white selection:bg-blue-500/30">
+    //   <AdminNavbar />
+    //   <div className="flex">
+    //     <AdminSidebar />
+    //     <main className="space-y-8 max-w-7xl mx-auto flex-1 p-6 md:p-8 overflow-x-hidden">
+    //       {children}
+    //     </main>
+    //   </div>
+    // </div>
   );
 }
