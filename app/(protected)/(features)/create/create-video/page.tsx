@@ -16,6 +16,7 @@ export default function CreateVideoPage() {
     resolution,
     durationSeconds,
     referenceImages,
+    generateAudio,
     projectId,
   } = useVideoGenerationStore();
 
@@ -36,6 +37,7 @@ export default function CreateVideoPage() {
         resolution,
         durationSeconds,
         referenceImages,
+        generateAudio,
         projectId: projectId,
       });
     } catch (e) {

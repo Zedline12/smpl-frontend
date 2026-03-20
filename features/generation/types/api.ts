@@ -21,6 +21,7 @@ export interface GenerateVideoRequest {
   durationSeconds: VideoDuration;
   resolution?: VideoResolution;
   aspectRatio?: VideoAspectRatio;
+  generateAudio: boolean;
 }
 export interface CalculateGenerationCostRequest {
   resolution: ImageResolution | VideoResolution;

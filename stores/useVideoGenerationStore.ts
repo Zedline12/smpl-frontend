@@ -11,12 +11,14 @@ type VideoGenerationState = {
   resolution: VideoResolution;
   durationSeconds: VideoDuration;
   referenceImages: string[];
+  generateAudio: boolean;
 
   setPrompt: (v: string) => void;
   setAspectRatio: (v: VideoAspectRatio) => void;
   setResolution: (v: VideoResolution) => void;
   setDurationSeconds: (v: VideoDuration) => void;
   setReferenceImages: (v: string[]) => void;
+  setGenerateAudio: (v: boolean) => void;
   projectId: string | null;
   setProjectId: (id: string | null) => void;
   reset: () => void;
@@ -29,6 +31,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
     resolution: "720p",
     durationSeconds: 4,
     referenceImages: [],
+    generateAudio: false,
 
     setPrompt: (prompt) => set({ prompt }),
 
@@ -74,6 +77,8 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
       set({ referenceImages, durationSeconds: newDuration });
     },
 
+    setGenerateAudio: (generateAudio) => set({ generateAudio }),
+
     projectId: null,
     setProjectId: (projectId) => set({ projectId }),
 
@@ -84,6 +89,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
         resolution: "720p",
         durationSeconds: 4,
         referenceImages: [],
+        generateAudio: false,
         projectId: null,
       }),
   }),
