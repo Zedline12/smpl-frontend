@@ -8,7 +8,9 @@ import {
   ImageResolution,
   VIDEO_DURATION_SECONDS,
   VideoDuration,
+  VideoAspectRatio,
 } from "../../types/media";
+import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
 import { AspectRatioSelector } from "./selectors/AspectRatioSelector";
 import { ResolutionSelector } from "./selectors/ResolutionSelector";
 import PromptComposerFooter from "./PromptComposerFooter";
@@ -22,6 +24,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Menu, MenuItem } from "@/components/menu";
 import DurationSelector from "@/features/generation/components/selectors/DurationSelector";
+import GenerateAudioSelector from "@/features/generation/components/selectors/GenerateAudioSelector";
 import { MediaManagerDialog } from "./MediaManagerDialog";
 import { Plus, X } from "lucide-react";
 
@@ -42,8 +45,10 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
     setAspectRatio,
     setPrompt,
     referenceImages,
+    generateAudio,
     setDurationSeconds,
     setReferenceImages,
+    setGenerateAudio,
   } = useVideoGenerationStore();
   const { data: generation } = useGenerationCostQuery(
     resolution,
@@ -74,6 +79,7 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         resolution,
         durationSeconds,
         referenceImages,
+        generateAudio,
         projectId: projectId,
       });
       router.push(`/create/create-video`);
@@ -115,8 +121,8 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         </div>
 
         <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          value="Video generation is currently updating. It will be back shortly!"
+          // onChange={(e) => setPrompt(e.target.value)}
           placeholder={`Describe what Video you want to create...`}
           className="flex-1 min-h-[100px] text-lg text-white  bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
         />
@@ -142,11 +148,28 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
             setResolution(value as VideoResolution);
           }}
         />
-        <AspectRatioSelector
+        <Menu
+          direction="up"
+          trigger={
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
+              {aspectRatio}
+            </div>
+          }
+          align="left"
+        >
+          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
+            <AspectRatioSelectorComponent
+              options={VIDEO_ASPECT_RATIOS}
+              value={aspectRatio}
+              onChange={(value) => setAspectRatio(value as VideoAspectRatio)}
+            />
+          </MenuItem>
+        </Menu>
+        {/* <AspectRatioSelector
           options={VIDEO_ASPECT_RATIOS}
           value={aspectRatio}
           onChange={setAspectRatio}
-        />
+        /> */}
         <Menu
           direction="up"
           trigger={
@@ -175,6 +198,22 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
               value={durationSeconds}
               onChange={(v) => setDurationSeconds(v as VideoDuration)}
               disabled={isDurationForced}
+            />
+          </MenuItem>
+        </Menu>
+        <Menu
+          direction="up"
+          trigger={
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
+              Audio
+            </div>
+          }
+          align="left"
+        >
+          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
+            <GenerateAudioSelector
+              value={generateAudio}
+              onChange={setGenerateAudio}
             />
           </MenuItem>
         </Menu>
