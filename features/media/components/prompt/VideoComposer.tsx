@@ -4,8 +4,6 @@ import {
   VIDEO_RESOLUTIONS,
   VIDEO_ASPECT_RATIOS,
   MediaTypeEnum,
-  IMAGE_RESOLUTIONS,
-  ImageResolution,
   VIDEO_DURATION_SECONDS,
   VideoDuration,
   VideoAspectRatio,
@@ -165,11 +163,7 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
             />
           </MenuItem>
         </Menu>
-        {/* <AspectRatioSelector
-          options={VIDEO_ASPECT_RATIOS}
-          value={aspectRatio}
-          onChange={setAspectRatio}
-        /> */}
+ 
         <Menu
           direction="up"
           trigger={

@@ -65,30 +65,8 @@ export default function CreateVideoParameter() {
           />
         </svg>
       </div>
-      <h1 className="text-center semi-bold text-primary-foreground">
-        Video generation is currently updating. It will be back shortly!
-      </h1>
-      <div
-        className="tenor-gif-embed"
-        data-postid="3142406825815976924"
-        data-share-method="host"
-        data-aspect-ratio="1"
-        data-width="100%"
-      >
-        <a href="https://tenor.com/view/maintenance-under-maintenance-construction-under-construction-working-on-it-gif-3142406825815976924">
-          Maintenance Under Maintenance Sticker
-        </a>
-        from{" "}
-        <a href="https://tenor.com/search/maintenance-stickers">
-          Maintenance Stickers
-        </a>
-      </div>{" "}
-      <script
-        type="text/javascript"
-        async
-        src="https://tenor.com/embed.js"
-      ></script>
-      {/* <ProjectSelector
+ 
+      <ProjectSelector
         projects={projects}
         selectedProjectId={projectId}
         onSelect={setProjectId}
@@ -113,7 +91,7 @@ export default function CreateVideoParameter() {
       <GenerateAudioSelector
         value={generateAudio}
         onChange={setGenerateAudio}
-      /> */}
+      />
     </div>
   );
 }

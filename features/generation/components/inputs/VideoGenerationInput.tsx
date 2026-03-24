@@ -66,7 +66,7 @@ export default function VideoGenerationInput({
         variant={"primary"}
         className="text-sm p-3 transition-all duration-300 ease-in-out"
         onClick={onGeneration}
-        disabled={true}
+        disabled={prompt.length === 0}
       >
         <>
           <div className="flex flex-row items-center gap-1">
