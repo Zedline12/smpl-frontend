@@ -1,5 +1,6 @@
 // stores/useGenerationStore.ts
 import { AspectRatio, ImageResolution } from "@/features/media/types/media";
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { create } from "zustand";
 
 type ImageGenerationState = {
@@ -13,6 +14,8 @@ type ImageGenerationState = {
   setResolution: (v: ImageResolution) => void;
   projectId: string | null;
   setProjectId: (id: string | null) => void;
+  model: AiModelsEnum;
+  setModel: (v: AiModelsEnum) => void;
   reset: () => void;
 };
 
@@ -22,6 +25,8 @@ export const useImageGenerationStore = create<ImageGenerationState>((set) => ({
   resolution: "1K",
   referenceImages: [],
   projectId: null,
+  model: AiModelsEnum.GEMINI_FLASH_IMAGE,
+  setModel: (model) => set({ model }),
   setReferenceImages: (referenceImages) => set({ referenceImages }),
   setPrompt: (prompt) => set({ prompt }),
   setAspectRatio: (aspectRatio) => set({ aspectRatio }),
@@ -35,5 +40,6 @@ export const useImageGenerationStore = create<ImageGenerationState>((set) => ({
       resolution: "1K",
       referenceImages: [],
       projectId: null,
+      model: AiModelsEnum.GEMINI_FLASH_IMAGE,
     }),
 }));

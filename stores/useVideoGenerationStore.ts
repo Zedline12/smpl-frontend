@@ -3,6 +3,7 @@ import {
   VideoDuration,
   VideoResolution,
 } from "@/features/media/types/media";
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { create } from "zustand";
 
 type VideoGenerationState = {
@@ -21,6 +22,8 @@ type VideoGenerationState = {
   setGenerateAudio: (v: boolean) => void;
   projectId: string | null;
   setProjectId: (id: string | null) => void;
+  model: AiModelsEnum;
+  setModel: (v: AiModelsEnum) => void;
   reset: () => void;
 };
 
@@ -32,7 +35,9 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
     durationSeconds: 4,
     referenceImages: [],
     generateAudio: false,
+    model: AiModelsEnum.VEO_3,
 
+    setModel: (model) => set({ model }),
     setPrompt: (prompt) => set({ prompt }),
 
     setAspectRatio: (aspectRatio) => set({ aspectRatio }),
@@ -91,6 +96,7 @@ export const useVideoGenerationStore = create<VideoGenerationState>(
         referenceImages: [],
         generateAudio: false,
         projectId: null,
+        model: AiModelsEnum.VEO_3,
       }),
   }),
 );

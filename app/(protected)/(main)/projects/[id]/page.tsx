@@ -48,9 +48,8 @@ export default function ProjectDetailsPage() {
           </div>
         </div>
         <Menu>
-          
           <MenuItem
-            disabled={project.media.length === 0}
+            // disabled={project.media.length === 0}
             icon={<Download size={16} />}
             onClick={() =>
               downloadUrlsZip(

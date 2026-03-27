@@ -12,6 +12,7 @@ interface MenuProps {
   direction?: "up" | "down";
   trigger?: React.ReactNode;
   className?: string;
+  menuClassName?: string;
 }
 
 export function Menu({
@@ -20,6 +21,7 @@ export function Menu({
   direction = "down",
   trigger,
   className,
+  menuClassName,
 }: MenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -60,13 +62,14 @@ export function Menu({
         {isOpen && (
           <div
             className={cn(
-              "absolute z-50 min-w-[180px] rounded-xl border border-neutral-800 shadow-xl bg-background-light  animate-in fade-in zoom-in-95 duration-100",
+              "absolute z-50 rounded-2xl border border-neutral-800 shadow-xl  animate-in fade-in zoom-in-95 duration-100",
               direction === "down" ? "top-full mt-2" : "bottom-full mb-2",
               align === "right" ? "right-0" : "left-0",
               direction === "down" && align === "right" && "origin-top-right",
               direction === "down" && align === "left" && "origin-top-left",
               direction === "up" && align === "right" && "origin-bottom-right",
               direction === "up" && align === "left" && "origin-bottom-left",
+              menuClassName
             )}
             role="menu"
           >
@@ -78,7 +81,7 @@ export function Menu({
   );
 }
 
-interface MenuItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MenuItemProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ReactNode;
   variant?: "default" | "danger" | "warning";
 }
@@ -94,7 +97,7 @@ export function MenuItem({
   const context = useContext(MenuContext);
 
   return (
-    <button
+    <div
       onClick={(e) => {
         if (onClick) onClick(e);
         context?.close();
@@ -118,6 +121,6 @@ export function MenuItem({
         </span>
       )}
       {children}
-    </button>
+    </div>
   );
 }

@@ -23,7 +23,10 @@ export function Navbar() {
       <div className="flex items-center gap-6">
         {user ? (
           <>
-            <Link  className="hidden sm:block" href={`${user.subscription.name == "Free Plan" ? "/subscription-plans" : "/my-subscription"}`} >
+            <Link
+              className="hidden sm:block"
+              href={`${user.subscription.name == "Free Plan" ? "/subscription-plans" : "/my-subscription"}`}
+            >
               <div className="grid grid-cols-2 gap-3 items-center px-3 py-1.5 rounded-full  border border-gray-200">
                 <div className="flex flex-row items-center border-r-2 border-r-gray-200">
                   <svg
@@ -53,7 +56,7 @@ export function Navbar() {
               </div>
             </Link>
 
-            <Menu
+            {/* <Menu
               className="pl-6 sm:border-l border-gray-100"
               trigger={
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border-2 border-white shadow-sm hover:shadow-md transition-shadow">
@@ -93,26 +96,22 @@ export function Navbar() {
               >
                 Logout
               </MenuItem>
-            </Menu>
+            </Menu> */}
           </>
         ) : (
-            <div className="flex items-center  sm:gap-4">
-              <Link href="/login">
-                <Button
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                >
-                  {" "}
-                  Log In
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                >
-                  {" "}
-                  Sign Up
-                </Button>
-              </Link>
+          <div className="flex items-center  sm:gap-4">
+            <Link href="/login">
+              <Button className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                {" "}
+                Log In
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                {" "}
+                Sign Up
+              </Button>
+            </Link>
             {/* <Button
               onClick={() => openLoginModal()}
               className="text-sm font-medium text-gray-600 hover:text-gray-900"

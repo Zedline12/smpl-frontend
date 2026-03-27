@@ -1,26 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { MediaType } from "../../types/media";
-import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
+import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import Link from "next/link";
+import { GenerationTypeEnum } from "../../types/generation";
 
-interface PromptComposerHeaderProps {
-  mediaType: MediaType;
-  onSelect: (mediaType: MediaType) => void;
-}
-export default function PromptComposerHeader({
-  mediaType,
-  onSelect,
-}: PromptComposerHeaderProps) {
-  const { reset } = useImageGenerationStore();
+export default function PromptComposerHeader() {
+  const { mediaType: generationType, setMediaType: onSelect } = useAiGenerationControlStore();
   return (
     <div className="flex items-center justify-between gap-4 backdrop-blur-3xl border-b border-black/10 px-4 py-1">
       <div className="flex items-center gap-2">
         <Button
           type="button"
-          onClick={() => onSelect("image")}
+          onClick={() => onSelect(GenerationTypeEnum.IMAGE)}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium hover:text-primary-foreground ${
-            mediaType === "image"
+            generationType === GenerationTypeEnum.IMAGE
               ? " text-primary-foreground shadow-sm backdrop-blur-sm"
               : "text-secondary-foreground "
           }`}
@@ -42,9 +35,9 @@ export default function PromptComposerHeader({
         </Button>
         <Button
           type="button"
-          onClick={() => onSelect("video")}
+          onClick={() => onSelect(GenerationTypeEnum.VIDEO)}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium hover:text-primary-foreground  ${
-            mediaType === "video"
+            generationType === GenerationTypeEnum.VIDEO
               ? " text-primary-foreground shadow-sm backdrop-blur-sm"
               : "text-secondary-foreground "
           }`}
@@ -66,7 +59,7 @@ export default function PromptComposerHeader({
         </Button>
       </div>
       <div className="flex items-center gap-7 text-secondary-foreground">
-        <div onClick={reset} className="cursor-pointer">
+        <div className="cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -80,7 +73,7 @@ export default function PromptComposerHeader({
             />
           </svg>
         </div>
-        <Link href={`/create/create-${mediaType}`}>
+        <Link href={`/create/create-${generationType}`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

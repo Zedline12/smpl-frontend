@@ -1,3 +1,5 @@
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import { AllModelsInput } from "@/features/generation/types/generation";
 import { ImageAspectRatio,VideoAspectRatio, MediaType, ImageResolution, VideoResolution } from "@/features/media/types/media";
 
 export interface GenerateMediaRequest {
@@ -9,8 +11,8 @@ export interface GenerateMediaRequest {
   aspectRatio?: ImageAspectRatio | VideoAspectRatio;
 }
 export interface CalculateMediaCostRequest{
-    resolution: ImageResolution | VideoResolution;
-    mediaType: MediaType;
+  model: AiModelsEnum,
+  input:AllModelsInput
 }
 export interface CalculateMediaCostResponse{
     creditsCost: number;

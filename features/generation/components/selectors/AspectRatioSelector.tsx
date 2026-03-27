@@ -1,13 +1,10 @@
-import {
-  AspectRatio,
-  ImageAspectRatio,
-  VideoAspectRatio,
-} from "@/features/media/types/media";
+
+import { AllModelsAspectRatio } from "@/features/generation/types/generation";
 
 interface AspectRatioSelectorProps {
-  options: readonly (ImageAspectRatio | VideoAspectRatio | AspectRatio)[];
-  value: ImageAspectRatio | VideoAspectRatio | AspectRatio;
-  onChange: (value: ImageAspectRatio | VideoAspectRatio | AspectRatio) => void;
+  options: readonly AllModelsAspectRatio[];
+  value: AllModelsAspectRatio;
+  onChange: (value: AllModelsAspectRatio) => void;
 }
 
 export default function AspectRatioSelector({

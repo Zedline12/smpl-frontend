@@ -1,27 +1,67 @@
 "use client";
-import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
 import { Button } from "@/components/ui/button";
 import ProjectSelector from "./selectors/ProjectSelector";
 import { useAuth } from "@/providers/AuthProvider";
+import ModelSelector from "./selectors/ModelSelector";
+import {
+  IMAGE_MODELS,
+  VIDEO_MODELS,
+} from "@/features/generation/enums/models.enum";
+import { GenerationTypeEnum, ModelsValidatorSchemaMap } from "../../types/generation";
+import {
+  useAiGenerationControlStore,
+  useAiModelStore,
+} from "@/stores/useAiGenerationControlStore";
+import {
+  useGenerateMutation,
+  useGenerationCostQuery,
+} from "../../hooks/generation";
+import { useRouter, usePathname } from 'next/navigation';
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
-  onGeneration: () => void;
-  disabled: boolean;
-  isGenerating: boolean;
-  creditsCost: number;
   isFocused: boolean;
 }
+
 export default function PromptComposerFooter({
   children,
-  onGeneration,
-  disabled,
-  isGenerating,
-  creditsCost,
   isFocused,
 }: PromptComposerFooterProps) {
-  const { projectId, setProjectId } = useImageGenerationStore();
+  const { model, projectId, mediaType } = useAiGenerationControlStore();
+  const { data } = useGenerationCostQuery();
+  const generation = useGenerateMutation();
+  const { states } = useAiModelStore();
+  const { prompt } = states[model]!;
   const { user } = useAuth();
+  const router = useRouter();
+const pathname = usePathname();
+  const isFormValid = () => {
+  if (!prompt.trim()) return false;
+   const validator = ModelsValidatorSchemaMap[model];
+  return validator.safeParse(states[model]).success;
+};
+  const handleGeneration = async () => {
+    try {
+      const state = states[model];
+
+      if (!state) {
+        throw new Error("No state for selected model");
+      }
+      const payload = {
+        model,
+        projectId,
+        mediaType,
+        input: state,
+      };
+      await generation!.mutateAsync(payload);
+        if (pathname !== '/create') {
+      router.push('/create');
+      return;
+    }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   return (
     <div
       className={`z-50 transition-all duration-500 ease-in-out  ${
@@ -30,20 +70,27 @@ export default function PromptComposerFooter({
     >
       <div className="flex items-center justify-between  xs:flex-row flex-col ">
         <div className="flex items-center xs:w-auto w-full justify-start xs:gap-2 xs:order-1 order-2">
+          {mediaType && (
+            <ModelSelector
+              models={
+                mediaType === GenerationTypeEnum.VIDEO
+                  ? VIDEO_MODELS
+                  : IMAGE_MODELS
+              }
+            />
+          )}
           {children}
         </div>
         <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
-          {user && (
-            <ProjectSelector />
-          )}
+          {user && <ProjectSelector />}
           <Button
             type="button"
             variant={"primary"}
             className="text-sm p-3"
-            onClick={onGeneration}
-            disabled={disabled}
+            onClick={handleGeneration}
+            disabled={!isFormValid()}
           >
-            {isGenerating ? (
+            {false ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Generating...
@@ -67,7 +114,7 @@ export default function PromptComposerFooter({
                       />
                     </svg>
 
-                    {creditsCost ?? 0}
+                    {data?.creditsCost ?? 0}
                   </div>
                 </div>
               </>

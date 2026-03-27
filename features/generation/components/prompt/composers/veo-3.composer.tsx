@@ -1,100 +1,61 @@
-import { forwardRef, useState, useImperativeHandle } from "react";
-import {
-  VideoResolution,
-  VIDEO_RESOLUTIONS,
-  VIDEO_ASPECT_RATIOS,
-  MediaTypeEnum,
-  VIDEO_DURATION_SECONDS,
-  VideoDuration,
-  VideoAspectRatio,
-} from "../../types/media";
+import { useState } from "react";
 import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
-import { AspectRatioSelector } from "./selectors/AspectRatioSelector";
-import { ResolutionSelector } from "./selectors/ResolutionSelector";
-import PromptComposerFooter from "./PromptComposerFooter";
-import {
-  useGenerationCostQuery,
-  useVideoGenerationMutation,
-} from "@/features/generation/hooks/generation";
 import { Textarea } from "@/components/ui/textarea";
-import { useVideoGenerationStore } from "@/stores/useVideoGenerationStore";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
 import { Menu, MenuItem } from "@/components/menu";
 import DurationSelector from "@/features/generation/components/selectors/DurationSelector";
 import GenerateAudioSelector from "@/features/generation/components/selectors/GenerateAudioSelector";
-import { MediaManagerDialog } from "./MediaManagerDialog";
 import { Plus, X } from "lucide-react";
+import { MediaManagerDialog } from "../MediaManagerDialog";
+import PromptComposerFooter from "../PromptComposerFooter";
+import { ResolutionSelector } from "../selectors/ResolutionSelector";
+import {
+  VEO3_ASPECT_RATIOS,
+  VEO3_RESOLUTIONS,
+  VEO3_DURATION_SECONDS,
+  Veo3Input,
+} from "@/features/generation/types/models/veo-3.type";
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
-interface VideoComposerProps {
+interface Veo3ComposerProps {
   isFocused: boolean;
 }
 
-export default function VideoComposer({ isFocused }: VideoComposerProps) {
-  const router = useRouter();
+export default function Veo3Composer({ isFocused }: Veo3ComposerProps) {
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
+
+  const { states, setField: setModelField } = useAiModelStore();
+  const state = states[AiModelsEnum.VEO_3] as Veo3Input;
+  const setField = (key: string, value: any) =>
+    setModelField(AiModelsEnum.VEO_3, key, value);
   const {
     resolution,
     aspectRatio,
     prompt,
+     images,
     durationSeconds,
-    projectId,
-    setResolution,
-    setAspectRatio,
-    setPrompt,
-    referenceImages,
     generateAudio,
-    setDurationSeconds,
-    setReferenceImages,
-    setGenerateAudio,
-  } = useVideoGenerationStore();
-  const { data: generation } = useGenerationCostQuery(
-    resolution,
-    MediaTypeEnum.VIDEO,
-  );
-  const videoGeneration = useVideoGenerationMutation();
+  } = state;
+
   const isDurationForced =
-    resolution === "1080p" || resolution === "4k" || referenceImages.length > 0;
+    resolution === "1080p" || resolution === "4k" || images.length > 0;
 
   if (isDurationForced && durationSeconds !== 8) {
-    setDurationSeconds(8);
+    setField("durationSeconds", 8);
   }
 
-  const handleGeneration = async () => {
-    if (!prompt) {
-      toast.error("Please enter a prompt");
-      return;
-    }
-    if (!projectId) {
-      toast.error("Please select a project");
-      return;
-    }
-
-    try {
-      await videoGeneration.mutateAsync({
-        prompt,
-        aspectRatio,
-        resolution,
-        durationSeconds,
-        referenceImages,
-        generateAudio,
-        projectId: projectId,
-      });
-      router.push(`/create/create-video`);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const removeReferenceImage = (url: string) => {
-    setReferenceImages(referenceImages.filter((img) => img !== url));
+    setField(
+      "images",
+      images.filter((img) => img !== url),
+    );
   };
 
   return (
     <>
       <div style={{ zIndex: 1 }} className=" flex flex-row items-start gap-4">
         <div className="flex flex-row gap-2 flex-wrap max-w-[400px]">
-          {referenceImages.map((url, index) => (
+          {images.map((url, index) => (
             <div
               key={url + index}
               className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5"
@@ -108,7 +69,7 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
               </button>
             </div>
           ))}
-          {referenceImages.length < 4 && (
+          {images.length < 4 && (
             <button
               onClick={() => setIsMediaManagerOpen(true)}
               className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex items-center justify-center transition-all group"
@@ -119,8 +80,8 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         </div>
 
         <Textarea
-          value="Video generation is currently updating. It will be back shortly!"
-          // onChange={(e) => setPrompt(e.target.value)}
+          value={prompt}
+          onChange={(e) => setField("prompt", e.target.value)}
           placeholder={`Describe what Video you want to create...`}
           className="flex-1 min-h-[100px] text-lg text-white  bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
         />
@@ -129,21 +90,16 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
       <MediaManagerDialog
         open={isMediaManagerOpen}
         onOpenChange={setIsMediaManagerOpen}
-        selectedImages={referenceImages}
-        onSelect={setReferenceImages}
+        selectedImages={images}
+        onSelect={(images) => setField("images", images)}
       />
-      <PromptComposerFooter
-        isGenerating={false}
-        creditsCost={generation?.creditsCost ?? 0}
-        isFocused={isFocused}
-        disabled={!prompt.trim()}
-        onGeneration={handleGeneration}
-      >
+
+      <PromptComposerFooter isFocused={isFocused}>
         <ResolutionSelector
-          options={VIDEO_RESOLUTIONS}
+          options={VEO3_RESOLUTIONS as any}
           value={resolution}
-          onChange={(value) => {
-            setResolution(value as VideoResolution);
+          onChange={(value: any) => {
+            setField("resolution", value);
           }}
         />
         <Menu
@@ -157,13 +113,13 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         >
           <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
             <AspectRatioSelectorComponent
-              options={VIDEO_ASPECT_RATIOS}
+              options={VEO3_ASPECT_RATIOS as any}
               value={aspectRatio}
-              onChange={(value) => setAspectRatio(value as VideoAspectRatio)}
+              onChange={(value: any) => setField("aspectRatio", value)}
             />
           </MenuItem>
         </Menu>
- 
+
         <Menu
           direction="up"
           trigger={
@@ -188,13 +144,14 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
         >
           <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
             <DurationSelector
-              options={VIDEO_DURATION_SECONDS}
+              options={VEO3_DURATION_SECONDS as any}
               value={durationSeconds}
-              onChange={(v) => setDurationSeconds(v as VideoDuration)}
+              onChange={(v) => setField("durationSeconds", v)}
               disabled={isDurationForced}
             />
           </MenuItem>
         </Menu>
+
         <Menu
           direction="up"
           trigger={
@@ -207,7 +164,7 @@ export default function VideoComposer({ isFocused }: VideoComposerProps) {
           <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
             <GenerateAudioSelector
               value={generateAudio}
-              onChange={setGenerateAudio}
+              onChange={(v) => setField("generateAudio", v)}
             />
           </MenuItem>
         </Menu>

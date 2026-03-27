@@ -1,34 +1,31 @@
 "use client";
-import React, { useRef, useState } from "react";
-import PromptInputHeader from "@/features/media/components/prompt/PromptComposerHeader";
-import { MediaType } from "@/features/media/types/media";
-import { GenerateMediaRequest } from "@/features/media/types/api";
-import { useImageGenerationMutation } from "@/features/generation/hooks/generation";
+import React, { useState } from "react";
+import PromptInputHeader from "@/features/generation/components/prompt/PromptComposerHeader";
 import {
   GenerateImageRequest,
   GenerateVideoRequest,
 } from "@/features/generation/types/api";
-import ImageComposer from "./ImageComposer";
-import VideoComposer from "./VideoComposer";
-import { useRouter } from "next/navigation";
+import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import GeminiFlashImageComposer from "./composers/gemini-flash-image.composer";
+import KlingO3ImageComposer from "./composers/kling-03-image.composer";
+import Veo3Composer from "./composers/veo-3.composer";
+import KlingV3ProMotionControlComposer from "./composers/kling-v3-pro-motion-control";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
   reset(): void;
 }
 
-interface PromptComposerProps {
-  isGenerating: boolean;
-  onGeneration: (data: GenerateMediaRequest) => void;
-}
+
 export default function PromptComposer() {
-  const router = useRouter();
-  const [mediaType, setMediaType] = useState<MediaType>("image");
+  const { model } = useAiGenerationControlStore();
+
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const imageGeneration = useImageGenerationMutation();
 
   React.useEffect(() => {
+    console.log(model);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
@@ -58,19 +55,19 @@ export default function PromptComposer() {
           isFocused ? "max-h-[100px] " : "max-h-0 "
         }`}
       >
-        <PromptInputHeader mediaType={mediaType} onSelect={setMediaType} />
+        <PromptInputHeader />
       </div>
 
       <div className="p-2 ">
-        {mediaType === "image" && (
-          <ImageComposer
-            isFocused={isFocused}
-          />
+        {model === AiModelsEnum.GEMINI_FLASH_IMAGE && (
+          <GeminiFlashImageComposer isFocused={isFocused} />
         )}
-        {mediaType === "video" && (
-          <VideoComposer
-            isFocused={isFocused}
-          />
+        {model === AiModelsEnum.KLING_O3_IMAGE && (
+          <KlingO3ImageComposer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.VEO_3 && <Veo3Composer isFocused={isFocused} />}
+        {model === AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL && (
+          <KlingV3ProMotionControlComposer isFocused={isFocused} />
         )}
       </div>
     </div>

@@ -1,14 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchGenerationCost,
-  fetchMyProjects,
-  fetchMedia,
-  mediaGeneration,
-} from "@/features/media/api/media";
-import { MediaType, ImageResolution, VideoResolution } from "@/features/media/types/media";
-import { GenerateMediaRequest } from "@/features/media/types/api";
-import { toast } from "sonner";
-
+import { useQuery } from "@tanstack/react-query";
+import { fetchMedia } from "@/features/media/api/media";
+import { MediaType } from "@/features/media/types/media";
 
 export function useMediaQuery(projectId?: string, type?: MediaType) {
   return useQuery({
@@ -17,20 +9,3 @@ export function useMediaQuery(projectId?: string, type?: MediaType) {
     staleTime: 1000 * 60,
   });
 }
-export function useMediaGenerationMutation(projectId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: GenerateMediaRequest) => mediaGeneration(data),
-    onSuccess: (data) => {
-      toast.success("Media generated successfully!");
-      queryClient.invalidateQueries({
-        queryKey: ["project-media", projectId],
-      });
-      return data;
-    },
-    onError: (error) => {
-      toast.error("Failed to generate media");
-    },
-  });
-}
-

@@ -1,17 +1,14 @@
 import { MenuItem, Menu } from "@/components/menu";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
-import { useImageGenerationStore } from "@/stores/useImageGenerationStore";
-import { useVideoGenerationStore } from "@/stores/useVideoGenerationStore";
+import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { useEffect } from "react";
 
 export default function ProjectSelector() {
-  const { projectId, setProjectId } = useImageGenerationStore();
-  const {setProjectId: setVideoProjectId} = useVideoGenerationStore();
+  const { projectId, setProjectId } = useAiGenerationControlStore();
   const { data: projects = [] } = useProjectsQuery();
   useEffect(() => {
     if (!projectId && projects.length > 0) {
       setProjectId(projects[0].id);
-      setVideoProjectId(projects[0].id)
     }
   }, [projects, projectId, setProjectId]);
   return (
@@ -36,9 +33,9 @@ export default function ProjectSelector() {
         <div className="gap-1 h-full max-h-100 w-full overflow-y-auto flex flex-col">
           {projects.map((project) => (
             <span
-              className="w-full text-left hover:bg-background-lighter p-3"
+              className="w-full text-left hover:bg-background-lighter p-3 cursor-pointer"
               key={project.id}
-              onClick={() => { setProjectId(project.id),setVideoProjectId(project.id) }}
+              onClick={() => setProjectId(project.id)}
             >
               {project.name}
             </span>

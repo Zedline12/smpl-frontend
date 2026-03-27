@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const res = await fetchWithToken(`/ai-media/calculate-cost`, {
+  const res = await fetchWithToken(`/generation/calculate-cost`, {
     method: "POST",
     body: JSON.stringify(body),
     headers: {

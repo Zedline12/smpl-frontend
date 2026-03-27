@@ -12,7 +12,7 @@ export default function CreateLayout({
     <div className="bg-background min-h-screen grid md:grid-cols-[100px_1fr] grid-cols-1 grid-rows-[auto_1fr]">
       {/* LEFT SIDEBAR spans both rows */}
       <aside className="md:block hidden row-span-2  ">
-        <CreateSidebar />
+        {/* <CreateSidebar /> */}
       </aside>
 
        <Navbar></Navbar>

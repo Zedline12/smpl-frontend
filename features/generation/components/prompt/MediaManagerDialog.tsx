@@ -20,24 +20,26 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface MediaItem {
-  url: string;
-  type: "image" | "video";
-  publicId: string;
-}
+
 
 interface MediaManagerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedImages: string[];
+  selectedImage?: string;
+  selectedImages?: string[];
   onSelect: (urls: string[]) => void;
+  mediaType?: "image" | "video";
+  maxSelections?: number;
 }
 
 export function MediaManagerDialog({
   open,
   onOpenChange,
+  selectedImage,
   selectedImages,
   onSelect,
+  mediaType = "image",
+  maxSelections = 5,
 }: MediaManagerDialogProps) {
   const [activeTab, setActiveTab] = useState("library");
   const [libraryImages, setLibraryImages] = useState<string[]>([]);
@@ -48,7 +50,7 @@ export function MediaManagerDialog({
   // Initialize temp selection when dialog opens
   useEffect(() => {
     if (open) {
-      setTempSelection(selectedImages);
+      setTempSelection(maxSelections>1?selectedImages!:[selectedImage!]);
       fetchLibrary();
     }
   }, [open, selectedImages]);
@@ -56,7 +58,7 @@ export function MediaManagerDialog({
   const fetchLibrary = async () => {
     setIsLoadingLibrary(true);
     try {
-      const res = await fetch("/api/media/reference-images");
+      const res = await fetch(`/api/media/reference-${mediaType}s`);
       const json = await res.json();
       setLibraryImages(json.data || []);
     } catch (error) {
@@ -104,8 +106,11 @@ export function MediaManagerDialog({
   const handleFileDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
+    const prefix = mediaType === "video" ? "video/" : "image/";
+    if (file && file.type.startsWith(prefix)) {
       uploadImage(file);
+    } else {
+      toast.error(`Please drop a ${mediaType} file`);
     }
   };
 
@@ -114,9 +119,9 @@ export function MediaManagerDialog({
       if (prev.includes(url)) {
         return prev.filter((item) => item !== url);
       }
-      if (prev.length >= 3) {
-        toast.warning("You can only select up to 3 reference images");
-        return prev;
+      if (prev.length >= maxSelections) {
+       
+        return maxSelections === 1 ? [url] : prev;
       }
       return [...prev, url];
     });
@@ -183,11 +188,22 @@ export function MediaManagerDialog({
                       )}
                       onClick={() => toggleSelection(item)}
                     >
-                      <img
-                        src={item}
-                        alt="Ref"
-                        className="w-full h-full object-cover"
-                      />
+                      {item.match(/\.(mp4|webm|mov|mkv)$/i) || mediaType === "video" ? (
+                        <video
+                          src={item}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          onMouseOver={(e) => e.currentTarget.play()}
+                          onMouseOut={(e) => e.currentTarget.pause()}
+                        />
+                      ) : (
+                        <img
+                          src={item}
+                          alt="Ref"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                       {tempSelection.includes(item) && (
                         <div className="absolute top-2 right-2 bg-primary rounded-full p-1 h-5 w-5 flex items-center justify-center">
                           <Check className="w-3 h-3 text-white stroke-[3px]" />
@@ -219,7 +235,7 @@ export function MediaManagerDialog({
                 <>
                   <Loader2 className="w-12 h-12 animate-spin text-primary" />
                   <div className="text-center">
-                    <p className="text-lg font-medium">Uploading image...</p>
+                    <p className="text-lg font-medium">Uploading {mediaType}...</p>
                     <p className="text-sm text-muted-foreground">
                       Please wait a moment
                     </p>
@@ -231,7 +247,7 @@ export function MediaManagerDialog({
                     <UploadCloud className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-medium">Drop an image here</p>
+                    <p className="text-lg font-medium">Drop a {mediaType} here</p>
                     <p className="text-sm text-muted-foreground mb-4">
                       or click the button below to browse files
                     </p>
@@ -247,7 +263,7 @@ export function MediaManagerDialog({
                         id="file-upload"
                         type="file"
                         className="hidden"
-                        accept="image/*"
+                        accept={mediaType === "video" ? "video/*" : "image/*"}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) uploadImage(file);
@@ -264,7 +280,7 @@ export function MediaManagerDialog({
         <DialogFooter className="p-6 border-t border-white/5 bg-background/50 backdrop-blur-sm">
           <div className="flex flex-1 items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {tempSelection.length} of 5 selected
+              {tempSelection.length} of {maxSelections} selected
             </p>
             <div className="flex gap-3">
               <Button

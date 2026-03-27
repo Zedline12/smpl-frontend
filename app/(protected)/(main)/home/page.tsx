@@ -1,5 +1,5 @@
 import { MediaGrid } from "@/features/media/components/MediaGrid";
-import PromptComposer from "@/features/media/components/prompt/PromptComposer";
+import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { Media } from "@/features/media/types/media";
 import { fetchWithToken } from "@/lib/fetcher";
 import { redirect } from "next/navigation";

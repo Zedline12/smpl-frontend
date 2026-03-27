@@ -2,16 +2,18 @@ interface GenerateAudioSelectorProps {
   value: boolean;
   onChange: (value: boolean) => void;
   disabled?: boolean;
+  label?: string;
 }
 
 export default function GenerateAudioSelector({
   value,
   onChange,
   disabled,
+  label,
 }: GenerateAudioSelectorProps) {
   return (
     <div className="w-full bg-neutral-800 p-3 rounded-lg flex flex-row items-center justify-between gap-1">
-      <p className="text-neutral-400 font-medium text-sm">Generate Audio</p>
+      <p className="text-neutral-400 font-medium text-sm">{label || "Generate Audio"}</p>
       <button
         type="button"
         role="switch"
