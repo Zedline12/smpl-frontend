@@ -8,10 +8,15 @@ export const projectsService = {
     });
   },
   async createProject(name: string): Promise<Project> {
-    return await apiFetch("projects", {
+    const res = await fetch("/api/projects", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ name }),
     });
+    const json = await res.json();
+    return json.data;
   },
   async getProject(id: string): Promise<Project & { media: Media[] }> {
     return await apiFetch(`projects/${id}?include=media`, {

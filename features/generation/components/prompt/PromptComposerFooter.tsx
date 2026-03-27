@@ -7,7 +7,10 @@ import {
   IMAGE_MODELS,
   VIDEO_MODELS,
 } from "@/features/generation/enums/models.enum";
-import { GenerationTypeEnum, ModelsValidatorSchemaMap } from "../../types/generation";
+import {
+  GenerationTypeEnum,
+  ModelsValidatorSchemaMap,
+} from "../../types/generation";
 import {
   useAiGenerationControlStore,
   useAiModelStore,
@@ -16,7 +19,7 @@ import {
   useGenerateMutation,
   useGenerationCostQuery,
 } from "../../hooks/generation";
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from "next/navigation";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -34,12 +37,12 @@ export default function PromptComposerFooter({
   const { prompt } = states[model]!;
   const { user } = useAuth();
   const router = useRouter();
-const pathname = usePathname();
+  const pathname = usePathname();
   const isFormValid = () => {
-  if (!prompt.trim()) return false;
-   const validator = ModelsValidatorSchemaMap[model];
-  return validator.safeParse(states[model]).success;
-};
+    if (!prompt.trim()) return false;
+    const validator = ModelsValidatorSchemaMap[model];
+    return validator.safeParse(states[model]).success;
+  };
   const handleGeneration = async () => {
     try {
       const state = states[model];
@@ -54,22 +57,22 @@ const pathname = usePathname();
         input: state,
       };
       await generation!.mutateAsync(payload);
-        if (pathname !== '/create') {
-      router.push('/create');
-      return;
-    }
+      if (pathname !== "/create") {
+        router.push("/create");
+        return;
+      }
     } catch (e) {
       console.error(e);
     }
   };
   return (
     <div
-      className={`z-50 transition-all duration-500 ease-in-out  ${
-        isFocused ? "max-h-[100px] opacity-100 " : "max-h-0 opacity-0 "
+      className={`z-50 transition-all duration-500 ease-in-out overflow-visible ${
+        isFocused ? "max-h-[300px] opacity-100 " : "max-h-0 opacity-0 "
       }`}
     >
       <div className="flex items-center justify-between  xs:flex-row flex-col ">
-        <div className="flex items-center xs:w-auto w-full justify-start xs:gap-2 xs:order-1 order-2">
+        <div className="flex items-center flex-wrap xs:w-auto w-full justify-start gap-2 xs:order-1 order-2">
           {mediaType && (
             <ModelSelector
               models={

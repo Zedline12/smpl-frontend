@@ -2,7 +2,6 @@ import { useState } from "react";
 import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
 import { Textarea } from "@/components/ui/textarea";
 import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
-import { useRouter } from "next/navigation";
 import { Menu, MenuItem } from "@/components/menu";
 import { Plus, X } from "lucide-react";
 import { MediaManagerDialog } from "../MediaManagerDialog";
@@ -22,7 +21,6 @@ interface GeminiFlashImageComposerProps {
 export default function GeminiFlashImageComposer({
   isFocused,
 }: GeminiFlashImageComposerProps) {
-  const router = useRouter();
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
 
   const { states, setField: setModelField } = useAiModelStore();
@@ -99,8 +97,9 @@ export default function GeminiFlashImageComposer({
             </div>
           }
           align="left"
+          menuClassName="max-sm:!left-1 max-sm:!-translate-x-1/2"
         >
-          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
+          <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
             <AspectRatioSelectorComponent
               options={GEMINI_FLASH_IMAGE_ASPECT_RATIOS as any}
               value={aspectRatio}

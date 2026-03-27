@@ -1,7 +1,6 @@
 "use client";
 import { Navbar } from "@/components/navbar";
-import CreateSidebar from "@/features/generation/components/sidebar";
-
+import { Sidebar } from "@/components/sidebar";
 export default function CreateLayout({
   children,
 }: Readonly<{
@@ -9,14 +8,22 @@ export default function CreateLayout({
 }>) {
 
   return (
-    <div className="bg-background min-h-screen grid md:grid-cols-[100px_1fr] grid-cols-1 grid-rows-[auto_1fr]">
-      {/* LEFT SIDEBAR spans both rows */}
-      <aside className="md:block hidden row-span-2  ">
-        {/* <CreateSidebar /> */}
-      </aside>
-
-       <Navbar></Navbar>
-      <main className="overflow-y-auto   ">{children}</main>
-    </div>
+      <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
+          {/* NAVBAR */}
+          <header className="col-span-full z-50  ">
+            <Navbar />
+          </header>
+    
+          {/* SIDEBAR (desktop) */}
+          <div className="hidden z-50  sm:block row-start-2 col-start-1 h-full">
+            <Sidebar />
+          </div>
+          {/* SIDEBAR (mobile) */}
+         
+          {/* CONTENT */}
+          <main className="row-start-2 h-full col-start-1 sm:col-start-2  ">
+            {children}
+          </main>
+          </div>
   );
 }

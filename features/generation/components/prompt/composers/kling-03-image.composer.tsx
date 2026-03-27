@@ -94,8 +94,9 @@ export default function KlingO3ImageComposer({
             </div>
           }
           align="left"
+          menuClassName="max-sm:!left-1 max-sm:!-translate-x-1/2"
         >
-          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
+          <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
             <AspectRatioSelectorComponent
               options={KlingO3ImageOptionsConst.aspectRatio as any}
               value={aspectRatio}

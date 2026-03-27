@@ -32,7 +32,7 @@ export default function Veo3Composer({ isFocused }: Veo3ComposerProps) {
     resolution,
     aspectRatio,
     prompt,
-     images,
+    images,
     durationSeconds,
     generateAudio,
   } = state;
@@ -95,79 +95,82 @@ export default function Veo3Composer({ isFocused }: Veo3ComposerProps) {
       />
 
       <PromptComposerFooter isFocused={isFocused}>
-        <ResolutionSelector
-          options={VEO3_RESOLUTIONS as any}
-          value={resolution}
-          onChange={(value: any) => {
-            setField("resolution", value);
-          }}
-        />
-        <Menu
-          direction="up"
-          trigger={
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
-              {aspectRatio}
-            </div>
-          }
-          align="left"
-        >
-          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
-            <AspectRatioSelectorComponent
-              options={VEO3_ASPECT_RATIOS as any}
-              value={aspectRatio}
-              onChange={(value: any) => setField("aspectRatio", value)}
-            />
-          </MenuItem>
-        </Menu>
+        <div className="grid grid-cols-4 sm:flex sm:flex-row  w-full  sm:mt-0">
+          <ResolutionSelector
+            options={VEO3_RESOLUTIONS as any}
+            value={resolution}
+            onChange={(value: any) => {
+              setField("resolution", value);
+            }}
+          />
+          <Menu
+            direction="up"
+            trigger={
+              <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20 w-full text-center">
+                {aspectRatio}
+              </div>
+            }
+            align="left"
+          >
+            <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
+              <AspectRatioSelectorComponent
+                options={VEO3_ASPECT_RATIOS as any}
+                value={aspectRatio}
+                onChange={(value: any) => setField("aspectRatio", value)}
+              />
+            </MenuItem>
+          </Menu>
 
-        <Menu
-          direction="up"
-          trigger={
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="size-4"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-                  clipRule="evenodd"
-                />
-              </svg>
+          <Menu
+            direction="up"
+            trigger={
+              <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20 w-full text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="size-4 shrink-0"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {durationSeconds}
+              </div>
+            }
+            align="left"
+            menuClassName="max-sm:!left-1 max-sm:!-translate-x-1/2"
+          >
+            <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
+              <DurationSelector
+                options={VEO3_DURATION_SECONDS as any}
+                value={durationSeconds}
+                onChange={(v) => setField("durationSeconds", v)}
+                disabled={isDurationForced}
+              />
+            </MenuItem>
+          </Menu>
 
-              {durationSeconds}
-            </div>
-          }
-          align="left"
-        >
-          <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
-            <DurationSelector
-              options={VEO3_DURATION_SECONDS as any}
-              value={durationSeconds}
-              onChange={(v) => setField("durationSeconds", v)}
-              disabled={isDurationForced}
-            />
-          </MenuItem>
-        </Menu>
-
-        <Menu
-          direction="up"
-          trigger={
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
-              Audio
-            </div>
-          }
-          align="left"
-        >
-          <MenuItem className="p-0 bg-red-500 m-0 sm:w-100 w-[200px]">
-            <GenerateAudioSelector
-              value={generateAudio}
-              onChange={(v) => setField("generateAudio", v)}
-            />
-          </MenuItem>
-        </Menu>
+          <Menu
+            direction="up"
+            trigger={
+              <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20 w-full text-center">
+                Audio
+              </div>
+            }
+            align="left"
+            menuClassName="max-sm:!left-1 max-sm:!-translate-x-1/2"
+          >
+            <MenuItem className="p-0  m-0 sm:w-100 w-[200px]">
+              <GenerateAudioSelector
+                value={generateAudio}
+                onChange={(v) => setField("generateAudio", v)}
+              />
+            </MenuItem>
+          </Menu>
+        </div>
       </PromptComposerFooter>
     </>
   );

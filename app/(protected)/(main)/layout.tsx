@@ -1,7 +1,7 @@
-
 import BottomNavbar from "@/components/BottomNavbar";
 import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
+import Footer from "@/components/footer";
 const bottomNavbarItems = [
   {
     title: "Subscribe",
@@ -45,8 +45,11 @@ export default function MainLayout({
         <BottomNavbar items={bottomNavbarItems} />
       </div>
       {/* CONTENT */}
-      <main className="row-start-2 h-full col-start-1 sm:col-start-2  ">
-        {children}
+      <main className="row-start-2 h-full col-start-1 sm:col-start-2 overflow-y-auto flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        {/* <Footer /> */}
       </main>
       </div>
   );

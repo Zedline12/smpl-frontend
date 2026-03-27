@@ -27,8 +27,8 @@ export function CreateProjectModal({
     setIsLoading(true);
     try {
       const project = await projectsService.createProject(name);
-        toast.success("Project created successfully");
-        router.push(`/workspace/projects/${project.id}`);
+      toast.success("Project created successfully");
+      router.push(`/projects`);
       onClose();
     } catch (error: any) {
       // Error is handled by apiFetch globally (toast), but we catch here to stop loading state if needed or specific handling
