@@ -103,7 +103,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             />
           </svg>
         ),
-        url: "https://mail.google.com/mail/?view=cm&fs=1&to=smplappteam@gmail.com&su=SUPPORT",
+        url: "https://mail.google.com/mail/?view=cm&fs=1&to=Team@smplsocial.io&su=SUPPORT",
       },
     ],
   },
