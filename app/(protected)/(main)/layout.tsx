@@ -46,11 +46,9 @@ export default function MainLayout({
       </div>
       {/* CONTENT */}
       <main className="row-start-2 h-full col-start-1 sm:col-start-2 overflow-y-auto flex flex-col">
-        <div className="flex-1">
-          {children}
-        </div>
-        {/* <Footer /> */}
+        <div className="flex-1">{children}</div>
+        <Footer />
       </main>
-      </div>
+    </div>
   );
 }

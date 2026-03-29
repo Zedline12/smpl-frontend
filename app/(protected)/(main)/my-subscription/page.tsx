@@ -67,10 +67,10 @@ export default function MySubscriptionPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="text-3xl font-bold text-primary-foreground capitalize mb-1">
-                    {user.plan}
+                    {user.subscription.name}
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    You are currently subscribed to the {user.plan} plan.
+                    You are currently subscribed to the {user.subscription.name} plan.
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">

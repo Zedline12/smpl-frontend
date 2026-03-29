@@ -19,9 +19,26 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+const validateVideoDuration = (
+  file: File,
+  minDuration: number,
+): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
 
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src);
+      resolve(video.duration >= minDuration);
+    };
 
+    video.onerror = () => {
+      resolve(false);
+    };
 
+    video.src = URL.createObjectURL(file);
+  });
+};
 interface MediaManagerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -50,7 +67,7 @@ export function MediaManagerDialog({
   // Initialize temp selection when dialog opens
   useEffect(() => {
     if (open) {
-      setTempSelection(maxSelections>1?selectedImages!:[selectedImage!]);
+      setTempSelection(maxSelections > 1 ? selectedImages! : [selectedImage!]);
       fetchLibrary();
     }
   }, [open, selectedImages]);
@@ -69,6 +86,13 @@ export function MediaManagerDialog({
   };
 
   const uploadImage = async (file: File) => {
+    if (mediaType === "video") {
+      const isValid = await validateVideoDuration(file, 3);
+      if (!isValid) {
+        toast.error("Video must be at least 3 seconds long");
+        return;
+      }
+    }
     setIsUploading(true);
     try {
       // 1. get signature
@@ -103,10 +127,17 @@ export function MediaManagerDialog({
     }
   };
 
-  const handleFileDrop = (e: React.DragEvent) => {
+  const handleFileDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     const prefix = mediaType === "video" ? "video/" : "image/";
+    if (mediaType === "video") {
+      const isValid = await validateVideoDuration(file, 3);
+      if (!isValid) {
+        toast.error("Video must be at least 3 seconds long");
+        return;
+      }
+    }
     if (file && file.type.startsWith(prefix)) {
       uploadImage(file);
     } else {
@@ -120,7 +151,6 @@ export function MediaManagerDialog({
         return prev.filter((item) => item !== url);
       }
       if (prev.length >= maxSelections) {
-       
         return maxSelections === 1 ? [url] : prev;
       }
       return [...prev, url];
@@ -188,7 +218,8 @@ export function MediaManagerDialog({
                       )}
                       onClick={() => toggleSelection(item)}
                     >
-                      {item.match(/\.(mp4|webm|mov|mkv)$/i) || mediaType === "video" ? (
+                      {item.match(/\.(mp4|webm|mov|mkv)$/i) ||
+                      mediaType === "video" ? (
                         <video
                           src={item}
                           className="w-full h-full object-cover"
@@ -235,7 +266,9 @@ export function MediaManagerDialog({
                 <>
                   <Loader2 className="w-12 h-12 animate-spin text-primary" />
                   <div className="text-center">
-                    <p className="text-lg font-medium">Uploading {mediaType}...</p>
+                    <p className="text-lg font-medium">
+                      Uploading {mediaType}...
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Please wait a moment
                     </p>
@@ -247,7 +280,9 @@ export function MediaManagerDialog({
                     <UploadCloud className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-medium">Drop a {mediaType} here</p>
+                    <p className="text-lg font-medium">
+                      Drop a {mediaType} here
+                    </p>
                     <p className="text-sm text-muted-foreground mb-4">
                       or click the button below to browse files
                     </p>

@@ -33,34 +33,34 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;    
+  const token = cookieStore.get("token")?.value;
 
-  const user = token ? await fetchWithToken("/auth/me").then((d:any)=>d.data) : null;
+  const user = token
+    ? await fetchWithToken("/auth/me").then((d: any) => d.data)
+    : null;
 
   return (
     <AuthProvider user={user}>
-        <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
-             {/* NAVBAR */}
-             <header className="col-span-full z-50  ">
-               <Navbar />
-             </header>
-       
-             {/* SIDEBAR (desktop) */}
-             <div className="hidden z-50  sm:block row-start-2 col-start-1 h-full">
-               <Sidebar />
-             </div>
-             {/* SIDEBAR (mobile) */}
-             <div className=" row-start-2 col-start-1 h-full">
-               <BottomNavbar items={bottomNavbarItems} />
-             </div>
-             {/* CONTENT */}
-             <main className="row-start-2 h-full col-start-1 sm:col-start-2 overflow-y-auto flex flex-col">
-               <div className="flex-1">
-                 {children}
-               </div>
-               {/* <Footer /> */}
-             </main>
-           </div>
+      <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
+        {/* NAVBAR */}
+        <header className="col-span-full z-50  ">
+          <Navbar />
+        </header>
+
+        {/* SIDEBAR (desktop) */}
+        <div className="hidden z-50  sm:block row-start-2 col-start-1 h-full">
+          <Sidebar />
+        </div>
+        {/* SIDEBAR (mobile) */}
+        <div className=" row-start-2 col-start-1 h-full">
+          <BottomNavbar items={bottomNavbarItems} />
+        </div>
+        {/* CONTENT */}
+        <main className="row-start-2 h-full col-start-1 sm:col-start-2 overflow-y-auto flex flex-col">
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </main>
+      </div>
     </AuthProvider>
   );
 }
