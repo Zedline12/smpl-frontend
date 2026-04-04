@@ -13,7 +13,7 @@ export interface IKlingV3ProMotionControlInput extends BaseAiInput {
 }
 
 export const klingV3ProMotionValidationSchema = z.object({
-  prompt: z.string().nonempty(),
+  prompt: z.string().optional(),
   videoUrl: z.string().url().nonempty(),
   imageUrl: z.string().url().nonempty(),
   keepOriginalSound: z.boolean().optional(),

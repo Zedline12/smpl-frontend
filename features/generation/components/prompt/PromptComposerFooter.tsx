@@ -39,7 +39,6 @@ export default function PromptComposerFooter({
   const router = useRouter();
   const pathname = usePathname();
   const isFormValid = () => {
-    if (!prompt.trim()) return false;
     const validator = ModelsValidatorSchemaMap[model];
     return validator.safeParse(states[model]).success;
   };
