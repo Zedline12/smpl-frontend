@@ -2,13 +2,23 @@
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
 import { Project } from "@/lib/types/project.type";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
 import { Sparkles, Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
+import { toast } from "sonner";
 interface MediaExplorerProps {
   defaultProjectId?: string;
   defaultMediaType?: MediaType;
@@ -23,13 +33,38 @@ export default function MediaExplorer({
   const [mediaType, setMediaType] = useState<MediaType>(
     defaultMediaType ?? "image",
   );
+  const [dismissedFailedQueues, setDismissedFailedQueues] = useState<
+    Set<string>
+  >(new Set());
+  const [dismissedSuccessQueues, setDismissedSuccessQueues] = useState<
+    Set<string>
+  >(new Set());
   const {
     data: media = [],
     isFetching: isMediaFetching,
     isFetched: isMediaFetched,
   } = useMediaQuery(selectedProject?.id, mediaType);
   const { data: queues } = useGenerationQueuesQuery();
+
+  const failedQueue = useMemo(() => {
+    console.log(queues)
+    return queues?.find(
+      (q: any) => q.status === "failure" && !dismissedFailedQueues.has(q.id),
+    );
+  }, [queues, dismissedFailedQueues]);
+
   useEffect(() => {
+    queues?.forEach((queue) => {
+      if (queue.status === "success" && !dismissedSuccessQueues.has(queue.id)) {
+        toast.success("Generation completed successfully!");
+        setDismissedSuccessQueues((prev) => {
+          const next = new Set(prev);
+          next.add(queue.id);
+          return next;
+        });
+      }
+    });
+
     const currentQueues =
       queues?.filter((queue) =>
         ["pending", "processing"].includes(queue.status),
@@ -94,34 +129,77 @@ export default function MediaExplorer({
         )}
       </div>
 
-      {queues && queues.length > 0 && (
+      {failedQueue && (
+        <AlertDialog
+          open={!!failedQueue}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDismissedFailedQueues((prev) => {
+                const next = new Set(prev);
+                next.add(failedQueue.id);
+                return next;
+              });
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {(failedQueue as any).failedMeta?.category ??
+                  "Generation Failed"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {(failedQueue as any).failedMeta?.clientMessage ??
+                  "An unknown error occurred during generation."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                onClick={() => {
+                  setDismissedFailedQueues((prev) => {
+                    const next = new Set(prev);
+                    next.add(failedQueue.id);
+                    return next;
+                  });
+                }}
+              >
+                OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {queues && queues.filter((q: any) => ["pending", "processing"].includes(q.status)).length > 0 && (
         <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-6 mb-4">
-          {queues.map((queue) => (
-            <div
-              key={queue.id}
-              className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-center transition-all duration-300 ${
-                queue.status === "processing"
-                  ? "bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 animate-pulse text-white shadow-lg shadow-purple-500/20"
-                  : "bg-neutral-900 border border-neutral-800 text-neutral-400"
-              }`}
-            >
-              {queue.status === "processing" ? (
-                <>
-                  <Sparkles className="w-8 h-8 mb-3 animate-spin-slow" />
-                  <span className="text-sm font-bold tracking-wide uppercase">
-                    Generating...
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Clock className="w-8 h-8 mb-3 opacity-50" />
-                  <span className="text-xs font-medium uppercase tracking-wide">
-                    Generation is in queue
-                  </span>
-                </>
-              )}
-            </div>
-          ))}
+          {queues
+            .filter((q: any) => ["pending", "processing"].includes(q.status))
+            .map((queue) => (
+              <div
+                key={queue.id}
+                className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-center transition-all duration-300 ${
+                  queue.status === "processing"
+                    ? "bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 animate-pulse text-white shadow-lg shadow-purple-500/20"
+                    : "bg-neutral-900 border border-neutral-800 text-neutral-400"
+                }`}
+              >
+                {queue.status === "processing" ? (
+                  <>
+                    <Sparkles className="w-8 h-8 mb-3 animate-spin-slow" />
+                    <span className="text-sm font-bold tracking-wide uppercase">
+                      Generating...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="w-8 h-8 mb-3 opacity-50" />
+                    <span className="text-xs font-medium uppercase tracking-wide">
+                      Generation is in queue
+                    </span>
+                  </>
+                )}
+              </div>
+            ))}
         </div>
       )}
 
@@ -133,8 +211,7 @@ export default function MediaExplorer({
           imagesWidth={200}
           layout="grid"
           media={media}
-            key={selectedProject?.id}
-            
+          key={selectedProject?.id}
         />
       )}
     </div>

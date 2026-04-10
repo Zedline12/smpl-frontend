@@ -47,13 +47,20 @@ const { prompt, ...stateWithoutPrompt } = state;
 
 
 export const useGenerationQueuesQuery = () => {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["generation-queues"],
-    queryFn: () => fetchGenerationQueues(),
+    queryFn: async () => {
+      const newJobs = await fetchGenerationQueues();
+      const previousJobs = (queryClient.getQueryData(["generation-queues"]) as any[]) || [];
+      const jobsMap = new Map(previousJobs.map((j) => [j.id, j]));
+      newJobs.forEach((j: any) => jobsMap.set(j.id, j));
+      return Array.from(jobsMap.values());
+    },
     refetchInterval: (query) => {
       const data = query.state.data;
       if (
-        data?.some((item) => ["pending", "processing"].includes(item.status))
+        data?.some((item: any) => ["pending", "processing"].includes(item.status))
       ) {
         return 1000;
       }
