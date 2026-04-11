@@ -4,12 +4,16 @@ import { GeminiFlashImageInput } from "@/features/generation/types/models/gemini
 import { KlingO3ImageInput } from "@/features/generation/types/models/kling-o3-image.type";
 import { Veo3Input } from "@/features/generation/types/models/veo-3.type";
 import { IKlingV3ProMotionControlInput } from "@/features/generation/types/models/kling-v3-pro-motion-control";
+import { IKlingV3ImageToVideoInput } from "@/features/generation/types/models/kling-v3-image-to-video.type";
+import { IKlingV3TextToVideoInput } from "@/features/generation/types/models/kling-v3-text-to-video.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
   [AiModelsEnum.KLING_O3_IMAGE]: KlingO3ImageInput;
   [AiModelsEnum.GEMINI_FLASH_IMAGE]: GeminiFlashImageInput;
   [AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL]: IKlingV3ProMotionControlInput;
+  [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: IKlingV3ImageToVideoInput;
+  [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: IKlingV3TextToVideoInput;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -22,6 +26,19 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
     durationSeconds: 4,
     images: [],
+    generateAudio: false,
+  },
+  [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: {
+    prompt: "",
+    startImageUrl: "",
+    duration: 4,
+    generateAudio: false,
+    endImageUrl: "",
+  },
+  [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: {
+    prompt: "",
+    duration: 4,
+    aspectRatio: "16:9",
     generateAudio: false,
   },
   [AiModelsEnum.KLING_O3_IMAGE]: {

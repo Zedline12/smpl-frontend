@@ -1,17 +1,17 @@
 import { VideoDuration } from "@/features/media/types/media";
 
-interface DurationSelectorProps {
-  options: readonly VideoDuration[];
-  value: VideoDuration;
-  onChange: (value: VideoDuration) => void;
+interface DurationSelectorProps<T extends number = number> {
+  options: readonly T[];
+  value: T;
+  onChange: (value: T) => void;
   disabled?: boolean;
 }
-export default function DurationSelector({
+export default function DurationSelector<T extends number = number>({
   options,
   value,
   onChange,
   disabled,
-}: DurationSelectorProps) {
+}: DurationSelectorProps<T>) {
   return (
     <div className="w-full bg-neutral-800 p-3 rounded-lg flex flex-col gap-1">
       <p className="text-neutral-400 font-medium">Duration (Seconds)</p>

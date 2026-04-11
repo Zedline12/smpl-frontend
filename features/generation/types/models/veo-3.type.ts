@@ -1,4 +1,4 @@
-import { aspectRatio } from "framer-motion";
+
 import { BaseAiInput } from "../generation";
 import { z } from "zod";
 export const VEO3_ASPECT_RATIOS = ["16:9", "9:16"] as const;
@@ -6,7 +6,7 @@ export const VEO3_RESOLUTIONS = ["720p", "1080p", "4k"] as const;
 
 export const VEO3_DURATION_SECONDS = [4, 6, 8];
 
-export type Veo3Resolution = (typeof VEO3_RESOLUTIONS)[number];
+export type Veo3Resolution = (typeof VEO3_RESOLUTIONS)[number]; 
 export type Veo3AspectRatio = (typeof VEO3_ASPECT_RATIOS)[number];
 export type Veo3Duration = (typeof VEO3_DURATION_SECONDS)[number];
 

@@ -14,6 +14,8 @@ import {
 } from "./models/gemini-flash-image.type";
 import { IKlingV3ProMotionControlInput, klingV3ProMotionValidationSchema } from "./models/kling-v3-pro-motion-control";
 import { AiModelsEnum } from "../enums/models.enum";
+import { IKlingV3ImageToVideoInput, klingV3ImageToVideoValidationSchema } from "./models/kling-v3-image-to-video.type";
+import { IKlingV3TextToVideoInput, klingV3TextToVideoValidationSchema } from "./models/kling-v3-text-to-video.type";
 export interface BaseAiInput {
   prompt: string;
 }
@@ -28,13 +30,15 @@ export type AllModelsResolution =
 export type AllModelsInput =
   | KlingO3ImageOptions
   | Veo3Input
-  | GeminiFlashImageInput | IKlingV3ProMotionControlInput;
+  | GeminiFlashImageInput | IKlingV3ProMotionControlInput | IKlingV3ImageToVideoInput | IKlingV3TextToVideoInput;
 
   export const ModelsValidatorSchemaMap = {
     [AiModelsEnum.VEO_3]:veo3ValidationSchema,
     [AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL]:klingV3ProMotionValidationSchema,
     [AiModelsEnum.GEMINI_FLASH_IMAGE]:geminiFlashImageValidationSchema,
-    [AiModelsEnum.KLING_O3_IMAGE]:klingO3ImageValidationSchema,
+    [AiModelsEnum.KLING_O3_IMAGE]: klingO3ImageValidationSchema,
+    [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: klingV3ImageToVideoValidationSchema,
+    [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: klingV3TextToVideoValidationSchema,
   };
 export enum GenerationTypeEnum {
   VIDEO = "video",

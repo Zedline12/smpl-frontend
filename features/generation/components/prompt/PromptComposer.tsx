@@ -11,6 +11,8 @@ import GeminiFlashImageComposer from "./composers/gemini-flash-image.composer";
 import KlingO3ImageComposer from "./composers/kling-03-image.composer";
 import Veo3Composer from "./composers/veo-3.composer";
 import KlingV3ProMotionControlComposer from "./composers/kling-v3-pro-motion-control";
+import KlingV3ImageToVideoComposer from "./composers/kling-v3-image-to-video.composer";
+import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -68,6 +70,12 @@ export default function PromptComposer() {
         {model === AiModelsEnum.VEO_3 && <Veo3Composer isFocused={isFocused} />}
         {model === AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL && (
           <KlingV3ProMotionControlComposer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO && (
+          <KlingV3ImageToVideoComposer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.KLING_V3_TEXT_TO_VIDEO && (
+          <KlingV3TextToVideoComposer isFocused={isFocused} />
         )}
       </div>
     </div>

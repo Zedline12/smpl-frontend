@@ -17,6 +17,7 @@ const sidebarLinks = [
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
   { icon: CreditCard, label: "Credit Pricing", href: "/admin/credit-pricing" },
+  { icon: BarChart3, label: "Generations", href: "/admin/generations" },
 ];
 
 export const AdminSidebar = () => {
