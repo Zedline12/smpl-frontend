@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { useToast } from "@/hooks/use-toast";
+import { Plus, Trash2 } from "lucide-react";
 
 interface EditSubscriptionPlanFormProps {
   plan: SubscriptionPlan;
@@ -104,13 +105,44 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
       </div>
 
       <div className="grid gap-2">
-        <label htmlFor="metadata" className="text-sm font-medium">Metadata (comma separated)</label>
-        <input
-          id="metadata"
-          value={(formData.metadata || []).join(", ")}
-          onChange={(e) => setFormData({ ...formData, metadata: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
-          className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
-        />
+        <label className="text-sm font-medium">Metadata Features</label>
+        {((formData.metadata && formData.metadata.length > 0) ? formData.metadata : [""]).map((meta, index, arr) => (
+          <div key={index} className="flex gap-2 items-center">
+            <input
+              value={meta}
+              onChange={(e) => {
+                const newMeta = [...arr];
+                newMeta[index] = e.target.value;
+                setFormData({ ...formData, metadata: newMeta });
+              }}
+              placeholder="e.g. Include 1000 credits"
+              className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            {index === arr.length - 1 && (
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, metadata: [...arr, ""] })}
+                className="flex shrink-0 items-center justify-center h-10 w-10 rounded-md bg-neutral-800 hover:bg-neutral-700 text-white transition-colors"
+                title="Add feature"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
+            {arr.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                   const newMeta = arr.filter((_, i) => i !== index);
+                   setFormData({ ...formData, metadata: newMeta });
+                }}
+                className="flex shrink-0 items-center justify-center h-10 w-10 rounded-md bg-red-900/40 hover:bg-red-900/60 text-red-400 transition-colors"
+                title="Remove feature"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="flex items-center justify-between mt-2 p-3 border border-neutral-800 rounded-md bg-neutral-900/50">

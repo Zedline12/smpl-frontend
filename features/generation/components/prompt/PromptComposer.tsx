@@ -13,6 +13,7 @@ import Veo3Composer from "./composers/veo-3.composer";
 import KlingV3ProMotionControlComposer from "./composers/kling-v3-pro-motion-control";
 import KlingV3ImageToVideoComposer from "./composers/kling-v3-image-to-video.composer";
 import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.composer";
+import ElevenLabsV3Composer from "./composers/eleven-labs-v3.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -76,6 +77,9 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.KLING_V3_TEXT_TO_VIDEO && (
           <KlingV3TextToVideoComposer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.ELEVEN_LABS_V3_TTS && (
+          <ElevenLabsV3Composer isFocused={isFocused} />
         )}
       </div>
     </div>

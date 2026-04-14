@@ -102,6 +102,16 @@ export default function MediaExplorer({
           >
             Video
           </button>
+          <button
+            onClick={() => setMediaType("audio")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              mediaType === "audio"
+                ? "bg-neutral-800 text-white"
+                : "bg-transparent text-neutral-400 hover:text-white"
+            }`}
+          >
+            Audio
+          </button>
         </div>
         {!defaultProjectId && (
           <div>

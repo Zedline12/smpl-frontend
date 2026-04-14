@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Media } from "@/features/media/types/media";
 import LazyImage from "@/components/LazyImage";
 import LazyVideo from "@/components/LazyVideo";
@@ -20,6 +20,17 @@ export function MediaCard({
   width: number;
   height: number;
 }) {
+  const [duration, setDuration] = useState<number | null>(null);
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    if (mins > 0) {
+      return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }
+    return `${secs}s`;
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -43,6 +54,20 @@ export function MediaCard({
                   }}
                 />
               </>
+            ) : media.type === "audio" ? (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-800/50 rounded-xl overflow-hidden border border-white/5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-white/20 mb-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+                <span className="text-white/50 text-sm font-medium tracking-wide w-full text-center truncate px-4">
+                  {duration !== null ? formatDuration(duration) : "Loading..."}
+                </span>
+                <audio
+                  src={media.url}
+                  className="hidden"
+                  onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+                />
+              </div>
             ) : (
               <LazyImage
                 key={media.id}
@@ -97,6 +122,18 @@ export function MediaCard({
               loop
               className="max-w-full max-h-full object-contain rounded-lg"
             />
+          ) : media.type === "audio" ? (
+            <div className="bg-neutral-900 border border-white/10 p-10 rounded-2xl shadow-2xl flex flex-col items-center justify-center min-w-[350px] sm:min-w-[450px]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-24 h-24 text-white/20 mb-8" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+              <audio
+                src={media.url}
+                controls
+                autoPlay
+                className="w-full"
+              />
+            </div>
           ) : (
             <img
               src={media.url}

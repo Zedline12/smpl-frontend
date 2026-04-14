@@ -38,10 +38,11 @@ export interface Media {
   createdAt: string;
   updatedAt: string;
 }
-export type MediaType = "image" | "video";
+export type MediaType = "image" | "video" | "audio";
 export enum MediaTypeEnum{
   IMAGE="image",
-  VIDEO="video"
+  VIDEO="video",
+  AUDIO="audio"
 }
 export type ImageResolution = (typeof IMAGE_RESOLUTIONS)[number];
 export type VideoResolution=(typeof VIDEO_RESOLUTIONS)[number];

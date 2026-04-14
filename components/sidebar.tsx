@@ -1,5 +1,6 @@
 "use client";
 import { useAuthGuard } from "@/features/auth/hooks/useAuthGuard";
+import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -123,6 +124,13 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         ),
         url: "https://mail.google.com/mail/?view=cm&fs=1&to=Team@smplsocial.io&su=SUPPORT",
       },
+      {
+        label: "Discord",
+        icon: (
+          <DiscordLogoIcon className="text-muted size-5" />
+        ),
+        url: "https://discord.gg/ADZBJQJuwq",
+      }
     ],
   },
 ];

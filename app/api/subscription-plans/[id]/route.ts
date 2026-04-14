@@ -8,10 +8,13 @@ export async function PATCH(
   try {
     const id = (await params).id;
     const body = await req.json();
-
+    console.log(body);
     const response = await fetchWithToken(`/subscription-plans/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {

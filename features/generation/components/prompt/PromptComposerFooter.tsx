@@ -6,6 +6,7 @@ import ModelSelector from "./selectors/ModelSelector";
 import {
   IMAGE_MODELS,
   VIDEO_MODELS,
+  AUDIO_MODELS,
 } from "@/features/generation/enums/models.enum";
 import {
   GenerationTypeEnum,
@@ -77,6 +78,8 @@ export default function PromptComposerFooter({
               models={
                 mediaType === GenerationTypeEnum.VIDEO
                   ? VIDEO_MODELS
+                  : mediaType === GenerationTypeEnum.AUDIO
+                  ? AUDIO_MODELS
                   : IMAGE_MODELS
               }
             />
