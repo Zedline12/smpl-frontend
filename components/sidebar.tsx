@@ -22,7 +22,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
     title: "Create",
     items: [
       {
-        label: "Generations",
+        label: "Start Generating",
         icon: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -56,14 +56,14 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
         url: "https://smpl.base44.app",
-      }
+      },
     ],
   },
   {
     title: "Your Content",
     items: [
       {
-        label: "Assets",
+        label: "Your Creations",
         icon: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -126,11 +126,9 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       },
       {
         label: "Discord",
-        icon: (
-          <DiscordLogoIcon className="text-muted size-5" />
-        ),
+        icon: <DiscordLogoIcon className="text-muted size-5" />,
         url: "https://discord.gg/ADZBJQJuwq",
-      }
+      },
     ],
   },
 ];
