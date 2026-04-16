@@ -205,13 +205,13 @@ export function MediaManagerDialog({
                 <p>No images found in your library</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4  max-h-100">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                 {libraryImages.length > 0 &&
                   libraryImages.map((item, index) => (
                     <div
                       key={index}
                       className={cn(
-                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
+                        "relative w-full aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
                         tempSelection.includes(item)
                           ? "border-primary shadow-[0_0_0_1px_var(--primary)]"
                           : "border-transparent hover:border-white/20",
@@ -222,7 +222,7 @@ export function MediaManagerDialog({
                       mediaType === "video" ? (
                         <video
                           src={item}
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover"
                           muted
                           loop
                           onMouseOver={(e) => e.currentTarget.play()}
@@ -232,7 +232,7 @@ export function MediaManagerDialog({
                         <img
                           src={item}
                           alt="Ref"
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
                       )}
                       {tempSelection.includes(item) && (
