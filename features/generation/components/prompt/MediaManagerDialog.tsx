@@ -172,7 +172,7 @@ export function MediaManagerDialog({
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex-1 flex flex-col"
+          className="flex-1 flex flex-col min-h-0"
         >
           <div className="px-6 border-b border-white/5">
             <TabsList className="bg-transparent h-12 gap-6 p-0">
@@ -193,7 +193,7 @@ export function MediaManagerDialog({
 
           <TabsContent
             value="library"
-            className="flex-1 overflow-y-auto p-6 m-0"
+            className="flex-1 overflow-y-auto p-6 m-0 min-h-0"
           >
             {isLoadingLibrary ? (
               <div className="flex h-full items-center justify-center">
@@ -251,7 +251,7 @@ export function MediaManagerDialog({
             )}
           </TabsContent>
 
-          <TabsContent value="upload" className="flex-1 p-6 m-0">
+          <TabsContent value="upload" className="flex-1 p-6 m-0 min-h-0">
             <div
               className={cn(
                 "h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 transition-all",
