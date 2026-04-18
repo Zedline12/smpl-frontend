@@ -2,13 +2,13 @@
 
 import { SubscriptionGrid } from "@/features/subscribe/components/subscription-grid";
 import { fetchWithToken } from "@/lib/fetcher";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default async function SubscribePage() {
   const json = await fetchWithToken("/subscription-plans").then((d) =>
     d.json(),
   );
   const subscriptionPlans = json.data;
-
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
       <div className="text-center space-y-4">

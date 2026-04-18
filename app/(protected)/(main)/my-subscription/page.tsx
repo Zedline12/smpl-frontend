@@ -5,6 +5,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
+import { fetchWithToken } from "@/lib/fetcher";
 
 export default function MySubscriptionPage() {
   const { user } = useAuth();
@@ -29,6 +30,20 @@ export default function MySubscriptionPage() {
 
     fetchPlans();
   }, []);
+
+  const handleCancelSubscription = async () => {
+    if (!user?.subscription?.id) return;
+    try {
+      setIsLoading(true);
+      await fetch(`/api/user-subscriptions/${user.subscription.id}/cancel`, {
+        method: "POST",
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to cancel subscription:", error);
+      setIsLoading(false);
+    }
+  };
 
   if (!user) {
     return null;
@@ -80,12 +95,15 @@ export default function MySubscriptionPage() {
                   >
                     Upgrade
                   </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => router.push("/")}
-                  >
-                    Cancel My Subscription
-                  </Button>
+                  {user.subscription.name !== "Free Plan" && (
+                    <Button
+                      variant="destructive"
+                      onClick={handleCancelSubscription}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Cancelling...' : 'Cancel My Subscription'}
+                    </Button>
+                  )}
                 </div>
               </div>
 

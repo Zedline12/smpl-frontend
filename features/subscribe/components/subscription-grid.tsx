@@ -47,7 +47,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   };
 
   const filteredPlans = plans
-    .filter((plan) => plan.billingPeriod === period)
+    .filter((plan) => plan.billingPeriod === period && plan.priceAmount!=0)
     .sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();

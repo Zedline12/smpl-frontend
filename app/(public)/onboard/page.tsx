@@ -1,6 +1,7 @@
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { Media } from "@/features/media/types/media";
+import Link from "next/link";
 
 export default async function OnboardPage() {
       const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
@@ -20,7 +21,8 @@ export default async function OnboardPage() {
     };
   });
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      <Link href="/login" className="fixed inset-0 z-[100] cursor-pointer" />
       <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
       </section>

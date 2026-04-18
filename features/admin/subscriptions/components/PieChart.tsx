@@ -55,26 +55,27 @@ export function SubscriptionsChartPie<T extends Record<string, any>>({
   }, [data, dataKey, nameKey]);
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[250px]"
-    >
-      <PieChart>
-        <ChartTooltip
-          content={<ChartTooltipContent nameKey={String(dataKey)} hideLabel />}
-        />
-        <Pie data={chartData} dataKey={String(dataKey)}>
-          <LabelList
-            dataKey={String(nameKey)}
-            className="fill-background"
-            stroke="none"
-            fontSize={12}
-            formatter={(value: keyof typeof chartConfig) =>
-              chartConfig[value]?.label
-            }
-          />
-        </Pie>
-      </PieChart>
-    </ChartContainer>
+    <h1>f</h1>
+    // <ChartContainer
+    //   config={chartConfig}
+    //   className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[250px]"
+    // >
+    //   <PieChart>
+    //     <ChartTooltip
+    //       content={<ChartTooltipContent nameKey={String(dataKey)} hideLabel />}
+    //     />
+    //     <Pie data={chartData} dataKey={String(dataKey)}>
+    //       <LabelList
+    //         dataKey={String(nameKey)}
+    //         className="fill-background"
+    //         stroke="none"
+    //         fontSize={12}
+    //         formatter={(value: keyof typeof chartConfig) =>
+    //           chartConfig[value]?.label
+    //         }
+    //       />
+    //     </Pie>
+    //   </PieChart>
+    // </ChartContainer>
   );
 }
