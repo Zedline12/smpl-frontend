@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { DollarSignIcon, LogOut, SubscriptIcon } from "lucide-react";
+import { DollarSignIcon, LogOut, SubscriptIcon, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { logout } from "@/features/auth/actions/auth";
@@ -56,6 +56,35 @@ export function Navbar() {
                 </div>
               </div>
             </Link>
+
+            <Menu
+              direction="down"
+              align="right"
+              trigger={
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-gray-200 dark:border-neutral-700">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700 dark:text-gray-300" />
+                </div>
+              }
+              className="ml-2 sm:ml-4"
+              menuClassName="bg-white dark:bg-black p-2 min-w-[150px]"
+            >
+              <MenuItem
+                className="bg-red-500 text-white hover:bg-red-600 hover:text-white justify-center text-center font-semibold rounded-md"
+                onClick={async () => {
+                  try {
+                    await fetch("/api/auth/logout", {
+                      method: "POST",
+                    });
+                    router.push("/onboard");
+                    router.refresh();
+                  } catch (error) {
+                    console.error("Logout failed", error);
+                  }
+                }}
+              >
+                Logout
+              </MenuItem>
+            </Menu>
 
           </>
         ) : (

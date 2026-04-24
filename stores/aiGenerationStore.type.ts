@@ -37,6 +37,8 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     duration: 4,
     generateAudio: false,
     endImageUrl: "",
+    multiPrompt: undefined,
+    elements: undefined,
   },
   [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: {
     prompt: "",

@@ -13,11 +13,35 @@ export interface IKlingV3ImageToVideoInput extends BaseAiInput {
   duration: KlingV3ImageToVideoDuration;
   generateAudio: boolean;
   endImageUrl?: string;
+  multiPrompt?: { prompt: string; duration: number }[];
+  elements?: {
+    referenceImageUrls?: string[];
+    frontalImageUrl?: string;
+    videoUrl?: string;
+  }[];
 }
+
 export const klingV3ImageToVideoValidationSchema = z.object({
-    prompt: z.string().nonempty(),
+  prompt: z.string().optional(),
   startImageUrl: z.string().nonempty(),
   duration: z.number(),
   generateAudio: z.boolean(),
   endImageUrl: z.string().optional(),
+  multiPrompt: z
+    .array(
+      z.object({
+        prompt: z.string(),
+        duration: z.number().min(1).max(15),
+      })
+    )
+    .optional(),
+  elements: z
+    .array(
+      z.object({
+        referenceImageUrls: z.array(z.string()).optional(),
+        frontalImageUrl: z.string().optional(),
+        videoUrl: z.string().optional(),
+      })
+    )
+    .optional(),
 }) as z.ZodType<IKlingV3ImageToVideoInput>;

@@ -5,9 +5,10 @@ import Link from "next/link";
 export default async function MediaPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+  const resolvedParams = await searchParams;
+  const page = resolvedParams.page ? parseInt(resolvedParams.page, 10) : 1;
   const media = await fetchWithToken(`/media?limit=30&page=${page}`, {
     method: "GET",
   });
@@ -26,12 +27,12 @@ export default async function MediaPage({
       {totalPages > 0 && (
         <div className="flex justify-center items-center space-x-4 mt-6">
           {currentPage > 1 ? (
-            <Link
+            <a
               href={`/admin/media?page=${currentPage - 1}`}
               className="px-4 py-2 border rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             >
               Previous
-            </Link>
+            </a>
           ) : (
             <div className="px-4 py-2 border rounded-md opacity-50 cursor-not-allowed">
               Previous
@@ -41,12 +42,13 @@ export default async function MediaPage({
             Page {currentPage} of {totalPages}
           </span>
           {currentPage < totalPages ? (
-            <Link
+            <a
               href={`/admin/media?page=${currentPage + 1}`}
+              
               className="px-4 py-2 border rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             >
               Next
-            </Link>
+            </a>
           ) : (
             <div className="px-4 py-2 border rounded-md opacity-50 cursor-not-allowed">
               Next
