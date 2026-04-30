@@ -1,21 +1,26 @@
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { LeftPanel } from "./_components/LeftPanel";
+
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p bg-gray-50 relative overflow-hidden">
-      {/* Shared Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-cyan-50 pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none" />
+    <div className="h-screen overflow-hidden bg-black flex">
+      <LeftPanel />
 
-      {/* Abstract decorative elements - using a shared color palette for consistency */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/20 blur-3xl animate-blob" />
-        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-cyan-200/20 blur-3xl animate-blob animation-delay-2000" />
+      <div
+        className="flex-shrink-0 flex flex-col items-center justify-center overflow-y-auto"
+        style={{
+          width: 440,
+          background: "#080808",
+          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          padding: "48px 44px",
+        }}
+      >
+        <div
+          className="w-full"
+          style={{ maxWidth: 340, animation: "fadeUp 0.6s ease-out 0.1s both" }}
+        >
+          {children}
+        </div>
       </div>
-
-      <div className="relative z-10 w-full">{children}</div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
-import "./globals.css";
+import { Geist, DM_Mono, Archivo_Black } from "next/font/google";
 import { Toaster } from "sonner";
+import "./globals.css";
 import { Providers } from "@/providers/providers";
 import { GlobalLoginModal } from "@/features/auth/components/GlobalLoginModal";
 
@@ -10,19 +10,23 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+const archivoblack = Archivo_Black({
+  variable: "--font-archivo-black",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
   title: "SMPL",
   description: "SMPL",
 };
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,10 +34,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased bg-background `}>
+      <body
+        className={`${geistSans.variable} ${dmMono.variable} ${archivoblack.variable} antialiased bg-background`}
+      >
         <Providers>
           {children}
-          
           <GlobalLoginModal />
         </Providers>
         <Toaster />

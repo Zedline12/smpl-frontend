@@ -69,7 +69,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="size-6"
+            className="size-5"
           >
             <path d="M21 6.375c0 2.692-4.03 4.875-9 4.875S3 9.067 3 6.375 7.03 1.5 12 1.5s9 2.183 9 4.875Z" />
             <path d="M12 12.75c2.685 0 5.19-.586 7.078-1.609a8.283 8.283 0 0 0 1.897-1.384c.016.121.025.244.025.368C21 12.817 16.97 15 12 15s-9-2.183-9-4.875c0-.124.009-.247.025-.368a8.285 8.285 0 0 0 1.897 1.384C6.809 12.164 9.315 12.75 12 12.75Z" />
@@ -88,7 +88,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="text-muted size-5"
+            className=" size-5"
           >
             <path
               strokeLinecap="round"
@@ -113,7 +113,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="text-muted size-5"
+            className="size-5"
           >
             <path
               strokeLinecap="round"
@@ -126,7 +126,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       },
       {
         label: "Discord",
-        icon: <DiscordLogoIcon className="text-muted size-5" />,
+        icon: <DiscordLogoIcon className=" size-5" />,
         url: "https://discord.gg/ADZBJQJuwq",
       },
     ],

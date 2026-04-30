@@ -6,18 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { authLoginSchema } from "@/features/auth/schemas/auth.schema";
 import { login } from "@/features/auth/actions/auth";
 import { useToast } from "@/hooks/use-toast";
-import { RequiredLabelIcon } from "@/components/RequiredLabelIcon";
 import { GoogleLoginButton } from "../components/google-login-button";
 import { useSearchParams } from "next/navigation";
 import { SocialAuthErrorText } from "../components/SocialAuthErrorText";
@@ -43,121 +40,241 @@ export function LoginForm() {
       if (data.error) {
         setServerError(data.message);
       } else {
-        toast({
-          title: "Success",
-          description: data.message,
-          variant: "default",
-        });
+        toast({ title: "Success", description: data.message });
       }
     }
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-background-light backdrop-blur-xl p-8 rounded-2xl shadow-xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground-primary">
-            Welcome Back
-          </h1>
-          <p className="text-foreground-secondary mt-2">
-            Sign in to continue to your workspace
-          </p>
-        </div>
-        {(serverError || queryError) && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm font-medium animate-fade-in-up">
-            <SocialAuthErrorText error={serverError || queryError || ""} />
-          </div>
-        )}
+    <div>
+      {/* Heading */}
+      <h1
+        className="text-white mb-1.5"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 26,
+          fontWeight: 900,
+          letterSpacing: "-0.02em",
+        }}
+      >
+        Welcome back
+      </h1>
+      <p
+        className="text-[13px] mb-[30px]"
+        style={{ color: "rgba(255,255,255,0.4)" }}
+      >
+        Sign in to your account to continue creating.
+      </p>
 
-        <div className="space-y-4">
-          <GoogleLoginButton
-            onClick={() => {
-              window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/user`;
-            }}
+      {/* Error */}
+      {(serverError || queryError) && (
+        <div className="mb-5 p-3.5 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm font-medium animate-fade-in-up">
+          <SocialAuthErrorText error={serverError || queryError || ""} />
+        </div>
+      )}
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-3.5"
+        >
+          {/* Email */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="gap-1.5">
+                <FormLabel
+                  className="block"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.5)",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  Email address
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <svg
+                      className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                      style={{
+                        width: 15,
+                        height: 15,
+                        color: "rgba(255,255,255,0.3)",
+                      }}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      style={{ paddingLeft: 35 }}
+                      className={
+                        form.formState.errors.email
+                          ? "pl-9 border-destructive"
+                          : "pl-4"
+                      }
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
-          <div className="relative flex items-center gap-4 my-6">
-            <div className="h-px bg-border flex-1" />
-            <span className="text-foreground-secondary text-sm font-medium">
-              OR
-            </span>
-            <div className="h-px bg-border flex-1" />
-          </div>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="flex  flex-col  gap-6 "
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground-secondary block mb-1.5">
-                      Email
-                      <RequiredLabelIcon />
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          form.formState.errors.email
-                            ? "border-destructive"
-                            : "border-border"
-                        } focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 bg-background text-foreground-primary`}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground-secondary block mb-1.5 ">
-                      Password
-                      <RequiredLabelIcon />
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          form.formState.errors.password
-                            ? "border-destructive"
-                            : "border-border"
-                        } focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 bg-background text-foreground-primary`}
-                        {...field}
-                        type="password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="text-center">
-                <Button
-                  className="w-full bg-gradient-primary cursor-pointer hover:bg-primary/90 text-primary-foreground font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]"
-                  disabled={form.formState.isSubmitting}
-                  type="submit"
+          {/* Password */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="gap-1.5">
+                <FormLabel
+                  className="block"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.5)",
+                    letterSpacing: "0.03em",
+                  }}
                 >
-                  Login
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-        <div className="mt-8 text-center flex flex-row justify-center items-center gap-2">
-          <p className="text-muted-foreground">Don't have an account? </p>
-          <Link
-            href="/signup"
-            className="font-semibold text-primary-foreground cursor-pointer hover:text-primary-foreground/90 transition-colors"
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <svg
+                      className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                      style={{
+                        width: 15,
+                        height: 15,
+                        color: "rgba(255,255,255,0.3)",
+                      }}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <rect width="18" height="11" x="3" y="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      style={{ paddingLeft: 35 }}
+                      className={
+                        form.formState.errors.password
+                          ? "pl-9 border-destructive"
+                          : "pl-9"
+                      }
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Forgot password */}
+          {/* <div className="flex justify-end -mt-1">
+            <Link
+              href="/forgot-password"
+              className="text-[12px]  duration-150 hover:text-[#9370ff] text-[rgba(255,255,255,0.4)]"
+            >
+              Forgot password?
+            </Link>
+          </div> */}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="w-full mt-1 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden transition-all duration-200 hover:opacity-90 hover:-translate-y-px active:scale-[0.98]"
+            style={{
+              padding: "12px",
+              borderRadius: 10,
+              border: "none",
+              background: "linear-gradient(135deg, #6b41ff, #ea4bff)",
+              color: "#fff",
+              fontFamily: "var(--font-sans)",
+              fontSize: 14,
+              fontWeight: 600,
+              letterSpacing: "0.01em",
+              boxShadow: "0 0 24px rgba(107,65,255,0.45)",
+            }}
           >
-            Sign up
-          </Link>
-        </div>
+            {form.formState.isSubmitting ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+      </Form>
+
+      {/* OR divider */}
+      <div className="flex items-center gap-3 my-5">
+        <div
+          className="flex-1 h-px"
+          style={{ background: "rgba(255,255,255,0.08)" }}
+        />
+        <span
+          style={{
+            fontSize: 11,
+            color: "rgba(255,255,255,0.25)",
+            letterSpacing: "0.05em",
+          }}
+        >
+          or continue with
+        </span>
+        <div
+          className="flex-1 h-px"
+          style={{ background: "rgba(255,255,255,0.08)" }}
+        />
       </div>
+
+      {/* Google */}
+      <GoogleLoginButton
+        onClick={() => {
+          window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/user`;
+        }}
+      />
+
+      {/* Sign up */}
+      <p
+        className="text-center mt-7"
+        style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}
+      >
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/signup"
+          className="font-semibold hover:text-[#b89dff] transition-colors duration-150"
+          style={{ color: "#9370ff", textDecoration: "none" }}
+        >
+          Get Started — it&apos;s free
+        </Link>
+      </p>
+
+      {/* Terms */}
+      <p
+        className="text-center mt-5 leading-relaxed"
+        style={{ fontSize: 11, color: "rgba(255,255,255,0.2)" }}
+      >
+        By signing in, you agree to our{" "}
+        <Link
+          href="https://smplcontent.com/privacy-policy"
+          style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+          className="hover:text-white/55 transition-colors"
+        >
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </div>
   );
 }
