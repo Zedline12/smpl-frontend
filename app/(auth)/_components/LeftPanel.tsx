@@ -58,7 +58,7 @@ export function LeftPanel() {
 
   return (
     <div
-      className="relative flex-[1.1] overflow-hidden flex flex-col justify-end p-12"
+      className="relative w-full overflow-hidden flex flex-col justify-end p-12"
       style={{ animation: "fadeUp 0.8s ease-out forwards" }}
     >
       {/* Blobs */}
