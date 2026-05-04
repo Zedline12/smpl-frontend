@@ -61,7 +61,7 @@ export function ModelPricingTable({
   };
 
   const handleAddRule = async () => {
-    if (addCredits === "" || Number(addCredits) <= 0) {
+    if (addCredits === "" || Number(addCredits) <0) {
       toast.error("Please enter a valid credit amount.");
       return;
     }

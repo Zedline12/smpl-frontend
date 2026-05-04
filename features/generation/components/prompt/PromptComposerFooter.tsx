@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ProjectSelector from "./selectors/ProjectSelector";
 import { useAuth } from "@/providers/AuthProvider";
@@ -31,14 +32,34 @@ export default function PromptComposerFooter({
   children,
   isFocused,
 }: PromptComposerFooterProps) {
-  const { model, projectId, mediaType } = useAiGenerationControlStore();
+  const { model, projectId, mediaType} = useAiGenerationControlStore();
   const { data } = useGenerationCostQuery();
   const generation = useGenerateMutation();
-  const { states } = useAiModelStore();
+  const { states, setField } = useAiModelStore();
   const { prompt } = states[model]!;
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handleEnhancePrompt = async () => {
+    setIsEnhancing(true);
+    try {
+      const res = await fetch("/api/generation/prompt-enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const json = await res.json();
+      if (json.data?.prompt) {
+        setField(model, "prompt", json.data.prompt);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
   const isFormValid = () => {
     const validator = ModelsValidatorSchemaMap[model];
     return validator.safeParse(states[model]).success;
@@ -88,6 +109,32 @@ export default function PromptComposerFooter({
         </div>
         <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
           {user && <ProjectSelector />}
+
+          {/* Enhance prompt */}
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={handleEnhancePrompt}
+              disabled={prompt.length < 10 || isEnhancing}
+              className="flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-white/10"
+            >
+              <svg
+                className={`w-4 h-4 ${isEnhancing ? "animate-robot-glow" : "text-white/50 group-hover:text-white transition-colors"}`}
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+              >
+                <rect x="3" y="8" width="18" height="13" rx="2" />
+                <path d="M8 8V6a4 4 0 0 1 8 0v2" />
+                <circle cx="9" cy="14" r="1" fill="currentColor" />
+                <circle cx="15" cy="14" r="1" fill="currentColor" />
+                <path d="M9 18h6" strokeLinecap="round" />
+                <path d="M12 3v1" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[11px] font-medium whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/80 text-white/80 border border-white/10">
+              {isEnhancing ? "Enhancing…" : "Enhance prompt"}
+            </div>
+          </div>
+
           <Button
             type="button"
             variant={"primary"}

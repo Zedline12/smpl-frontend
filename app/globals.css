@@ -668,6 +668,15 @@ textarea::placeholder {
   50%     { opacity: 0; }
 }
 
+@keyframes robotGlow {
+  0%,100% { filter: drop-shadow(0 0 5px #6b41ff) drop-shadow(0 0 10px rgba(107,65,255,0.6)); color: #9370ff; }
+  50%     { filter: drop-shadow(0 0 8px #ea4bff) drop-shadow(0 0 16px rgba(234,75,255,0.6)); color: #ef75ff; }
+}
+
+.animate-robot-glow {
+  animation: robotGlow 1.4s ease-in-out infinite;
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
