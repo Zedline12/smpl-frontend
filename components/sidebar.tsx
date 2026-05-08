@@ -124,11 +124,11 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         ),
         url: "https://mail.google.com/mail/?view=cm&fs=1&to=Team@smplsocial.io&su=SUPPORT",
       },
-      {
-        label: "Discord",
-        icon: <DiscordLogoIcon className=" size-5" />,
-        url: "https://discord.gg/ADZBJQJuwq",
-      },
+      // {
+      //   label: "Discord",
+      //   icon: <DiscordLogoIcon className=" size-5" />,
+      //   url: "https://discord.gg/ADZBJQJuwq",
+      // },
     ],
   },
 ];
