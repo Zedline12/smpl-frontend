@@ -47,7 +47,6 @@ export default function MediaExplorer({
   const { data: queues } = useGenerationQueuesQuery();
 
   const failedQueue = useMemo(() => {
-    console.log(queues)
     return queues?.find(
       (q: any) => q.status === "failure" && !dismissedFailedQueues.has(q.id),
     );
@@ -62,16 +61,11 @@ export default function MediaExplorer({
           next.add(queue.id);
           return next;
         });
+        queryClient.refetchQueries({ queryKey: ["media"] });
+        queryClient.invalidateQueries({ queryKey: ["current-user"] });
       }
     });
 
-    const currentQueues =
-      queues?.filter((queue) =>
-        ["pending", "processing"].includes(queue.status),
-      ) ?? [];
-    if (currentQueues.length == 0) {
-      queryClient.refetchQueries({ queryKey: ["media"] });
-    }
     if (defaultProjectId) {
       setSelectedProject(
         projects.find((p) => p.id === defaultProjectId) ?? null,

@@ -143,20 +143,22 @@ export function Sidebar() {
           onClick={() => guard(() => redirect("/"))}
           className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-secondary-foreground  rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-            />
-          </svg>
+          <span className="sidebar-icon-glow flex-shrink-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+              />
+            </svg>
+          </span>
 
           <span className="hidden xl:inline">Home</span>
         </button>
@@ -178,7 +180,9 @@ export function Sidebar() {
                     href={item.url}
                     className="cursor-pointer flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-secondary-foreground  rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
                   >
-                    {item.icon}
+                    <span className="sidebar-icon-glow flex-shrink-0">
+                      {item.icon}
+                    </span>
                     <span className="hidden xl:inline">{item.label}</span>
                   </Link>
                 </li>

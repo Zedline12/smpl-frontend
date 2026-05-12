@@ -22,6 +22,7 @@ import {
   useGenerationCostQuery,
 } from "../../hooks/generation";
 import { useRouter, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ export default function PromptComposerFooter({
   const router = useRouter();
   const pathname = usePathname();
   const [isEnhancing, setIsEnhancing] = useState(false);
-
+   const queryClient = useQueryClient();
   const handleEnhancePrompt = async () => {
     setIsEnhancing(true);
     try {
@@ -71,6 +72,7 @@ export default function PromptComposerFooter({
       if (!state) {
         throw new Error("No state for selected model");
       }
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
       const payload = {
         model,
         projectId,
@@ -82,6 +84,7 @@ export default function PromptComposerFooter({
         router.push("/create");
         return;
       }
+      
     } catch (e) {
       console.error(e);
     }

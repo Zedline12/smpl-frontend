@@ -32,6 +32,8 @@ export interface Media {
   url: string;
   type: MediaType;
   aspectRatio: AspectRatio;
+  model: string;
+  input:Record<string,any>;
   width: number;
   height: number;
   format: string;

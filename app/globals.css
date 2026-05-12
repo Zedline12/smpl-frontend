@@ -3,7 +3,7 @@
 
 /* ============================================================
    SMPL Design System — Global Styles
-   Black bg · Purple #6b41ff · Pink #ea4bff · Geist/Archivo Black
+   Black bg · Purple #6b41ff · Pink #ea4bff · Orange #ff6b00
    ============================================================ */
 
 /* ── Design Tokens ───────────────────────────────────────── */
@@ -29,6 +29,13 @@
   --pink-600: #c730db;
   --pink-700: #a020b8;
 
+  /* Orange */
+  --orange-300: #ffb067;
+  --orange-400: #ff8c2a;
+  --orange-500: #ff6b00;
+  --orange-600: #cc5500;
+  --orange-700: #993f00;
+
   /* Foreground hierarchy */
   --white: #ffffff;
   --fg-1: #ffffff;
@@ -48,6 +55,8 @@
   --color-primary-dim: var(--purple-700);
   --color-secondary: var(--pink-500);
   --color-secondary-dim: var(--pink-700);
+  --color-tertiary: var(--orange-500);
+  --color-tertiary-dim: var(--orange-700);
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.08);
@@ -59,6 +68,12 @@
     135deg,
     var(--purple-500) 0%,
     var(--pink-500) 100%
+  );
+  --gradient-trio: linear-gradient(
+    135deg,
+    var(--purple-500) 0%,
+    var(--pink-500) 50%,
+    var(--orange-500) 100%
   );
   --gradient-glow: linear-gradient(
     135deg,
@@ -675,6 +690,33 @@ textarea::placeholder {
 
 .animate-robot-glow {
   animation: robotGlow 1.4s ease-in-out infinite;
+}
+
+.sidebar-icon-glow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter:
+    drop-shadow(0 0 4px rgba(107, 65, 255, 0.9))
+    drop-shadow(0 0 8px rgba(234, 75, 255, 0.6))
+    drop-shadow(0 0 12px rgba(255, 107, 0, 0.4));
+}
+
+@keyframes triGlow {
+  0%   { box-shadow: 0 0 14px rgba(107,65,255,0.7), 0 0 28px rgba(107,65,255,0.3); }
+  33%  { box-shadow: 0 0 14px rgba(234,75,255,0.7), 0 0 28px rgba(234,75,255,0.3); }
+  66%  { box-shadow: 0 0 14px rgba(255,107,0,0.7),  0 0 28px rgba(255,107,0,0.3);  }
+  100% { box-shadow: 0 0 14px rgba(107,65,255,0.7), 0 0 28px rgba(107,65,255,0.3); }
+}
+
+@keyframes triGradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-tri-glow {
+  animation: triGlow 3s ease-in-out infinite, triGradientShift 3s ease infinite;
 }
 
 .animate-float {

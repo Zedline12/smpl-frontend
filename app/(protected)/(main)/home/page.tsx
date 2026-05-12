@@ -20,6 +20,8 @@ export default async function WorkspacePage() {
       aspectRatio: randomRatio as any,
       width: 1080,
       height: 1080,
+      input: {},
+      model: "s",
       format: "webp",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

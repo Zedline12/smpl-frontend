@@ -4,7 +4,7 @@ import { Media } from "@/features/media/types/media";
 import Link from "next/link";
 
 export default async function OnboardPage() {
-      const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
+  const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
   const media: Media[] = Array.from({ length: 13 }).map((_, i) => {
     const randomRatio =
       aspectRatios[Math.floor(Math.random() * aspectRatios.length)];
@@ -15,6 +15,8 @@ export default async function OnboardPage() {
       aspectRatio: randomRatio as any,
       width: 1080,
       height: 1080,
+      input: {},
+      model: "s",
       format: "webp",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
