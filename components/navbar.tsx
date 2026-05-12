@@ -1,6 +1,12 @@
 "use client";
 import { redirect, useRouter } from "next/navigation";
-import { DollarSignIcon, LogOut, Settings, SubscriptIcon, User } from "lucide-react";
+import {
+  DollarSignIcon,
+  LogOut,
+  Settings,
+  SubscriptIcon,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { logout } from "@/features/auth/actions/auth";
@@ -28,20 +34,25 @@ export function Navbar() {
       style={{ zIndex: 100 }}
       className="h-16 backdrop-blur-sm  flex items-center justify-between px-4 sm:px-8 "
     >
-      <Image src="/new-logo.png" alt="Logo" width={70} height={70} />
+      <Image src="/logo.png" alt="Logo" width={70} height={70} />
 
       <div className="flex items-center gap-6">
         {user ? (
           <>
             <Link
               className="hidden sm:block"
-              href={user.subscription.name === "Free Plan" ? "/subscription-plans" : "/my-subscription"}
+              href={
+                user.subscription.name === "Free Plan"
+                  ? "/subscription-plans"
+                  : "/my-subscription"
+              }
             >
               {/* Tri-color gradient border pill */}
               <div
                 className="animate-tri-glow p-[1.5px] rounded-full transition-all duration-300 hover:scale-[1.03]"
                 style={{
-                  background: "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)",
+                  background:
+                    "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)",
                   backgroundSize: "200% 200%",
                 }}
               >
@@ -52,10 +63,21 @@ export function Navbar() {
                   {/* Lightning in tri-color gradient circle */}
                   <div
                     className="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg, #6b41ff, #ea4bff, #ff6b00)" }}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #6b41ff, #ea4bff, #ff6b00)",
+                    }}
                   >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-white">
-                      <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clipRule="evenodd" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-3.5 h-3.5 text-white"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
 
@@ -65,10 +87,16 @@ export function Navbar() {
                   </span>
 
                   {/* Divider */}
-                  <div className="w-px h-4 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }} />
+                  <div
+                    className="w-px h-4 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.2)" }}
+                  />
 
                   {/* Plan name */}
-                  <span className="text-sm font-medium leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  <span
+                    className="text-sm font-medium leading-none"
+                    style={{ color: "rgba(255,255,255,0.75)" }}
+                  >
                     {user.subscription.name}
                   </span>
                 </div>
@@ -92,7 +120,7 @@ export function Navbar() {
                   redirect("/settings/account");
                 }}
               >
-               <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700 dark:text-gray-300" />
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700 dark:text-gray-300" />
               </MenuItem>
               <MenuItem
                 className="bg-red-500 text-white hover:bg-red-600 hover:text-white justify-center text-center font-semibold rounded-md"
@@ -111,7 +139,6 @@ export function Navbar() {
                 Logout
               </MenuItem>
             </Menu>
-
           </>
         ) : (
           <div className="flex items-center  sm:gap-4">
@@ -127,7 +154,6 @@ export function Navbar() {
                 Sign Up
               </Button>
             </Link>
-    
           </div>
         )}
       </div>
