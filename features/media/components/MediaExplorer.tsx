@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
-import { Sparkles, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
@@ -181,19 +181,18 @@ export default function MediaExplorer({
             .map((queue) => (
               <div
                 key={queue.id}
-                className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 text-center transition-all duration-300 ${
+                className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center text-center transition-all duration-300 ${
                   queue.status === "processing"
-                    ? "bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 animate-pulse text-white shadow-lg shadow-purple-500/20"
-                    : "bg-neutral-900 border border-neutral-800 text-neutral-400"
+                    ? "bg-black"
+                    : "bg-neutral-900 border border-neutral-800 text-neutral-400 p-4"
                 }`}
               >
                 {queue.status === "processing" ? (
-                  <>
-                    <Sparkles className="w-8 h-8 mb-3 animate-spin-slow" />
-                    <span className="text-sm font-bold tracking-wide uppercase">
-                      Generating...
-                    </span>
-                  </>
+                  <img
+                    src="/smpl-loading.gif"
+                    alt="Generating..."
+                    className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] object-cover rounded-lg"
+                  />
                 ) : (
                   <>
                     <Clock className="w-8 h-8 mb-3 opacity-50" />

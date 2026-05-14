@@ -27,6 +27,7 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
     [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: ModelDefaults[AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO],
     [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: ModelDefaults[AiModelsEnum.KLING_V3_TEXT_TO_VIDEO],
     [AiModelsEnum.ELEVEN_LABS_V3_TTS]: ModelDefaults[AiModelsEnum.ELEVEN_LABS_V3_TTS],
+    [AiModelsEnum.SEEDREAM_V4_5]: ModelDefaults[AiModelsEnum.SEEDREAM_V4_5],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();

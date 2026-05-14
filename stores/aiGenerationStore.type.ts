@@ -7,6 +7,7 @@ import { IKlingV3ProMotionControlInput } from "@/features/generation/types/model
 import { IKlingV3ImageToVideoInput } from "@/features/generation/types/models/kling-v3-image-to-video.type";
 import { IKlingV3TextToVideoInput } from "@/features/generation/types/models/kling-v3-text-to-video.type";
 import { IElevenLabsV3Input, ElevenLabsV3ApplyTextNormalization, ElevenLabsV3Voice } from "@/features/generation/types/models/elevenlabs-v3.type";
+import { ISeedreamV45Input } from "@/features/generation/types/models/seedream-v4-5.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
@@ -16,6 +17,7 @@ export type ModelStateMap = {
   [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: IKlingV3ImageToVideoInput;
   [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: IKlingV3TextToVideoInput;
   [AiModelsEnum.ELEVEN_LABS_V3_TTS]: IElevenLabsV3Input;
+  [AiModelsEnum.SEEDREAM_V4_5]: ISeedreamV45Input;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -71,5 +73,10 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     applyTextNormalization: ElevenLabsV3ApplyTextNormalization.AUTO,
     stability: 0.5,
     languageCode: "en",
+  },
+  [AiModelsEnum.SEEDREAM_V4_5]: {
+    prompt: "",
+    images: [],
+    aspectRatio: "1:1",
   },
 };

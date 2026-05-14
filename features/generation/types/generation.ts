@@ -17,6 +17,7 @@ import { AiModelsEnum } from "../enums/models.enum";
 import { IKlingV3ImageToVideoInput, klingV3ImageToVideoValidationSchema } from "./models/kling-v3-image-to-video.type";
 import { IKlingV3TextToVideoInput, klingV3TextToVideoValidationSchema } from "./models/kling-v3-text-to-video.type";
 import { IElevenLabsV3Input, elevenLabsV3ValidationSchema } from "./models/elevenlabs-v3.type";
+import { ISeedreamV45Input, seedreamV45ValidationSchema } from "./models/seedream-v4-5.type";
 
 export interface BaseAiInput {
   prompt: string;
@@ -32,7 +33,7 @@ export type AllModelsResolution =
 export type AllModelsInput =
   | KlingO3ImageOptions
   | Veo3Input
-  | GeminiFlashImageInput | IKlingV3ProMotionControlInput | IKlingV3ImageToVideoInput | IKlingV3TextToVideoInput | IElevenLabsV3Input;
+  | GeminiFlashImageInput | IKlingV3ProMotionControlInput | IKlingV3ImageToVideoInput | IKlingV3TextToVideoInput | IElevenLabsV3Input | ISeedreamV45Input;
 
   export const ModelsValidatorSchemaMap = {
     [AiModelsEnum.VEO_3]:veo3ValidationSchema,
@@ -42,6 +43,7 @@ export type AllModelsInput =
     [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: klingV3ImageToVideoValidationSchema,
     [AiModelsEnum.KLING_V3_TEXT_TO_VIDEO]: klingV3TextToVideoValidationSchema,
     [AiModelsEnum.ELEVEN_LABS_V3_TTS]: elevenLabsV3ValidationSchema,
+    [AiModelsEnum.SEEDREAM_V4_5]: seedreamV45ValidationSchema,
   };
 export enum GenerationTypeEnum {
   VIDEO = "video",

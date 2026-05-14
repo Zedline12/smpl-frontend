@@ -14,6 +14,7 @@ import KlingV3ProMotionControlComposer from "./composers/kling-v3-pro-motion-con
 import KlingV3ImageToVideoComposer from "./composers/kling-v3-image-to-video.composer";
 import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.composer";
 import ElevenLabsV3Composer from "./composers/eleven-labs-v3.composer";
+import SeedreamV45Composer from "./composers/seedream-v4-5.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -80,6 +81,9 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.ELEVEN_LABS_V3_TTS && (
           <ElevenLabsV3Composer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.SEEDREAM_V4_5 && (
+          <SeedreamV45Composer isFocused={isFocused} />
         )}
       </div>
     </div>

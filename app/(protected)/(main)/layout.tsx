@@ -49,6 +49,7 @@ export default function MainLayout({
         <div className="flex-1">{children}</div>
         <Footer />
       </main>
+                
     </div>
   );
 }

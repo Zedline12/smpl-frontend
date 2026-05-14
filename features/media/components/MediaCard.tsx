@@ -9,6 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAiGenerationControlStore, useAiModelStore } from "@/stores/useAiGenerationControlStore";
+import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import { GenerationTypeEnum } from "@/features/generation/types/generation";
 
 function UrlValue({ url }: { url: string }) {
   const [imageError, setImageError] = useState(false);
@@ -66,6 +69,19 @@ export function MediaCard({
   height: number;
 }) {
   const [duration, setDuration] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
+  const { setModel, setMediaType } = useAiGenerationControlStore();
+  const { setField } = useAiModelStore();
+
+  const handleRegenerate = () => {
+    const modelEnum = media.model as AiModelsEnum;
+    setMediaType(media.type as GenerationTypeEnum);
+    setModel(modelEnum);
+    Object.entries(media.input).forEach(([key, value]) => {
+      setField(modelEnum, key, value);
+    });
+    setOpen(false);
+  };
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -79,7 +95,7 @@ export function MediaCard({
   );
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <div
           style={{ height }}
@@ -256,6 +272,16 @@ export function MediaCard({
               </div>
             </div>
           )}
+
+          {/* Regenerate */}
+          <div className="px-6 py-4">
+            <button
+              onClick={handleRegenerate}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:opacity-90 transition-opacity"
+            >
+              Regenerate
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

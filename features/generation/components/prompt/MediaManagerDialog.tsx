@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -72,14 +73,32 @@ export function MediaManagerDialog({
     }
   }, [open, selectedImages]);
 
-  const fetchLibrary = async () => {
+  const deleteMedia = async (imageUrl: string) => {
+    try {
+      const res = await fetch(`/api/media/reference-${mediaType}s`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl }),
+      });
+      if (!res.ok) throw new Error();
+      setTempSelection((prev) => prev.filter((url) => url !== imageUrl));
+      await fetchLibrary();
+    } catch {
+      toast.error("Failed to delete media");
+    }
+  };
+
+  const fetchLibrary = async (): Promise<string[]> => {
     setIsLoadingLibrary(true);
     try {
       const res = await fetch(`/api/media/reference-${mediaType}s`);
       const json = await res.json();
-      setLibraryImages(json.data || []);
+      const urls: string[] = json.data || [];
+      setLibraryImages(urls);
+      return urls;
     } catch (error) {
       toast.error("Failed to load image library");
+      return [];
     } finally {
       setIsLoadingLibrary(false);
     }
@@ -95,6 +114,8 @@ export function MediaManagerDialog({
     }
     setIsUploading(true);
     try {
+      const previousUrls = new Set(libraryImages);
+
       // 1. get signature
       const sigRes = await fetch("/api/media/upload-signature", {
         method: "POST",
@@ -117,7 +138,15 @@ export function MediaManagerDialog({
 
       toast.success("Image uploaded successfully");
 
-      fetchLibrary();
+      const newUrls = await fetchLibrary();
+      const newItem = newUrls.find((u) => !previousUrls.has(u));
+      if (newItem) {
+        setTempSelection((prev) => {
+          if (maxSelections === 1) return [newItem];
+          if (prev.includes(newItem) || prev.length >= maxSelections) return prev;
+          return [...prev, newItem];
+        });
+      }
       setActiveTab("library");
     } catch (error) {
       console.error("Upload error:", error);
@@ -240,11 +269,20 @@ export function MediaManagerDialog({
                           <Check className="w-3 h-3 text-white stroke-[3px]" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <p className="text-[10px] font-medium uppercase tracking-wider">
                           {tempSelection.includes(item) ? "Deselect" : "Select"}
                         </p>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteMedia(item);
+                        }}
+                        className="absolute bottom-2 right-2 z-10 bg-black/60 hover:bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 className="w-3 h-3 text-white" />
+                      </button>
                     </div>
                   ))}
               </div>
