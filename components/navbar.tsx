@@ -34,7 +34,7 @@ export function Navbar() {
       style={{ zIndex: 100 }}
       className="h-16 backdrop-blur-sm  flex items-center justify-between px-4 sm:px-8 "
     >
-      <Image src="/logo.png" alt="Logo" width={70} height={70} />
+      <Image src="/logo.png" alt="Logo" width={130} height={130} />
 
       <div className="flex items-center gap-6">
         {user ? (
