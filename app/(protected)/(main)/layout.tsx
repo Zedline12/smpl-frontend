@@ -30,7 +30,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
+    <div className="bg-background h-screen overflow-hidden grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
       {/* NAVBAR */}
       <header className="col-span-full z-50  ">
         <Navbar />
