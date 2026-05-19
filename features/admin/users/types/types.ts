@@ -1,19 +1,38 @@
-import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
-import { SubscriptionPlanAdmin } from "../../subscriptions/types/types";
+import { Media } from "@/features/media/types/media";
 
-export interface UserAdmin {
-  firstName: string;
-  lastName: string;
-  email: string;
+export interface SubscribedUser {
   id: string;
-  creditsBalance?: number;
-  subscriptionPlan: Pick<
-    SubscriptionPlanAdmin,
-    "id" | "name" | "billingPeriod"
-  >;
-  subscription: {
-    status: string;
-    currentPeriodStart: Date;
-    currentPeriodEnd: Date;
-  };
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  creditsBalance: number;
+  subscriptionStatus: "active" | "past_due" | "canceled" | null;
+  subscriptionPlanName: string | null;
+  subscriptionPlanPriceAmount: number;
+  billingPeriod: string | null;
+}
+
+export interface AdminUserInvoice {
+  subscriptionName: string;
+  month: string;
+  date: string;
+  amount: string;
+  invoiceId: string;
+}
+
+export interface AdminUserDetail {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  creditsBalance: number;
+  subscriptionStatus: "active" | "past_due" | "canceled" | null;
+  subscriptionPlanName: string | null;
+  subscriptionPlanPriceAmount: number;
+  totalGenerations: number;
+  successJobs: number;
+  processingJobs: number;
+  failureJobs: number;
+  invoices: AdminUserInvoice[];
+  media: Media[];
 }

@@ -11,12 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserAdmin } from "../types/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface EditUserDialogProps {
-  user: UserAdmin | null;
+  user: any | null; //UserAdmin
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -53,7 +52,7 @@ export function EditUserDialog({
   const handleSave = async () => {
     if (!user) return;
     setLoading(true);
-      try {
+    try {
       const response = await fetch(`/api/admin/users/${user.id}`, {
         method: "PATCH",
         headers: {
@@ -131,7 +130,11 @@ export function EditUserDialog({
           >
             Cancel
           </Button>
-          <Button className="bg-gradient-primary" onClick={handleSave} disabled={!isChanged || loading}>
+          <Button
+            className="bg-gradient-primary"
+            onClick={handleSave}
+            disabled={!isChanged || loading}
+          >
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
