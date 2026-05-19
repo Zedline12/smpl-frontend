@@ -89,7 +89,7 @@ export function UsersTable({
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.creditsBalance}</TableCell>
               <TableCell>{user.subscriptionPlanName ?? "Free"}</TableCell>
-              <TableCell>{formatPrice(user.subscriptionPlanPriceAmount)}</TableCell>
+              <TableCell>{user.subscriptionPlanPriceAmount}</TableCell>
               <TableCell>{user.billingPeriod ?? "—"}</TableCell>
               <TableCell>
                 <StatusBadge status={user.subscriptionStatus} />
