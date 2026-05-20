@@ -37,7 +37,7 @@ export default function MainLayout({
       </header>
 
       {/* SIDEBAR (desktop) */}
-      <div className=" mt-5 z-50  sm:block row-start-2 col-start-1 h-full">
+      <div className=" mt-5 z-50 hidden sm:block row-start-2 col-start-1 h-full">
         <Sidebar />
       </div>
       {/* SIDEBAR (mobile) */}

@@ -2,10 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GenerationTypeEnum } from "../../types/generation";
 
 export default function PromptComposerHeader() {
   const { mediaType: generationType, setMediaType: onSelect } = useAiGenerationControlStore();
+  const pathname = usePathname();
+  const isCreatePage = pathname === "/create";
   return (
     <div className="flex items-center justify-between gap-4 backdrop-blur-3xl border-b border-black/10 px-4 py-1">
       <div className="flex items-center gap-2">
@@ -82,7 +85,7 @@ export default function PromptComposerHeader() {
           Audio
         </Button>
       </div>
-      <div className="flex items-center gap-7 text-secondary-foreground">
+      {!isCreatePage && <div className="flex items-center gap-7 text-secondary-foreground">
         <div className="cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +100,7 @@ export default function PromptComposerHeader() {
             />
           </svg>
         </div>
-        <Link href={`/create/create-${generationType}`}>
+        <Link href={`/create`}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -111,7 +114,7 @@ export default function PromptComposerHeader() {
             />
           </svg>
         </Link>
-      </div>
+      </div>}
     </div>
   );
 }

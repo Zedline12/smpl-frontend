@@ -4,7 +4,8 @@ import { fetchWithToken } from "@/lib/fetcher";
 export async function GET(req: NextRequest) {
   try {
     const sortBy = req.nextUrl.searchParams.get("sortBy");
-    const params = new URLSearchParams({ isSubscribed: "true" });
+    const isSubscribed = req.nextUrl.searchParams.get("isSubscribed") ?? "true";
+    const params = new URLSearchParams({ isSubscribed });
     if (sortBy) params.set("sortBy", sortBy);
 
     const response = await fetchWithToken(`/admin/users?${params.toString()}`);

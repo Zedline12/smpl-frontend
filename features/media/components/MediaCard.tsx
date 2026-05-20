@@ -70,6 +70,7 @@ export function MediaCard({
 }) {
   const [duration, setDuration] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
   const { setModel, setMediaType } = useAiGenerationControlStore();
   const { setField } = useAiModelStore();
 

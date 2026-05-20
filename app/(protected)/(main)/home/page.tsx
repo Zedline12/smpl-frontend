@@ -28,7 +28,7 @@ export default async function WorkspacePage() {
     };
   });
   return (
-    <div className="w-full p-5 mt-5">
+    <div className="w-full p-5 sm:mt-5">
       <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
       </section>

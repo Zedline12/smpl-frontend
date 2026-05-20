@@ -7,10 +7,10 @@ import {
   LayoutDashboard,
   Users,
   CreditCard,
-  Settings,
-  FileText,
   BarChart3,
   Image,
+  Tag,
+  Mail,
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -19,8 +19,10 @@ const sidebarLinks = [
   { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
   { icon: CreditCard, label: "Credit Pricing", href: "/admin/credit-pricing" },
   { icon: BarChart3, label: "Generations", href: "/admin/generations" },
-  {icon:CreditCard, label:"Subscription Plans", href:"/admin/subscription-plans"},
-  {icon:Image, label:"Media", href:"/admin/media"}
+  { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
+  { icon: Image, label: "Media", href: "/admin/media" },
+  { icon: Tag, label: "Discounts", href: "/admin/discounts" },
+  { icon: Mail, label: "Email Marketing", href: "/admin/email-marketing" },
 ];
 
 export const AdminSidebar = () => {
