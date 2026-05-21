@@ -16,7 +16,13 @@
   --black-700: oklch(0.18 0 0);
   --black-600: oklch(0.24 0 0);
   --black-500: oklch(0.32 0 0);
-
+  --blue-100: #d6f7fe;
+  --blue-200: #93e9fd;
+  --blue-300: #2fcefd;
+  --blue-400: #06b6e8;
+  --blue-500: #0592bb;
+  --blue-600: #046e8e;
+  --blue-700: #034d63;
   --purple-300: #b89dff;
   --purple-400: #9370ff;
   --purple-500: #6b41ff;
@@ -92,6 +98,13 @@
     var(--black-900) 100%
   );
 
+  --gradient-create: linear-gradient(
+    135deg,
+    var(--blue-300) 0%,
+    var(--pink-500) 55%,
+    var(--orange-500) 100%
+  );
+
   /* Legacy gradient aliases */
   --gradient-secondary: linear-gradient(
     135deg,
@@ -110,6 +123,7 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.8);
   --glow-purple: 0 0 24px rgba(107, 65, 255, 0.5);
   --glow-pink: 0 0 24px rgba(234, 75, 255, 0.45);
+  --glow-blue: 0 0 24px rgba(47, 206, 253, 0.5);
   --glow-mixed:
     0 0 32px rgba(107, 65, 255, 0.35), 0 0 64px rgba(234, 75, 255, 0.2);
 
@@ -543,15 +557,15 @@ select {
   font-size: 13px;
   padding: 9px 12px;
   outline: none;
-  transition: border-color var(--duration-fast);
+  /* transition: border-color var(--duration-fast); */
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+/* input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 textarea:focus,
 select:focus {
   border-color: var(--purple-500);
   box-shadow: 0 0 0 3px rgba(107, 65, 255, 0.2);
-}
+} */
 
 input::placeholder,
 textarea::placeholder {

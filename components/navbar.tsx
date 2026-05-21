@@ -107,8 +107,32 @@ export function Navbar() {
               direction="down"
               align="right"
               trigger={
-                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-gray-200 dark:border-neutral-700">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700 dark:text-gray-300" />
+                <div className="relative cursor-pointer group/avatar">
+                  {/* Wide outer glow */}
+                  <div
+                    className="absolute -inset-4 rounded-full blur-2xl opacity-70 group-hover/avatar:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    style={{ background: "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)" }}
+                  />
+                  {/* Tight inner glow */}
+                  <div
+                    className="absolute -inset-1 rounded-full blur-md opacity-90 group-hover/avatar:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    style={{ background: "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)" }}
+                  />
+                  {/* Thick gradient border ring */}
+                  <div
+                    className="relative rounded-full p-[3px]"
+                    style={{ background: "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)" }}
+                  >
+                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-neutral-900">
+                      <User
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        style={{
+                          color: "#ea4bff",
+                          filter: "drop-shadow(0 0 5px #ea4bff) drop-shadow(0 0 10px #2fcefd)",
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               }
               className="ml-2 sm:ml-4"

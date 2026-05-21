@@ -1,6 +1,8 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { AdminUserDetail } from "@/features/admin/users/types/types";
 import { MediaGrid } from "@/features/media/components/MediaGrid";
+import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
+import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
@@ -104,26 +106,30 @@ export default async function UserDetailPage({
           </div>
         </div>
 
-        {/* Credits card */}
-        <div className="flex-shrink-0 rounded-xl border border-white/10 bg-neutral-800/50 px-6 py-4 text-center min-w-[140px]">
-          <p className="text-3xl font-bold tabular-nums">{user.creditsBalance.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Credits</p>
-        </div>
+        <CreditsCard userId={user.id} initialBalance={user.creditsBalance} />
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {STAT_CARDS.map(({ key, label, color, bg, icon }) => (
-          <div key={key} className={cn("rounded-xl border border-white/10 px-5 py-4 flex items-center gap-4", bg)}>
-            <span className={color}>{icon}</span>
-            <div>
-              <p className={cn("text-2xl font-bold tabular-nums", color)}>
-                {user.stats[key].toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+        {STAT_CARDS.map(({ key, label, color, bg, icon }) =>
+          key === "failureJobs" ? (
+            <FailedStatCard
+              key={key}
+              count={user.stats[key]}
+              failedGenerations={user.failedGenerations ?? []}
+            />
+          ) : (
+            <div key={key} className={cn("rounded-xl border border-white/10 px-5 py-4 flex items-center gap-4", bg)}>
+              <span className={color}>{icon}</span>
+              <div>
+                <p className={cn("text-2xl font-bold tabular-nums", color)}>
+                  {user.stats[key].toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
 
       {/* Invoices */}

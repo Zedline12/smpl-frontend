@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+
 import ProjectSelector from "./selectors/ProjectSelector";
 import { useAuth } from "@/providers/AuthProvider";
 import ModelSelector from "./selectors/ModelSelector";
@@ -135,43 +135,72 @@ export default function PromptComposerFooter({
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant={"primary"}
-            className="text-sm p-3"
-            onClick={handleGeneration}
-            disabled={!isFormValid()}
-          >
-            {false ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <div className="flex flex-row items-center gap-1">
-                  <div>Create</div>
-                  <div className="text-sm text-white/50">|</div>
-                  <div className="flex flex-row items-center opacity-50 ">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="size-4"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-
-                    {data?.creditsCost ?? 0}
+          {/* Glassy glow Create button */}
+          <div className="relative group/btn ">
+            {/* Wide outer glow */}
+            <div
+              className={`absolute -inset-2 rounded-full blur-xl pointer-events-none transition-opacity duration-500 ${
+                isFormValid()
+                  ? "opacity-50 group-hover/btn:opacity-80"
+                  : "opacity-[0.07]"
+              }`}
+              style={{ background: "var(--gradient-create)" }}
+            />
+            {/* Tight inner glow */}
+            <div
+              className={`absolute -inset-0.5 rounded-full blur-sm pointer-events-none transition-opacity duration-300 ${
+                isFormValid()
+                  ? "opacity-80 group-hover/btn:opacity-100"
+                  : "opacity-[0.12]"
+              }`}
+              style={{ background: "var(--gradient-create)" }}
+            />
+            {/* Gradient border */}
+            <div
+              className={`relative rounded-full p-px transition-transform duration-200 ${
+                isFormValid() ? "group-hover/btn:scale-[1.03]" : ""
+              }`}
+              style={{ background: "var(--gradient-create)" }}
+            >
+              <button
+                type="button"
+                onClick={handleGeneration}
+                disabled={!isFormValid()}
+                className={`cursor-pointer relative flex items-center rounded-full backdrop-blur-md px-4 py-2 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed ${
+                  isFormValid()
+                    ? "bg-black/65 text-white group-hover/btn:bg-black/45"
+                    : "bg-black/80 text-white/30"
+                }`}
+              >
+                {false ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Generating...
                   </div>
-                </div>
-              </>
-            )}
-          </Button>
+                ) : (
+                  <div className="flex flex-row items-center gap-1">
+                    <span>Create</span>
+                    <span className="text-white/40 mx-0.5">|</span>
+                    <span className="flex flex-row items-center opacity-60">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="size-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {data?.creditsCost ?? 0}
+                    </span>
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

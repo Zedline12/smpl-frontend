@@ -20,6 +20,15 @@ export interface AdminUserInvoice {
   invoiceId: string;
 }
 
+export interface FailedGeneration {
+  id: string;
+  category: string;
+  clientMessage: string;
+  model: string;
+  input: Record<string, unknown>;
+  createdAt?: string;
+}
+
 export interface AdminUserDetail {
   id: string;
   firstName: string | null;
@@ -35,4 +44,5 @@ export interface AdminUserDetail {
   failureJobs: number;
   invoices: AdminUserInvoice[];
   media: Media[];
+  failedGenerations?: FailedGeneration[];
 }

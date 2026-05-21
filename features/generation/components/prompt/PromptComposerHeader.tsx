@@ -10,7 +10,7 @@ export default function PromptComposerHeader() {
   const pathname = usePathname();
   const isCreatePage = pathname === "/create";
   return (
-    <div className="flex items-center justify-between gap-4 backdrop-blur-3xl border-b border-black/10 px-4 py-1">
+    <div className="flex items- rounded-2xl justify-between gap-4 backdrop-blur-3xl border-b border-black/10 px-4 py-1">
       <div className="flex items-center gap-2">
         <Button
           type="button"
