@@ -35,6 +35,17 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/settings/referrals",
+    label: "Referrals",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0">
+        <path d="M17 20h5v-1a4 4 0 0 0-5.5-3.7" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 20H4v-1a4 4 0 0 1 5.5-3.7" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="8" r="4" />
+      </svg>
+    ),
+  },
 ];
 
 export function SettingsNav() {

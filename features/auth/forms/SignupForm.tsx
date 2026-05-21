@@ -30,6 +30,7 @@ export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryError = searchParams?.get("error");
+  const refToken = searchParams?.get("refToken");
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -268,7 +269,9 @@ export function SignUpForm() {
       {/* Google */}
       <GoogleLoginButton
         onClick={() => {
-          window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/user`;
+          const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/user`);
+          if (refToken) url.searchParams.set("refToken", refToken);
+          window.location.href = url.toString();
         }}
       />
 
