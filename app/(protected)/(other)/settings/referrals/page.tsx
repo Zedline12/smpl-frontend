@@ -48,8 +48,8 @@ export default async function ReferralsPage() {
   return (
     <div className="max-w-lg flex flex-col gap-6">
       <div>
-        <h2 className="text-white font-semibold text-base leading-tight">Referrals</h2>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <h2 className="text-foreground font-semibold text-base">Referrals</h2>
+        <p className="text-sm mt-1 text-foreground">
           Share your link and earn credits when friends sign up.
         </p>
       </div>

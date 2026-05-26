@@ -24,7 +24,7 @@ export default async function BillingPage() {
   return (
     <div className="max-w-2xl">
       <h2
-        className="text-white font-semibold mb-6"
+        className="text-foreground font-semibold mb-6"
         style={{ fontSize: 18, letterSpacing: "-0.01em" }}
       >
         Billing &amp; Invoices

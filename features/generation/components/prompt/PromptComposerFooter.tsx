@@ -24,6 +24,7 @@ import {
 } from "../../hooks/generation";
 import { useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import SpeechToText from "./SpeechToText";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -113,6 +114,8 @@ export default function PromptComposerFooter({
         </div>
         <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
           {user && <ProjectSelector />}
+
+          <SpeechToText />
 
           {/* Enhance prompt */}
           <div className="relative group">

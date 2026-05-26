@@ -46,6 +46,16 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/settings/appearance",
+    label: "Appearance",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 flex-shrink-0">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export function SettingsNav() {
@@ -59,9 +69,8 @@ export function SettingsNav() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+            className="flex text-foreground items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150"
             style={{
-              color: active ? "#fff" : "rgba(255,255,255,0.45)",
               background: active ? "rgba(107,65,255,0.15)" : "transparent",
               borderLeft: active ? "2px solid #6b41ff" : "2px solid transparent",
             }}

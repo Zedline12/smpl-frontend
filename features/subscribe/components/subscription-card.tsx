@@ -16,7 +16,7 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
 
   return (
     <div
-      className={`relative rounded-2xl p-8 border hover:shadow-xl transition-all duration-300 flex flex-col h-full  overflow-hidden group border-neutral-700/50 hover:bg-background-light bg-transparent ${plan.isMostPopular ? "border-primary/50" : ""}`}
+      className={`relative rounded-2xl p-8 border hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden group bg-card ${plan.isMostPopular ? "border-primary/50" : "border-border"}`}
     >
       {plan.isMostPopular && (
         <div className="bg-gradient-primary text-primary-foreground w-fit text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg border border-white/20 mb-4">

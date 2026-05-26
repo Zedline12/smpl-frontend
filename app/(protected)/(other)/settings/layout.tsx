@@ -5,8 +5,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
     <div className="min-h-full flex flex-col">
       {/* Page header */}
       <div className="px-6 pt-8 pb-6 border-b border-white/[0.06]">
-        <h1 className="text-xl font-semibold text-white tracking-tight">Settings</h1>
-        <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <h1 className="text-xl font-semibold text-foregorund">Settings</h1>
+        <p className="text-sm mt-0.5 text-foregorund">
           Manage your account and preferences
         </p>
       </div>

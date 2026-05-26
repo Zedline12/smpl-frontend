@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
    SMPL Design System — Global Styles
@@ -263,6 +264,74 @@
   --sidebar-accent: var(--black-600);
   --sidebar-accent-foreground: var(--fg-1);
   --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--purple-500);
+}
+
+.light {
+  /* Backgrounds */
+  --bg: #ffffff;
+  --bg-surface: #fafafa;
+  --bg-card: #f5f4ff;
+  --bg-elevated: #ededf5;
+  --bg-hover: #e3e2f0;
+
+  /* Foreground hierarchy */
+  --fg-1: #111118;
+  --fg-2: rgba(17, 17, 24, 0.70);
+  --fg-3: rgba(17, 17, 24, 0.45);
+  --fg-4: rgba(17, 17, 24, 0.22);
+
+  /* Borders */
+  --border-subtle: rgba(17, 17, 24, 0.08);
+  --border-default: rgba(17, 17, 24, 0.12);
+  --border-emphasis: rgba(17, 17, 24, 0.22);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+
+  /* Tailwind / shadcn semantic layer */
+  --background: #ffffff;
+  --background-dark: #f5f4ff;
+  --background-light: #ededf5;
+  --background-lighter: #e3e2f0;
+  --background-lightest: #d8d7ec;
+
+  --foreground: #111118;
+
+  --card: #f5f4ff;
+  --card-foreground: #111118;
+
+  --popover: #ffffff;
+  --popover-foreground: #111118;
+
+  --primary: var(--purple-500);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--pink-500);
+  --secondary-foreground: #ffffff;
+  --tertiary: var(--orange-500);
+
+  --muted: #ededf5;
+  --muted-foreground: rgba(17, 17, 24, 0.45);
+
+  --accent: #e3e2f0;
+  --accent-foreground: #111118;
+
+  --destructive: #ef4444;
+
+  --border: rgba(17, 17, 24, 0.10);
+  --input: rgba(17, 17, 24, 0.12);
+  --ring: var(--purple-500);
+
+  --sidebar: #f5f4ff;
+  --sidebar-foreground: #111118;
+  --sidebar-primary: var(--purple-500);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3e2f0;
+  --sidebar-accent-foreground: #111118;
+  --sidebar-border: rgba(17, 17, 24, 0.08);
   --sidebar-ring: var(--purple-500);
 }
 

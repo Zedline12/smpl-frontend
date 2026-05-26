@@ -120,7 +120,7 @@ export function Sidebar() {
         <button
           type="button"
           onClick={() => guard(() => redirect("/"))}
-          className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-secondary-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
+          className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
         >
           <span className="sidebar-icon-glow flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -129,11 +129,10 @@ export function Sidebar() {
           </span>
           <span className="hidden xl:inline">Home</span>
         </button>
-
         {SIDEBAR_SECTIONS.map((section, sectionIdx) => (
           <div key={sectionIdx} className="w-full pt-5 pb-6 border-b border-neutral-700">
             {section.title && (
-              <div className="hidden xl:block text-neutral-500 px-2.5 text-xs font-bold uppercase tracking-wider mb-2">
+              <div className="hidden xl:block text-foreground px-2.5 text-xs font-bold uppercase tracking-wider mb-2">
                 {section.title}
               </div>
             )}
@@ -158,7 +157,7 @@ export function Sidebar() {
                       >
                         {item.icon}
                       </span>
-                      <span className="hidden xl:inline text-sm font-medium text-white/90">
+                      <span className="hidden xl:inline text-sm font-medium text-foreground">
                         {item.label}
                       </span>
                     </Link>

@@ -25,7 +25,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-[#1a1a1a] rounded-[16px] border border-[#2a2a2a] h-96 animate-pulse"
+            className="bg-card rounded-[16px] border border-border h-96 animate-pulse"
           />
         ))}
       </div>
@@ -34,7 +34,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
 
   if (!plans?.length) {
     return (
-      <div className="text-center py-20 text-[#888]">
+      <div className="text-center py-20 text-muted-foreground">
         No plans available at the moment.
       </div>
     );
@@ -62,10 +62,10 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         <button
           onClick={() => setPeriod(billingPeriod.MONTHLY)}
           className={cn(
-            "px-6 py-2 rounded-[999px] border border-[#2a2a2a] text-[15px] font-medium transition-all",
+            "px-6 py-2 rounded-[999px] border border-border text-[15px] font-medium transition-all",
             period === billingPeriod.MONTHLY
-              ? "bg-white text-black"
-              : "bg-transparent text-[#888] hover:text-white",
+              ? "bg-foreground text-background"
+              : "bg-transparent text-muted-foreground hover:text-foreground",
           )}
         >
           Monthly
@@ -74,10 +74,10 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         <button
           onClick={() => setPeriod(billingPeriod.YEARLY)}
           className={cn(
-            "px-6 py-2 rounded-[999px] border border-[#2a2a2a] text-[15px] font-medium transition-all flex items-center gap-2",
+            "px-6 py-2 rounded-[999px] border border-border text-[15px] font-medium transition-all flex items-center gap-2",
             period === billingPeriod.YEARLY
-              ? "bg-white text-black"
-              : "bg-transparent text-[#888] hover:text-white",
+              ? "bg-foreground text-background"
+              : "bg-transparent text-muted-foreground hover:text-foreground",
           )}
         >
           Yearly
@@ -118,8 +118,8 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               className={cn(
                 "relative rounded-[16px] p-8 border flex flex-col items-start text-left h-full transition-all duration-300",
                 isCreatorFeatured
-                  ? "bg-[#141420] border-[#6366f1]"
-                  : "bg-[#1a1a1a] border-[#2a2a2a]",
+                  ? "bg-card border-[#6366f1]"
+                  : "bg-card border-border",
               )}
             >
               {isCreatorFeatured && (
@@ -138,7 +138,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
 
               <div className="flex flex-col items-start justify-end h-[72px] mb-2 leading-none">
                 {isYearly && yearlySavings > 0 && (
-                  <span className="text-lg text-[#555] line-through mb-1">
+                  <span className="text-lg text-muted-foreground line-through mb-1">
                     ${monthlyPrice}/mo
                   </span>
                 )}
@@ -151,7 +151,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               <div className="h-[60px] flex flex-col justify-start gap-1 mt-2">
                 {isYearly && yearlySavings > 0 && (
                   <>
-                    <div className="bg-[#1a2e1a] text-[#4ade80] text-[12px] font-semibold px-2 py-0.5 rounded w-fit mb-1">
+                    <div className="bg-green-500/15 text-green-500 text-[12px] font-semibold px-2 py-0.5 rounded w-fit mb-1">
                       You save ${Math.round(yearlySavings)}/yr
                     </div>
                     <div className="text-[#a855f7] text-[13px] font-medium tracking-tight">
@@ -163,9 +163,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                 )}
               </div>
 
-              <div className="w-full h-px bg-[#2a2a2a] my-6" />
+              <div className="w-full h-px bg-border my-6" />
 
-              <div className="text-[11px] font-bold uppercase text-[#888] tracking-wider mb-2">
+              <div className="text-[11px] font-bold uppercase text-muted-foreground tracking-wider mb-2">
                 Monthly Credits
               </div>
               <div className="text-[22px] font-bold mb-6">
@@ -188,7 +188,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    <span className="text-[14px] text-[#ddd] leading-snug">
+                    <span className="text-[14px] text-foreground/85 leading-snug">
                       {meta}
                     </span>
                   </div>
@@ -202,10 +202,10 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                     isCheckoutLoading || user?.subscription?.id === plan.id
                   }
                   className={cn(
-                    "w-full py-3 rounded-[8px] font-medium transition-all text-white flex items-center justify-center disabled:opacity-50",
+                    "w-full py-3 rounded-[8px] font-medium transition-all flex items-center justify-center disabled:opacity-50",
                     isCreatorFeatured
-                      ? "border-none shadow-lg hover:opacity-90"
-                      : "bg-transparent border border-[#2a2a2a] hover:bg-[#2a2a2a]",
+                      ? "border-none shadow-lg hover:opacity-90 text-white"
+                      : "bg-transparent border border-border text-foreground hover:bg-accent",
                   )}
                   style={
                     isCreatorFeatured
@@ -222,7 +222,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                       ? "Current Plan"
                       : "Subscribe"}
                 </button>
-                <div className="text-[#555] text-[11px] text-center w-full mt-3">
+                <div className="text-muted-foreground text-[11px] text-center w-full mt-3">
                   Cancel anytime
                 </div>
               </div>
@@ -232,17 +232,17 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
       </div>
 
       <div className="max-w-[960px] mx-auto px-4 mt-8 pb-16">
-        <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-[16px] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-card border border-border rounded-[16px] p-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col text-left min-w-[150px]">
             <div className="text-[18px] font-bold mb-1">Free Plan</div>
             <div className="flex items-baseline gap-1">
               <span className="text-[28px] font-bold">$0</span>
-              <span className="text-[18px] font-normal text-[#888]">/mo</span>
+              <span className="text-[18px] font-normal text-muted-foreground">/mo</span>
             </div>
           </div>
 
           <div className="flex-grow flex flex-col items-center md:items-start text-center md:text-left">
-            <div className="text-[11px] font-bold uppercase text-[#888] tracking-wider mb-2">
+            <div className="text-[11px] font-bold uppercase text-muted-foreground tracking-wider mb-2">
               One-Time Credits
             </div>
             <div className="text-[18px] font-bold mb-3">50 credits</div>
@@ -262,7 +262,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="text-sm text-[#ddd]">
+                <span className="text-sm text-foreground/85">
                   Access to basic generation
                 </span>
               </div>
@@ -280,7 +280,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="text-sm text-[#ddd]">Standard support</span>
+                <span className="text-sm text-foreground/85">Standard support</span>
               </div>
             </div>
           </div>
@@ -289,16 +289,16 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             {!user?.subscription ? (
               <button
                 disabled
-                className="w-[180px] py-3 rounded-[8px] border border-[#2a2a2a] bg-transparent text-[#555] font-medium flex justify-center items-center gap-1 cursor-not-allowed"
+                className="w-[180px] py-3 rounded-[8px] border border-border bg-transparent text-muted-foreground font-medium flex justify-center items-center gap-1 cursor-not-allowed"
               >
                 ✓ Current Plan
               </button>
             ) : (
-              <button className="w-[180px] py-3 rounded-[8px] border border-[#2a2a2a] bg-transparent text-[#888] font-medium flex justify-center items-center gap-1 hover:bg-[#2a2a2a] transition-all">
+              <button className="w-[180px] py-3 rounded-[8px] border border-border bg-transparent text-muted-foreground font-medium flex justify-center items-center gap-1 hover:bg-accent hover:text-foreground transition-all">
                 Downgrade
               </button>
             )}
-            <div className="text-[11px] text-[#555] mt-2">
+            <div className="text-[11px] text-muted-foreground mt-2">
               No credit card required
             </div>
           </div>
