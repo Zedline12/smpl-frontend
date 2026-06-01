@@ -16,10 +16,12 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 interface KlingO3ImageComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 export default function KlingO3ImageComposer({
   isFocused,
+  editMode,
 }: KlingO3ImageComposerProps) {
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
 
@@ -78,7 +80,7 @@ export default function KlingO3ImageComposer({
         onSelect={(images) => setField("images", images)}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <ResolutionSelector
           options={KlingO3ImageOptionsConst.resolution as any}
           value={resolution}

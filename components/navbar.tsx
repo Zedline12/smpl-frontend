@@ -1,15 +1,11 @@
 "use client";
 import { redirect, useRouter } from "next/navigation";
 import {
-  DollarSignIcon,
-  LogOut,
   Settings,
-  SubscriptIcon,
   User,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { logout } from "@/features/auth/actions/auth";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "./ui/button";
 import { Menu, MenuItem } from "@/components/menu";

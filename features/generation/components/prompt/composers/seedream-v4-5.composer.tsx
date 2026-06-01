@@ -9,7 +9,7 @@ import PromptComposerFooter from "../PromptComposerFooter";
 import { ISeedreamV45Input, SeedreamV45OptionsConst } from "@/features/generation/types/models/seedream-v4-5.type";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
-export default function SeedreamV45Composer({ isFocused }: { isFocused: boolean }) {
+export default function SeedreamV45Composer({ isFocused, editMode }: { isFocused: boolean; editMode?: boolean }) {
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
   const { states, setField: setModelField } = useAiModelStore();
   const state = states[AiModelsEnum.SEEDREAM_V4_5] as ISeedreamV45Input;
@@ -64,7 +64,7 @@ export default function SeedreamV45Composer({ isFocused }: { isFocused: boolean 
         onSelect={(imgs) => setField("images", imgs)}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <Menu
           direction="up"
           trigger={

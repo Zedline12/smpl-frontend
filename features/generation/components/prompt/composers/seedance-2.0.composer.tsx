@@ -18,8 +18,10 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 export default function Seedance20Composer({
   isFocused,
+  editMode,
 }: {
   isFocused: boolean;
+  editMode?: boolean;
 }) {
   const [isStartImageManagerOpen, setIsStartImageManagerOpen] = useState(false);
   const [isEndImageManagerOpen, setIsEndImageManagerOpen] = useState(false);
@@ -127,7 +129,7 @@ export default function Seedance20Composer({
         maxSelections={1}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <div className="grid grid-cols-2 sm:flex sm:flex-row w-full gap-2 sm:gap-0">
           <Menu
             direction="up"

@@ -10,10 +10,12 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 interface KlingV3TextToVideoComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 export default function KlingV3TextToVideoComposer({
   isFocused,
+  editMode,
 }: KlingV3TextToVideoComposerProps) {
   const { states, setField: setModelField } = useAiModelStore();
   const state = states[
@@ -43,7 +45,7 @@ export default function KlingV3TextToVideoComposer({
         />
       </div>
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <div className="grid grid-cols-3 sm:flex sm:flex-row w-full sm:mt-0">
           <Menu
             direction="up"

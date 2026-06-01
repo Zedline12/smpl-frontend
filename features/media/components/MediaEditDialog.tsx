@@ -88,23 +88,21 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
         </div>
 
         {/* Editor body */}
-        <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Model selector */}
-          <div className="px-4 pt-4 pb-2 border-b border-white/5">
-            <ModelSelector models={modelList} />
-          </div>
+         
 
           {/* Model-specific composer */}
           <div className="px-2 py-2 flex-1">
-            {model === AiModelsEnum.GEMINI_FLASH_IMAGE && <GeminiFlashImageComposer isFocused={true} />}
-            {model === AiModelsEnum.KLING_O3_IMAGE && <KlingO3ImageComposer isFocused={true} />}
-            {model === AiModelsEnum.VEO_3 && <Veo3Composer isFocused={true} />}
-            {model === AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL && <KlingV3ProMotionControlComposer isFocused={true} />}
-            {model === AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO && <KlingV3ImageToVideoComposer isFocused={true} />}
-            {model === AiModelsEnum.KLING_V3_TEXT_TO_VIDEO && <KlingV3TextToVideoComposer isFocused={true} />}
-            {model === AiModelsEnum.ELEVEN_LABS_V3_TTS && <ElevenLabsV3Composer isFocused={true} />}
-            {model === AiModelsEnum.SEEDREAM_V4_5 && <SeedreamV45Composer isFocused={true} />}
-            {model === AiModelsEnum.SEEDANCE_2_0 && <Seedance20Composer isFocused={true} />}
+            {model === AiModelsEnum.GEMINI_FLASH_IMAGE && <GeminiFlashImageComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.KLING_O3_IMAGE && <KlingO3ImageComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.VEO_3 && <Veo3Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL && <KlingV3ProMotionControlComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO && <KlingV3ImageToVideoComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.KLING_V3_TEXT_TO_VIDEO && <KlingV3TextToVideoComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.ELEVEN_LABS_V3_TTS && <ElevenLabsV3Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.SEEDREAM_V4_5 && <SeedreamV45Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.SEEDANCE_2_0 && <Seedance20Composer isFocused={true} editMode={true} />}
           </div>
 
           {/* Confirm button */}

@@ -16,10 +16,12 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 interface GeminiFlashImageComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 export default function GeminiFlashImageComposer({
   isFocused,
+  editMode,
 }: GeminiFlashImageComposerProps) {
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
 
@@ -81,7 +83,7 @@ export default function GeminiFlashImageComposer({
         onSelect={(images) => setField("images", images)}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <ResolutionSelector
           options={GEMINI_FLASH_IMAGE_RESOLUTIONS as any}
           value={resolution}

@@ -13,10 +13,12 @@ import { Button } from "@/components/ui/button";
 
 interface KlingV3ProMotionControlComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 export default function KlingV3ProMotionControlComposer({
   isFocused,
+  editMode,
 }: KlingV3ProMotionControlComposerProps) {
   const [isImageManagerOpen, setIsImageManagerOpen] = useState(false);
   const [isVideoManagerOpen, setIsVideoManagerOpen] = useState(false);
@@ -128,7 +130,7 @@ export default function KlingV3ProMotionControlComposer({
         mediaType="video"
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <Menu
           direction="up"
           trigger={

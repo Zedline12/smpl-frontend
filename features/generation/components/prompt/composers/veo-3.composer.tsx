@@ -19,9 +19,10 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 interface Veo3ComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
-export default function Veo3Composer({ isFocused }: Veo3ComposerProps) {
+export default function Veo3Composer({ isFocused, editMode }: Veo3ComposerProps) {
   const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false);
 
   const { states, setField: setModelField } = useAiModelStore();
@@ -94,7 +95,7 @@ export default function Veo3Composer({ isFocused }: Veo3ComposerProps) {
         onSelect={(images) => setField("images", images)}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <div className="grid grid-cols-4 sm:flex sm:flex-row  w-full  sm:mt-0">
           <ResolutionSelector
             options={VEO3_RESOLUTIONS as any}

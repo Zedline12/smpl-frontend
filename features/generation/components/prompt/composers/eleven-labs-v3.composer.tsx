@@ -85,6 +85,7 @@ const languages = [
 ];
 interface ElevenLabsV3ComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 interface GenericSelectorProps {
@@ -149,6 +150,7 @@ function SliderSelector({ title, value, min, max, step, onChange }: SliderSelect
 
 export default function ElevenLabsV3Composer({
   isFocused,
+  editMode,
 }: ElevenLabsV3ComposerProps) {
   const { states, setField: setModelField } = useAiModelStore();
   const state = states[AiModelsEnum.ELEVEN_LABS_V3_TTS] as IElevenLabsV3Input;
@@ -169,7 +171,7 @@ export default function ElevenLabsV3Composer({
         />
       </div>
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <Menu
           direction="up"
           trigger={

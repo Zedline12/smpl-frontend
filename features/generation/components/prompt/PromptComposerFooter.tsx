@@ -29,11 +29,13 @@ import SpeechToText from "./SpeechToText";
 interface PromptComposerFooterProps {
   children: React.ReactNode;
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 export default function PromptComposerFooter({
   children,
   isFocused,
+  editMode,
 }: PromptComposerFooterProps) {
   const { model, projectId, mediaType} = useAiGenerationControlStore();
   const { data } = useGenerationCostQuery();
@@ -113,7 +115,7 @@ export default function PromptComposerFooter({
           {children}
         </div>
         <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
-          {user && <ProjectSelector />}
+          {user && !editMode && <ProjectSelector />}
 
           <SpeechToText />
 
@@ -139,7 +141,7 @@ export default function PromptComposerFooter({
           </div>
 
           {/* Glassy glow Create button */}
-          <div className="relative group/btn ">
+          {!editMode && <div className="relative group/btn ">
             {/* Wide outer glow */}
             <div
               className={`absolute -inset-2 rounded-full blur-xl pointer-events-none transition-opacity duration-500 ${
@@ -203,7 +205,7 @@ export default function PromptComposerFooter({
                 )}
               </button>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

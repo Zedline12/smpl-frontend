@@ -16,12 +16,14 @@ import { Label } from "@/components/ui/label";
 
 interface KlingV3ImageToVideoComposerProps {
   isFocused: boolean;
+  editMode?: boolean;
 }
 
 const EMPTY_ARRAY: string[] = [];
 
 export default function KlingV3ImageToVideoComposer({
   isFocused,
+  editMode,
 }: KlingV3ImageToVideoComposerProps) {
   const [isStartImageManagerOpen, setIsStartImageManagerOpen] = useState(false);
   const [isEndImageManagerOpen, setIsEndImageManagerOpen] = useState(false);
@@ -169,7 +171,7 @@ export default function KlingV3ImageToVideoComposer({
         }}
       />
 
-      <PromptComposerFooter isFocused={isFocused}>
+      <PromptComposerFooter isFocused={isFocused} editMode={editMode}>
         <Dialog open={isMultiPromptOpen} onOpenChange={setIsMultiPromptOpen}>
           <DialogTrigger asChild>
             <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors cursor-pointer backdrop-blur-sm bg-white/10 border border-white/20 w-full text-center">
