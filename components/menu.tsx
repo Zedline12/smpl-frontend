@@ -62,7 +62,7 @@ export function Menu({
         {isOpen && (
           <div
             className={cn(
-              "absolute z-50 rounded-2xl border border-neutral-800 shadow-xl  animate-in fade-in zoom-in-95 duration-100",
+              "absolute z-50 min-w-[200px] rounded-2xl border border-border bg-card p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-100",
               direction === "down" ? "top-full mt-2" : "bottom-full mb-2",
               align === "right" ? "right-0" : "left-0",
               direction === "down" && align === "right" && "origin-top-right",

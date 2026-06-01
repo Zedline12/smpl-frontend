@@ -1,4 +1,5 @@
 import {
+  editGeneration,
   fetchGenerationCost,
   fetchGenerationQueues,
   generate,
@@ -6,6 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  EditGenerateRequest,
   GenerateRequest,
 } from "@/features/generation/types/api";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
@@ -31,6 +33,21 @@ export function useGenerateMutation() {
   });
 }
 
+
+export function useEditGenerationMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: EditGenerateRequest) => editGeneration(payload),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({ queryKey: ["generation-queues"] });
+      return data;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+}
 
 export function useGenerationCostQuery() {
   const { model } = useAiGenerationControlStore();

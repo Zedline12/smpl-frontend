@@ -1,7 +1,7 @@
 import { UpdateProjectRequest } from "../types/api";
-import { Project, ProjectWithStatsAndMedia } from "../types/project";
+import { Project, ProjectWithStats, ProjectWithStatsAndMedia } from "../types/project";
 
-export async function fetchMyProjects(): Promise<Project[] | []> {
+export async function fetchMyProjects(): Promise<ProjectWithStats[]> {
   const res = await fetch("/api/projects/me");
   const json = await res.json();
   return json.data;

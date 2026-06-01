@@ -7,11 +7,17 @@ import {
   MediaType,
 } from "@/features/media/types/media";
 import { AllModelsInput } from "./generation";
-export interface GenerateRequest{
-  model:string;
-  projectId:string;
-  mediaType:MediaType;
-  input:AllModelsInput;
+export interface GenerateRequest {
+  model: string;
+  projectId: string;
+  mediaType: MediaType;
+  input: AllModelsInput;
+}
+export interface EditGenerateRequest {
+  mediaId: string;
+  model: string;
+  mediaType: MediaType;
+  input: AllModelsInput;
 }
 export interface GenerateImageRequest {
   prompt: string;

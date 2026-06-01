@@ -1,3 +1,4 @@
-export interface UpdateProjectRequest{
-    name: string;
+export interface UpdateProjectRequest {
+  name: string;
+  hexCode?: string;
 }

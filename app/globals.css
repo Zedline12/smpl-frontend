@@ -833,3 +833,34 @@ textarea::placeholder {
 .animation-delay-2000 {
   animation-delay: 2s;
 }
+
+@keyframes scanner {
+  0%   { transform: translateX(-120%); }
+  50%  { transform: translateX(120%); }
+  100% { transform: translateX(-120%); }
+}
+.animate-scanner {
+  animation: scanner 2s ease-in-out infinite;
+}
+
+/* ── react-colorful overrides ────────────────────────────── */
+
+.react-colorful {
+  border-radius: var(--radius-md) !important;
+  gap: 10px;
+}
+.react-colorful__saturation {
+  border-radius: var(--radius-sm) !important;
+  border-bottom: none !important;
+}
+.react-colorful__hue {
+  border-radius: var(--radius-full) !important;
+  height: 10px !important;
+}
+.react-colorful__pointer {
+  width: 18px !important;
+  height: 18px !important;
+  border-width: 2px !important;
+  border-color: white !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+}

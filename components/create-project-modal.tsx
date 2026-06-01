@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { projectsService } from "@/lib/api/services/projects.service";
 import { toast } from "sonner";
+import { ProjectColorPicker } from "@/components/ui/hex-color-picker";
+import { Button } from "@/components/ui/button";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ export function CreateProjectModal({
   onClose,
 }: CreateProjectModalProps) {
   const [name, setName] = useState("");
+  const [hexCode, setHexCode] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -26,12 +29,12 @@ export function CreateProjectModal({
 
     setIsLoading(true);
     try {
-      const project = await projectsService.createProject(name);
+      await projectsService.createProject(name, hexCode);
       toast.success("Project created successfully");
       router.push(`/projects`);
       onClose();
-    } catch (error: any) {
-      // Error is handled by apiFetch globally (toast), but we catch here to stop loading state if needed or specific handling
+    } catch {
+      // Error handled globally via apiFetch toast
     } finally {
       setIsLoading(false);
     }
@@ -40,20 +43,19 @@ export function CreateProjectModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in duration-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
+      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.8)] p-6 animate-in fade-in zoom-in duration-200">
+        <h2 className="text-xl font-bold text-foreground mb-6">
           Create New Project
         </h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
             <label
               htmlFor="projectName"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="text-sm font-medium text-muted-foreground"
             >
               Project Name
             </label>
@@ -63,23 +65,24 @@ export function CreateProjectModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Summer Campaign 2024"
-              className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               autoFocus
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <ProjectColorPicker value={hexCode} onChange={setHexCode} />
+
+          <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+              className="btn btn-ghost btn-sm"
             >
               Cancel
             </button>
-            <button
+            <Button
               type="submit"
+              variant="primary"
               disabled={isLoading || !name.trim()}
-              className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -89,7 +92,7 @@ export function CreateProjectModal({
               ) : (
                 "Create Project"
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

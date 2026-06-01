@@ -16,29 +16,7 @@ export type SidebarSection = {
   items: SidebarItem[];
 };
 
-const GLOW_COLORS = [
-  {
-    bg: "rgba(234, 75, 255, 0.07)",
-    border: "rgba(234, 75, 255, 0.45)",
-    shadow: "0 0 18px rgba(234, 75, 255, 0.30), inset 0 0 18px rgba(234, 75, 255, 0.04)",
-    iconBg: "rgba(234, 75, 255, 0.15)",
-    iconColor: "#ea4bff",
-  },
-  {
-    bg: "rgba(255, 107, 0, 0.07)",
-    border: "rgba(255, 140, 42, 0.45)",
-    shadow: "0 0 18px rgba(255, 107, 0, 0.30), inset 0 0 18px rgba(255, 107, 0, 0.04)",
-    iconBg: "rgba(255, 107, 0, 0.15)",
-    iconColor: "#ff8c2a",
-  },
-  {
-    bg: "rgba(47, 206, 253, 0.07)",
-    border: "rgba(47, 206, 253, 0.45)",
-    shadow: "0 0 18px rgba(47, 206, 253, 0.30), inset 0 0 18px rgba(47, 206, 253, 0.04)",
-    iconBg: "rgba(47, 206, 253, 0.15)",
-    iconColor: "#2fcefd",
-  },
-];
+const TRI_GRADIENT = "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)";
 
 export const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
@@ -111,11 +89,9 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
 export function Sidebar() {
   const guard = useAuthGuard();
 
-  let globalIdx = 0;
-
   return (
     <aside className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-neutral-700 overflow-y-auto">
-      <div className="flex flex-col items-center xl:items-start xl:p-2">
+      <div className="flex flex-col items-center xl:items-start xl:p-2 h-full">
         {/* Home */}
         <button
           type="button"
@@ -137,23 +113,20 @@ export function Sidebar() {
               </div>
             )}
             <ul className="xl:space-y-3 space-y-5 w-full">
-              {section.items.map((item, itemIdx) => {
-                const color = GLOW_COLORS[globalIdx % 3];
-                globalIdx++;
-                return (
-                  <li key={itemIdx}>
+              {section.items.map((item, itemIdx) => (
+                <li key={itemIdx}>
+                  <div
+                    className="animate-tri-glow p-[1.5px] rounded-xl transition-all duration-300 hover:scale-[1.02]"
+                    style={{ background: TRI_GRADIENT, backgroundSize: "200% 200%" }}
+                  >
                     <Link
                       href={item.url}
-                      className="flex w-full items-center justify-center xl:justify-start gap-x-3 py-2.5 px-2.5 rounded-xl transition-all duration-200 hover:brightness-110"
-                      style={{
-                        background: color.bg,
-                        border: `1px solid ${color.border}`,
-                        boxShadow: color.shadow,
-                      }}
+                      className="flex w-full items-center justify-center xl:justify-start gap-x-3 py-2.5 px-2.5 rounded-xl"
+                      style={{ background: "#080808" }}
                     >
                       <span
                         className="flex-shrink-0 p-1.5 rounded-lg"
-                        style={{ background: color.iconBg, color: color.iconColor }}
+                        style={{ background: TRI_GRADIENT, color: "white" }}
                       >
                         {item.icon}
                       </span>
@@ -161,12 +134,31 @@ export function Sidebar() {
                         {item.label}
                       </span>
                     </Link>
-                  </li>
-                );
-              })}
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         ))}
+
+        {/* Get More Credits */}
+        <div className="mt-auto pt-5 w-full">
+          <Link
+            href="/subscription-plans"
+            className="flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
+          >
+            <span className="flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                <path
+                  fillRule="evenodd"
+                  d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+            <span className="hidden xl:inline">Get More Credits</span>
+          </Link>
+        </div>
       </div>
     </aside>
   );

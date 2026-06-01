@@ -7,13 +7,13 @@ export const projectsService = {
       method: "GET",
     });
   },
-  async createProject(name: string): Promise<Project> {
+  async createProject(name: string, hexCode?: string): Promise<Project> {
     const res = await fetch("/api/projects", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, ...(hexCode && { hexCode }) }),
     });
     const json = await res.json();
     return json.data;

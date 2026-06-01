@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useMediaQuery } from "../queries/media";
+import { useInfiniteMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
 import { Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
@@ -40,11 +40,28 @@ export default function MediaExplorer({
     Set<string>
   >(new Set());
   const {
-    data: media = [],
+    data: pagedData,
     isFetching: isMediaFetching,
     isFetched: isMediaFetched,
-  } = useMediaQuery(selectedProject?.id, mediaType);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteMediaQuery(undefined,mediaType);
+  const media = pagedData?.pages.flatMap((p) => p.data ?? []) ?? [];
+  const totalCount = pagedData?.pages[0]?.totalCount ?? 0;
   const { data: queues } = useGenerationQueuesQuery();
+  const updatingMediaIds = useMemo(() => {
+    const active = queues?.filter((q: any) =>
+      ["pending", "processing"].includes(q.status) && q.mediaId
+    ) ?? [];
+    return new Set(active.map((q: any) => q.mediaId as string));
+  }, [queues]);
+
+  const topRowQueues = useMemo(() =>
+    queues?.filter((q: any) =>
+      ["pending", "processing"].includes(q.status) && !q.mediaId
+    ) ?? []
+  , [queues]);
 
   const failedQueue = useMemo(() => {
     return queues?.find(
@@ -61,7 +78,7 @@ export default function MediaExplorer({
           next.add(queue.id);
           return next;
         });
-        queryClient.refetchQueries({ queryKey: ["media"] });
+        queryClient.invalidateQueries({ queryKey: ["media"] });
         queryClient.invalidateQueries({ queryKey: ["current-user"] });
       }
     });
@@ -174,11 +191,9 @@ export default function MediaExplorer({
         </AlertDialog>
       )}
 
-      {queues && queues.filter((q: any) => ["pending", "processing"].includes(q.status)).length > 0 && (
+      {topRowQueues.length > 0 && (
         <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-6 mb-4">
-          {queues
-            .filter((q: any) => ["pending", "processing"].includes(q.status))
-            .map((queue) => (
+          {topRowQueues.map((queue) => (
               <div
                 key={queue.id}
                 className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center text-center transition-all duration-300 ${
@@ -206,7 +221,7 @@ export default function MediaExplorer({
         </div>
       )}
 
-      {!isMediaFetched || isMediaFetching ? (
+      {!isMediaFetched || (isMediaFetching && media.length === 0) ? (
         <MediaGridSkeleton key={selectedProject?.id} />
       ) : (
         <MediaGrid
@@ -215,7 +230,32 @@ export default function MediaExplorer({
           layout="grid"
           media={media}
           key={selectedProject?.id}
+          updatingMediaIds={updatingMediaIds}
         />
+      )}
+
+      {isMediaFetched && media.length > 0 && (
+        <div className="flex flex-col items-center gap-3 mt-6 pb-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {media.length} of {totalCount}
+          </p>
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="btn btn-ghost btn-sm"
+            >
+              {isFetchingNextPage ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                  Loading...
+                </span>
+              ) : (
+                "Show More"
+              )}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

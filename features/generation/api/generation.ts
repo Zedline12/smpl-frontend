@@ -2,7 +2,7 @@ import {
   CalculateMediaCostRequest,
   CalculateMediaCostResponse,
 } from "@/features/media/types/api";
-import { GenerateImageRequest, GenerateRequest, GenerateVideoRequest } from "../types/api";
+import { EditGenerateRequest, GenerateImageRequest, GenerateRequest, GenerateVideoRequest } from "../types/api";
 import { GenerationQueue } from "../types/generation";
 export async function fetchGenerationCost(
   data: CalculateMediaCostRequest,
@@ -33,6 +33,16 @@ export async function generate(data: GenerateRequest) {
   if (!json.success) {
     throw new Error(json.message);
   }
+  return json.data;
+}
+export async function editGeneration(data: EditGenerateRequest) {
+  const res = await fetch("/api/generation/edit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.message);
   return json.data;
 }
 export async function videoGeneration(data: GenerateRequest) {

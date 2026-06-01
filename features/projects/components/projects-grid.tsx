@@ -3,21 +3,21 @@ import React, { useState } from "react";
 import { ProjectCard } from "./project-card";
 import Link from "next/link";
 import { CreateProjectModal } from "@/components/create-project-modal";
-import { Project } from "../types/project";
+import { ProjectWithStats } from "../types/project";
 interface ProjectsGridProps {
-  projects?: Project[];
+  projects?: ProjectWithStats[];
 }
 export function ProjectsGrid({ projects }: ProjectsGridProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (!projects?.length) {
     return (
-      <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
+      <div className="text-center py-16 rounded-2xl border border-dashed border-border bg-card">
         <CreateProjectModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
         />
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-muted-foreground">
           <svg
             className="w-8 h-8"
             fill="none"
@@ -32,13 +32,13 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">No projects yet</h3>
-        <p className="text-gray-500 mt-1 mb-6">
+        <h3 className="text-lg font-semibold text-foreground">No projects yet</h3>
+        <p className="text-muted-foreground mt-1 mb-6">
           Create your first project to get started
         </p>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+          className="btn btn-primary"
         >
           Create Project
         </button>

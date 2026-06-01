@@ -59,6 +59,7 @@ export interface GenerationQueue {
   type: MediaType;
   status: "pending" | "processing" | "success" | "failure";
   resultUrl: string;
+  mediaId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

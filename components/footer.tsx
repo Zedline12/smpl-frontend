@@ -17,7 +17,7 @@ const resourceLinks = [
 export default function Footer() {
   return (
     <footer className="z-100 w-full bg-background border-t border-border py-8 px-4 shrink-0">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-start md:justify-between gap-8">
         <div className="flex-shrink-0">
           <p className="text-foreground text-sm font-medium">
             © {new Date().getFullYear()} SmplContent
@@ -27,7 +27,7 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-8 md:gap-12">
+        <div className="flex flex-wrap gap-12 md:gap-16 lg:gap-24">
           <div>
             <p className="text-foreground/50 text-xs font-semibold uppercase tracking-wider mb-3">
               Resources
@@ -52,7 +52,7 @@ export default function Footer() {
             <p className="text-foreground/50 text-xs font-semibold uppercase tracking-wider mb-3">
               Legal
             </p>
-            <ul className="flex flex-col gap-2">
+            <ul className="grid grid-cols-2 gap-x-10 gap-y-2">
               {legalLinks.map(({ href, label }) => (
                 <li key={href}>
                   <Link

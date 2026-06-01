@@ -1,23 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateProjectName } from "@/features/projects/hooks/useUpdateProject";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useUpdateProjectMutation } from "../hooks/projects";
+import { ProjectColorPicker } from "@/components/ui/hex-color-picker";
 
 export function UpdateProjectNameForm({
   projectId,
   initialName,
+  initialHexCode,
   onSuccess,
 }: {
   projectId: string;
   initialName: string;
+  initialHexCode?: string;
   onSuccess?: () => void;
 }) {
   const [name, setName] = useState(initialName);
+  const [hexCode, setHexCode] = useState<string | undefined>(initialHexCode);
   const mutation = useUpdateProjectMutation();
 
   return (
@@ -25,21 +28,14 @@ export function UpdateProjectNameForm({
       onSubmit={(e) => {
         e.preventDefault();
         mutation.mutate(
-          { id: projectId, body: {name} },
-          {
-            onSuccess: () => {
-              onSuccess?.();
-            },
-          },
+          { id: projectId, body: { name, hexCode } },
+          { onSuccess: () => onSuccess?.() },
         );
       }}
       className="space-y-4 py-2"
     >
       <div className="space-y-2">
-        <Label
-          htmlFor="projectName"
-          className="text-secondary-foreground font-medium"
-        >
+        <Label htmlFor="projectName" className="text-secondary-foreground font-medium">
           Project Name
         </Label>
         <Input
@@ -52,10 +48,12 @@ export function UpdateProjectNameForm({
         />
       </div>
 
+      <ProjectColorPicker value={hexCode} onChange={setHexCode} />
+
       <div className="flex justify-end pt-2">
         <Button
           type="submit"
-          disabled={mutation.isPending || !name.trim() || name === initialName}
+          disabled={mutation.isPending || !name.trim()}
           variant="primary"
           className="w-full sm:w-auto"
         >

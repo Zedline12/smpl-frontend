@@ -6,25 +6,40 @@ import { calculateHeight } from "@/lib/utils";
 type MediaGridProps = {
   media: Media[];
   layout?: "masonry" | "grid";
-  imagesWidth?: number,
-  breakpointCols?: number | { default: number, [key: number]: number } | { [key: number]: number };
-  aspectRatio?:AspectRatio
+  imagesWidth?: number;
+  breakpointCols?: number | { default: number; [key: number]: number } | { [key: number]: number };
+  aspectRatio?: AspectRatio;
+  updatingMediaIds?: Set<string>;
 };
 
-export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspectRatio = "1:1", breakpointCols = { default: 6,1600:5, 1450:4, 1200: 3, 940: 2 } }: MediaGridProps) {
+export function MediaGrid({
+  media,
+  layout = "masonry",
+  imagesWidth = 270,
+  aspectRatio = "1:1",
+  breakpointCols = { default: 6, 1600: 5, 1450: 4, 1200: 3, 940: 2 },
+  updatingMediaIds,
+}: MediaGridProps) {
   if (!media.length) {
-    return (    
+    return (
       <div className="flex items-center justify-center h-full">
         <p className="text-primary-foreground text-lg">Start Generating !</p>
       </div>
-    )
+    );
   }
+
   if (layout === "grid") {
     return (
-      <div className=" p-4  min-h-[calc(100vh-600px)]">
+      <div className="p-4 min-h-[calc(100vh-600px)]">
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 gap-6">
           {media.map((item) => (
-            <MediaCard key={item.id} media={item} width={imagesWidth} height={calculateHeight(aspectRatio, imagesWidth)} />
+            <MediaCard
+              key={item.id}
+              media={item}
+              width={imagesWidth}
+              height={calculateHeight(aspectRatio, imagesWidth)}
+              isUpdating={updatingMediaIds?.has(item.id) ?? false}
+            />
           ))}
         </div>
       </div>
@@ -34,9 +49,8 @@ export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspect
   return (
     <Masonry
       breakpointCols={breakpointCols}
-      className="flex gap-1 "
-      columnClassName="space-y-3 "
-    
+      className="flex gap-1"
+      columnClassName="space-y-3"
     >
       {media.map((m) => (
         <MediaCard
@@ -44,6 +58,7 @@ export function MediaGrid({ media, layout = "masonry", imagesWidth = 270, aspect
           media={m}
           width={imagesWidth}
           height={calculateHeight(m.aspectRatio, imagesWidth)}
+          isUpdating={updatingMediaIds?.has(m.id) ?? false}
         />
       ))}
     </Masonry>
