@@ -23,6 +23,6 @@ export const veo3ValidationSchema = z.object({
   aspectRatio: z.string().nonempty(),
   resolution: z.string().nonempty(),
   durationSeconds: z.number(),
-  images: z.array(z.string()).optional(),
+  images: z.array(z.string()).max(3).optional(),
   generateAudio: z.boolean(),
 }) as z.ZodType<Veo3Input>;
