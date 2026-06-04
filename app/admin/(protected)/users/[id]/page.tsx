@@ -3,6 +3,7 @@ import { AdminUserDetail } from "@/features/admin/users/types/types";
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
+import { CreditsUsageCard, CreditsUsageData } from "@/features/admin/users/components/CreditsUsageCard";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
@@ -70,6 +71,16 @@ const STAT_CARDS = [
   },
 ];
 
+async function getAdminCreditsUsage(userId: string): Promise<CreditsUsageData | null> {
+  try {
+    const res = await fetchWithToken(`/admin/users/${userId}/credits-usage`);
+    const json = await res.json();
+    return json?.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function UserDetailPage({
   params,
 }: {
@@ -77,11 +88,13 @@ export default async function UserDetailPage({
 }) {
   const { id } = await params;
 
-  const res = await fetchWithToken(`/admin/users/${id}`);
+  const [res, creditsUsage] = await Promise.all([
+    fetchWithToken(`/admin/users/${id}`),
+    getAdminCreditsUsage(id),
+  ]);
   if (!res.ok) notFound();
   const json = await res.json();
   const user: AdminUserDetail & {stats: Record<string, number>} = json.data;
-   console.log(user)
   const status = user.subscriptionStatus;
   const statusStyle = status
     ? (STATUS_STYLES[status] ?? "bg-neutral-800 text-neutral-400 border border-neutral-700")
@@ -181,6 +194,18 @@ export default async function UserDetailPage({
               </div>
             ))}
           </div>
+        )}
+      </section>
+
+      {/* Credits Usage */}
+      <section className="space-y-4">
+        <h2 className="text-base font-semibold">Credits Usage</h2>
+        {creditsUsage ? (
+          <CreditsUsageCard data={creditsUsage} />
+        ) : (
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Failed to load credits usage.
+          </p>
         )}
       </section>
 

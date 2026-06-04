@@ -7,7 +7,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type TransactionType = "BONUS" | "REFUND";
+type RemoveTransactionType = "FRAUD" | "OTHER";
+
+const TYPE_STYLES: Record<RemoveTransactionType, { active: string; label: string }> = {
+  FRAUD: {
+    active: "bg-red-500/15 border-red-500/40 text-red-400",
+    label: "FRAUD",
+  },
+  OTHER: {
+    active: "bg-orange-500/15 border-orange-500/40 text-orange-400",
+    label: "OTHER",
+  },
+};
 
 interface Props {
   open: boolean;
@@ -16,8 +27,8 @@ interface Props {
   onSuccess: (newBalance: number) => void;
 }
 
-export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Props) {
-  const [type, setType] = useState<TransactionType>("BONUS");
+export function RemoveCreditsDialog({ open, onOpenChange, userId, onSuccess }: Props) {
+  const [type, setType] = useState<RemoveTransactionType>("OTHER");
   const [credits, setCredits] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +40,7 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/users/${userId}/credits/add`, {
+      const res = await fetch(`/api/admin/users/${userId}/credits/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type, credits: Number(credits) }),
@@ -42,7 +53,7 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
       onSuccess(json.data?.creditsBalance ?? json.creditsBalance);
       onOpenChange(false);
       setCredits("");
-      setType("BONUS");
+      setType("OTHER");
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -54,7 +65,7 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm w-full p-0 bg-neutral-900 border border-white/10 rounded-2xl overflow-hidden">
         <DialogTitle className="px-6 py-4 border-b border-white/10 text-base font-semibold text-white">
-          Add Credits
+          Remove Credits
         </DialogTitle>
 
         <div className="px-6 py-5 space-y-5">
@@ -62,19 +73,17 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
           <div className="space-y-2">
             <label className="text-xs text-white/40 uppercase tracking-wider">Transaction Type</label>
             <div className="flex gap-2">
-              {(["BONUS", "REFUND"] as TransactionType[]).map((t) => (
+              {(["FRAUD", "OTHER"] as RemoveTransactionType[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
                   className={`flex-1 py-2 rounded-xl border text-sm font-semibold transition-colors ${
                     type === t
-                      ? t === "BONUS"
-                        ? "bg-green-500/15 border-green-500/40 text-green-400"
-                        : "bg-blue-500/15 border-blue-500/40 text-blue-400"
+                      ? TYPE_STYLES[t].active
                       : "bg-neutral-800 border-white/10 text-white/40 hover:text-white/70 hover:border-white/20"
                   }`}
                 >
-                  {t}
+                  {TYPE_STYLES[t].label}
                 </button>
               ))}
             </div>
@@ -104,9 +113,9 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
             <button
               onClick={handleSubmit}
               disabled={!isValid || loading}
-              className="flex-1 py-2.5 rounded-xl bg-white text-black text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/90 transition-colors"
+              className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-600 transition-colors"
             >
-              {loading ? "Adding…" : "Confirm"}
+              {loading ? "Removing…" : "Confirm"}
             </button>
             <button
               onClick={() => onOpenChange(false)}

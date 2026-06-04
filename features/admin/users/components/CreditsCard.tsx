@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AddCreditsDialog } from "./AddCreditsDialog";
+import { RemoveCreditsDialog } from "./RemoveCreditsDialog";
 
 interface Props {
   userId: string;
@@ -10,7 +11,8 @@ interface Props {
 
 export function CreditsCard({ userId, initialBalance }: Props) {
   const [balance, setBalance] = useState(initialBalance);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
 
   return (
     <>
@@ -18,7 +20,7 @@ export function CreditsCard({ userId, initialBalance }: Props) {
         <div className="flex items-center justify-center gap-2">
           <p className="text-3xl font-bold tabular-nums">{balance}</p>
           <button
-            onClick={() => setDialogOpen(true)}
+            onClick={() => setAddOpen(true)}
             className="cursor-pointer flex items-center justify-center w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/60 hover:text-white flex-shrink-0"
             title="Add credits"
           >
@@ -26,13 +28,28 @@ export function CreditsCard({ userId, initialBalance }: Props) {
               <path d="M12 5v14M5 12h14" strokeLinecap="round" />
             </svg>
           </button>
+          <button
+            onClick={() => setRemoveOpen(true)}
+            className="cursor-pointer flex items-center justify-center w-6 h-6 rounded-full bg-red-500/15 hover:bg-red-500/30 transition-colors text-red-400 hover:text-red-300 flex-shrink-0"
+            title="Remove credits"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-3.5 h-3.5">
+              <path d="M5 12h14" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
         <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Credits</p>
       </div>
 
       <AddCreditsDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        userId={userId}
+        onSuccess={(newBalance) => setBalance(newBalance)}
+      />
+      <RemoveCreditsDialog
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
         userId={userId}
         onSuccess={(newBalance) => setBalance(newBalance)}
       />
