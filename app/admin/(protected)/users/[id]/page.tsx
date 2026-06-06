@@ -199,7 +199,20 @@ export default async function UserDetailPage({
 
       {/* Credits Usage */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold">Credits Usage</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold">Credits Usage</h2>
+          <a
+            href={`/api/admin/users/${id}/usage-report`}
+            download
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-500 transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" opacity=".2"/>
+              <path d="M14 2v6h6M8 13h2.5M13.5 13H16M8 16.5h2.5M13.5 16.5H16M8 10h8" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+            </svg>
+            Download Report
+          </a>
+        </div>
         {creditsUsage ? (
           <CreditsUsageCard data={creditsUsage} />
         ) : (
