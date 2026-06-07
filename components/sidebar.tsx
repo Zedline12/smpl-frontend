@@ -90,7 +90,7 @@ export function Sidebar() {
   const guard = useAuthGuard();
 
   return (
-    <aside className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-neutral-700 overflow-y-auto">
+    <aside id="tour-sidebar" className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-neutral-700 overflow-y-auto">
       <div className="flex flex-col items-center xl:items-start xl:p-2 h-full">
         {/* Home */}
         <button

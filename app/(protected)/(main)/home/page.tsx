@@ -1,5 +1,6 @@
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
+import { HomeTour } from "@/components/HomeTour";
 import { Media } from "@/features/media/types/media";
 import { fetchWithToken } from "@/lib/fetcher";
 import { redirect } from "next/navigation";
@@ -29,6 +30,7 @@ export default async function WorkspacePage() {
   });
   return (
     <div className="w-full p-5 sm:mt-5">
+      <HomeTour />
       <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
       </section>

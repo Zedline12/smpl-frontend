@@ -27,6 +27,7 @@ export function Navbar() {
   });
   return (
     <header
+      id="tour-navbar"
       style={{ zIndex: 100 }}
       className="h-16 backdrop-blur-sm  flex items-center justify-between px-4 sm:px-8 "
     >

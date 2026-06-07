@@ -50,6 +50,7 @@ export default function PromptComposer() {
 
   return (
     <div
+      id="tour-prompt-composer"
       ref={containerRef}
       onFocus={handleFocus}
       onClick={handleFocus}
