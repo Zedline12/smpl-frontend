@@ -25,9 +25,7 @@ export default async function CreditPricingPage() {
         </h1>
       </div>
 
-      <div className="flex justify-between items-center mb-10 mt-8">
-        <h2 className="text-xl font-bold text-white">Configured Pricing Models</h2>
-      </div>
+     
       <CreditPricingTables schema={modelsSchema} rules={rules} />
     </div>
   );

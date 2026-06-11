@@ -28,9 +28,7 @@ export function CreditPricingTables({
     <div className="space-y-12">
       {modelKeys.map((modelId) => (
         <div key={modelId} className="space-y-4">
-          <h2 className="text-xl font-semibold text-white capitalize">
-            {modelId.replace("-", " ")} Pricing
-          </h2>
+        
           <ModelPricingTable
             modelId={modelId}
             modelSchema={schema[modelId]}

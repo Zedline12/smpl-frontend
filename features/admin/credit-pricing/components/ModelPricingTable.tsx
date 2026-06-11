@@ -3,13 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Pencil, Loader2 } from "lucide-react";
+import { Pencil, Loader2, ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  IMAGE_MODELS,
+  VIDEO_MODELS,
+  AUDIO_MODELS,
+} from "@/features/generation/enums/models.enum";
+
+const ALL_MODELS = [...IMAGE_MODELS, ...VIDEO_MODELS, ...AUDIO_MODELS];
 
 export interface CreditPricingRule {
   id: string;
@@ -31,6 +38,7 @@ export function ModelPricingTable({
 }: ModelPricingTableProps) {
   const parameters = Object.keys(modelSchema);
   const router = useRouter();
+  const modelIcon = ALL_MODELS.find((m) => m.id === modelId)?.svg ?? null;
 
   // "Add" State
   const initialFormState = parameters.reduce(
@@ -46,6 +54,9 @@ export function ModelPricingTable({
   const [formData, setFormData] = useState<Record<string, string>>(initialFormState);
   const [addCredits, setAddCredits] = useState<number | "">("");
   const [isAdding, setIsAdding] = useState(false);
+
+  // "Expand" State
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // "Edit" State
   const [selectedRule, setSelectedRule] = useState<CreditPricingRule | null>(null);
@@ -142,7 +153,34 @@ export function ModelPricingTable({
 
   return (
     <div className="rounded-md border border-neutral-800 overflow-hidden bg-neutral-950">
-      <div className="overflow-x-auto w-full">
+      <button
+        type="button"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        className="w-full flex items-center justify-between px-5 py-4 bg-neutral-900 hover:bg-neutral-800/70 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          {modelIcon && (
+            <div
+              className="w-8 h-8 rounded-md flex items-center justify-center text-xl shrink-0"
+              style={{ background: "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)" }}
+            >
+              {modelIcon}
+            </div>
+          )}
+          <span className="text-sm font-semibold text-white tracking-wide">{modelId}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-full">
+            {existingRules.length} {existingRules.length === 1 ? "rule" : "rules"}
+          </span>
+          <ChevronDown
+            className={`w-4 h-4 text-neutral-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+          />
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="overflow-x-auto w-full">
         <table className="w-full text-sm text-left text-neutral-300">
           <thead className="text-xs uppercase bg-neutral-900 border-b border-neutral-800 text-neutral-400">
             {/* Headers mapping exactly from schema parameters */}
@@ -263,6 +301,7 @@ export function ModelPricingTable({
           </tbody>
         </table>
       </div>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-neutral-950 border-neutral-800 text-white">
