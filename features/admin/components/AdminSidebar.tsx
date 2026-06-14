@@ -11,6 +11,8 @@ import {
   Image,
   Tag,
   Mail,
+  DollarSign,
+  TrendingUp,
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -18,7 +20,9 @@ const sidebarLinks = [
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
   { icon: CreditCard, label: "Credit Pricing", href: "/admin/credit-pricing" },
+  { icon: DollarSign, label: "Model Costs", href: "/admin/model-costs" },
   { icon: BarChart3, label: "Generations", href: "/admin/generations" },
+  { icon: TrendingUp, label: "Profit", href: "/admin/profit" },
   { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
   { icon: Image, label: "Media", href: "/admin/media" },
   { icon: Tag, label: "Discounts", href: "/admin/discounts" },

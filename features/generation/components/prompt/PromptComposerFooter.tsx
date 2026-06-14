@@ -53,7 +53,7 @@ export default function PromptComposerFooter({
       const res = await fetch("/api/generation/prompt-enhance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt,mediaType }),
       });
       const json = await res.json();
       if (json.data?.prompt) {
