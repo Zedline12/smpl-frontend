@@ -17,7 +17,8 @@ interface SubscriptionGridProps {
 export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const [period, setPeriod] = useState<billingPeriod>(billingPeriod.YEARLY);
   const { user } = useAuth();
-  const { startCheckout, loadingPlanId } = useCheckout();
+  const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
+  const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -47,7 +48,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   };
 
   const filteredPlans = plans
-    .filter((plan) => plan.billingPeriod === period && plan.priceAmount!=0)
+    .filter((plan) => plan.billingPeriod === period && plan.priceAmount != 0)
     .sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -197,9 +198,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
 
               <div className="w-full mt-auto">
                 <button
-                  onClick={() => startCheckout(plan.id)}
+                  onClick={() => { setProcessingPlanId(plan.id); startCheckout(plan.id); }}
                   disabled={
-                    loadingPlanId !== null || user?.subscription?.id === plan.id
+                    isCheckoutLoading || user?.subscription?.id === plan.id
                   }
                   className={cn(
                     "w-full py-3 rounded-[8px] font-medium transition-all flex items-center justify-center disabled:opacity-50",
@@ -216,7 +217,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                       : {}
                   }
                 >
-                  {loadingPlanId === plan.id
+                  {processingPlanId === plan.id
                     ? "Processing..."
                     : user?.subscription?.id === plan.id
                       ? "Current Plan"
@@ -237,7 +238,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             <div className="text-[18px] font-bold mb-1">Free Plan</div>
             <div className="flex items-baseline gap-1">
               <span className="text-[28px] font-bold">$0</span>
-              <span className="text-[18px] font-normal text-muted-foreground">/mo</span>
+              <span className="text-[18px] font-normal text-muted-foreground">
+                /mo
+              </span>
             </div>
           </div>
 
@@ -280,7 +283,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="text-sm text-foreground/85">Standard support</span>
+                <span className="text-sm text-foreground/85">
+                  Standard support
+                </span>
               </div>
             </div>
           </div>
