@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 
 export function useCheckout() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
 
   const startCheckout = useCallback(async (subscriptionPlanId: string) => {
     try {
-      setIsLoading(true);
+      setLoadingPlanId(subscriptionPlanId);
       const response = await fetch("/api/billing/checkout-session", {
         method: "POST",
         headers: {
@@ -28,9 +28,9 @@ export function useCheckout() {
       console.error("Failed to start checkout:", error);
       // You might want to add toast notification here
     } finally {
-      setIsLoading(false);
+      setLoadingPlanId(null);
     }
   }, []);
 
-  return { startCheckout, isLoading };
+  return { startCheckout, loadingPlanId };
 }

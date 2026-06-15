@@ -17,7 +17,7 @@ interface SubscriptionGridProps {
 export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const [period, setPeriod] = useState<billingPeriod>(billingPeriod.YEARLY);
   const { user } = useAuth();
-  const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
+  const { startCheckout, loadingPlanId } = useCheckout();
 
   if (isLoading) {
     return (
@@ -199,7 +199,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                 <button
                   onClick={() => startCheckout(plan.id)}
                   disabled={
-                    isCheckoutLoading || user?.subscription?.id === plan.id
+                    loadingPlanId !== null || user?.subscription?.id === plan.id
                   }
                   className={cn(
                     "w-full py-3 rounded-[8px] font-medium transition-all flex items-center justify-center disabled:opacity-50",
@@ -216,7 +216,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                       : {}
                   }
                 >
-                  {isCheckoutLoading
+                  {loadingPlanId === plan.id
                     ? "Processing..."
                     : user?.subscription?.id === plan.id
                       ? "Current Plan"
