@@ -9,24 +9,25 @@ export default async function MediaPage({
 }) {
   const resolvedParams = await searchParams;
   const page = resolvedParams.page ? parseInt(resolvedParams.page, 10) : 1;
-  const media = await fetchWithToken(`/media?limit=30&page=${page}`, {
+  const response = await fetchWithToken(`/media?limit=30&page=${page}`, {
     method: "GET",
   });
-  const data = await media.json();
-  const totalPages = data.pagination?.totalPages || 1;
-  const currentPage = data.pagination?.page || 1;
-
+  const json = await response.json();
+  const data= json.data;
+  const totalPages = json.pagination?.totalPages || 1;
+  const currentPage = json.pagination?.page || 1;
+   
   return (
     <div className="w-full p-5 mt-5 flex flex-col gap-6">
       <MediaGrid
         imagesWidth={250}
-        media={data.data}
+        media={data}
         breakpointCols={{ default: 3, 1600: 4, 1450: 4, 1200: 3, 940: 2 }}
       ></MediaGrid>
 
       {totalPages > 0 && (
         <div className="flex justify-center items-center space-x-4 mt-6">
-          {currentPage > 1 ? (
+          {json.pagination.hasPrev ? (
             <a
               href={`/admin/media?page=${currentPage - 1}`}
               className="px-4 py-2 border rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
@@ -41,7 +42,7 @@ export default async function MediaPage({
           <span className="font-medium text-sm text-muted-foreground px-4 py-2">
             Page {currentPage} of {totalPages}
           </span>
-          {currentPage < totalPages ? (
+          {json.pagination.hasNext ? (
             <a
               href={`/admin/media?page=${currentPage + 1}`}
               
