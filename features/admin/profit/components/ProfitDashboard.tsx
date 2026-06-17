@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -65,20 +66,26 @@ export function ProfitDashboard({ months }: ProfitDashboardProps) {
 
   return (
     <div className="space-y-8">
-      {/* Month selector */}
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium text-neutral-400">Month</label>
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="h-10 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          {monthKeys.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white">Profit Analytics</h2>
+          <p className="text-gray-400 text-sm mt-1">Monthly revenue, costs, and per-model breakdown.</p>
+        </div>
+        <div className="relative">
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="appearance-none h-10 w-48 rounded-xl border border-neutral-700 bg-neutral-900 pl-4 pr-9 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all cursor-pointer"
+          >
+            {monthKeys.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+        </div>
       </div>
 
       {data ? (

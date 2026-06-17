@@ -8,6 +8,7 @@ export default async function ProfitPage() {
     const res = await fetchWithToken("/admin/analytics/profit");
     if (res.ok) {
       const json = await res.json();
+      console.log(json)
       months = json.data?.months ?? json.months ?? {};
     }
   } catch (error) {
@@ -16,10 +17,6 @@ export default async function ProfitPage() {
 
   return (
     <div className="space-y-8 p-6">
-      <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Profit Analytics</h2>
-        <p className="text-gray-400">Monthly revenue, costs, and per-model breakdown.</p>
-      </div>
       <ProfitDashboard months={months} />
     </div>
   );
