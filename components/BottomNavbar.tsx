@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import { SIDEBAR_SECTIONS } from "./sidebar";
 import Link from "next/link";
+import { useAuth } from "@/providers/AuthProvider";
 
 export type BottomNavItem = {
   title: string;
@@ -16,6 +17,7 @@ interface BottomNavbarProps {
 
 export default function BottomNavbar({ items }: BottomNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <>
@@ -56,7 +58,7 @@ export default function BottomNavbar({ items }: BottomNavbarProps) {
                   {section.items.map((item, itemIdx) => (
                     <Link
                       key={itemIdx}
-                      href={item.url}
+                      href={user ? item.url : "/login"}
                       onClick={() => setIsMenuOpen(false)}
                       className="flex flex-col items-center justify-center p-4 bg-background-lighter rounded-xl hover:bg-neutral-800 transition-colors gap-2"
                     >
@@ -117,7 +119,7 @@ export default function BottomNavbar({ items }: BottomNavbarProps) {
             return (
               <Link
                 key={index}
-                href={item.link || "#"}
+                href={user ? item.link || "#" : "/login"}
                 className="flex flex-col items-center justify-center gap-1 w-full p-2 group"
               >
                 {Content}

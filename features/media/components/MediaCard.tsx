@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Media } from "@/features/media/types/media";
 import LazyImage from "@/components/LazyImage";
 import LazyVideo from "@/components/LazyVideo";
 import { downloadFile } from "@/lib/handle-downloads";
 import { MediaPreviewDialog } from "./MediaPreviewDialog";
 import { MediaEditDialog } from "./MediaEditDialog";
+import { useAuth } from "@/providers/AuthProvider";
 
 export function MediaCard({
   media,
@@ -17,6 +19,8 @@ export function MediaCard({
   height: number;
   isUpdating?: boolean;
 }) {
+  const { user } = useAuth();
+  const router = useRouter();
   const [duration, setDuration] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -33,7 +37,7 @@ export function MediaCard({
       {/* Card thumbnail */}
       <div
         style={{ height }}
-        onClick={() => setPreviewOpen(true)}
+        onClick={() => (user ? setPreviewOpen(true) : router.push("/login"))}
         className="cursor-pointer w-full group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
       >
         <div className="relative h-full">

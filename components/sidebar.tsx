@@ -1,8 +1,9 @@
 "use client";
 import { useAuthGuard } from "@/features/auth/hooks/useAuthGuard";
+import { useAuth } from "@/providers/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
 export type SidebarItem = {
@@ -97,6 +98,8 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
 
 export function Sidebar() {
   const guard = useAuthGuard();
+  const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <aside id="tour-sidebar" className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-neutral-700 overflow-y-auto">
@@ -104,7 +107,7 @@ export function Sidebar() {
         {/* Home */}
         <button
           type="button"
-          onClick={() => guard(() => redirect("/"))}
+          onClick={() => (user ? guard(() => redirect("/")) : router.push("/login"))}
           className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
         >
           <span className="sidebar-icon-glow flex-shrink-0">
@@ -129,7 +132,7 @@ export function Sidebar() {
                     style={{ background: TRI_GRADIENT, backgroundSize: "200% 200%" }}
                   >
                     <Link
-                      href={item.url}
+                      href={user ? item.url : "/login"}
                       className="flex w-full items-center justify-center xl:justify-start gap-x-3 py-2.5 px-2.5 rounded-xl"
                       style={{ background: "#080808" }}
                     >
@@ -153,7 +156,7 @@ export function Sidebar() {
         {/* Get More Credits */}
         <div className="mt-auto pt-5 w-full">
           <Link
-            href="/subscription-plans"
+            href={user ? "/subscription-plans" : "/login"}
             className="flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
           >
             <span className="flex-shrink-0">
