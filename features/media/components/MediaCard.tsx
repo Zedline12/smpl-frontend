@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Media } from "@/features/media/types/media";
@@ -19,7 +20,8 @@ export function MediaCard({
   height: number;
   isUpdating?: boolean;
 }) {
-  const { user } = useAuth();
+  // const { user } = useAuth();
+  // console.log(user);
   const router = useRouter();
   const [duration, setDuration] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -37,7 +39,7 @@ export function MediaCard({
       {/* Card thumbnail */}
       <div
         style={{ height }}
-        onClick={() => (user ? setPreviewOpen(true) : router.push("/login"))}
+        onClick={() => (setPreviewOpen(true) )}
         className="cursor-pointer w-full group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
       >
         <div className="relative h-full">

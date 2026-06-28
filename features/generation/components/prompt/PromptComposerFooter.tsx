@@ -65,6 +65,7 @@ export default function PromptComposerFooter({
       setIsEnhancing(false);
     }
   };
+  const isFreePlan = user?.subscription?.id === "69d0069900c1312c5ba5a577";
   const isFormValid = () => {
     const validator = ModelsValidatorSchemaMap[model];
     return validator.safeParse(states[model]).success;
@@ -124,19 +125,19 @@ export default function PromptComposerFooter({
             <button
               type="button"
               onClick={handleEnhancePrompt}
-              disabled={prompt.length < 10 || isEnhancing}
+              disabled={isFreePlan || prompt.length < 10 || isEnhancing}
               className="flex cursor-pointer items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-white/10"
             >
               <Image
                 src="/robot.png"
-                alt="Enhance prompt"
+                alt={isFreePlan ? "Enhance prompt (unlocked for paid users)" : "Enhance prompt"}
                 width={16}
                 height={16}
                 className={`w-4 h-4 ${isEnhancing ? "animate-robot-glow" : "opacity-50 group-hover:opacity-100 transition-opacity"}`}
               />
             </button>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[11px] font-medium whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/80 text-white/80 border border-white/10">
-              {isEnhancing ? "Enhancing…" : "Enhance prompt"}
+              {isFreePlan ? "Enhance prompt (unlocked for paid users)" : isEnhancing ? "Enhancing…" : "Enhance prompt"}
             </div>
           </div>
 

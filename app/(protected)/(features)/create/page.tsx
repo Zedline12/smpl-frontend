@@ -1,10 +1,10 @@
 "use client";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function CreateImagePage() {
   
-
   return (
     <>
       <div className="md:grid hidden w-full  h-full  text-foreground">

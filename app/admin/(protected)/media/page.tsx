@@ -1,6 +1,5 @@
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { fetchWithToken } from "@/lib/fetcher";
-import Link from "next/link";
 
 export default async function MediaPage({
   searchParams,
