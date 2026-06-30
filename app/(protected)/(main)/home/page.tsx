@@ -16,7 +16,7 @@ export default async function WorkspacePage() {
       aspectRatios[Math.floor(Math.random() * aspectRatios.length)];
     return {
       id: `mock-${i + 1}`,
-      url: `/assets/images/${i + 1}.webp`,
+      url: `/assets/background-media/${i + 1}.webp`,
       type: "image",
       aspectRatio: randomRatio as any,
       width: 1080,
