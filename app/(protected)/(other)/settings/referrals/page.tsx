@@ -1,6 +1,9 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { ReferralLinkCard } from "./_components/ReferralLinkCard";
 
+/** Credits granted per successful referral — mirrors the backend reward amount. */
+const CREDITS_PER_REFERRAL = 200;
+
 interface ReferralData {
   link: string;
   totalCreditsGranted: number;
@@ -50,7 +53,26 @@ export default async function ReferralsPage() {
       <div>
         <h2 className="text-foreground font-semibold text-base">Referrals</h2>
         <p className="text-sm mt-1 text-foreground">
-          Share your link and earn credits when friends sign up.
+          Share your link and earn {CREDITS_PER_REFERRAL} credits when friends sign up.
+        </p>
+      </div>
+
+      {/* Reward callout */}
+      <div
+        className="flex items-center gap-3 rounded-xl px-4 py-3 border"
+        style={{ background: "rgba(107,65,255,0.10)", borderColor: "rgba(107,65,255,0.28)" }}
+      >
+        <span className="flex-shrink-0" style={{ color: "#b89dff" }}>
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clipRule="evenodd" />
+          </svg>
+        </span>
+        <p className="text-sm text-foreground">
+          You get{" "}
+          <span className="font-semibold" style={{ color: "#b89dff" }}>
+            {CREDITS_PER_REFERRAL} credits
+          </span>{" "}
+          for every friend who signs up with your link.
         </p>
       </div>
 

@@ -133,7 +133,7 @@ export default function SpeechToText() {
       <button
         type="button"
         onClick={startRecording}
-        className="flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 hover:bg-white/10 opacity-50 hover:opacity-100 cursor-pointer"
+        className="flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 hover:bg-white/10 opacity-50 hover:opacity-100 cursor-pointer text-white"
       >
         <svg
           viewBox="0 0 24 24"

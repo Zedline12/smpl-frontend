@@ -63,7 +63,7 @@ export default function GeminiFlashImageComposer({
               onClick={() => setIsMediaManagerOpen(true)}
               className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex items-center justify-center transition-all group"
             >
-              <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+              <Plus className="w-6 h-6 text-muted group-hover:text-primary transition-colors" />
             </button>
           )}
         </div>

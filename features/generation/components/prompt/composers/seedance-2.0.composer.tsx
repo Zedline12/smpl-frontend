@@ -70,8 +70,8 @@ export default function Seedance20Composer({
                 onClick={() => setIsStartImageManagerOpen(true)}
                 className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex flex-col items-center justify-center transition-all group"
               >
-                <ImageIcon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors mb-1" />
-                <Plus className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                <ImageIcon className="w-5 h-5 text-muted group-hover:text-primary transition-colors mb-1" />
+                <Plus className="w-3 h-3 text-muted group-hover:text-primary transition-colors" />
               </Button>
             )}
           </div>
@@ -98,8 +98,8 @@ export default function Seedance20Composer({
                 onClick={() => setIsEndImageManagerOpen(true)}
                 className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex flex-col items-center justify-center transition-all group"
               >
-                <ImageIcon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors mb-1" />
-                <Plus className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                <ImageIcon className="w-5 h-5 text-muted group-hover:text-primary transition-colors mb-1" />
+                <Plus className="w-3 h-3 text-muted group-hover:text-primary transition-colors" />
               </Button>
             )}
           </div>

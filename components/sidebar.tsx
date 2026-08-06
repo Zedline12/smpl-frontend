@@ -102,13 +102,13 @@ export function Sidebar() {
   const router = useRouter();
 
   return (
-    <aside id="tour-sidebar" className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-neutral-700 overflow-y-auto">
+    <aside id="tour-sidebar" className="flex sm:justify-center xl:justify-start xl:p-4 xl:flex-col w-full h-full border-t border-r border-border overflow-y-auto">
       <div className="flex flex-col items-center xl:items-start xl:p-2 h-full">
         {/* Home */}
         <button
           type="button"
           onClick={() => (user ? guard(() => redirect("/")) : router.push("/login"))}
-          className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
+          className="cursor-pointer mb-3 flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           <span className="sidebar-icon-glow flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -118,7 +118,7 @@ export function Sidebar() {
           <span className="hidden xl:inline">Home</span>
         </button>
         {SIDEBAR_SECTIONS.map((section, sectionIdx) => (
-          <div key={sectionIdx} className="w-full pt-5 pb-6 border-b border-neutral-700">
+          <div key={sectionIdx} className="w-full pt-5 pb-6 border-b border-border">
             {section.title && (
               <div className="hidden xl:block text-foreground px-2.5 text-xs font-bold uppercase tracking-wider mb-2">
                 {section.title}
@@ -133,8 +133,7 @@ export function Sidebar() {
                   >
                     <Link
                       href={user ? item.url : "/login"}
-                      className="flex w-full items-center justify-center xl:justify-start gap-x-3 py-2.5 px-2.5 rounded-xl"
-                      style={{ background: "#080808" }}
+                      className="flex w-full items-center justify-center xl:justify-start gap-x-3 py-2.5 px-2.5 rounded-xl bg-background"
                     >
                       <span
                         className="flex-shrink-0 p-1.5 rounded-lg"
@@ -157,7 +156,7 @@ export function Sidebar() {
         <div className="mt-auto pt-5 w-full">
           <Link
             href={user ? "/subscription-plans" : "/login"}
-            className="flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
+            className="flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <span className="flex-shrink-0">
               <svg viewBox="0 0 24 24" fill="currentColor" className="size-6">
