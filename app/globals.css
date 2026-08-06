@@ -636,9 +636,12 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(107, 65, 255, 0.2);
 } */
 
-input::placeholder,
-textarea::placeholder {
-  color: var(--fg-4);
+/* Kept in @layer base so Tailwind `placeholder:*` utilities can override it. */
+@layer base {
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--fg-3);
+  }
 }
 
 /* ── Glass nav ───────────────────────────────────────────── */
