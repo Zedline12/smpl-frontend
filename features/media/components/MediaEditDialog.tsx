@@ -18,6 +18,9 @@ import KlingV3TextToVideoComposer from "@/features/generation/components/prompt/
 import ElevenLabsV3Composer from "@/features/generation/components/prompt/composers/eleven-labs-v3.composer";
 import SeedreamV45Composer from "@/features/generation/components/prompt/composers/seedream-v4-5.composer";
 import Seedance20Composer from "@/features/generation/components/prompt/composers/seedance-2.0.composer";
+import Seedance25Composer from "@/features/generation/components/prompt/composers/seedance-2.5.composer";
+import GptImage2Composer from "@/features/generation/components/prompt/composers/gpt-image-2.composer";
+import GrokImagineVideo15Composer from "@/features/generation/components/prompt/composers/grok-imagine-video-1.5.composer";
 
 interface MediaEditDialogProps {
   media: Media;
@@ -103,6 +106,9 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
             {model === AiModelsEnum.ELEVEN_LABS_V3_TTS && <ElevenLabsV3Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.SEEDREAM_V4_5 && <SeedreamV45Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.SEEDANCE_2_0 && <Seedance20Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.SEEDANCE_2_5 && <Seedance25Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.GPT_IMAGE_2 && <GptImage2Composer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5 && <GrokImagineVideo15Composer isFocused={true} editMode={true} />}
           </div>
 
           {/* Confirm button */}

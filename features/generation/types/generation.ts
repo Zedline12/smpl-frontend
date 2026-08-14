@@ -19,6 +19,9 @@ import { IKlingV3TextToVideoInput, klingV3TextToVideoValidationSchema } from "./
 import { IElevenLabsV3Input, elevenLabsV3ValidationSchema } from "./models/elevenlabs-v3.type";
 import { ISeedreamV45Input, seedreamV45ValidationSchema } from "./models/seedream-v4-5.type";
 import { ISeedance20Input, seedance20ValidationSchema } from "./models/seedance-2.0.type";
+import { ISeedance25Input, seedance25ValidationSchema } from "./models/seedance-2.5.type";
+import { GptImage2AspectRatio, IGptImage2Input, gptImage2ValidationSchema } from "./models/gpt-image-2.type";
+import { GrokImagineVideo15AspectRatio, IGrokImagineVideo15Input, grokImagineVideo15ValidationSchema } from "./models/grok-imagine-video-1.5.type";
 
 export interface BaseAiInput {
   prompt: string;
@@ -26,7 +29,9 @@ export interface BaseAiInput {
 export type AllModelsAspectRatio =
   | KlingO3ImageOptions["aspectRatio"]
   | Veo3AspectRatio
-  | GeminiFlashImageAspectRatio;
+  | GeminiFlashImageAspectRatio
+  | GptImage2AspectRatio
+  | GrokImagineVideo15AspectRatio;
 export type AllModelsResolution =
   | KlingO3ImageOptions["resolution"]
   | Veo3Resolution
@@ -34,7 +39,7 @@ export type AllModelsResolution =
 export type AllModelsInput =
   | KlingO3ImageOptions
   | Veo3Input
-  | GeminiFlashImageInput | IKlingV3ProMotionControlInput | IKlingV3ImageToVideoInput | IKlingV3TextToVideoInput | IElevenLabsV3Input | ISeedreamV45Input | ISeedance20Input;
+  | GeminiFlashImageInput | IKlingV3ProMotionControlInput | IKlingV3ImageToVideoInput | IKlingV3TextToVideoInput | IElevenLabsV3Input | ISeedreamV45Input | ISeedance20Input | ISeedance25Input | IGptImage2Input | IGrokImagineVideo15Input;
 
   export const ModelsValidatorSchemaMap = {
     [AiModelsEnum.VEO_3]:veo3ValidationSchema,
@@ -46,6 +51,9 @@ export type AllModelsInput =
     [AiModelsEnum.ELEVEN_LABS_V3_TTS]: elevenLabsV3ValidationSchema,
     [AiModelsEnum.SEEDREAM_V4_5]: seedreamV45ValidationSchema,
     [AiModelsEnum.SEEDANCE_2_0]: seedance20ValidationSchema,
+    [AiModelsEnum.SEEDANCE_2_5]: seedance25ValidationSchema,
+    [AiModelsEnum.GPT_IMAGE_2]: gptImage2ValidationSchema,
+    [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: grokImagineVideo15ValidationSchema,
   };
 export enum GenerationTypeEnum {
   VIDEO = "video",

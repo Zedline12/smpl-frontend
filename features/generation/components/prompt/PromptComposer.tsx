@@ -16,6 +16,9 @@ import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.compo
 import ElevenLabsV3Composer from "./composers/eleven-labs-v3.composer";
 import SeedreamV45Composer from "./composers/seedream-v4-5.composer";
 import Seedance20Composer from "./composers/seedance-2.0.composer";
+import Seedance25Composer from "./composers/seedance-2.5.composer";
+import GptImage2Composer from "./composers/gpt-image-2.composer";
+import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -89,6 +92,15 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.SEEDANCE_2_0 && (
           <Seedance20Composer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.SEEDANCE_2_5 && (
+          <Seedance25Composer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.GPT_IMAGE_2 && (
+          <GptImage2Composer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5 && (
+          <GrokImagineVideo15Composer isFocused={isFocused} />
         )}
       </div>
     </div>

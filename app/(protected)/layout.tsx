@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/navbar";
+import AiAssistantWidget from "@/features/chat/components/AiAssistantWidget";
 import { fetchWithToken } from "@/lib/fetcher";
 import AuthProvider from "@/providers/AuthProvider";
 import { cookies } from "next/headers";
@@ -21,5 +22,10 @@ export default async function ProtectedLayout({
   if (!user) {
     redirect("/login");
   }
-  return <AuthProvider user={user}>{children}</AuthProvider>;
+  return (
+    <AuthProvider user={user}>
+      {children}
+      <AiAssistantWidget />
+    </AuthProvider>
+  );
 }

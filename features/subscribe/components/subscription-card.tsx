@@ -3,6 +3,7 @@
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
+import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
 interface SubscriptionCardProps {
   plan: SubscriptionPlan;
 }
@@ -39,6 +40,8 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
           </span>
         </div>
       </div>
+
+      <AiAssistantBadge className="mb-5" />
 
       <div className="flex-grow space-y-4 mb-8">
         {(plan.metadata || []).map((meta, i) => (

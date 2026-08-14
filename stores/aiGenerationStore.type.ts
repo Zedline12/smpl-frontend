@@ -9,6 +9,9 @@ import { IKlingV3TextToVideoInput } from "@/features/generation/types/models/kli
 import { IElevenLabsV3Input, ElevenLabsV3ApplyTextNormalization, ElevenLabsV3Voice } from "@/features/generation/types/models/elevenlabs-v3.type";
 import { ISeedreamV45Input } from "@/features/generation/types/models/seedream-v4-5.type";
 import { ISeedance20Input } from "@/features/generation/types/models/seedance-2.0.type";
+import { ISeedance25Input } from "@/features/generation/types/models/seedance-2.5.type";
+import { IGptImage2Input } from "@/features/generation/types/models/gpt-image-2.type";
+import { IGrokImagineVideo15Input } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
@@ -20,6 +23,9 @@ export type ModelStateMap = {
   [AiModelsEnum.ELEVEN_LABS_V3_TTS]: IElevenLabsV3Input;
   [AiModelsEnum.SEEDREAM_V4_5]: ISeedreamV45Input;
   [AiModelsEnum.SEEDANCE_2_0]: ISeedance20Input;
+  [AiModelsEnum.SEEDANCE_2_5]: ISeedance25Input;
+  [AiModelsEnum.GPT_IMAGE_2]: IGptImage2Input;
+  [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: IGrokImagineVideo15Input;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -89,5 +95,27 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     generateAudio: false,
     imageUrl: "",
     endImageUrl: "",
+  },
+  [AiModelsEnum.SEEDANCE_2_5]: {
+    prompt: "",
+    resolution: "720p",
+    duration: 5,
+    aspectRatio: "16:9",
+    generateAudio: false,
+    imageUrl: "",
+    endImageUrl: "",
+  },
+  [AiModelsEnum.GPT_IMAGE_2]: {
+    prompt: "",
+    images: [],
+    aspectRatio: "auto",
+    quality: "auto",
+  },
+  [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: {
+    prompt: "",
+    images: [],
+    duration: 5,
+    resolution: "720p",
+    aspectRatio: "16:9",
   },
 };

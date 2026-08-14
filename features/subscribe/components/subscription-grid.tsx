@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
+import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
 
 interface SubscriptionGridProps {
   plans: SubscriptionPlan[];
@@ -173,6 +174,8 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                 {plan.creditsPerMonth?.toLocaleString()} credits
               </div>
 
+              <AiAssistantBadge className="mb-5" />
+
               <div className="space-y-3 mb-8 flex-grow w-full">
                 {(plan.metadata || []).map((meta, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -287,6 +290,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                   Standard support
                 </span>
               </div>
+              <AiAssistantBadge className="self-center max-md:self-start" />
             </div>
           </div>
 
