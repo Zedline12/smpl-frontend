@@ -54,7 +54,7 @@ export function Menu({
             e.stopPropagation();
             setIsOpen(!isOpen);
           }}
-          className="flex items-center justify-center p-2 rounded-lg hover:bg-neutral-800/50 transition-colors text-secondary-foreground"
+          className="flex items-center justify-center p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
         >
           {trigger || <MoreVertical className="w-5 h-5" />}
         </button>
@@ -104,8 +104,7 @@ export function MenuItem({
       }}
       className={cn(
         "disabled:opacity-50 disabled:cursor-not-allowed group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors cursor-pointer",
-        variant === "default" &&
-          "text-primary-foreground hover:bg-neutral-800/50",
+        variant === "default" && "text-foreground hover:bg-accent",
         variant === "danger" &&
           "text-red-400 hover:bg-red-500/10 hover:text-red-300",
         variant === "warning" &&

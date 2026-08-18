@@ -71,18 +71,18 @@ export const IMAGE_MODELS: Model[] = [
       </svg>
     ),
   },
-  // {
-  //   id: AiModelsEnum.GPT_IMAGE_2,
-  //   name: "GPT Image 2",
-  //   description:
-  //     "Faithful prompt following with up to 16 reference images.",
-  //   svg: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-  //       <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-  //         d="M4 16.5 8.5 12l3 3 3.5-3.5 5 5M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm5.5 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
-  //     </svg>
-  //   ),
-  // },
+  {
+    id: AiModelsEnum.GPT_IMAGE_2,
+    name: "GPT Image 2",
+    description:
+      "Faithful prompt following with up to 16 reference images.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M4 16.5 8.5 12l3 3 3.5-3.5 5 5M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm5.5 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
+      </svg>
+    ),
+  },
 ];
 export const VIDEO_MODELS: Model[] = [
   {
@@ -152,28 +152,28 @@ export const VIDEO_MODELS: Model[] = [
       </svg>
     ),
   },
-  // {
-  //   id: AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
-  //   name: "Grok Imagine Video 1.5",
-  //   description: "Fast, expressive video from a prompt or a single image.",
-  //   svg: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-  //       <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-  //         d="M5 19 19 5M9.5 5H19v9.5M10 19H5v-5" />
-  //     </svg>
-  //   ),
-  // },
-  // {
-  //   id: AiModelsEnum.SEEDANCE_2_5,
-  //   name: "Seedance 2.5",
-  //   description: "Cinematic video generation with optional start/end image control.",
-  //   svg: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-  //       <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-  //         d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
-  //     </svg>
-  //   ),
-  // },
+  {
+    id: AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
+    name: "Grok Imagine Video 1.5",
+    description: "Fast, expressive video from a prompt or a single image.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M5 19 19 5M9.5 5H19v9.5M10 19H5v-5" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SEEDANCE_2_5,
+    name: "Seedance 2.5",
+    description: "Cinematic video generation with optional start/end image control.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+      </svg>
+    ),
+  },
   {
     id: AiModelsEnum.KLING_V3_TEXT_TO_VIDEO,
     name: "Kling V3 Text To Video",

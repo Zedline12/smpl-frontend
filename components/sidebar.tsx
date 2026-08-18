@@ -41,7 +41,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             <path d="M20.71 7.04a1.003 1.003 0 0 0 0-1.42L18.37 3.29a1.003 1.003 0 0 0-1.42 0l-1.13 1.13 3.75 3.75 1.14-1.13Z" />
           </svg>
         ),
-        url: "https://smplprompt.com",
+        url: "/prompt-maker",
       },
     ],
   },
