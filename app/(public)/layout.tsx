@@ -43,7 +43,8 @@ export default async function PublicLayout({
     <AuthProvider user={user}>
       <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
         {/* NAVBAR */}
-        <header className="col-span-full z-50  ">
+        {/* z-[60]: must outrank the z-50 sidebar wrapper below it. */}
+        <header className="col-span-full z-[60]  ">
           <Navbar />
         </header>
 

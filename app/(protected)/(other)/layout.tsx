@@ -7,7 +7,7 @@ export default function OtherLayout({
 }>) {
   return (
     <div className="bg-background h-screen flex flex-col">
-      <header className="z-50 flex-shrink-0">
+      <header className="z-[60] flex-shrink-0">
         <Navbar />
       </header>
 

@@ -32,7 +32,9 @@ export default function MainLayout({
   return (
     <div className="bg-background h-screen overflow-hidden grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
       {/* NAVBAR */}
-      <header className="col-span-full z-50  ">
+      {/* z-[60]: the sidebar wrapper below is z-50 and later in the DOM, so it
+          would paint over the navbar's model card without this. */}
+      <header className="col-span-full z-[60]  ">
         <Navbar />
       </header>
 

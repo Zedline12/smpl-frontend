@@ -5,6 +5,7 @@ import {
   SubscriptionPlan,
 } from "@/lib/types/subscription-plan.type";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
@@ -17,9 +18,22 @@ interface SubscriptionGridProps {
 
 export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const [period, setPeriod] = useState<billingPeriod>(billingPeriod.YEARLY);
-  const { user } = useAuth();
+
+  const router = useRouter();
+  // Optional-chained: useAuth() returns null outside AuthProvider, so this also
+  // reads as "not signed in" if the grid is ever rendered on a public page.
+  const user = useAuth()?.user;
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
+
+  const handleSubscribe = (planId: string) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setProcessingPlanId(planId);
+    startCheckout(planId);
+  };
 
   if (isLoading) {
     return (
@@ -201,10 +215,8 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
 
               <div className="w-full mt-auto">
                 <button
-                  onClick={() => { setProcessingPlanId(plan.id); startCheckout(plan.id); }}
-                  disabled={
-                    isCheckoutLoading || user?.subscription?.id === plan.id
-                  }
+                  onClick={() => handleSubscribe(plan.id)}
+
                   className={cn(
                     "w-full py-3 rounded-[8px] font-medium transition-all flex items-center justify-center disabled:opacity-50",
                     isCreatorFeatured
@@ -220,11 +232,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                       : {}
                   }
                 >
-                  {processingPlanId === plan.id
-                    ? "Processing..."
-                    : user?.subscription?.id === plan.id
-                      ? "Current Plan"
-                      : "Subscribe"}
+                 Subscribe
                 </button>
                 <div className="text-muted-foreground text-[11px] text-center w-full mt-3">
                   Cancel anytime
@@ -295,18 +303,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
           </div>
 
           <div className="flex flex-col items-center flex-shrink-0 min-w-[200px]">
-            {!user?.subscription ? (
-              <button
-                disabled
-                className="w-[180px] py-3 rounded-[8px] border border-border bg-transparent text-muted-foreground font-medium flex justify-center items-center gap-1 cursor-not-allowed"
-              >
-                ✓ Current Plan
-              </button>
-            ) : (
-              <button className="w-[180px] py-3 rounded-[8px] border border-border bg-transparent text-muted-foreground font-medium flex justify-center items-center gap-1 hover:bg-accent hover:text-foreground transition-all">
-                Downgrade
-              </button>
-            )}
+            
             <div className="text-[11px] text-muted-foreground mt-2">
               No credit card required
             </div>

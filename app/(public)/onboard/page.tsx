@@ -2,8 +2,13 @@ import { MediaGrid } from "@/features/media/components/MediaGrid";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { Media } from "@/features/media/types/media";
 import Link from "next/link";
+import { fetchAppStats } from "@/features/app-stats/api";
+import { AppStatsBand } from "@/features/app-stats/components/AppStatsBand";
+import { OnboardHero } from "@/features/landing/components/OnboardHero";
 
 export default async function OnboardPage() {
+  const stats = await fetchAppStats();
+
   const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
   const media: Media[] = Array.from({ length: 13 }).map((_, i) => {
     const randomRatio =
@@ -35,6 +40,25 @@ export default async function OnboardPage() {
           </div>
         </Link>
       </section>
+
+      {stats && (
+        <div className="mb-5 px-4 pt-3 sm:px-6">
+          <AppStatsBand stats={stats} />
+        </div>
+      )}
+
+      <div className="px-4 pb-6 sm:px-6">
+        <OnboardHero />
+      </div>
+
+      <div className="px-4 pb-4 sm:px-6">
+        <h2 className="text-foreground text-xl font-bold sm:text-2xl">
+          Nano Banana Pro
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Best way to take your ad creatives to the next level
+        </p>
+      </div>
 
       <div className="">
         <section className=" overflow-y-auto  ">

@@ -8,7 +8,7 @@ export default function PromptMakerLayout({
   return (
     <div className="bg-background grid h-screen grid-rows-[auto_1fr]">
       {/* NAVBAR */}
-      <header className="z-50">
+      <header className="z-[60]">
         <Navbar />
       </header>
 
