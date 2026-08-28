@@ -35,8 +35,15 @@ export default async function PublicLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
+  // fetchWithToken resolves to a Response, so the body has to be parsed —
+  // reading `.data` straight off it yielded undefined, which made every public
+  // page look signed-out. `include=subscription` matches the protected layout,
+  // since the navbar's credits pill and account menu both read it.
   const user = token
-    ? await fetchWithToken("/auth/me").then((d: any) => d.data)
+    ? await fetchWithToken("/auth/me?include=subscription")
+        .then((res) => res.json())
+        .then((json) => json?.data ?? null)
+        .catch(() => null)
     : null;
 
   return (

@@ -3,6 +3,7 @@ import {
   fetchGenerationCost,
   fetchGenerationQueues,
   generate,
+  refundGeneration,
 } from "@/features/generation/api/generation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -33,6 +34,23 @@ export function useGenerateMutation() {
   });
 }
 
+
+export function useRefundGenerationMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (generationId: string) => refundGeneration(generationId),
+    onSuccess: () => {
+      toast.success("Generation refunded — your credits are back.");
+      // The job leaves the queue and the balance changes.
+      queryClient.refetchQueries({ queryKey: ["generation-queues"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+}
 
 export function useEditGenerationMutation() {
   const queryClient = useQueryClient();

@@ -21,6 +21,24 @@ export async function fetchGenerationQueues(): Promise<GenerationQueue[] | []> {
   const json = await res.json();
   return json.data;
 }
+/**
+ * Takes the queue record's `id`. The GenerationQueue type also declares a
+ * `jobId`, but the /media/me/queues payload does not actually return one —
+ * nothing else in the app reads that field.
+ */
+export async function refundGeneration(generationId: string) {
+  const res = await fetch(`/api/generation/${generationId}/refund`, {
+    method: "POST",
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(
+      json?.error || json?.message || "Failed to refund this generation",
+    );
+  }
+  return json?.data ?? json;
+}
+
 export async function generate(data: GenerateRequest) {
   const res = await fetch("/api/generation", {
     method: "POST",

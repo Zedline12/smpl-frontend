@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useInfiniteMediaQuery } from "../queries/media";
 import { MediaType } from "../types/media";
-import { Clock } from "lucide-react";
 import { MediaGrid } from "./MediaGrid";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
+import { QueuedGenerationTile } from "./QueuedGenerationTile";
 import { useProjectsQuery } from "@/features/projects/hooks/projects";
 import { toast } from "sonner";
 interface MediaExplorerProps {
@@ -194,30 +194,8 @@ export default function MediaExplorer({
       {topRowQueues.length > 0 && (
         <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-6 mb-4">
           {topRowQueues.map((queue) => (
-              <div
-                key={queue.id}
-                className={`relative aspect-square rounded-xl overflow-hidden flex flex-col items-center justify-center text-center transition-all duration-300 ${
-                  queue.status === "processing"
-                    ? "bg-black"
-                    : "bg-neutral-900 border border-neutral-800 text-neutral-400 p-4"
-                }`}
-              >
-                {queue.status === "processing" ? (
-                  <img
-                    src="/smpl-loading.gif"
-                    alt="Generating..."
-                    className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] object-cover rounded-lg"
-                  />
-                ) : (
-                  <>
-                    <Clock className="w-8 h-8 mb-3 opacity-50" />
-                    <span className="text-xs font-medium uppercase tracking-wide">
-                      Generation is in queue
-                    </span>
-                  </>
-                )}
-              </div>
-            ))}
+            <QueuedGenerationTile key={queue.id} queue={queue} />
+          ))}
         </div>
       )}
 
