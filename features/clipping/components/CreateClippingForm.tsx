@@ -16,6 +16,7 @@ import {
   VIDEO_TYPES,
 } from "../constants";
 import { videoTypeIcon } from "../icons";
+import { useClippingCostQuery } from "../hooks/use-clipping";
 import { CreateVideoClippingRequest } from "../types";
 import { detectVideoType, normalizeVideoUrl, videoTypeLabel } from "../utils";
 
@@ -67,6 +68,8 @@ export function CreateClippingForm({
   // Before anything is typed the form assumes YouTube.
   const effectiveType = videoTypeOverride ?? detectedType ?? INITIAL_VIDEO_TYPE;
   const SourceIcon = videoTypeIcon(effectiveType);
+
+  const { data: cost } = useClippingCostQuery(normalizedUrl);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -163,6 +166,23 @@ export function CreateClippingForm({
             <>
               <Scissors className="size-4" />
               Create clips
+              {/* Same `label | ⚡ N` shape as the generate button. */}
+              <span className="mx-0.5 text-white/40">|</span>
+              <span className="flex flex-row items-center gap-0.5 opacity-60">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="size-4"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {cost?.creditsCost ?? 0}
+              </span>
             </>
           )}
         </button>
@@ -176,6 +196,15 @@ export function CreateClippingForm({
           {videoTypeLabel(effectiveType)}
         </span>
         {videoTypeOverride !== null && " (manual)"}
+        {cost?.sourceDurationMinutes ? (
+          <>
+            {" · "}
+            <span className="text-foreground font-medium">
+              {Math.round(cost.sourceDurationMinutes)} min
+            </span>{" "}
+            video
+          </>
+        ) : null}
       </p>
 
       {/* Language + length + ratio */}

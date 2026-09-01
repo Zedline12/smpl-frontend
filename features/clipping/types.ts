@@ -51,6 +51,11 @@ export interface VideoClippingProject {
   updatedAt: string;
 }
 
+export interface ClippingCost {
+  sourceDurationMinutes: number;
+  creditsCost: number;
+}
+
 export interface CreateVideoClippingRequest {
   videoUrl: string;
   lang: string;

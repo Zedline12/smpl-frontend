@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createClippingProject,
+  fetchClippingCost,
   fetchClippingProject,
   fetchClippingProjects,
 } from "../api";
@@ -16,10 +18,40 @@ import {
 const LIST_POLL_MS = 35_000;
 const DETAIL_POLL_MS = 35_000;
 
+const COST_DEBOUNCE_MS = 500;
+
 export const clippingKeys = {
   all: ["video-clipping"] as const,
   detail: (id: string) => ["video-clipping", id] as const,
+  cost: (videoUrl: string) => ["video-clipping", "cost", videoUrl] as const,
 };
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
+}
+
+/**
+ * Debounced so a valid URL forming mid-keystroke ("https://y.co") doesn't fire
+ * a request per character.
+ */
+export function useClippingCostQuery(videoUrl: string | null) {
+  const debouncedUrl = useDebouncedValue(videoUrl, COST_DEBOUNCE_MS);
+
+  return useQuery({
+    queryKey: clippingKeys.cost(debouncedUrl ?? ""),
+    queryFn: () => fetchClippingCost(debouncedUrl!),
+    enabled: !!debouncedUrl,
+    staleTime: 60_000,
+    retry: 0,
+  });
+}
 
 export function useClippingProjectsQuery() {
   return useQuery({

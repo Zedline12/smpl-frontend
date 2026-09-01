@@ -79,7 +79,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
         href={
           user?.subscription?.name === "Free Plan"
             ? "/subscription-plans"
-            : "/my-subscription"
+            : "/settings/billing"
         }
       >
         {/* Tri-color gradient border pill */}

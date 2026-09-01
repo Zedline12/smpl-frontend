@@ -33,7 +33,7 @@ const NAV_ROWS: {
     icon: Share2,
     isNew: true,
   },
-  { href: "/settings/billing", label: "Billing", icon: CreditCard },
+  { href: "/settings/billing", label: "Plan & Billing", icon: CreditCard },
   { href: "/settings/appearance", label: "Appearance", icon: Palette },
 ];
 
@@ -149,7 +149,7 @@ export function AccountMenuPanel({
         </div>
       ) : (
         <Link
-          href="/my-subscription"
+          href="/settings/billing"
           onClick={onNavigate}
           className={cn(ROW_CLASS, "text-foreground hover:bg-accent mt-1.5")}
         >
