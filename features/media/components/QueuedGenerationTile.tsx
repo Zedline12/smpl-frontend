@@ -34,14 +34,14 @@ export function QueuedGenerationTile({ queue }: { queue: GenerationQueue }) {
 
       {/* Caution notice — always visible, hidden while hovering so it doesn't
           compete with the refund button. */}
-      <div className="pointer-events-none absolute inset-x-2 bottom-2 flex items-start gap-1.5 rounded-lg bg-black/70 p-2 text-left backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-0">
+      {/* <div className="pointer-events-none absolute inset-x-2 bottom-2 flex items-start gap-1.5 rounded-lg bg-black/70 p-2 text-left backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-0">
         <AlertTriangle className="mt-px size-3 shrink-0 text-amber-400" />
         <span className="text-[10px] leading-tight text-white/80">
           Taking more than 2 minutes? You can refund this generation.
         </span>
-      </div>
+      </div> */}
 
-      {/* Hover layer */}
+{/*       
       <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/65 group-hover:opacity-100">
         <button
           type="button"
@@ -61,7 +61,7 @@ export function QueuedGenerationTile({ queue }: { queue: GenerationQueue }) {
             </>
           )}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

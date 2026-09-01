@@ -33,7 +33,7 @@ export function Navbar() {
             theme and darker on the light one, from a single class. */}
         <span className="bg-foreground/20 hidden h-5 w-px md:block" />
 
-        <StudioLinks />
+        {/* <StudioLinks /> */}
       </div>
 
       <div className="flex items-center gap-6">
