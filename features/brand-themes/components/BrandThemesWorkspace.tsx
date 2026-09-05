@@ -132,7 +132,7 @@ export function BrandThemesWorkspace() {
         </TabsContent>
       </Tabs>
 
-      <BrandThemeGrid
+      {/* <BrandThemeGrid
         themes={finished}
         activeJobs={extracting}
         isLoading={isLoading}
@@ -143,7 +143,7 @@ export function BrandThemesWorkspace() {
           deleteTheme.isPending ? (deleteTheme.variables as string) : undefined
         }
         onDelete={(id) => deleteTheme.mutate(id)}
-      />
+      /> */}
     </div>
   );
 }
