@@ -3,16 +3,19 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   brandThemeKeys,
   useBrandThemeQueuesQuery,
   useBrandThemesQuery,
   useCreateBrandThemeMutation,
+  useCreateManualBrandThemeMutation,
   useDeleteBrandThemeMutation,
 } from "../hooks/use-brand-themes";
 import { isActiveStatus } from "../types";
 import { BrandThemeGrid } from "./BrandThemeGrid";
 import { CreateBrandThemeForm } from "./CreateBrandThemeForm";
+import { CreateManualBrandThemeForm } from "./CreateManualBrandThemeForm";
 
 export function BrandThemesWorkspace() {
   const queryClient = useQueryClient();
@@ -21,6 +24,7 @@ export function BrandThemesWorkspace() {
     useBrandThemesQuery();
   const { data: queues } = useBrandThemeQueuesQuery();
   const createTheme = useCreateBrandThemeMutation();
+  const createManualTheme = useCreateManualBrandThemeMutation();
   const deleteTheme = useDeleteBrandThemeMutation();
 
   // A ref, not state: the effect below depends only on `queues`, so a state Set
@@ -97,10 +101,36 @@ export function BrandThemesWorkspace() {
         </p>
       </header>
 
-      <CreateBrandThemeForm
-        onSubmit={(values) => createTheme.mutate(values)}
-        isSubmitting={createTheme.isPending}
-      />
+      <Tabs defaultValue="website">
+        <TabsList className="bg-background-light h-10 gap-1 rounded-xl p-1">
+          <TabsTrigger
+            value="website"
+            className="cursor-pointer rounded-lg text-xs sm:text-sm data-[state=active]:shadow-none"
+          >
+            From website
+          </TabsTrigger>
+          <TabsTrigger
+            value="manual"
+            className="cursor-pointer rounded-lg text-xs sm:text-sm data-[state=active]:shadow-none"
+          >
+            Manual
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="website" className="mt-3">
+          <CreateBrandThemeForm
+            onSubmit={(values) => createTheme.mutate(values)}
+            isSubmitting={createTheme.isPending}
+          />
+        </TabsContent>
+
+        <TabsContent value="manual" className="mt-3">
+          <CreateManualBrandThemeForm
+            onSubmit={(values) => createManualTheme.mutate(values)}
+            isSubmitting={createManualTheme.isPending}
+          />
+        </TabsContent>
+      </Tabs>
 
       <BrandThemeGrid
         themes={finished}

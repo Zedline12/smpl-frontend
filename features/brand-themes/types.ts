@@ -9,7 +9,8 @@ export function isActiveStatus(status: BrandThemeStatus): boolean {
 
 export interface BrandTheme {
   id: string;
-  websiteUrl: string;
+  /** Absent on a manually created theme. */
+  websiteUrl?: string | null;
   name: string;
   status: BrandThemeStatus;
   primaryColor: string | null;
@@ -37,4 +38,15 @@ export interface BrandThemeQueue {
 export interface CreateBrandThemeRequest {
   websiteUrl: string;
   name?: string;
+}
+
+export interface CreateManualBrandThemeRequest {
+  name: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  fonts?: string[];
+}
+
+export interface LogoSignedUrl {
+  url: string;
 }

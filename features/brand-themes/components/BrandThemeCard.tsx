@@ -15,6 +15,11 @@ function hostnameOf(url: string): string {
   }
 }
 
+/** Absent on a manually created theme, which has no website to link to. */
+function hostnameOrNull(url: string | null | undefined): string | null {
+  return url ? hostnameOf(url) : null;
+}
+
 function relativeTime(value: string): string | null {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
@@ -35,7 +40,7 @@ export function BrandThemeCard({
   const [confirming, setConfirming] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const host = hostnameOf(theme.websiteUrl);
+  const host = hostnameOrNull(theme.websiteUrl);
   const failed = theme.status === "failure";
 
   const copyColor = async () => {
@@ -66,22 +71,24 @@ export function BrandThemeCard({
           />
         ) : (
           <div className="border-border bg-background-light text-muted-foreground flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold uppercase">
-            {(theme.name || host).charAt(0)}
+            {(theme.name || host || "?").charAt(0)}
           </div>
         )}
 
         <div className="min-w-0 flex-1">
           <p className="text-foreground truncate text-sm font-semibold">
-            {theme.name?.trim() || host}
+            {theme.name?.trim() || host || "Untitled theme"}
           </p>
-          <a
-            href={theme.websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground truncate text-xs transition-colors"
-          >
-            {host}
-          </a>
+          {host && (
+            <a
+              href={theme.websiteUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground truncate text-xs transition-colors"
+            >
+              {host}
+            </a>
+          )}
         </div>
 
         <button

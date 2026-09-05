@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createBrandTheme,
+  createManualBrandTheme,
   deleteBrandTheme,
   fetchBrandThemeQueues,
   fetchBrandThemes,
@@ -10,6 +11,7 @@ import {
   BrandTheme,
   BrandThemeQueue,
   CreateBrandThemeRequest,
+  CreateManualBrandThemeRequest,
   isActiveStatus,
 } from "../types";
 
@@ -76,6 +78,25 @@ export function useCreateBrandThemeMutation() {
       );
       // refetch, not invalidate — this starts the poll immediately.
       queryClient.refetchQueries({ queryKey: brandThemeKeys.queues });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useCreateManualBrandThemeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateManualBrandThemeRequest) =>
+      createManualBrandTheme(body),
+    onSuccess: (theme) => {
+      queryClient.setQueryData<BrandTheme[]>(brandThemeKeys.all, (old) =>
+        old ? [theme, ...old] : [theme],
+      );
+      // No refetchQueries(queues) here — a manual theme creates no extraction
+      // job, so there is nothing to poll.
     },
     onError: (error) => {
       toast.error(error.message);

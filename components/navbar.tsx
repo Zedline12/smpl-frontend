@@ -19,10 +19,10 @@ export function Navbar() {
         <Link href="/" className="shrink-0">
           {/* The source is 1000x1000 — the className is what actually caps it. */}
           <Image
-            className="h-10 w-20 cursor-pointer"
+            className="h-10 w-25 cursor-pointer"
             src="/logo.png"
             alt="Logo"
-            width={150}
+            width={200}
             height={100}
           />
         </Link>
@@ -33,7 +33,7 @@ export function Navbar() {
             theme and darker on the light one, from a single class. */}
         <span className="bg-foreground/20 hidden h-5 w-px md:block" />
 
-        {/* <StudioLinks /> */}
+        <StudioLinks />
       </div>
 
       <div className="flex items-center gap-6">

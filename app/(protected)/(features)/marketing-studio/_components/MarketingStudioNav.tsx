@@ -2,10 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette } from "lucide-react";
+import { Images, Palette, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
+  {
+    href: "/marketing-studio/create",
+    label: "Create",
+    icon: Sparkles,
+  },
+  {
+    href: "/marketing-studio/my-creations",
+    label: "My Creations",
+    icon: Images,
+  },
   {
     href: "/marketing-studio/brand-themes",
     label: "Brand Themes",
