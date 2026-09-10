@@ -1,3 +1,5 @@
+import { Generation } from "@/features/generation/types/generation";
+
 export const ASPECT_RATIOS = [
   "16:9",
   "4:3",

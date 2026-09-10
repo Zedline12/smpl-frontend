@@ -31,9 +31,13 @@ import {
   useCreateMarketingAdMutation,
   useCreateMarketingPhotoMutation,
   useMarketingCostQuery,
-  useMarketingJobStatus,
+  useMarketingCreationStatus,
 } from "../hooks/use-marketing-studio";
-import { MarketingStudioMediaType, MAX_DESCRIPTION_LENGTH } from "../types";
+import {
+  MarketingStudioCreation,
+  MarketingStudioMediaType,
+  MAX_DESCRIPTION_LENGTH,
+} from "../types";
 
 const TRIGGER_CLASS =
   "flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-foreground hover:bg-background-lightest transition-colors bg-background-light border border-border w-full text-center";
@@ -56,13 +60,17 @@ export function MarketingCreateWorkspace() {
   const [includeFonts, setIncludeFonts] = useState(false);
   const [referenceImages, setReferenceImages] = useState<string[]>([]);
 
-  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeCreation, setActiveCreation] =
+    useState<MarketingStudioCreation | null>(null);
   const [resultMediaType, setResultMediaType] =
     useState<MarketingStudioMediaType>("photo");
 
   const createAd = useCreateMarketingAdMutation();
   const createPhoto = useCreateMarketingPhotoMutation();
-  const { job } = useMarketingJobStatus(activeJobId);
+  const { creation: liveCreation } = useMarketingCreationStatus(
+    activeCreation?.id ?? null,
+    activeCreation,
+  );
 
   const selectedTheme = themes?.find((theme) => theme.id === brandThemeId);
   const isSubmitting = createAd.isPending || createPhoto.isPending;
@@ -136,7 +144,7 @@ export function MarketingCreateWorkspace() {
         {
           onSuccess: (creation) => {
             setResultMediaType("video");
-            setActiveJobId(creation.jobId);
+            setActiveCreation(creation);
           },
         },
       );
@@ -153,7 +161,7 @@ export function MarketingCreateWorkspace() {
         {
           onSuccess: (creation) => {
             setResultMediaType("photo");
-            setActiveJobId(creation.jobId);
+            setActiveCreation(creation);
           },
         },
       );
@@ -302,7 +310,12 @@ export function MarketingCreateWorkspace() {
         </button>
       </div>
 
-      {activeJobId && <CreationResult mediaType={resultMediaType} job={job} />}
+      {activeCreation && (
+        <CreationResult
+          mediaType={resultMediaType}
+          creation={liveCreation ?? activeCreation}
+        />
+      )}
     </div>
   );
 }

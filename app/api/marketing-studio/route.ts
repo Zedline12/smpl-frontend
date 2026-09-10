@@ -4,8 +4,12 @@ import { fetchWithToken } from "@/lib/fetcher";
 export async function GET(req: NextRequest) {
   try {
     const limit = req.nextUrl.searchParams.get("limit");
-    const endpoint = limit
-      ? `/marketing-studio?limit=${encodeURIComponent(limit)}`
+    const brandThemeId = req.nextUrl.searchParams.get("brandThemeId");
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", limit);
+    if (brandThemeId) params.set("brandThemeId", brandThemeId);
+    const endpoint = params.size
+      ? `/marketing-studio?${params.toString()}`
       : "/marketing-studio";
 
     const response = await fetchWithToken(endpoint);

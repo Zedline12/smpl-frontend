@@ -1,5 +1,6 @@
 import { Veo3AspectRatio, Veo3Duration } from "@/features/generation/types/models/veo-3.type";
 import { GeminiFlashImageAspectRatio } from "@/features/generation/types/models/gemini-flash-image.type";
+import { Media } from "@/features/media/types/media";
 
 export type MarketingStudioMediaType = "photo" | "video";
 
@@ -34,7 +35,8 @@ export interface MarketingStudioCreation {
   id: string;
   brandThemeId: string;
   projectId: string;
-  jobId: string;
+  /** Null until generation finishes — its presence is the only status signal. */
+  media: Media | null;
   mediaType: MarketingStudioMediaType;
   description: string;
   includeLogo: boolean;
@@ -42,6 +44,12 @@ export interface MarketingStudioCreation {
   includeFonts: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export function isMarketingStudioActive(
+  creation: Pick<MarketingStudioCreation, "media">,
+): boolean {
+  return creation.media === null;
 }
 
 export const MAX_DESCRIPTION_LENGTH = 2000;

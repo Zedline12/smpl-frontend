@@ -42,9 +42,12 @@ export async function createMarketingPhoto(
 }
 
 export async function fetchMarketingCreations(
-  limit?: number,
+  options?: { limit?: number; brandThemeId?: string },
 ): Promise<MarketingStudioCreation[]> {
-  const query = limit ? `?limit=${limit}` : "";
+  const params = new URLSearchParams();
+  if (options?.limit) params.set("limit", String(options.limit));
+  if (options?.brandThemeId) params.set("brandThemeId", options.brandThemeId);
+  const query = params.size ? `?${params.toString()}` : "";
   const res = await fetch(`/api/marketing-studio${query}`);
   if (!res.ok) {
     throw new Error(await readError(res, "Failed to load creations"));
@@ -61,4 +64,13 @@ export async function fetchMarketingCreation(
     throw new Error(await readError(res, "Failed to load creation"));
   }
   return unwrap<MarketingStudioCreation>(await res.json());
+}
+
+export async function fetchMarketingQueues(): Promise<MarketingStudioCreation[]> {
+  const res = await fetch("/api/marketing-studio/me/queues");
+  if (!res.ok) {
+    throw new Error(await readError(res, "Failed to load creation jobs"));
+  }
+  const data = unwrap<MarketingStudioCreation[]>(await res.json());
+  return Array.isArray(data) ? data : [];
 }

@@ -1,9 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchGenerationCost } from "@/features/generation/api/generation";
-import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
-import { GenerationQueue } from "@/features/generation/types/generation";
 import { Veo3Input } from "@/features/generation/types/models/veo-3.type";
 import { GeminiFlashImageInput } from "@/features/generation/types/models/gemini-flash-image.type";
 import {
@@ -11,24 +9,84 @@ import {
   createMarketingPhoto,
   fetchMarketingCreation,
   fetchMarketingCreations,
+  fetchMarketingQueues,
 } from "../api";
 import {
   CreateMarketingAdRequest,
   CreateMarketingPhotoRequest,
+  MarketingStudioCreation,
+  isMarketingStudioActive,
 } from "../types";
+
+const POLL_INTERVAL_MS = 1000;
 
 export const marketingStudioKeys = {
   all: ["marketing-studio"] as const,
   detail: (id: string) => ["marketing-studio", id] as const,
+  queues: ["marketing-studio", "queues"] as const,
 };
 
-export function useMarketingCreationsQuery() {
+export function useMarketingCreationsQuery(options?: { brandThemeId?: string }) {
   return useQuery({
-    queryKey: marketingStudioKeys.all,
-    queryFn: () => fetchMarketingCreations(),
+    queryKey: [...marketingStudioKeys.all, options?.brandThemeId ?? null],
+    queryFn: () => fetchMarketingCreations(options),
     staleTime: 30_000,
     retry: 0,
+    // Safety net: if the queues endpoint ever drops an item before its media
+    // shows up here, this is what stops the card spinning forever.
+    refetchInterval: (query) =>
+      query.state.data?.some((creation) => isMarketingStudioActive(creation))
+        ? 5_000
+        : false,
   });
+}
+
+/**
+ * Polls `GET /marketing-studio/me/queues` once a second while any creation is
+ * still generating, then stops. Mirrors `useBrandThemeQueuesQuery`. The
+ * domain carries no status field — a creation is "active" purely by having a
+ * null `media`, and this endpoint's items are the same full creation shape.
+ */
+export function useMarketingQueuesQuery() {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: marketingStudioKeys.queues,
+    queryFn: async () => {
+      const incoming = await fetchMarketingQueues();
+      // Merge over the cached jobs by id: a job can drop out of the endpoint's
+      // window before the UI has observed its media populate.
+      const previous =
+        (queryClient.getQueryData(marketingStudioKeys.queues) as
+          | MarketingStudioCreation[]
+          | undefined) ?? [];
+      const byId = new Map(previous.map((job) => [job.id, job]));
+      incoming.forEach((job) => byId.set(job.id, job));
+      return Array.from(byId.values());
+    },
+    // Self-stopping: only poll while something is actually running.
+    refetchInterval: (query) =>
+      query.state.data?.some((job) => isMarketingStudioActive(job))
+        ? POLL_INTERVAL_MS
+        : false,
+    retry: 0,
+  });
+}
+
+/**
+ * Live status for one creation: prefers the queues poll (fresher, 1s) and
+ * falls back to whatever was passed in (e.g. the mutation's own response)
+ * until the first queue fetch resolves.
+ */
+export function useMarketingCreationStatus(
+  id: string | null,
+  fallback?: MarketingStudioCreation | null,
+) {
+  const { data: queue } = useMarketingQueuesQuery();
+  const creation = id
+    ? (queue?.find((job) => job.id === id) ?? fallback ?? undefined)
+    : undefined;
+  return { creation };
 }
 
 /**
@@ -62,9 +120,33 @@ export function useMarketingCostQuery(
   });
 }
 
+/**
+ * Prepends a freshly created creation into both the unfiltered list cache and
+ * (if present) the theme-filtered list cache — `useMarketingCreationsQuery`
+ * keys each by `[...marketingStudioKeys.all, brandThemeId ?? null]`.
+ */
+function prependCreation(
+  queryClient: ReturnType<typeof useQueryClient>,
+  creation: MarketingStudioCreation,
+) {
+  for (const filter of [null, creation.brandThemeId]) {
+    queryClient.setQueryData<MarketingStudioCreation[]>(
+      [...marketingStudioKeys.all, filter],
+      (old) => (old ? [creation, ...old] : old),
+    );
+  }
+}
+
 export function useCreateMarketingAdMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (body: CreateMarketingAdRequest) => createMarketingAd(body),
+    onSuccess: (creation) => {
+      prependCreation(queryClient, creation);
+      // refetch, not invalidate — this starts the poll immediately.
+      queryClient.refetchQueries({ queryKey: marketingStudioKeys.queues });
+    },
     onError: (error) => {
       toast.error(error.message);
     },
@@ -72,9 +154,15 @@ export function useCreateMarketingAdMutation() {
 }
 
 export function useCreateMarketingPhotoMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (body: CreateMarketingPhotoRequest) =>
       createMarketingPhoto(body),
+    onSuccess: (creation) => {
+      prependCreation(queryClient, creation);
+      queryClient.refetchQueries({ queryKey: marketingStudioKeys.queues });
+    },
     onError: (error) => {
       toast.error(error.message);
     },
@@ -82,8 +170,8 @@ export function useCreateMarketingPhotoMutation() {
 }
 
 /**
- * Recovers a creation's `jobId` after a reload — the mutation's in-memory
- * response wouldn't survive one. Not itself the source of status/progress.
+ * Recovers a creation after a reload — the mutation's in-memory response
+ * wouldn't survive one. Not itself the source of polling.
  */
 export function useMarketingCreationQuery(id: string | null) {
   return useQuery({
@@ -93,24 +181,4 @@ export function useMarketingCreationQuery(id: string | null) {
     retry: 0,
     staleTime: Infinity,
   });
-}
-
-/**
- * `GET /marketing-studio/:id` carries no status or result — that lives on the
- * generation job identified by `jobId`, which `useGenerationQueuesQuery`
- * already polls (self-stopping, 1s) for every other generation in the app.
- * This reads that same cache rather than starting a second independent poll.
- *
- * Matched against the queue item's `id`, not its `jobId` — the latter is
- * declared on `GenerationQueue` but is not actually populated by the backend
- * (see the earlier refund-generation fix, which hit the same gap).
- */
-export function useMarketingJobStatus(jobId: string | null) {
-  const { data: queues } = useGenerationQueuesQuery();
-  const job = jobId
-    ? (queues as GenerationQueue[] | undefined)?.find(
-        (queue) => queue.id === jobId,
-      )
-    : undefined;
-  return { job };
 }

@@ -2,19 +2,17 @@
 
 import { Download, Loader2 } from "lucide-react";
 import { downloadFile } from "@/lib/handle-downloads";
-import { GenerationQueue } from "@/features/generation/types/generation";
-import { MarketingStudioMediaType } from "../types";
+import { MarketingStudioCreation, MarketingStudioMediaType } from "../types";
 
 interface CreationResultProps {
   mediaType: MarketingStudioMediaType;
-  job: GenerationQueue | undefined;
+  creation: MarketingStudioCreation | undefined;
 }
 
-export function CreationResult({ mediaType, job }: CreationResultProps) {
-  if (!job) return null;
+export function CreationResult({ mediaType, creation }: CreationResultProps) {
+  if (!creation) return null;
 
-  const isActive = job.status === "pending" || job.status === "processing";
-  const isFailure = job.status === "failure";
+  const isActive = !creation.media;
 
   return (
     <div className="border-border bg-card overflow-hidden rounded-2xl border">
@@ -22,23 +20,15 @@ export function CreationResult({ mediaType, job }: CreationResultProps) {
         {isActive && (
           <div className="text-muted-foreground flex flex-col items-center gap-2 p-10">
             <Loader2 className="size-6 animate-spin" />
-            <span className="text-sm">
-              {job.status === "pending" ? "Queued…" : "Generating…"}
-            </span>
+            <span className="text-sm">Generating…</span>
           </div>
         )}
 
-        {isFailure && (
-          <p className="p-10 text-sm text-red-400">
-            Generation failed. Try again.
-          </p>
-        )}
-
-        {job.status === "success" && job.resultUrl && (
+        {creation.media && (
           <>
             {mediaType === "video" ? (
               <video
-                src={job.resultUrl}
+                src={creation.media.url}
                 controls
                 autoPlay
                 loop
@@ -46,7 +36,7 @@ export function CreationResult({ mediaType, job }: CreationResultProps) {
               />
             ) : (
               <img
-                src={job.resultUrl}
+                src={creation.media.url}
                 alt=""
                 className="max-h-[55vh] w-full object-contain"
               />
@@ -56,8 +46,8 @@ export function CreationResult({ mediaType, job }: CreationResultProps) {
               type="button"
               onClick={() =>
                 downloadFile(
-                  job.resultUrl,
-                  `marketing-${mediaType}-${job.id}`,
+                  creation.media!.url,
+                  `marketing-${mediaType}-${creation.id}`,
                 )
               }
               className="absolute top-3 right-3 cursor-pointer rounded-lg bg-black/40 p-2 text-white backdrop-blur-md transition-colors hover:bg-black/60"
