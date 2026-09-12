@@ -965,3 +965,13 @@ select:focus {
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-bottom-color: oklch(0.13 0 0) !important;
 }
+
+/* ── Toasts (sonner) — always vertically centered on screen ── */
+[data-sonner-toaster] {
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+}
+[data-sonner-toaster][data-x-position="center"] {
+  transform: translate(-50%, -50%) !important;
+}

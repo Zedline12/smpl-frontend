@@ -114,6 +114,12 @@ export default async function AccountPage() {
         <Stat label="Credits used" value={user.totalCreditsUsed} />
         <Stat label="Member since" value={formatMemberSince(user.createdAt)} />
       </div>
+     <button onclick="copyToClipboard('https://api.yourapp.com/api/mcp')">
+  Copy MCP URL
+</button>
+<a href="https://claude.ai/settings/connectors" target="_blank">
+  Open Claude.ai connectors →
+</a>
 
       {/* Danger zone */}
       <div
