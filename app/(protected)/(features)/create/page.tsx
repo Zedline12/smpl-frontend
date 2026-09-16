@@ -15,7 +15,7 @@ export default function CreateImagePage() {
           <div className="h-[500px] ">
             <MediaExplorer />
           </div>
-           <section className="sm:w-1/2 w-full flex items-center justify-center">
+           <section className="sm:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           <PromptComposer />
         </section>
           {/* <div className="absolute border border-neutral-800 rounded-lg p-5 bottom-0 left-0 w-full">
@@ -27,7 +27,7 @@ export default function CreateImagePage() {
         <div className="col-span-1 h-[600px] ">
           <MediaExplorer />
         </div>
-        <section className="sm:w-1/2 w-full z-10 flex items-center justify-center">
+        <section className="sm:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           <PromptComposer />
         </section>
       </div>
