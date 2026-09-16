@@ -148,14 +148,15 @@ export function AccountMenuPanel({
           </Link>
         </div>
       ) : (
-        <Link
-          href="/settings/billing"
-          onClick={onNavigate}
-          className={cn(ROW_CLASS, "text-foreground hover:bg-accent mt-1.5")}
-        >
-          <Crown className="text-primary size-4 shrink-0" />
-          Manage subscription
-        </Link>
+        <></>
+        // <Link
+        //   href="/settings/billing"
+        //   onClick={onNavigate}
+        //   className={cn(ROW_CLASS, "text-foreground hover:bg-accent mt-1.5")}
+        // >
+        //   <Crown className="text-primary size-4 shrink-0" />
+        //   Manage subscription
+        // </Link>
       )}
 
       <Divider />

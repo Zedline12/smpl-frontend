@@ -135,7 +135,7 @@ export function CurrentPlanCard() {
               className="text-sm font-semibold"
               style={{ color: "rgba(239,68,68,0.9)" }}
             >
-              Cancel subscription
+              Delete account
             </p>
             <p
               className="mt-0.5 text-xs"

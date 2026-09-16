@@ -70,7 +70,7 @@ export function CancelSubscriptionDialog({
             background: "rgba(239,68,68,0.06)",
           }}
         >
-          Cancel subscription
+          Delete Account
         </button>
       </DialogPrimitive.Trigger>
 
@@ -99,8 +99,7 @@ export function CancelSubscriptionDialog({
             <ul className="text-muted-foreground space-y-1 text-xs leading-relaxed">
               {monthlyCredits > 0 && (
                 <li>
-                  Your {monthlyCredits.toLocaleString("en-US")} monthly credits
-                  will stop renewing.
+                 Lose access to your premium features and all your creations by canceling your subscription
                 </li>
               )}
               <li>You&apos;ll lose access to paid plan features.</li>
@@ -116,7 +115,7 @@ export function CancelSubscriptionDialog({
                 disabled={cancel.isPending}
                 className="border-border text-foreground hover:bg-accent flex-1 cursor-pointer rounded-lg border py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Keep plan
+                Keep account
               </button>
             </DialogPrimitive.Close>
 
