@@ -1,5 +1,6 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { DeleteAccountDialog } from "./_components/DeleteAccountDialog";
+import { Button } from "@/components/ui/button";
 
 interface UserData {
   id: string;
@@ -61,7 +62,10 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export default async function AccountPage() {
   const user = await getMe();
-
+  const copyToClipboard = async () => {
+    const mcpUrl = `${process.env.NEXT_PUBLIC_API_URL!.replace(/\/v1$/, "")}/mcp`;
+    await navigator.clipboard.writeText(mcpUrl);
+  };
   if (!user) {
     return (
       <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -155,9 +159,7 @@ export default async function AccountPage() {
         <Stat label="Credits used" value={user.totalCreditsUsed} />
         <Stat label="Member since" value={formatMemberSince(user.createdAt)} />
       </div>
-      {/* <button onclick="copyToClipboard('https://api.yourapp.com/api/mcp')">
-  Copy MCP URL
-</button> */}
+      <Button onClick={copyToClipboard}>Copy MCP URL</Button>
       <a href="https://claude.ai/settings/connectors" target="_blank">
         Open Claude.ai connectors →
       </a>
