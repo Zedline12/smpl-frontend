@@ -28,7 +28,10 @@ export default function McpButton() {
     >
       <div>
         <p className="text-white font-semibold text-sm">MCP server</p>
-        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <p
+          className="text-xs mt-0.5"
+          style={{ color: "rgba(255,255,255,0.4)" }}
+        >
           Connect this account to Claude via MCP.
         </p>
       </div>
@@ -49,18 +52,24 @@ export default function McpButton() {
           onClick={copyToClipboard}
           className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium flex-shrink-0 transition-colors"
           style={{
-            background: copied ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.06)",
+            background: copied
+              ? "rgba(34,197,94,0.12)"
+              : "rgba(255,255,255,0.06)",
             color: copied ? "#22c55e" : "white",
             border: `1px solid ${copied ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.1)"}`,
           }}
         >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? (
+            <Check className="w-3.5 h-3.5" />
+          ) : (
+            <Copy className="w-3.5 h-3.5" />
+          )}
           {copied ? "Copied" : "Copy URL"}
         </button>
       </div>
 
       <a
-        href="https://claude.ai/settings/connectors"
+        href="https://claude.ai/new?modal=add-custom-connector#customize/connectors"
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs font-medium transition-colors hover:text-white"
