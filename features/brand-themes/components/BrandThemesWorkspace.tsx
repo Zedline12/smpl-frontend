@@ -1,21 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   brandThemeKeys,
   useBrandThemeQueuesQuery,
   useBrandThemesQuery,
-  useCreateBrandThemeMutation,
-  useCreateManualBrandThemeMutation,
   useDeleteBrandThemeMutation,
 } from "../hooks/use-brand-themes";
 import { isActiveStatus } from "../types";
 import { BrandThemeGrid } from "./BrandThemeGrid";
-import { CreateBrandThemeForm } from "./CreateBrandThemeForm";
-import { CreateManualBrandThemeForm } from "./CreateManualBrandThemeForm";
 
 export function BrandThemesWorkspace() {
   const queryClient = useQueryClient();
@@ -23,8 +20,6 @@ export function BrandThemesWorkspace() {
   const { data: themes, isLoading, isError, error, refetch } =
     useBrandThemesQuery();
   const { data: queues } = useBrandThemeQueuesQuery();
-  const createTheme = useCreateBrandThemeMutation();
-  const createManualTheme = useCreateManualBrandThemeMutation();
   const deleteTheme = useDeleteBrandThemeMutation();
 
   // A ref, not state: the effect below depends only on `queues`, so a state Set
@@ -52,7 +47,7 @@ export function BrandThemesWorkspace() {
         .map((theme) => ({
           id: theme.id,
           status: jobByThemeId.get(theme.id)?.status ?? theme.status,
-          websiteUrl: theme.websiteUrl,
+          websiteUrl: theme.websiteUrl ?? undefined,
         })),
       finished: list.filter((theme) => !isActiveStatus(theme.status)),
     };
@@ -94,45 +89,24 @@ export function BrandThemesWorkspace() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-5 md:p-8">
-      <header>
-        <h1 className="text-foreground text-2xl font-bold">Brand Themes</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Pull a brand&apos;s colours, fonts and logo straight from its website.
-        </p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-foreground text-2xl font-bold">Brand Themes</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Your brands&apos; colours, fonts and logos, ready to use in Marketing
+            Studio.
+          </p>
+        </div>
+        <Link
+          href="/marketing-studio/brand-themes/create"
+          className="bg-gradient-primary flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <Plus className="size-4" />
+          New theme
+        </Link>
       </header>
 
-      <Tabs defaultValue="website">
-        <TabsList className="bg-background-light h-10 gap-1 rounded-xl p-1">
-          <TabsTrigger
-            value="website"
-            className="cursor-pointer rounded-lg text-xs sm:text-sm data-[state=active]:shadow-none"
-          >
-            From website
-          </TabsTrigger>
-          <TabsTrigger
-            value="manual"
-            className="cursor-pointer rounded-lg text-xs sm:text-sm data-[state=active]:shadow-none"
-          >
-            Manual
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="website" className="mt-3">
-          <CreateBrandThemeForm
-            onSubmit={(values) => createTheme.mutate(values)}
-            isSubmitting={createTheme.isPending}
-          />
-        </TabsContent>
-
-        <TabsContent value="manual" className="mt-3">
-          <CreateManualBrandThemeForm
-            onSubmit={(values) => createManualTheme.mutate(values)}
-            isSubmitting={createManualTheme.isPending}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* <BrandThemeGrid
+      <BrandThemeGrid
         themes={finished}
         activeJobs={extracting}
         isLoading={isLoading}
@@ -143,7 +117,7 @@ export function BrandThemesWorkspace() {
           deleteTheme.isPending ? (deleteTheme.variables as string) : undefined
         }
         onDelete={(id) => deleteTheme.mutate(id)}
-      /> */}
+      />
     </div>
   );
 }

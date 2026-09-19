@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Palette } from "lucide-react";
 import { BrandTheme, BrandThemeQueue } from "../types";
 import { BrandThemeCard } from "./BrandThemeCard";
@@ -72,9 +73,15 @@ export function BrandThemeGrid({
         <h3 className="text-foreground text-lg font-semibold">
           No brand themes yet
         </h3>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Paste a website above to extract its colours, fonts and logo.
+        <p className="text-muted-foreground mt-1 mb-6 text-sm">
+          Extract one from a website, or set up a brand manually.
         </p>
+        <Link
+          href="/marketing-studio/brand-themes/create"
+          className="btn btn-primary"
+        >
+          Create a theme
+        </Link>
       </div>
     );
   }

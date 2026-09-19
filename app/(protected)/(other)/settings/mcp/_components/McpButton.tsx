@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-const MCP_URL = `${process.env.NEXT_PUBLIC_API_URL}/mcp`;
+export const MCP_URL = `${process.env.NEXT_PUBLIC_API_URL}/mcp`;
 
 export default function McpButton() {
   const [copied, setCopied] = useState(false);
@@ -67,16 +67,6 @@ export default function McpButton() {
           {copied ? "Copied" : "Copy URL"}
         </button>
       </div>
-
-      <a
-        href="https://claude.ai/new?modal=add-custom-connector#customize/connectors"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs font-medium transition-colors hover:text-white"
-        style={{ color: "rgba(255,255,255,0.45)" }}
-      >
-        Open Claude.ai connectors →
-      </a>
     </div>
   );
 }

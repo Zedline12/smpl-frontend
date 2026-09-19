@@ -1,6 +1,5 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { DeleteAccountDialog } from "./_components/DeleteAccountDialog";
-import McpButton from "./_components/McpButton";
 
 interface UserData {
   id: string;
@@ -155,8 +154,6 @@ export default async function AccountPage() {
         <Stat label="Credits used" value={user.totalCreditsUsed} />
         <Stat label="Member since" value={formatMemberSince(user.createdAt)} />
       </div>
-      <McpButton />
-
       {/* Danger zone */}
       <div
         className="rounded-2xl border p-5"

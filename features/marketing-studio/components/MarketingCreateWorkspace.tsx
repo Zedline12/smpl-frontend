@@ -20,7 +20,7 @@ import {
 // AllModelsAspectRatio state back down at submit time for each request shape.
 import { AllModelsAspectRatio } from "@/features/generation/types/generation";
 import { useBrandThemesQuery } from "@/features/brand-themes/hooks/use-brand-themes";
-import { BrandTheme } from "@/features/brand-themes/types";
+import { BrandTheme, getThemeFonts } from "@/features/brand-themes/types";
 import { BrandThemeSelector } from "./BrandThemeSelector";
 import { ProjectPickerMenu } from "./ProjectPickerMenu";
 import { MediaTypeToggle } from "./MediaTypeToggle";
@@ -107,7 +107,7 @@ export function MarketingCreateWorkspace() {
     // otherwise submit includeLogo: true for a theme that has no logo.
     if (!theme.logoUrl) setIncludeLogo(false);
     if (!theme.primaryColor) setIncludePrimaryColor(false);
-    if (!theme.fonts?.length) setIncludeFonts(false);
+    if (!getThemeFonts(theme).length) setIncludeFonts(false);
   };
 
   const handleMediaTypeChange = (next: MarketingStudioMediaType) => {
@@ -119,7 +119,7 @@ export function MarketingCreateWorkspace() {
   const buildIncludeFlags = () => ({
     includeLogo: !!selectedTheme?.logoUrl && includeLogo,
     includePrimaryColor: !!selectedTheme?.primaryColor && includePrimaryColor,
-    includeFonts: !!selectedTheme?.fonts?.length && includeFonts,
+    includeFonts: getThemeFonts(selectedTheme).length > 0 && includeFonts,
   });
 
   const handleSubmit = () => {

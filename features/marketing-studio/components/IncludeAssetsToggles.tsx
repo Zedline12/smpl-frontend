@@ -1,7 +1,7 @@
 "use client";
 
 import GenerateAudioSelector from "@/features/generation/components/selectors/GenerateAudioSelector";
-import { BrandTheme } from "@/features/brand-themes/types";
+import { BrandTheme, getThemeFonts } from "@/features/brand-themes/types";
 
 interface IncludeAssetsTogglesProps {
   theme: BrandTheme | undefined;
@@ -28,7 +28,7 @@ export function IncludeAssetsToggles({
 }: IncludeAssetsTogglesProps) {
   const hasLogo = !!theme?.logoUrl;
   const hasPrimaryColor = !!theme?.primaryColor;
-  const hasFonts = !!theme?.fonts?.length;
+  const hasFonts = getThemeFonts(theme).length > 0;
 
   return (
     <div className="flex flex-col gap-2">

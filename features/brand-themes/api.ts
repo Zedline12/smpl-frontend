@@ -48,9 +48,14 @@ export async function createBrandTheme(
   return unwrap<BrandTheme>(await res.json());
 }
 
-export async function fetchLogoSignedUrl(): Promise<LogoSignedUrl> {
-  const res = await fetch("/api/brand-themes/logo/signed-url", {
+/** Uses the media controller's signed-url endpoint (same one the media library upload uses). */
+export async function fetchLogoSignedUrl(
+  contentType: string,
+): Promise<LogoSignedUrl> {
+  const res = await fetch("/api/media/upload-signature", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contentType }),
   });
   if (!res.ok) {
     throw new Error(await readError(res, "Failed to get an upload URL"));
@@ -60,7 +65,7 @@ export async function fetchLogoSignedUrl(): Promise<LogoSignedUrl> {
 
 /** Uploads the file and returns the durable object URL (the signed URL minus its query string). */
 export async function uploadBrandThemeLogo(file: File): Promise<string> {
-  const { url } = await fetchLogoSignedUrl();
+  const { url } = await fetchLogoSignedUrl(file.type);
   const putRes = await fetch(url, {
     method: "PUT",
     body: file,

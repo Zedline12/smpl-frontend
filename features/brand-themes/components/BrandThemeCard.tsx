@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Check, Copy, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { BrandTheme } from "../types";
+import { BrandTheme, getThemeFonts } from "../types";
 
 function hostnameOf(url: string): string {
   try {
@@ -113,25 +113,34 @@ export function BrandThemeCard({
           {/* Primary colour */}
           <div className="flex items-center gap-2.5">
             {theme.primaryColor ? (
-              <button
-                type="button"
-                onClick={copyColor}
-                className="group/color flex cursor-pointer items-center gap-2.5"
-                title="Copy hex"
-              >
-                <span
-                  className="size-7 shrink-0 rounded-full border border-white/20"
-                  style={{ background: theme.primaryColor }}
-                />
-                <span className="text-foreground font-mono text-xs uppercase">
-                  {theme.primaryColor}
-                </span>
-                {copied ? (
-                  <Check className="size-3 text-green-500" />
-                ) : (
-                  <Copy className="text-muted-foreground size-3 opacity-0 transition-opacity group-hover/color:opacity-100" />
+              <>
+                <button
+                  type="button"
+                  onClick={copyColor}
+                  className="group/color flex cursor-pointer items-center gap-2.5"
+                  title="Copy hex"
+                >
+                  <span
+                    className="size-7 shrink-0 rounded-full border border-white/20"
+                    style={{ background: theme.primaryColor }}
+                  />
+                  <span className="text-foreground font-mono text-xs uppercase">
+                    {theme.primaryColor}
+                  </span>
+                  {copied ? (
+                    <Check className="size-3 text-green-500" />
+                  ) : (
+                    <Copy className="text-muted-foreground size-3 opacity-0 transition-opacity group-hover/color:opacity-100" />
+                  )}
+                </button>
+                {theme.secondaryColor && (
+                  <span
+                    className="size-5 shrink-0 rounded-full border border-white/20"
+                    style={{ background: theme.secondaryColor }}
+                    title={`Secondary ${theme.secondaryColor}`}
+                  />
                 )}
-              </button>
+              </>
             ) : (
               <>
                 <span className="border-border bg-background-light size-7 shrink-0 rounded-full border" />
@@ -144,8 +153,8 @@ export function BrandThemeCard({
 
           {/* Fonts */}
           <div className="flex flex-wrap gap-1.5">
-            {theme.fonts?.length ? (
-              theme.fonts.slice(0, 4).map((font) => (
+            {getThemeFonts(theme).length ? (
+              getThemeFonts(theme).map((font) => (
                 <span
                   key={font}
                   className="border-border bg-background-light text-foreground/80 rounded-full border px-2 py-0.5 text-[11px]"

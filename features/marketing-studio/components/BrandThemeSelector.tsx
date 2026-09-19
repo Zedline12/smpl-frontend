@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { Menu, MenuItem } from "@/components/menu";
 import { useBrandThemesQuery } from "@/features/brand-themes/hooks/use-brand-themes";
-import { BrandTheme } from "@/features/brand-themes/types";
+import { BrandTheme, getThemeFonts } from "@/features/brand-themes/types";
 
 interface BrandThemeSelectorProps {
   brandThemeId: string | null;
@@ -74,9 +74,9 @@ export function BrandThemeSelector({
                 <span className="text-foreground truncate text-sm">
                   {theme.name}
                 </span>
-                {theme.fonts.length > 0 && (
+                {getThemeFonts(theme).length > 0 && (
                   <span className="text-muted-foreground truncate text-[11px]">
-                    {theme.fonts.join(", ")}
+                    {getThemeFonts(theme).join(", ")}
                   </span>
                 )}
               </span>

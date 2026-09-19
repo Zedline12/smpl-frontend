@@ -30,7 +30,10 @@ export function MarketingStudioNav() {
     <nav className="flex flex-row gap-1 md:flex-col">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
-        const active = pathname === item.href;
+        // Nested routes (e.g. /brand-themes/create, /my-creations/[id]) keep
+        // their parent highlighted.
+        const active =
+          pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Link

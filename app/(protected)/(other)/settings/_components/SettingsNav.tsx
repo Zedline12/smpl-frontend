@@ -6,6 +6,7 @@ import {
   CreditCard,
   LucideIcon,
   Palette,
+  Plug,
   Share2,
   Sparkles,
   User,
@@ -37,6 +38,10 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       },
       { href: "/settings/referrals", label: "Referrals", icon: Share2 },
     ],
+  },
+  {
+    title: "Integrations",
+    items: [{ href: "/settings/mcp", label: "MCP", icon: Plug }],
   },
 ];
 

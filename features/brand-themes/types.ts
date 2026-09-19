@@ -9,12 +9,15 @@ export function isActiveStatus(status: BrandThemeStatus): boolean {
 
 export interface BrandTheme {
   id: string;
+  userId?: string;
   /** Absent on a manually created theme. */
   websiteUrl?: string | null;
   name: string;
   status: BrandThemeStatus;
   primaryColor: string | null;
-  fonts: string[];
+  secondaryColor: string | null;
+  headerFont: string | null;
+  bodyFont: string | null;
   logoUrl: string | null;
   errorMessage: string | null;
   readAt: string | null;
@@ -40,11 +43,24 @@ export interface CreateBrandThemeRequest {
   name?: string;
 }
 
+/** De-duplicated header + body fonts — replaces the old `theme.fonts` array. */
+export function getThemeFonts(
+  theme: Pick<BrandTheme, "headerFont" | "bodyFont"> | undefined | null,
+): string[] {
+  const fonts = [theme?.headerFont, theme?.bodyFont].filter(
+    (font): font is string => !!font,
+  );
+  return Array.from(new Set(fonts));
+}
+
 export interface CreateManualBrandThemeRequest {
-  name: string;
-  logoUrl?: string;
-  primaryColor?: string;
-  fonts?: string[];
+  name?: string;
+  primaryColor: string;
+  logoUrl: string;
+  fonts: string[];
+  secondaryColor?: string;
+  headerFont?: string;
+  bodyFont?: string;
 }
 
 export interface LogoSignedUrl {

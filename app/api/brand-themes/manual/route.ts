@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await fetchWithToken("/brand-themes/manual", {
+    const response = await fetchWithToken("/brand-themes", {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },

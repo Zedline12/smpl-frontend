@@ -5,13 +5,15 @@ import { Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProjectColorPicker } from "@/components/ui/hex-color-picker";
 import { CreateManualBrandThemeRequest } from "../types";
-import { FontChipsInput } from "./FontChipsInput";
 import { LogoUploadField } from "./LogoUploadField";
 
 interface CreateManualBrandThemeFormProps {
   onSubmit: (values: CreateManualBrandThemeRequest) => void;
   isSubmitting: boolean;
 }
+
+const TEXT_INPUT_CLASS =
+  "border-border bg-background-light text-foreground placeholder:text-muted-foreground focus:border-primary/50 h-10 w-full rounded-xl! border! px-3! text-sm! outline-none!";
 
 export function CreateManualBrandThemeForm({
   onSubmit,
@@ -20,7 +22,9 @@ export function CreateManualBrandThemeForm({
   const [name, setName] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | undefined>();
-  const [fonts, setFonts] = useState<string[]>([]);
+  const [secondaryColor, setSecondaryColor] = useState<string | undefined>();
+  const [headerFont, setHeaderFont] = useState("");
+  const [bodyFont, setBodyFont] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (event: FormEvent) => {
@@ -32,19 +36,22 @@ export function CreateManualBrandThemeForm({
       setError("Give this brand theme a name");
       return;
     }
+    if (!logoUrl || !primaryColor) return;
+
+    const header = headerFont.trim();
+    const body = bodyFont.trim();
 
     setError(null);
     onSubmit({
       name: trimmedName,
-      ...(logoUrl ? { logoUrl } : {}),
-      ...(primaryColor ? { primaryColor } : {}),
-      ...(fonts.length ? { fonts } : {}),
+      logoUrl,
+      primaryColor,
+      // The backend still requires the array alongside header/body.
+      fonts: Array.from(new Set([header, body].filter(Boolean))),
+      ...(secondaryColor ? { secondaryColor } : {}),
+      ...(header ? { headerFont: header } : {}),
+      ...(body ? { bodyFont: body } : {}),
     });
-
-    setName("");
-    setLogoUrl(null);
-    setPrimaryColor(undefined);
-    setFonts([]);
   };
 
   return (
@@ -56,7 +63,7 @@ export function CreateManualBrandThemeForm({
         Create a brand theme manually
       </h2>
       <p className="text-muted-foreground mt-1 text-xs">
-        Set the name, logo, colour and fonts yourself.
+        Set the name, logo, colours and fonts yourself.
       </p>
 
       <div className="mt-4 flex flex-col gap-4">
@@ -74,43 +81,73 @@ export function CreateManualBrandThemeForm({
             maxLength={100}
             placeholder="Acme Inc."
             aria-invalid={!!error}
-            className={cn(
-              "border-border bg-background-light text-foreground placeholder:text-muted-foreground h-10 w-full rounded-xl! border! px-3! text-sm! outline-none!",
-              "focus:border-primary/50",
-              error && "border-red-500/60!",
-            )}
+            className={cn(TEXT_INPUT_CLASS, error && "border-red-500/60!")}
           />
           {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
         </div>
 
         <div>
           <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-            Logo (optional)
+            Logo
           </label>
           <LogoUploadField value={logoUrl} onChange={setLogoUrl} />
         </div>
 
-        <div>
-          <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-            Primary colour (optional)
-          </label>
-          <ProjectColorPicker
-            value={primaryColor}
-            onChange={setPrimaryColor}
-            label=""
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+              Primary colour
+            </label>
+            <ProjectColorPicker
+              value={primaryColor}
+              onChange={setPrimaryColor}
+              label=""
+            />
+          </div>
+          <div>
+            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+              Secondary colour (optional)
+            </label>
+            <ProjectColorPicker
+              value={secondaryColor}
+              onChange={setSecondaryColor}
+              label=""
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-            Fonts (optional)
-          </label>
-          <FontChipsInput value={fonts} onChange={setFonts} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+              Header font (optional)
+            </label>
+            <input
+              type="text"
+              value={headerFont}
+              onChange={(event) => setHeaderFont(event.target.value)}
+              maxLength={60}
+              placeholder="Playfair Display"
+              className={TEXT_INPUT_CLASS}
+            />
+          </div>
+          <div>
+            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+              Body font (optional)
+            </label>
+            <input
+              type="text"
+              value={bodyFont}
+              onChange={(event) => setBodyFont(event.target.value)}
+              maxLength={60}
+              placeholder="Inter"
+              className={TEXT_INPUT_CLASS}
+            />
+          </div>
         </div>
 
         <button
           type="submit"
-          disabled={isSubmitting || !name.trim()}
+          disabled={isSubmitting || !name.trim() || !logoUrl || !primaryColor}
           className="bg-gradient-primary flex h-10 w-fit cursor-pointer items-center justify-center gap-2 self-end rounded-xl px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
