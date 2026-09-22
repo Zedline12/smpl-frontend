@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-export const MCP_URL = `${process.env.NEXT_PUBLIC_API_URL}/mcp`;
+export const MCP_URL = `${process.env.NEXT_PUBLIC_API_URL?.replace("/v1","")}/mcp`;
 
 export default function McpButton() {
   const [copied, setCopied] = useState(false);
