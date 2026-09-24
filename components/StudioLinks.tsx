@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   { label: "Mcp Integration", href: "/settings/mcp", isNew: true },
-   { label: "Clipping Studio", href: "/clipping-studio", isNew: true },
+  { label: "Clipping Studio", href: "/clipping-studio", isNew: true },
   // { label: "Marketing Studio", href: "/marketing-studio", isNew: true },
 ];
 
