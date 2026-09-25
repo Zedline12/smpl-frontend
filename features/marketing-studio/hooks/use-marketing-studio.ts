@@ -74,22 +74,6 @@ export function useMarketingQueuesQuery() {
 }
 
 /**
- * Live status for one creation: prefers the queues poll (fresher, 1s) and
- * falls back to whatever was passed in (e.g. the mutation's own response)
- * until the first queue fetch resolves.
- */
-export function useMarketingCreationStatus(
-  id: string | null,
-  fallback?: MarketingStudioCreation | null,
-) {
-  const { data: queue } = useMarketingQueuesQuery();
-  const creation = id
-    ? (queue?.find((job) => job.id === id) ?? fallback ?? undefined)
-    : undefined;
-  return { creation };
-}
-
-/**
  * Same endpoint the prompt composer already uses — {model, input} in,
  * {creditsCost} out. Marketing Studio has no resolution control of its own,
  * so it borrows each model's ModelDefaults resolution for the estimate.

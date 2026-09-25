@@ -44,7 +44,7 @@ export function ProjectPickerMenu({
     <Menu
       direction="up"
       trigger={
-        <div className="border-border bg-background-light hover:bg-background-lightest flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors">
+        <div className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20">
           {FOLDER_ICON}
           {current?.name ?? "Select a project"}
         </div>

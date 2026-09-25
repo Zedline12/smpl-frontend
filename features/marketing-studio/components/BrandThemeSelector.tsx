@@ -41,7 +41,7 @@ export function BrandThemeSelector({
     <Menu
       direction="up"
       trigger={
-        <div className="border-border bg-background-light hover:bg-background-lightest flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors">
+        <div className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20">
           {current ? <ThemeSwatch theme={current} /> : null}
           {current?.name ?? "Select a brand theme"}
         </div>

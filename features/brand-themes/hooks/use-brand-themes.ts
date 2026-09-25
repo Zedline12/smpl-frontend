@@ -6,12 +6,14 @@ import {
   deleteBrandTheme,
   fetchBrandThemeQueues,
   fetchBrandThemes,
+  updateBrandTheme,
 } from "../api";
 import {
   BrandTheme,
   BrandThemeQueue,
   CreateBrandThemeRequest,
   CreateManualBrandThemeRequest,
+  UpdateBrandThemeRequest,
   isActiveStatus,
 } from "../types";
 
@@ -97,6 +99,26 @@ export function useCreateManualBrandThemeMutation() {
       );
       // No refetchQueries(queues) here — a manual theme creates no extraction
       // job, so there is nothing to poll.
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useUpdateBrandThemeMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: UpdateBrandThemeRequest }) =>
+      updateBrandTheme(id, body),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<BrandTheme[]>(brandThemeKeys.all, (old) =>
+        old
+          ? old.map((theme) => (theme.id === updated.id ? updated : theme))
+          : old,
+      );
+      toast.success("Brand theme updated");
     },
     onError: (error) => {
       toast.error(error.message);

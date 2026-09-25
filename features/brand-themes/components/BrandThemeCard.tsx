@@ -2,10 +2,19 @@
 
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { AlertTriangle, Check, Copy, Loader2, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Copy,
+  Loader2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getThemeCardStyle } from "../color";
 import { BrandTheme, getThemeFonts } from "../types";
+import { EditBrandThemeDialog } from "./EditBrandThemeDialog";
 
 function hostnameOf(url: string): string {
   try {
@@ -38,45 +47,92 @@ export function BrandThemeCard({
   onDelete,
 }: BrandThemeCardProps) {
   const [confirming, setConfirming] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [copiedColor, setCopiedColor] = useState<string | null>(null);
 
   const host = hostnameOrNull(theme.websiteUrl);
   const failed = theme.status === "failure";
+  const fonts = getThemeFonts(theme);
 
-  const copyColor = async () => {
-    if (!theme.primaryColor) return;
+  // The card takes on the brand: gradient with two colours, solid with one.
+  const { background, isLight } = getThemeCardStyle(theme);
+  const tinted = !!background && !failed;
+  const ink = isLight ? "#0b0b0f" : "#ffffff";
+  const softBorder = isLight ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.3)";
+  const softFill = isLight ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.22)";
+
+  const copyColor = async (color: string) => {
     if (!navigator.clipboard?.writeText) {
-      toast.info(`Primary colour is ${theme.primaryColor}`);
+      toast.info(`Colour is ${color}`);
       return;
     }
     try {
-      await navigator.clipboard.writeText(theme.primaryColor);
-      setCopied(true);
+      await navigator.clipboard.writeText(color);
+      setCopiedColor(color);
       toast.success("Colour copied");
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopiedColor(null), 2000);
     } catch {
       toast.error("Could not copy the colour");
     }
   };
 
+  const colors = [theme.primaryColor, theme.secondaryColor].filter(
+    (color): color is string => !!color,
+  );
+
   return (
-    <div className="border-border bg-card group relative flex flex-col gap-4 rounded-2xl border p-4 transition-colors hover:border-white/20">
-      <div className="flex items-start gap-3">
+    <div
+      className={cn(
+        "group relative flex min-h-64 flex-col gap-6 rounded-2xl border p-6 transition-shadow",
+        tinted
+          ? "hover:shadow-xl"
+          : "border-border bg-card hover:border-white/20",
+      )}
+      style={
+        tinted
+          ? { background: background!, color: ink, borderColor: softBorder }
+          : undefined
+      }
+    >
+      <div className="flex items-start gap-4">
         {/* Arbitrary remote host — next/image would need it whitelisted. */}
         {theme.logoUrl ? (
           <img
             src={theme.logoUrl}
             alt=""
-            className="border-border bg-background-light size-11 shrink-0 rounded-xl border object-contain p-1"
+            className={cn(
+              "size-16 shrink-0 rounded-2xl border object-contain p-1.5",
+              !tinted && "border-border bg-background-light",
+            )}
+            style={
+              tinted
+                ? { borderColor: softBorder, background: softFill }
+                : undefined
+            }
           />
         ) : (
-          <div className="border-border bg-background-light text-muted-foreground flex size-11 shrink-0 items-center justify-center rounded-xl border text-base font-bold uppercase">
+          <div
+            className={cn(
+              "flex size-16 shrink-0 items-center justify-center rounded-2xl border text-2xl font-bold uppercase",
+              !tinted && "border-border bg-background-light text-muted-foreground",
+            )}
+            style={
+              tinted
+                ? { borderColor: softBorder, background: softFill }
+                : undefined
+            }
+          >
             {(theme.name || host || "?").charAt(0)}
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="text-foreground truncate text-sm font-semibold">
+          <p
+            className={cn(
+              "truncate text-xl leading-tight font-bold",
+              !tinted && "text-foreground",
+            )}
+          >
             {theme.name?.trim() || host || "Untitled theme"}
           </p>
           {host && (
@@ -84,21 +140,46 @@ export function BrandThemeCard({
               href={theme.websiteUrl!}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground truncate text-xs transition-colors"
+              className={cn(
+                "mt-0.5 block truncate text-sm transition-opacity",
+                tinted
+                  ? "opacity-75 hover:opacity-100"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
               {host}
             </a>
           )}
         </div>
 
-        <button
-          type="button"
-          aria-label="Delete brand theme"
-          onClick={() => setConfirming(true)}
-          className="text-muted-foreground hover:bg-background-lighter cursor-pointer rounded-lg p-1.5 opacity-0 transition-colors group-hover:opacity-100 hover:text-red-500 focus-visible:opacity-100 max-sm:opacity-100"
-        >
-          <Trash2 className="size-4" />
-        </button>
+        <div className="flex shrink-0 items-center">
+          <button
+            type="button"
+            aria-label="Edit brand theme"
+            onClick={() => setEditing(true)}
+            className={cn(
+              "cursor-pointer rounded-lg p-2 opacity-0 transition-colors group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-100",
+              tinted
+                ? "hover:bg-black/15"
+                : "text-muted-foreground hover:bg-background-lighter hover:text-foreground",
+            )}
+          >
+            <Pencil className="size-[18px]" />
+          </button>
+          <button
+            type="button"
+            aria-label="Delete brand theme"
+            onClick={() => setConfirming(true)}
+            className={cn(
+              "cursor-pointer rounded-lg p-2 opacity-0 transition-colors group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-100",
+              tinted
+                ? "hover:bg-black/15"
+                : "text-muted-foreground hover:bg-background-lighter hover:text-red-500",
+            )}
+          >
+            <Trash2 className="size-[18px]" />
+          </button>
+        </div>
       </div>
 
       {failed ? (
@@ -109,42 +190,44 @@ export function BrandThemeCard({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {/* Primary colour */}
-          <div className="flex items-center gap-2.5">
-            {theme.primaryColor ? (
-              <>
+        <div className="flex flex-col gap-4">
+          {/* Colours */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {colors.length ? (
+              colors.map((color) => (
                 <button
+                  key={color}
                   type="button"
-                  onClick={copyColor}
+                  onClick={() => copyColor(color)}
                   className="group/color flex cursor-pointer items-center gap-2.5"
                   title="Copy hex"
                 >
                   <span
-                    className="size-7 shrink-0 rounded-full border border-white/20"
-                    style={{ background: theme.primaryColor }}
+                    className="size-9 shrink-0 rounded-full border-2"
+                    style={{
+                      background: color,
+                      borderColor: tinted ? ink : "rgba(255,255,255,0.2)",
+                    }}
                   />
-                  <span className="text-foreground font-mono text-xs uppercase">
-                    {theme.primaryColor}
+                  <span
+                    className={cn(
+                      "font-mono text-sm uppercase",
+                      !tinted && "text-foreground",
+                    )}
+                  >
+                    {color}
                   </span>
-                  {copied ? (
-                    <Check className="size-3 text-green-500" />
+                  {copiedColor === color ? (
+                    <Check className="size-3.5 text-green-500" />
                   ) : (
-                    <Copy className="text-muted-foreground size-3 opacity-0 transition-opacity group-hover/color:opacity-100" />
+                    <Copy className="size-3.5 opacity-0 transition-opacity group-hover/color:opacity-70" />
                   )}
                 </button>
-                {theme.secondaryColor && (
-                  <span
-                    className="size-5 shrink-0 rounded-full border border-white/20"
-                    style={{ background: theme.secondaryColor }}
-                    title={`Secondary ${theme.secondaryColor}`}
-                  />
-                )}
-              </>
+              ))
             ) : (
               <>
-                <span className="border-border bg-background-light size-7 shrink-0 rounded-full border" />
-                <span className="text-muted-foreground text-xs">
+                <span className="border-border bg-background-light size-9 shrink-0 rounded-full border" />
+                <span className="text-muted-foreground text-sm">
                   No colour detected
                 </span>
               </>
@@ -152,19 +235,32 @@ export function BrandThemeCard({
           </div>
 
           {/* Fonts */}
-          <div className="flex flex-wrap gap-1.5">
-            {getThemeFonts(theme).length ? (
-              getThemeFonts(theme).map((font) => (
+          <div className="flex flex-wrap gap-2">
+            {fonts.length ? (
+              fonts.map((font) => (
                 <span
                   key={font}
-                  className="border-border bg-background-light text-foreground/80 rounded-full border px-2 py-0.5 text-[11px]"
-                  style={{ fontFamily: `${font}, var(--font-sans)` }}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-sm",
+                    !tinted && "border-border bg-background-light text-foreground/80",
+                  )}
+                  style={{
+                    fontFamily: `${font}, var(--font-sans)`,
+                    ...(tinted
+                      ? { borderColor: softBorder, background: softFill }
+                      : {}),
+                  }}
                 >
                   {font}
                 </span>
               ))
             ) : (
-              <span className="text-muted-foreground text-xs">
+              <span
+                className={cn(
+                  "text-sm",
+                  tinted ? "opacity-70" : "text-muted-foreground",
+                )}
+              >
                 No fonts detected
               </span>
             )}
@@ -172,7 +268,12 @@ export function BrandThemeCard({
         </div>
       )}
 
-      <p className="text-muted-foreground mt-auto text-[11px]">
+      <p
+        className={cn(
+          "mt-auto text-xs",
+          tinted ? "opacity-70" : "text-muted-foreground",
+        )}
+      >
         {relativeTime(theme.createdAt)}
       </p>
 
@@ -204,6 +305,12 @@ export function BrandThemeCard({
           </div>
         </div>
       )}
+
+      <EditBrandThemeDialog
+        theme={theme}
+        open={editing}
+        onOpenChange={setEditing}
+      />
     </div>
   );
 }

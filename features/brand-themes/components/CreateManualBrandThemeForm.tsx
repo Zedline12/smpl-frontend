@@ -3,8 +3,8 @@
 import { FormEvent, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ProjectColorPicker } from "@/components/ui/hex-color-picker";
 import { CreateManualBrandThemeRequest } from "../types";
+import { HexColorField } from "./HexColorField";
 import { LogoUploadField } from "./LogoUploadField";
 
 interface CreateManualBrandThemeFormProps {
@@ -93,27 +93,17 @@ export function CreateManualBrandThemeForm({
           <LogoUploadField value={logoUrl} onChange={setLogoUrl} />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-              Primary colour
-            </label>
-            <ProjectColorPicker
-              value={primaryColor}
-              onChange={setPrimaryColor}
-              label=""
-            />
-          </div>
-          <div>
-            <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-              Secondary colour (optional)
-            </label>
-            <ProjectColorPicker
-              value={secondaryColor}
-              onChange={setSecondaryColor}
-              label=""
-            />
-          </div>
+        <div>
+          <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+            Primary colour
+          </label>
+          <HexColorField value={primaryColor} onChange={setPrimaryColor} />
+        </div>
+        <div>
+          <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+            Secondary colour (optional)
+          </label>
+          <HexColorField value={secondaryColor} onChange={setSecondaryColor} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

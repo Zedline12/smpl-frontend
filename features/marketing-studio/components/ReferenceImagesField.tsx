@@ -10,6 +10,7 @@ interface ReferenceImagesFieldProps {
   onChange: (images: string[]) => void;
 }
 
+/** Same thumbnail grid + dashed add tile the prompt composers use. */
 export function ReferenceImagesField({
   images,
   onChange,
@@ -21,18 +22,14 @@ export function ReferenceImagesField({
   };
 
   return (
-    <div>
-      <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-        Reference images (optional)
-      </label>
-
-      <div className="flex flex-row flex-wrap gap-2">
+    <>
+      <div className="flex max-w-[400px] flex-row flex-wrap gap-2">
         {images.map((url, index) => (
           <div
             key={url + index}
-            className="group border-border bg-background-light relative h-20 w-20 overflow-hidden rounded-xl border"
+            className="group relative h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-white/5"
           >
-            <img src={url} alt="Reference" className="h-full w-full object-cover" />
+            <img src={url} alt="Ref" className="h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => removeImage(url)}
@@ -47,9 +44,9 @@ export function ReferenceImagesField({
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="border-border hover:border-primary/50 hover:bg-background-light flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all"
+            className="group flex h-20 w-20 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-white/10 transition-all hover:border-primary/50 hover:bg-white/5"
           >
-            <Plus className="text-muted-foreground size-6" />
+            <Plus className="text-muted group-hover:text-primary size-6 transition-colors" />
           </button>
         )}
       </div>
@@ -61,6 +58,6 @@ export function ReferenceImagesField({
         onSelect={onChange}
         maxSelections={MAX_REFERENCE_IMAGES}
       />
-    </div>
+    </>
   );
 }

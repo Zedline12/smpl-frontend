@@ -63,6 +63,16 @@ export interface CreateManualBrandThemeRequest {
   bodyFont?: string;
 }
 
+export interface UpdateBrandThemeRequest {
+  name?: string;
+  fonts?: string[];
+  primaryColor?: string;
+  logoUrl?: string;
+  secondaryColor?: string;
+  headerFont?: string;
+  bodyFont?: string;
+}
+
 export interface LogoSignedUrl {
   url: string;
 }

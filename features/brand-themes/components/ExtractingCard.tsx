@@ -17,7 +17,7 @@ export function ExtractingCard({ job }: { job: BrandThemeQueue }) {
   const isQueued = job.status === "pending";
 
   return (
-    <div className="border-border bg-card relative overflow-hidden rounded-2xl border p-4">
+    <div className="border-border bg-card relative min-h-64 overflow-hidden rounded-2xl border p-6">
       {/* The sweep. .animate-scanner only sets the transform — the gradient and
           width have to come from here, and the parent must clip it. */}
       {!isQueued && (
@@ -30,10 +30,10 @@ export function ExtractingCard({ job }: { job: BrandThemeQueue }) {
         />
       )}
 
-      <div className="relative flex items-center gap-3">
-        <div className="bg-background-lighter size-11 shrink-0 animate-pulse rounded-xl" />
+      <div className="relative flex items-center gap-4">
+        <div className="bg-background-lighter size-16 shrink-0 animate-pulse rounded-2xl" />
         <div className="min-w-0 flex-1">
-          <p className="text-foreground truncate text-sm font-medium">
+          <p className="text-foreground truncate text-xl font-bold">
             {host ?? "Extracting brand theme"}
           </p>
           <p className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-xs">
