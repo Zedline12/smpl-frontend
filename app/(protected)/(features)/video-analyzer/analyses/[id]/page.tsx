@@ -2,18 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Clock,
-  ExternalLink,
-  ListVideo,
-  Loader2,
-} from "lucide-react";
+import { AlertTriangle, ArrowLeft, Clock, ListVideo, Loader2 } from "lucide-react";
 import { SceneList } from "@/features/video-analyzer/components/SceneList";
 import { useVideoAnalysisQuery } from "@/features/video-analyzer/hooks/use-video-analyzer";
 import { isActiveStatus } from "@/features/video-analyzer/types";
-import { formatDuration, hostnameOf } from "@/features/video-analyzer/utils";
+import { formatDuration } from "@/features/video-analyzer/utils";
 
 function AnalysisSkeleton() {
   return (
@@ -59,8 +52,7 @@ export default function VideoAnalysisPage() {
     );
   }
 
-  const host = hostnameOf(analysis.youtubeUrl);
-  const title = analysis.name?.trim() || host;
+  const title = analysis.name?.trim() || "Untitled analysis";
   const active = isActiveStatus(analysis.status);
 
   return (
@@ -74,26 +66,26 @@ export default function VideoAnalysisPage() {
       </Link>
 
       <header className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-foreground text-2xl font-bold">{title}</h1>
-          <a
-            href={analysis.youtubeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs transition-colors"
-          >
-            <ExternalLink className="size-3.5" />
-            Source
-          </a>
+        <h1 className="text-foreground text-2xl font-bold">{title}</h1>
+
+        <div className="border-border overflow-hidden rounded-2xl border bg-black">
+          <video
+            src={analysis.originalVideoUrl}
+            controls
+            className="max-h-[50vh] w-full object-contain"
+          />
         </div>
 
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
           <span className="bg-muted inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
             <ListVideo className="size-3" />
-            {analysis.scenes?.length ?? 0} scenes
+            {analysis.totalScenes ?? 0} scenes
           </span>
           <span className="bg-muted rounded-full px-2.5 py-0.5 text-[11px] font-medium">
             {formatDuration(analysis.durationSeconds)}
+          </span>
+          <span className="bg-muted rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+            {analysis.sceneDurationSeconds}s scenes
           </span>
           <span className="bg-muted rounded-full px-2.5 py-0.5 text-[11px] font-medium">
             {analysis.creditsUsed} credits

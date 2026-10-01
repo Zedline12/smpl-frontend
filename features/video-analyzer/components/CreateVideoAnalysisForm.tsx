@@ -1,13 +1,17 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import { ChevronDown, Loader2, Youtube } from "lucide-react";
+import { FormEvent, useState } from "react";
+import { ChevronDown, Loader2, Plus, Video, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
 import { CreateVideoAnalysisRequest } from "../types";
-import { normalizeYoutubeUrl } from "../utils";
 
 const FIELD_CLASS =
   "border-border bg-background-light text-foreground placeholder:text-muted-foreground focus:border-primary/50 w-full rounded-xl! border! px-3! text-sm! outline-none!";
+
+/** Same 4/6/8s increments Veo 3 uses (features/generation/types/models/veo-3.type.ts). */
+const SCENE_DURATIONS: Array<4 | 6 | 8> = [4, 6, 8];
+const DEFAULT_SCENE_DURATION: 4 | 6 | 8 = 8;
 
 interface CreateVideoAnalysisFormProps {
   onSubmit: (values: CreateVideoAnalysisRequest) => void;
@@ -18,31 +22,27 @@ export function CreateVideoAnalysisForm({
   onSubmit,
   isSubmitting,
 }: CreateVideoAnalysisFormProps) {
-  const [videoUrl, setVideoUrl] = useState("");
+  const [isVideoManagerOpen, setIsVideoManagerOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | undefined>();
+  const [sceneDurationSeconds, setSceneDurationSeconds] = useState<4 | 6 | 8>(
+    DEFAULT_SCENE_DURATION,
+  );
   const [name, setName] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const normalizedUrl = useMemo(() => normalizeYoutubeUrl(videoUrl), [videoUrl]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !videoUrl) return;
 
-    if (!normalizedUrl) {
-      setError("Enter a valid YouTube link, for example youtube.com/watch?v=…");
-      return;
-    }
-
-    setError(null);
     onSubmit({
-      videoUrl: normalizedUrl,
+      videoUrl,
+      sceneDurationSeconds,
       ...(name.trim() ? { name: name.trim() } : {}),
       ...(prompt.trim() ? { prompt: prompt.trim() } : {}),
     });
 
-    setVideoUrl("");
+    setVideoUrl(undefined);
     setName("");
     setPrompt("");
   };
@@ -54,30 +54,76 @@ export function CreateVideoAnalysisForm({
     >
       <h2 className="text-foreground text-sm font-semibold">Analyze a video</h2>
       <p className="text-muted-foreground mt-1 text-xs">
-        Paste a YouTube link and we&apos;ll break it down scene by scene.
+        Upload a video and we&apos;ll break it into scenes with a ready-to-use
+        prompt for recreating each one.
       </p>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Youtube className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <input
-            type="text"
-            inputMode="url"
-            value={videoUrl}
-            onChange={(event) => {
-              setVideoUrl(event.target.value);
-              if (error) setError(null);
-            }}
-            placeholder="youtube.com/watch?v=…"
-            aria-label="YouTube URL"
-            aria-invalid={!!error}
-            className={cn(FIELD_CLASS, "h-10 pl-9!", error && "border-red-500/60!")}
-          />
-        </div>
+      <div className="mt-4 flex flex-row items-start gap-4">
+        {videoUrl ? (
+          <div className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+            <video src={videoUrl} className="h-full w-full object-cover" muted />
+            <button
+              type="button"
+              onClick={() => setVideoUrl(undefined)}
+              className="absolute top-1 right-1 cursor-pointer rounded-full bg-black/60 p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
+            >
+              <X className="size-3 text-white" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsVideoManagerOpen(true)}
+            className="group flex h-20 w-20 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border transition-all hover:border-primary/50 hover:bg-background-light"
+          >
+            <Video className="text-muted-foreground group-hover:text-primary size-5 transition-colors" />
+            <Plus className="text-muted-foreground group-hover:text-primary size-3 transition-colors" />
+          </button>
+        )}
 
+        <div className="flex-1">
+          <p className="text-muted-foreground text-xs font-medium">
+            {videoUrl ? "Video selected" : "Choose a video to analyze"}
+          </p>
+
+          <div className="mt-3 flex flex-col gap-1.5">
+            <span className="text-muted-foreground text-xs font-medium">
+              Scene length
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {SCENE_DURATIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setSceneDurationSeconds(option)}
+                  className={cn(
+                    "cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    sceneDurationSeconds === option
+                      ? "border-primary bg-primary/15 text-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {option}s
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <MediaManagerDialog
+        open={isVideoManagerOpen}
+        onOpenChange={setIsVideoManagerOpen}
+        selectedImage={videoUrl}
+        onSelect={(urls) => setVideoUrl(urls[0])}
+        mediaType="video"
+        maxSelections={1}
+      />
+
+      <div className="mt-4 flex justify-end">
         <button
           type="submit"
-          disabled={isSubmitting || !videoUrl.trim()}
+          disabled={isSubmitting || !videoUrl}
           className="bg-gradient-primary flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
@@ -87,14 +133,12 @@ export function CreateVideoAnalysisForm({
             </>
           ) : (
             <>
-              <Youtube className="size-4" />
+              <Video className="size-4" />
               Analyze
             </>
           )}
         </button>
       </div>
-
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
 
       <button
         type="button"

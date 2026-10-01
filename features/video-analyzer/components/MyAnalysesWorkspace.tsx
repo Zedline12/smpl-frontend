@@ -102,7 +102,7 @@ export function MyAnalysesWorkspace() {
             No analyses yet
           </h3>
           <p className="text-muted-foreground mt-1 mb-6 text-sm">
-            Paste a YouTube link to get your first scene breakdown.
+            Upload a video to get your first scene breakdown.
           </p>
           <Link href="/video-analyzer" className="btn btn-primary">
             Analyze a video

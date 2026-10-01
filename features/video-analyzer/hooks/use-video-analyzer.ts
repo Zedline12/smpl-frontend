@@ -9,7 +9,7 @@ import {
 } from "../api";
 import {
   CreateVideoAnalysisRequest,
-  VideoAnalysis,
+  VideoAnalysisProject,
   isActiveStatus,
 } from "../types";
 
@@ -52,7 +52,7 @@ export function useVideoAnalysisQueuesQuery() {
       // window before the UI has observed it reaching a terminal state.
       const previous =
         (queryClient.getQueryData(videoAnalyzerKeys.queues) as
-          | VideoAnalysis[]
+          | VideoAnalysisProject[]
           | undefined) ?? [];
       const byId = new Map(previous.map((job) => [job.id, job]));
       incoming.forEach((job) => byId.set(job.id, job));
@@ -89,7 +89,7 @@ export function useCreateVideoAnalysisMutation() {
   return useMutation({
     mutationFn: (body: CreateVideoAnalysisRequest) => createVideoAnalysis(body),
     onSuccess: (analysis) => {
-      queryClient.setQueryData<VideoAnalysis[]>(videoAnalyzerKeys.all, (old) =>
+      queryClient.setQueryData<VideoAnalysisProject[]>(videoAnalyzerKeys.all, (old) =>
         old ? [analysis, ...old] : [analysis],
       );
       // refetch, not invalidate — this starts the poll immediately.
@@ -107,7 +107,7 @@ export function useDeleteVideoAnalysisMutation() {
   return useMutation({
     mutationFn: (id: string) => deleteVideoAnalysis(id),
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<VideoAnalysis[]>(videoAnalyzerKeys.all, (old) =>
+      queryClient.setQueryData<VideoAnalysisProject[]>(videoAnalyzerKeys.all, (old) =>
         old ? old.filter((analysis) => analysis.id !== id) : old,
       );
     },

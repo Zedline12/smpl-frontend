@@ -4,8 +4,7 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Clock, Loader2, ListVideo } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VideoAnalysis } from "../types";
-import { hostnameOf } from "../utils";
+import { VideoAnalysisProject } from "../types";
 
 function relativeTime(value: string): string | null {
   const date = new Date(value);
@@ -13,7 +12,7 @@ function relativeTime(value: string): string | null {
   return formatDistanceToNow(date, { addSuffix: true });
 }
 
-function StatusPill({ analysis }: { analysis: VideoAnalysis }) {
+function StatusPill({ analysis }: { analysis: VideoAnalysisProject }) {
   const base =
     "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold";
 
@@ -43,15 +42,18 @@ function StatusPill({ analysis }: { analysis: VideoAnalysis }) {
       return (
         <span className={cn(base, "bg-green-500/15 text-green-500")}>
           <ListVideo className="size-3" />
-          {analysis.scenes?.length ?? 0} scenes
+          {analysis.totalScenes ?? 0} scenes
         </span>
       );
   }
 }
 
-export function VideoAnalysisCard({ analysis }: { analysis: VideoAnalysis }) {
-  const host = hostnameOf(analysis.youtubeUrl);
-  const title = analysis.name?.trim() || host;
+export function VideoAnalysisCard({
+  analysis,
+}: {
+  analysis: VideoAnalysisProject;
+}) {
+  const title = analysis.name?.trim() || "Untitled analysis";
   const timestamp = relativeTime(analysis.createdAt);
 
   return (
@@ -62,7 +64,9 @@ export function VideoAnalysisCard({ analysis }: { analysis: VideoAnalysis }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-foreground truncate text-sm font-semibold">{title}</p>
-          <p className="text-muted-foreground mt-0.5 truncate text-xs">{host}</p>
+          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+            {analysis.sceneDurationSeconds}s scenes
+          </p>
         </div>
         <StatusPill analysis={analysis} />
       </div>

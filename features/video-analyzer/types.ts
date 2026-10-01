@@ -1,27 +1,45 @@
 /** Same union as brand-themes/generation — "success"/"failure", not clipping's "completed"/"failed". */
-export type VideoAnalysisStatus = "pending" | "processing" | "success" | "failure";
+export type VideoAnalysisProjectStatus =
+  | "pending"
+  | "processing"
+  | "success"
+  | "failure";
 
-export const ACTIVE_STATUSES: VideoAnalysisStatus[] = ["pending", "processing"];
+export const ACTIVE_STATUSES: VideoAnalysisProjectStatus[] = [
+  "pending",
+  "processing",
+];
 
-export function isActiveStatus(status: VideoAnalysisStatus): boolean {
+export function isActiveStatus(status: VideoAnalysisProjectStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
 }
 
 export interface VideoAnalysisScene {
-  timestamp: string;
+  id: string;
+  videoAnalysisProjectId: string;
+  index: number;
+  startTime: number;
+  endTime: number;
   visual: string;
   dialogue: string;
   onScreenText: string;
+  /** Ready-to-use generation prompt to recreate this scene. */
+  prompt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface VideoAnalysis {
+export interface VideoAnalysisProject {
   id: string;
   userId: string;
-  youtubeUrl: string;
+  originalVideoUrl: string;
   name: string;
-  status: VideoAnalysisStatus;
-  scenes: VideoAnalysisScene[];
+  status: VideoAnalysisProjectStatus;
+  sceneDurationSeconds: 4 | 6 | 8;
   durationSeconds: number | null;
+  totalScenes: number | null;
+  /** Only populated by the single-item fetch, not by the list/queues endpoints. */
+  scenes?: VideoAnalysisScene[];
   creditsUsed: number;
   errorMessage: string | null;
   readAt: string | null;
@@ -31,6 +49,7 @@ export interface VideoAnalysis {
 
 export interface CreateVideoAnalysisRequest {
   videoUrl: string;
+  sceneDurationSeconds: 4 | 6 | 8;
   name?: string;
   prompt?: string;
 }
