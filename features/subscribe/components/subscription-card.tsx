@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
 import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
+import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
 interface SubscriptionCardProps {
   plan: SubscriptionPlan;
 }
@@ -11,7 +13,11 @@ interface SubscriptionCardProps {
 export function SubscriptionCard({ plan }: SubscriptionCardProps) {
   const { user } = useAuth();
   const { startCheckout, isLoading } = useCheckout();
+  const [captchaOpen, setCaptchaOpen] = useState(false);
 
+  const handleVerified = (token: string) => {
+    startCheckout(plan.id, token);
+  };
 
   // const isPremiumOrPro = !isBasic && !isStandard;
 
@@ -65,7 +71,7 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
       </div>
 
       <button
-        onClick={() => startCheckout(plan.id)}
+        onClick={() => setCaptchaOpen(true)}
         disabled={isLoading || user?.subscription?.id === plan.id}
         className={`w-full py-3 px-6 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-primary-foreground ${
           plan.isMostPopular
@@ -103,6 +109,13 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
           "Subscribe"
         )}
       </button>
+
+      <CheckoutCaptchaDialog
+        open={captchaOpen}
+        onOpenChange={setCaptchaOpen}
+        onVerified={handleVerified}
+        isRedirecting={isLoading}
+      />
     </div>
   );
 }
