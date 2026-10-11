@@ -10,6 +10,7 @@ import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
+import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
 
 interface SubscriptionGridProps {
   plans: SubscriptionPlan[];
@@ -25,14 +26,20 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const user = useAuth()?.user;
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
+  const [captchaPlanId, setCaptchaPlanId] = useState<string | null>(null);
 
   const handleSubscribe = (planId: string) => {
     if (!user) {
       router.push("/login");
       return;
     }
-    setProcessingPlanId(planId);
-    startCheckout(planId);
+    setCaptchaPlanId(planId);
+  };
+
+  const handleCaptchaVerified = (token: string) => {
+    if (!captchaPlanId) return;
+    setProcessingPlanId(captchaPlanId);
+    startCheckout(captchaPlanId, token);
   };
 
   if (isLoading) {
@@ -216,7 +223,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               <div className="w-full mt-auto">
                 <button
                   onClick={() => handleSubscribe(plan.id)}
-
+                  disabled={isCheckoutLoading && processingPlanId === plan.id}
                   className={cn(
                     "w-full py-3 rounded-[8px] font-medium transition-all flex items-center justify-center disabled:opacity-50",
                     isCreatorFeatured
@@ -232,7 +239,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                       : {}
                   }
                 >
-                 Subscribe
+                  {isCheckoutLoading && processingPlanId === plan.id
+                    ? "Redirecting…"
+                    : "Subscribe"}
                 </button>
                 <div className="text-muted-foreground text-[11px] text-center w-full mt-3">
                   Cancel anytime
@@ -310,6 +319,15 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
           </div>
         </div>
       </div>
+
+      <CheckoutCaptchaDialog
+        open={!!captchaPlanId}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setCaptchaPlanId(null);
+        }}
+        onVerified={handleCaptchaVerified}
+        isRedirecting={isCheckoutLoading}
+      />
     </>
   );
 }

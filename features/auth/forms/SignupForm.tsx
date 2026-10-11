@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { GoogleLoginButton } from "../components/google-login-button";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,7 @@ export function SignUpForm() {
   const refToken = searchParams?.get("refToken");
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const {
     register,
@@ -44,10 +46,11 @@ export function SignUpForm() {
   });
 
   const onSubmit = async (data: SignupFormData) => {
+    if (!captchaToken) return;
     setIsLoading(true);
     setServerError(null);
     try {
-      const result = await signup(data);
+      const result = await signup(data, captchaToken);
       if (result?.error) {
         setServerError(result.message || "An error occurred during signup");
       } else {
@@ -216,10 +219,16 @@ export function SignUpForm() {
           )}
         </div>
 
+        {/* Captcha */}
+        <TurnstileWidget
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken(null)}
+        />
+
         {/* Submit */}
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !captchaToken}
           className="w-full mt-1 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 hover:opacity-90 hover:-translate-y-px active:scale-[0.98]"
           style={{
             padding: "12px",

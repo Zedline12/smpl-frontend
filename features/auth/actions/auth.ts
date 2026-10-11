@@ -3,11 +3,10 @@
 import { authLoginSchema, authSignupSchema } from "../schemas/auth.schema";
 import { z } from "zod";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { fetchWithToken } from "@/lib/fetcher";
 export async function logout() {
-  console.log("logout");
   const cookieStore = await cookies();
   cookieStore.delete("token");
   cookieStore.delete("refresh_token");
@@ -15,21 +14,30 @@ export async function logout() {
 }
 export async function login(
   unsafeData: z.infer<typeof authLoginSchema>,
+  captchaToken: string,
 ): Promise<{ error: boolean; message: string } | undefined> {
   const { success, data } = authLoginSchema.safeParse(unsafeData);
   if (!success) {
     return { error: true, message: "Invalid input data" };
   }
+  if (!captchaToken) {
+    return { error: true, message: "Captcha verification is required" };
+  }
 
   try {
+    const requestHeaders = await headers();
+    const clientIp = requestHeaders.get("x-real-ip");
+    console.log(clientIp);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/email/login`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(clientIp ? { "X-Client-IP": clientIp } : {}),
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data }),
+        //  body: JSON.stringify({ ...data, captchaToken }),
       },
     );
 
@@ -141,6 +149,7 @@ export async function confirmEmail(hash: string) {
 
 export async function signup(
   unsafeData: z.infer<typeof authSignupSchema>,
+  captchaToken: string,
 ): Promise<
   | { error?: boolean; message?: string; success?: boolean; data?: any }
   | undefined
@@ -149,6 +158,9 @@ export async function signup(
   if (!success) {
     return { error: true, message: "Validation Error" };
   }
+  if (!captchaToken) {
+    return { error: true, message: "Captcha verification is required" };
+  }
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/email/register`,
     {
@@ -156,10 +168,9 @@ export async function signup(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, captchaToken }),
     },
   );
-  
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

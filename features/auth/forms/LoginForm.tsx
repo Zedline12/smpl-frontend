@@ -16,6 +16,7 @@ import { authLoginSchema } from "@/features/auth/schemas/auth.schema";
 import { login } from "@/features/auth/actions/auth";
 import { useToast } from "@/hooks/use-toast";
 import { GoogleLoginButton } from "../components/google-login-button";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 import { useSearchParams } from "next/navigation";
 import { SocialAuthErrorText } from "../components/SocialAuthErrorText";
 import Link from "next/link";
@@ -26,6 +27,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const queryError = searchParams?.get("error");
   const [serverError, setServerError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof authLoginSchema>>({
     resolver: zodResolver(authLoginSchema),
@@ -33,8 +35,9 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof authLoginSchema>) {
+    if (!captchaToken) return;
     setServerError(null);
-    const data = await login(values);
+    const data = await login(values, captchaToken);
 
     if (data?.message) {
       if (data.error) {
@@ -194,10 +197,16 @@ export function LoginForm() {
             </Link>
           </div>
 
+          {/* Captcha */}
+          <TurnstileWidget
+            onVerify={setCaptchaToken}
+            onExpire={() => setCaptchaToken(null)}
+          />
+
           {/* Submit */}
           <button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || !captchaToken}
             className="w-full mt-1 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden transition-all duration-200 hover:opacity-90 hover:-translate-y-px active:scale-[0.98]"
             style={{
               padding: "12px",
