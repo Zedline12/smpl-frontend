@@ -27,7 +27,6 @@ export async function login(
   try {
     const requestHeaders = await headers();
     const clientIp = requestHeaders.get("x-real-ip");
-    console.log(clientIp);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/email/login`,
       {
@@ -161,14 +160,18 @@ export async function signup(
   if (!captchaToken) {
     return { error: true, message: "Captcha verification is required" };
   }
+  const requestHeaders = await headers();
+  const clientIp = requestHeaders.get("x-real-ip");
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/email/register`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(clientIp ? { "X-Client-IP": clientIp } : {}),
       },
-      body: JSON.stringify({ ...data, captchaToken }),
+      body: JSON.stringify({ ...data }),
+      // body: JSON.stringify({ ...data, captchaToken }),
     },
   );
 
