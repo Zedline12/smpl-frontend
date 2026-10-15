@@ -13,6 +13,7 @@ export enum AiModelsEnum {
   SEEDANCE_2_5 = "seedance-2.5",
   GPT_IMAGE_2 = "gpt-image-2",
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
+  HIGGSFIELD_GENJUTSU_MOTION_TRANSFER = "higgsfield-genjutsu-motion-transfer",
 }
 export interface Model {
   id: AiModelsEnum;
@@ -149,6 +150,17 @@ export const VIDEO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER,
+    name: "Genjutsu Motion Transfer",
+    description: "Swap characters, locations and styles in a video, keeping its motion.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       </svg>
     ),
   },

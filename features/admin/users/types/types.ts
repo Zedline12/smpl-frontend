@@ -38,6 +38,7 @@ export interface AdminUserDetail {
   subscriptionStatus: "active" | "past_due" | "canceled" | null;
   subscriptionPlanName: string | null;
   subscriptionPlanPriceAmount: number;
+  providerCustomerId: string | null;
   totalGenerations: number;
   successJobs: number;
   processingJobs: number;

@@ -54,6 +54,10 @@ import {
   IGrokImagineVideo15Input,
   grokImagineVideo15ValidationSchema,
 } from "./models/grok-imagine-video-1.5.type";
+import {
+  IGenjutsuMotionTransferInput,
+  genjutsuMotionTransferValidationSchema,
+} from "./models/higgsfield-genjutsu-motion-transfer.type";
 
 export interface BaseAiInput {
   prompt: string;
@@ -80,7 +84,8 @@ export type AllModelsInput =
   | ISeedance20Input
   | ISeedance25Input
   | IGptImage2Input
-  | IGrokImagineVideo15Input;
+  | IGrokImagineVideo15Input
+  | IGenjutsuMotionTransferInput;
 
 export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.VEO_3]: veo3ValidationSchema,
@@ -95,6 +100,8 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SEEDANCE_2_5]: seedance25ValidationSchema,
   [AiModelsEnum.GPT_IMAGE_2]: gptImage2ValidationSchema,
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: grokImagineVideo15ValidationSchema,
+  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
+    genjutsuMotionTransferValidationSchema,
 };
 export enum GenerationTypeEnum {
   VIDEO = "video",

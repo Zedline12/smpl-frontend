@@ -85,7 +85,10 @@ export default function PromptComposerFooter({
         input: state,
       };
       await generation!.mutateAsync(payload);
-      if (pathname !== "/create") {
+      if (
+        pathname !== "/create" &&
+        !pathname.startsWith("/create/motion-transfer")
+      ) {
         router.push("/create");
         return;
       }

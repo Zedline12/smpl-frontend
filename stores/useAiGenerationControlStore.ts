@@ -33,6 +33,8 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
     [AiModelsEnum.GPT_IMAGE_2]: ModelDefaults[AiModelsEnum.GPT_IMAGE_2],
     [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]:
       ModelDefaults[AiModelsEnum.GROK_IMAGINE_VIDEO_1_5],
+    [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
+      ModelDefaults[AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();

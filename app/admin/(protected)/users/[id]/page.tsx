@@ -3,7 +3,10 @@ import { AdminUserDetail } from "@/features/admin/users/types/types";
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
-import { CreditsUsageCard, CreditsUsageData } from "@/features/admin/users/components/CreditsUsageCard";
+import {
+  CreditsUsageCard,
+  CreditsUsageData,
+} from "@/features/admin/users/components/CreditsUsageCard";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
@@ -30,8 +33,17 @@ const STAT_CARDS = [
     color: "text-foreground",
     bg: "bg-neutral-800/50",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
-        <path d="M12 3v4M12 17v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M3 12h4M17 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" strokeLinecap="round" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        className="w-5 h-5"
+      >
+        <path
+          d="M12 3v4M12 17v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M3 12h4M17 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"
+          strokeLinecap="round"
+        />
       </svg>
     ),
   },
@@ -41,8 +53,18 @@ const STAT_CARDS = [
     color: "text-green-400",
     bg: "bg-green-900/20",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
-        <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        className="w-5 h-5"
+      >
+        <path
+          d="M20 6L9 17l-5-5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -52,7 +74,13 @@ const STAT_CARDS = [
     color: "text-yellow-400",
     bg: "bg-yellow-900/20",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        className="w-5 h-5"
+      >
         <circle cx="12" cy="12" r="9" />
         <path d="M12 7v5l3 3" strokeLinecap="round" />
       </svg>
@@ -64,14 +92,22 @@ const STAT_CARDS = [
     color: "text-red-400",
     bg: "bg-red-900/20",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        className="w-5 h-5"
+      >
         <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
       </svg>
     ),
   },
 ];
 
-async function getAdminCreditsUsage(userId: string): Promise<CreditsUsageData | null> {
+async function getAdminCreditsUsage(
+  userId: string,
+): Promise<CreditsUsageData | null> {
   try {
     const res = await fetchWithToken(`/admin/users/${userId}/credits-usage`);
     const json = await res.json();
@@ -94,10 +130,12 @@ export default async function UserDetailPage({
   ]);
   if (!res.ok) notFound();
   const json = await res.json();
-  const user: AdminUserDetail & {stats: Record<string, number>} = json.data;
+  console.log(json.data)
+  const user: AdminUserDetail & { stats: Record<string, number> } & {providerCustomerId:string} = json.data;
   const status = user.subscriptionStatus;
   const statusStyle = status
-    ? (STATUS_STYLES[status] ?? "bg-neutral-800 text-neutral-400 border border-neutral-700")
+    ? (STATUS_STYLES[status] ??
+      "bg-neutral-800 text-neutral-400 border border-neutral-700")
     : "bg-neutral-800 text-neutral-400 border border-neutral-700";
 
   return (
@@ -105,16 +143,37 @@ export default async function UserDetailPage({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">{formatName(user)}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {formatName(user)}
+          </h1>
           <p className="text-muted-foreground text-sm">{user.email}</p>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize", statusStyle)}>
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
+                statusStyle,
+              )}
+            >
               {status ?? "No subscription"}
             </span>
             {user.subscriptionPlanName && (
               <span className="text-sm text-muted-foreground">
-                {user.subscriptionPlanName} · {formatPrice(user.subscriptionPlanPriceAmount)}
+                {user.subscriptionPlanName} ·{" "}
+                {formatPrice(user.subscriptionPlanPriceAmount)}
               </span>
+            )}
+            {user.providerCustomerId && (
+              <a
+                href={`https://dashboard.stripe.com/customers/${user.providerCustomerId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#635bff]/15 text-[#a3a0ff] border border-[#635bff]/30 hover:bg-[#635bff]/25 transition-colors"
+              >
+                View in Stripe
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                  <path d="M7 17 17 7M7 7h10v10" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
             )}
           </div>
         </div>
@@ -132,7 +191,13 @@ export default async function UserDetailPage({
               failedGenerations={user.failedGenerations ?? []}
             />
           ) : (
-            <div key={key} className={cn("rounded-xl border border-white/10 px-5 py-4 flex items-center gap-4", bg)}>
+            <div
+              key={key}
+              className={cn(
+                "rounded-xl border border-white/10 px-5 py-4 flex items-center gap-4",
+                bg,
+              )}
+            >
               <span className={color}>{icon}</span>
               <div>
                 <p className={cn("text-2xl font-bold tabular-nums", color)}>
@@ -141,7 +206,7 @@ export default async function UserDetailPage({
                 <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
               </div>
             </div>
-          )
+          ),
         )}
       </div>
 
@@ -151,7 +216,10 @@ export default async function UserDetailPage({
         {user.invoices.length === 0 ? (
           <div
             className="rounded-xl border px-6 py-10 text-center"
-            style={{ borderColor: "rgba(255,255,255,0.07)", background: "oklch(0.13 0 0)" }}
+            style={{
+              borderColor: "rgba(255,255,255,0.07)",
+              background: "oklch(0.13 0 0)",
+            }}
           >
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
               No invoices yet.
@@ -163,18 +231,30 @@ export default async function UserDetailPage({
               <div
                 key={invoice.invoiceId}
                 className="flex items-center justify-between rounded-xl border px-5 py-4"
-                style={{ borderColor: "rgba(255,255,255,0.07)", background: "oklch(0.13 0 0)" }}
+                style={{
+                  borderColor: "rgba(255,255,255,0.07)",
+                  background: "oklch(0.13 0 0)",
+                }}
               >
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-sm font-medium truncate" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <span
+                    className="text-sm font-medium truncate"
+                    style={{ color: "rgba(255,255,255,0.85)" }}
+                  >
                     {invoice.subscriptionName} — {invoice.month}
                   </span>
-                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  <span
+                    className="text-xs"
+                    style={{ color: "rgba(255,255,255,0.35)" }}
+                  >
                     {invoice.date}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                  <span className="text-sm font-semibold tabular-nums" style={{ color: "rgba(255,255,255,0.9)" }}>
+                  <span
+                    className="text-sm font-semibold tabular-nums"
+                    style={{ color: "rgba(255,255,255,0.9)" }}
+                  >
                     {invoice.amount}
                   </span>
                   <a
@@ -182,11 +262,24 @@ export default async function UserDetailPage({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-150 hover:bg-white/10 hover:border-white/20"
-                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
+                    style={{
+                      borderColor: "rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.5)",
+                    }}
                     title="Download invoice"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
-                      <path d="M12 3v13M7 11l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        d="M12 3v13M7 11l5 5 5-5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                       <path d="M5 21h14" strokeLinecap="round" />
                     </svg>
                   </a>
@@ -206,9 +299,22 @@ export default async function UserDetailPage({
             download
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-500 transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" opacity=".2"/>
-              <path d="M14 2v6h6M8 13h2.5M13.5 13H16M8 16.5h2.5M13.5 16.5H16M8 10h8" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-4 h-4 flex-shrink-0"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"
+                opacity=".2"
+              />
+              <path
+                d="M14 2v6h6M8 13h2.5M13.5 13H16M8 16.5h2.5M13.5 16.5H16M8 10h8"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                fill="none"
+              />
             </svg>
             Download Report
           </a>

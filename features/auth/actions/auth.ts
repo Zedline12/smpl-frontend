@@ -170,8 +170,8 @@ export async function signup(
         "Content-Type": "application/json",
         ...(clientIp ? { "X-Client-IP": clientIp } : {}),
       },
-      body: JSON.stringify({ ...data }),
-      // body: JSON.stringify({ ...data, captchaToken }),
+      //body: JSON.stringify({ ...data }),
+      body: JSON.stringify({ ...data, captchaToken }),
     },
   );
 
