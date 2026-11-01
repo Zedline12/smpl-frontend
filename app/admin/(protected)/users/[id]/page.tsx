@@ -3,6 +3,7 @@ import { AdminUserDetail } from "@/features/admin/users/types/types";
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
+import UserActionsBar from "@/features/admin/users/components/UserActionsBar";
 import {
   CreditsUsageCard,
   CreditsUsageData,
@@ -180,6 +181,23 @@ export default async function UserDetailPage({
 
         <CreditsCard userId={user.id} initialBalance={user.creditsBalance} />
       </div>
+
+      {/* Security + action buttons */}
+      <UserActionsBar
+        userId={user.id}
+        isSuspended={!!(user as any).isSuspended}
+        hasSubscription={!!user.subscriptionStatus && user.subscriptionStatus !== "canceled"}
+        subscriptionPlanName={user.subscriptionPlanName}
+        subscriptionPlanPriceAmount={user.subscriptionPlanPriceAmount}
+        clientIp={(user as any).clientIp}
+        country={(user as any).country}
+        countryCode={(user as any).countryCode}
+        city={(user as any).city}
+        isVpn={(user as any).isVpn}
+        isProxy={(user as any).isProxy}
+        isDataCenter={(user as any).isDataCenter}
+        isThreat={(user as any).isThreat}
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

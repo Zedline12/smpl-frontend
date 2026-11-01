@@ -21,4 +21,6 @@ export default function AuthProvider({
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+// Outside the protected/public layouts (e.g. the admin dashboard) there is no provider.
+export const useAuth = () =>
+  useContext(AuthContext) ?? { user: null, setCurrentUser: () => {} };

@@ -13,6 +13,13 @@ import { ISeedance25Input } from "@/features/generation/types/models/seedance-2.
 import { IGptImage2Input } from "@/features/generation/types/models/gpt-image-2.type";
 import { IGrokImagineVideo15Input } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
 import { IGenjutsuMotionTransferInput } from "@/features/generation/types/models/higgsfield-genjutsu-motion-transfer.type";
+import { IAiInfluencerInput } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+import { IAdsStudioInput } from "@/features/generation/types/models/higgsfield-ads-studio.type";
+import { IKatanaInput } from "@/features/generation/types/models/higgsfield-katana.type";
+import { IMusicV25Input } from "@/features/generation/types/models/elevenlabs-music-v2-5.type";
+import { createMusicInput } from "@/features/artist/utils/composition-plan";
+import { ISeedance25RefToVideoInput } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import { IAdsMultiplierInput } from "@/features/generation/types/models/ads-multiplier.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
@@ -28,6 +35,12 @@ export type ModelStateMap = {
   [AiModelsEnum.GPT_IMAGE_2]: IGptImage2Input;
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: IGrokImagineVideo15Input;
   [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: IGenjutsuMotionTransferInput;
+  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: IAiInfluencerInput;
+  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: IAdsStudioInput;
+  [AiModelsEnum.HIGGSFIELD_KATANA]: IKatanaInput;
+  [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
+  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: ISeedance25RefToVideoInput;
+  [AiModelsEnum.ADS_MULTIPLIER]: IAdsMultiplierInput;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -125,5 +138,51 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     videoUrl: "",
     images: [],
     resolution: "720p",
+  },
+  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: {
+    prompt: "",
+    tier: "normal",
+    selection: {},
+    brief: "",
+    imageUrl: "",
+    itemImageUrls: [],
+    seed: null,
+    variationIndex: 0,
+    bodyColor: "",
+  },
+  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: {
+    prompt: "",
+    images: [],
+    niche: "",
+    targetAudience: "",
+    language: "",
+    aspectRatio: "1:1",
+    batchSize: 1,
+  },
+  [AiModelsEnum.HIGGSFIELD_KATANA]: {
+    prompt: "",
+    videoUrl: "",
+    images: [],
+    resolution: "720p",
+  },
+  [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: createMusicInput(),
+  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: {
+    prompt: "",
+    images: [],
+    videos: [],
+    audios: [],
+    resolution: "720p",
+    duration: 10,
+    aspectRatio: "auto",
+    generateAudio: true,
+  },
+  [AiModelsEnum.ADS_MULTIPLIER]: {
+    prompt: "",
+    videoUrl: "",
+    images: [],
+    hook: "",
+    cta: "",
+    resolution: "720p",
+    duration: 8,
   },
 };

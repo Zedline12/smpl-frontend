@@ -13,7 +13,7 @@ export default function CreateImagePage() {
         </div> */}
         <div className="relative col-span-2 px-5 w-full   flex flex-col justify-between gap-2">
           <div className="h-[500px] ">
-            <MediaExplorer />
+            <MediaExplorer explore />
           </div>
            <section className=" w-full    flex items-center justify-center">
           <PromptComposer />
@@ -25,7 +25,7 @@ export default function CreateImagePage() {
       </div>
       <div className="p-5 md:hidden  block h-full grid grid-cols-1 gap-6 text-foreground">
         <div className="col-span-1 h-[600px] ">
-          <MediaExplorer />
+          <MediaExplorer explore />
         </div>
         <section className=" w-full   z-10 flex items-center justify-center">
           <PromptComposer />

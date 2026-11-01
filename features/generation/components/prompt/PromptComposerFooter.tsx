@@ -25,6 +25,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import SpeechToText from "./SpeechToText";
+import { useGenerateTemplateMutation } from "@/features/media/hooks/useTemplates";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -37,9 +38,11 @@ export default function PromptComposerFooter({
   isFocused,
   editMode,
 }: PromptComposerFooterProps) {
-  const { model, projectId, mediaType} = useAiGenerationControlStore();
+  const { model, projectId, mediaType, templateMode } =
+    useAiGenerationControlStore();
   const { data } = useGenerationCostQuery();
   const generation = useGenerateMutation();
+  const templateGeneration = useGenerateTemplateMutation();
   const { states, setField } = useAiModelStore();
   const { prompt } = states[model]!;
   const { user } = useAuth();
@@ -78,6 +81,11 @@ export default function PromptComposerFooter({
         throw new Error("No state for selected model");
       }
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      // Admin template page: no project, no redirect.
+      if (templateMode) {
+        await templateGeneration.mutateAsync({ model, mediaType, input: state });
+        return;
+      }
       const payload = {
         model,
         projectId,
@@ -119,7 +127,7 @@ export default function PromptComposerFooter({
           {children}
         </div>
         <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
-          {user && !editMode && <ProjectSelector />}
+          {user && !editMode && !templateMode && <ProjectSelector />}
 
           <SpeechToText />
 

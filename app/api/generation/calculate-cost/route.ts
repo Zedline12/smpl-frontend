@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     },
   });
-  const json = await res.json();
-  return NextResponse.json(json);
+  const json = await res.json().catch(() => null);
+  // Keep the backend status so callers can tell a failed price from a real one.
+  return NextResponse.json(json, { status: res.status });
 }

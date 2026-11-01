@@ -1,5 +1,4 @@
 import { Navbar } from "@/components/navbar";
-import { VideoAnalyzerNav } from "./_components/VideoAnalyzerNav";
 
 export default function VideoAnalyzerLayout({
   children,
@@ -8,23 +7,13 @@ export default function VideoAnalyzerLayout({
 }>) {
   return (
     <div className="bg-background grid h-screen grid-rows-[auto_1fr]">
-      {/* NAVBAR */}
       <header className="z-[60]">
         <Navbar />
       </header>
 
-      {/* CONTENT — no app sidebar; the studio owns its own nav */}
-      <main className="row-start-2 flex min-h-0 flex-col md:flex-row">
-        <aside className="border-border shrink-0 border-b p-3 md:h-full md:w-52 md:border-r md:border-b-0">
-          <p className="text-muted-foreground mb-2 hidden px-3 text-[11px] font-semibold tracking-widest uppercase md:block">
-            Video Analyzer
-          </p>
-          <VideoAnalyzerNav />
-        </aside>
-
-        <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
-          {children}
-        </div>
+      {/* No sidebar: the analyzer is one scrolling page. */}
+      <main className="custom-scrollbar row-start-2 min-h-0 overflow-y-auto">
+        {children}
       </main>
     </div>
   );

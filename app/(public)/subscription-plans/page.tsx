@@ -2,7 +2,6 @@
 
 import { SubscriptionGrid } from "@/features/subscribe/components/subscription-grid";
 import { fetchWithToken } from "@/lib/fetcher";
-import { useAuth } from "@/providers/AuthProvider";
 
 export default async function SubscribePage() {
   const json = await fetchWithToken("/subscription-plans").then((d) =>
@@ -10,19 +9,18 @@ export default async function SubscribePage() {
   );
   const subscriptionPlans = json.data;
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-          Subscription Plans
+    <div className="min-h-screen bg-background">
+      <div className="pt-16 pb-10 text-center px-4">
+        <h1 className="text-[44px] md:text-[56px] font-extrabold text-white tracking-tight leading-none mb-3">
+          Choose your plan
         </h1>
-        <p className="text-xl text-foreground max-w-2xl mx-auto">
-          Choose the perfect plan for your needs. Upgrade or downgrade at any
-          time.
+        <p className="text-[16px] max-w-md mx-auto" style={{ color: "var(--fg-3)" }}>
+          Simple pricing. Cancel anytime.
         </p>
       </div>
 
       {json.error ? (
-        <div className="text-center p-4 bg-red-50 text-red-600 rounded-lg">
+        <div className="text-center p-4 text-red-400 max-w-md mx-auto">
           <p>Error loading plans: {json.error}</p>
           <p className="text-sm mt-2">Please try again later.</p>
         </div>

@@ -162,6 +162,7 @@ export async function signup(
   }
   const requestHeaders = await headers();
   const clientIp = requestHeaders.get("x-real-ip");
+  console.log("Client Ip", clientIp);
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/email/register`,
     {

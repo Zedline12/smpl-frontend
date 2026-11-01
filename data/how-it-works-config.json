@@ -1,0 +1,87 @@
+{
+  "models": {
+    "higgsfield-genjutsu-motion-transfer": [
+      {
+        "eyebrow": "THE IDEA",
+        "title": "ONE VIDEO, MANY VERSIONS",
+        "description": "Upload any video and remake it with your own characters, places, and products.",
+        "layout": "single",
+        "thumbnail": "",
+        "media": [
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/genjutsu-idea.mp4",
+            "label": "",
+            "highlight": false
+          }
+        ]
+      },
+      {
+        "eyebrow": "OBJECTS SWAP",
+        "title": "CHANGE WHAT YOU WANT",
+        "description": "Describe the change you want, from a person to a product or text, and leave the rest of the shot as it is.",
+        "layout": "beforeAfter",
+        "thumbnail": "",
+        "media": [
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/before.mp4",
+            "label": "Before",
+            "highlight": false
+          },
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/after.mp4",
+            "label": "After",
+            "highlight": true
+          }
+        ]
+      },
+      {
+        "eyebrow": "REFERENCES",
+        "title": "BRING YOUR OWN EVERYTHING",
+        "description": "Add characters, outfits, props, or locations as references, and they show up in every result.",
+        "layout": "grid",
+        "thumbnail": "",
+        "media": [
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/1.mp4",
+            "label": "Your character",
+            "highlight": false
+          },
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/2.mp4",
+            "label": "Your outfit",
+            "highlight": false
+          },
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/3.mp4",
+            "label": "Your location",
+            "highlight": false
+          },
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/4.mp4",
+            "label": "Result",
+            "highlight": true
+          }
+        ]
+      },
+      {
+        "eyebrow": "RESTYLE",
+        "title": "SAME SHOT, NEW STYLE",
+        "description": "Pick a style or upload an image of one, and the whole video is redrawn in it. Add your characters if you want them in the result.",
+        "layout": "beforeAfter",
+        "thumbnail": "",
+        "media": [
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/before-2.mp4",
+            "label": "Before",
+            "highlight": false
+          },
+          {
+            "src": "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20How%20To%20Videos/Smpl%20Riven/after-2.mp4",
+            "label": "After",
+            "highlight": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,6 +2,7 @@ import {
   editGeneration,
   fetchGenerationCost,
   fetchGenerationQueues,
+  fetchUserModels,
   generate,
   refundGeneration,
 } from "@/features/generation/api/generation";
@@ -81,13 +82,22 @@ const { prompt, ...stateWithoutPrompt } = state;
 }
 
 
-export const useGenerationQueuesQuery = () => {
+export function useUserModelsQuery() {
+  return useQuery({
+    queryKey: ["user-models"],
+    queryFn: fetchUserModels,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/** Jobs are split by domain; studios with isolated jobs (e.g. "ads-studio") pass theirs. */
+export const useGenerationQueuesQuery = (domain: string = "media-generation") => {
   const queryClient = useQueryClient();
   return useQuery({
-    queryKey: ["generation-queues"],
+    queryKey: ["generation-queues", domain],
     queryFn: async () => {
-      const newJobs = await fetchGenerationQueues();
-      const previousJobs = (queryClient.getQueryData(["generation-queues"]) as any[]) || [];
+      const newJobs = await fetchGenerationQueues(domain);
+      const previousJobs = (queryClient.getQueryData(["generation-queues", domain]) as any[]) || [];
       const jobsMap = new Map(previousJobs.map((j) => [j.id, j]));
       newJobs.forEach((j: any) => jobsMap.set(j.id, j));
       return Array.from(jobsMap.values());

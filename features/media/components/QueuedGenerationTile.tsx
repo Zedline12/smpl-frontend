@@ -1,36 +1,116 @@
 "use client";
 
-import { AlertTriangle, Clock, Loader2, RotateCcw } from "lucide-react";
+import { Clock, Loader2, RotateCcw } from "lucide-react";
 import { useRefundGenerationMutation } from "@/features/generation/hooks/generation";
 import { GenerationQueue } from "@/features/generation/types/generation";
+import { DjGeneratingTile } from "@/features/artist/components/DjGeneratingTile";
+import { RemixGeneratingTile } from "@/features/remix/components/RemixGeneratingTile";
+import { MediaDisplayVariant } from "../types/media";
 
-export function QueuedGenerationTile({ queue }: { queue: GenerationQueue }) {
+export function QueuedGenerationTile({
+  queue,
+  height,
+  variant = "default",
+}: {
+  queue: GenerationQueue;
+  /** Pixel height of the media cards beside it; without it the tile is 16:9. */
+  height?: number;
+  /** "music" shows the DJ animation (Artist page); "remix" the film strip (Remix page). */
+  variant?: MediaDisplayVariant;
+}) {
+  const sizeStyle = height ? { height } : undefined;
+  const sizeClass = height ? "" : "aspect-video";
   const refund = useRefundGenerationMutation();
   const isProcessing = queue.status === "processing";
+  const isEarlyPreview = queue.status === "success" && !!queue.providerUrl && !queue.mediaId;
   const isRefunding = refund.isPending && refund.variables === queue.id;
+
+  // Provider is done but R2 upload is still in progress — show the actual media
+  if (isEarlyPreview) {
+    const isVideo = queue.type === "video";
+    return (
+      <div style={sizeStyle} className={`group relative w-full overflow-hidden rounded-xl ${sizeClass}`}>
+        {queue.type === "audio" ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/[0.04] px-4">
+            <audio src={queue.providerUrl} controls className="w-full" />
+          </div>
+        ) : isVideo ? (
+          <video
+            src={queue.providerUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={queue.providerUrl}
+            alt="Generated"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center">
+          <span className="flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] text-white/70 backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/60" />
+            Saving to library…
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "music") {
+    return <DjGeneratingTile processing={isProcessing} style={sizeStyle} className={sizeClass} />;
+  }
+  if (variant === "remix") {
+    return <RemixGeneratingTile processing={isProcessing} style={sizeStyle} className={sizeClass} />;
+  }
 
   return (
     <div
-      className={`group relative aspect-square overflow-hidden rounded-xl flex flex-col items-center justify-center text-center transition-all duration-300 ${
+      style={sizeStyle}
+      className={`group relative w-full overflow-hidden rounded-xl border backdrop-blur-xl ${sizeClass} transition-colors duration-300 ${
         isProcessing
-          ? "bg-black"
-          : "bg-neutral-900 border border-neutral-800 text-neutral-400 p-4"
+          ? "border-primary/25 bg-primary/[0.06]"
+          : "border-white/10 bg-white/[0.04]"
       }`}
     >
-      {isProcessing ? (
-        <img
-          src="/smpl-loading.gif"
-          alt="Generating..."
-          className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] object-cover rounded-lg"
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.07] via-transparent to-transparent" />
+
+      {/* Scanner: a fading trail whose bottom edge is the bright line. */}
+      <div className="animate-scan-down pointer-events-none absolute inset-x-0 h-16">
+        <div
+          className={`absolute inset-0 bg-gradient-to-b from-transparent ${
+            isProcessing ? "to-primary/30" : "to-white/10"
+          }`}
         />
-      ) : (
-        <>
-          <Clock className="w-8 h-8 mb-3 opacity-50" />
-          <span className="text-xs font-medium uppercase tracking-wide">
-            Generation is in queue
-          </span>
-        </>
-      )}
+        <div
+          className={`absolute inset-x-0 bottom-0 h-px ${
+            isProcessing
+              ? "bg-primary shadow-[0_0_14px_3px_var(--color-primary)]"
+              : "bg-white/40"
+          }`}
+        />
+      </div>
+
+      <div className="relative flex h-full flex-col items-center justify-center gap-1.5 text-center">
+        <span
+          className={`flex items-center gap-2 text-sm font-semibold tracking-wide ${
+            isProcessing ? "text-white" : "text-white/60"
+          }`}
+        >
+          {isProcessing ? (
+            <span className="bg-primary size-1.5 animate-pulse rounded-full shadow-[0_0_8px_var(--color-primary)]" />
+          ) : (
+            <Clock className="size-3.5" />
+          )}
+          {isProcessing ? "Generating" : "In queue"}
+        </span>
+        <span className="text-[11px] text-white/40">
+          {isProcessing ? "Your media is being created…" : "Waiting for a free slot…"}
+        </span>
+      </div>
 
       {/* Caution notice — always visible, hidden while hovering so it doesn't
           compete with the refund button. */}

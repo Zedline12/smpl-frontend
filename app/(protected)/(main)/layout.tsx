@@ -1,6 +1,6 @@
 import BottomNavbar from "@/components/BottomNavbar";
 import { Navbar } from "@/components/navbar";
-import { Sidebar } from "@/components/sidebar";
+// import { Sidebar } from "@/components/sidebar";
 import Footer from "@/components/footer";
 const bottomNavbarItems = [
   {
@@ -30,28 +30,27 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-background h-screen overflow-hidden grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[70px_1fr] xl:grid-cols-[230px_1fr]">
+    <div className="bg-background h-screen overflow-hidden grid grid-rows-[auto_1fr] grid-cols-1">
       {/* NAVBAR */}
-      {/* z-[60]: the sidebar wrapper below is z-50 and later in the DOM, so it
-          would paint over the navbar's model card without this. */}
-      <header className="col-span-full z-[60]  ">
+      <header className="col-span-full z-[60]">
         <Navbar />
       </header>
 
-      {/* SIDEBAR (desktop) */}
-      <div className=" mt-5 z-50 hidden sm:block row-start-2 col-start-1 h-full">
+      {/* SIDEBAR (desktop) — commented out, replaced by per-section sidebars */}
+      {/* <div className="mt-5 z-50 hidden sm:block row-start-2 col-start-1 h-full">
         <Sidebar />
-      </div>
+      </div> */}
+
       {/* SIDEBAR (mobile) */}
-      <div className=" row-start-2 col-start-1 h-full">
+      <div className="row-start-2 col-start-1 h-full">
         <BottomNavbar items={bottomNavbarItems} />
       </div>
+
       {/* CONTENT */}
-      <main className="row-start-2 h-full col-start-1 sm:col-start-2 overflow-y-auto flex flex-col">
-        <div className="flex-1">{children}</div>
+      <main className="row-start-2 h-full col-start-1 overflow-y-auto flex flex-col">
+        <div className="flex-1 w-full sm:w-[90%] sm:mx-auto">{children}</div>
         <Footer />
       </main>
-                
     </div>
   );
 }

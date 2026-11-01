@@ -58,6 +58,24 @@ import {
   IGenjutsuMotionTransferInput,
   genjutsuMotionTransferValidationSchema,
 } from "./models/higgsfield-genjutsu-motion-transfer.type";
+import {
+  IAiInfluencerInput,
+  aiInfluencerValidationSchema,
+} from "./models/higgsfield-ai-influencer.type";
+import {
+  IAdsStudioInput,
+  adsStudioValidationSchema,
+} from "./models/higgsfield-ads-studio.type";
+import { IKatanaInput, katanaValidationSchema } from "./models/higgsfield-katana.type";
+import { IMusicV25Input, musicV25ValidationSchema } from "./models/elevenlabs-music-v2-5.type";
+import {
+  IAdsMultiplierInput,
+  adsMultiplierValidationSchema,
+} from "./models/ads-multiplier.type";
+import {
+  ISeedance25RefToVideoInput,
+  seedance25RefValidationSchema,
+} from "./models/seedance-2.5-ref-to-video.type";
 
 export interface BaseAiInput {
   prompt: string;
@@ -85,7 +103,13 @@ export type AllModelsInput =
   | ISeedance25Input
   | IGptImage2Input
   | IGrokImagineVideo15Input
-  | IGenjutsuMotionTransferInput;
+  | IGenjutsuMotionTransferInput
+  | IAiInfluencerInput
+  | IAdsStudioInput
+  | IKatanaInput
+  | IMusicV25Input
+  | ISeedance25RefToVideoInput
+  | IAdsMultiplierInput;
 
 export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.VEO_3]: veo3ValidationSchema,
@@ -102,6 +126,12 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: grokImagineVideo15ValidationSchema,
   [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
     genjutsuMotionTransferValidationSchema,
+  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
+  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
+  [AiModelsEnum.HIGGSFIELD_KATANA]: katanaValidationSchema,
+  [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: musicV25ValidationSchema,
+  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: seedance25RefValidationSchema,
+  [AiModelsEnum.ADS_MULTIPLIER]: adsMultiplierValidationSchema,
 };
 export enum GenerationTypeEnum {
   VIDEO = "video",
@@ -116,6 +146,7 @@ export interface GenerationQueue {
   status: "pending" | "processing" | "success" | "failure";
   resultUrl: string;
   mediaId?: string;
+  providerUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

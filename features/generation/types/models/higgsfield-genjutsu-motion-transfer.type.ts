@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const GENJUTSU_MOTION_TRANSFER_MAX_IMAGES = 8;
+export const GENJUTSU_MOTION_TRANSFER_MAX_IMAGES = 3;
 
 export const GenjutsuMotionTransferInputConst = {
   resolution: ["480p", "720p", "1080p"] as const,

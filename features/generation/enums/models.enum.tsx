@@ -14,6 +14,12 @@ export enum AiModelsEnum {
   GPT_IMAGE_2 = "gpt-image-2",
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
   HIGGSFIELD_GENJUTSU_MOTION_TRANSFER = "higgsfield-genjutsu-motion-transfer",
+  HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
+  HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
+  HIGGSFIELD_KATANA = "higgsfield-katana",
+  ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
+  SEEDANCE_2_5_REF_TO_VIDEO = "seedance-2.5-ref-to-video",
+  ADS_MULTIPLIER = "ads-multiplier",
 }
 export interface Model {
   id: AiModelsEnum;
@@ -86,6 +92,17 @@ export const IMAGE_MODELS: Model[] = [
   },
 ];
 export const VIDEO_MODELS: Model[] = [
+  {
+    id: AiModelsEnum.ADS_MULTIPLIER,
+    name: "Ad Multiplier",
+    description: "Turn one winning ad into new versions with your characters and products.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M8 8V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-3M4 9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9Zm5 3.5v5l4-2.5-4-2.5Z" />
+      </svg>
+    ),
+  },
   {
     id: AiModelsEnum.VEO_3,
     name: "Veo 3 Standard",
@@ -165,6 +182,17 @@ export const VIDEO_MODELS: Model[] = [
     ),
   },
   {
+    id: AiModelsEnum.HIGGSFIELD_KATANA,
+    name: "Katana",
+    description: "Drop your character into any video edit with one reference photo.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M3 17L17 3l1 1-1 1 2 2 1-1 1 1-7 7v5l-2 2v-4l-1-1-4 4H7l-2-2h4l4-4-1-1H8l2-2" />
+      </svg>
+    ),
+  },
+  {
     id: AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
     name: "Grok Imagine Video 1.5",
     description: "Fast, expressive video from a prompt or a single image.",
@@ -226,3 +254,64 @@ export const AUDIO_MODELS: Model[] = [
     )
   }
 ];
+
+/** Models that run from their own studio page, not the /create prompt composer. */
+export const STUDIO_MODELS: Model[] = [
+  {
+    id: AiModelsEnum.HIGGSFIELD_ADS_STUDIO,
+    name: "Ads Studio",
+    description: "Ready-to-use ads from a brief and your product photos.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M10.34 15.84c-.69-.03-1.38-.04-2.09-.04H7.5a4.5 4.5 0 1 1 0-9h.75c.71 0 1.4-.01 2.09-.04m0 9.08c.25.97.58 1.91.99 2.81.25.56.06 1.24-.48 1.55l-.65.38a1.14 1.14 0 0 1-1.6-.49 22.6 22.6 0 0 1-1.48-3.56m3.22-.69a24 24 0 0 1 0-9.08m0 9.08c3.52.16 6.82 1.1 9.75 2.65A24 24 0 0 0 21 12c0-1.69-.18-3.33-.51-4.92a23.7 23.7 0 0 1-9.75 2.68" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.ELEVENLABS_MUSIC_V2_5,
+    name: "Artist",
+    description: "Full songs from a genre, a mood and your own lyrics.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9 9l12-2" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO,
+    name: "Seedance 2.5 Reference",
+    description: "Music video clips from a character, a reference video and a song.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.HIGGSFIELD_AI_INFLUENCER,
+    name: "AI Influencer",
+    description: "Character reference sheet for a human or animal influencer.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0M18.5 3.5l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5.5-1.5Z" />
+      </svg>
+    ),
+  },
+];
+
+const MODEL_BY_ID = new Map<string, Model>(
+  [...IMAGE_MODELS, ...VIDEO_MODELS, ...AUDIO_MODELS, ...STUDIO_MODELS].map((m) => [m.id, m]),
+);
+
+export function isAiModel(value: string): value is AiModelsEnum {
+  return (Object.values(AiModelsEnum) as string[]).includes(value);
+}
+
+/** The model definition for an id, or null when the id isn't a known model. */
+export function getModel(id: string): Model | null {
+  return MODEL_BY_ID.get(id) ?? null;
+}

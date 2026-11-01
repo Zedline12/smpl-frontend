@@ -5,6 +5,99 @@ import { HomeWelcome } from "@/features/landing/components/HomeWelcome";
 import { Media } from "@/features/media/types/media";
 import { fetchWithToken } from "@/lib/fetcher";
 import { redirect } from "next/navigation";
+import { FeaturedCarousel, type FeaturedItem } from "@/components/FeaturedCarousel";
+import { FeatureGrid, type FeatureItem } from "@/components/FeatureGrid";
+
+// ─── hero data ────────────────────────────────────────────────────────────────
+
+const featured: FeaturedItem[] = [
+  {
+    title: "Reality Manipulation",
+    description: "Transfer motion from any video onto your subjects with Genjutsu.",
+    video: "",
+    poster: "",
+    href: "/create/video",
+  },
+  {
+    title: "Text to Video",
+    description: "Generate cinematic 4K clips from a single prompt in seconds.",
+    video: "",
+    poster: "",
+    href: "/create/video",
+  },
+  {
+    title: "AI Image Studio",
+    description: "Create stunning visuals with GPT Image 2 and Kling.",
+    video: "",
+    poster: "",
+    href: "/create/image",
+  },
+  {
+    title: "Voice Synthesis",
+    description: "Ultra-realistic speech and voice cloning with ElevenLabs v3.",
+    video: "",
+    poster: "",
+    href: "/create/audio",
+  },
+];
+
+const features: FeatureItem[] = [
+  {
+    icon: "Sparkles",
+    title: "AI Generation",
+    description: "Create videos, images and audio from text or reference media.",
+    badge: "FREE",
+    href: "/create/video",
+  },
+  {
+    icon: "BarChart",
+    title: "Analytics",
+    description: "Track your usage, credits and generation history at a glance.",
+    href: "/",
+  },
+  {
+    icon: "Cpu",
+    title: "Latest Models",
+    description: "Access Veo 3, Kling, Seedance, Grok and more as they launch.",
+    href: "/create/video",
+  },
+  {
+    icon: "Film",
+    title: "Motion Transfer",
+    description: "Transplant motion from any clip onto your own subjects.",
+    highlighted: true,
+    href: "/create/video",
+  },
+  {
+    icon: "Asterisk",
+    title: "Media Library",
+    description: "All your generated assets stored and ready to reuse.",
+    href: "/media",
+  },
+  {
+    icon: "Wand",
+    title: "Smart Prompts",
+    description: "Prompt suggestions powered by your previous generations.",
+    href: "/create/video",
+  },
+];
+
+const promo = {
+  title: "Smpl Studio",
+  subtitle: "Your AI creative suite — all models, one workspace.",
+  ctaLabel: "Create",
+  ctaHref: "/create/video",
+  statusItems: [
+    { label: "Veo 3 generation complete", accent: true },
+    { label: "Kling v3 rendering…" },
+    { label: "Seedance 2.5 queued" },
+    { label: "ElevenLabs pending" },
+  ],
+  thumbUrls: ["", "", ""],
+};
+
+// ─── page ─────────────────────────────────────────────────────────────────────
+
 export default async function WorkspacePage() {
   const isAuthRes = await fetchWithToken("/auth/is-auth", { method: "POST" });
   if (!isAuthRes.ok) {
@@ -29,17 +122,26 @@ export default async function WorkspacePage() {
       updatedAt: new Date().toISOString(),
     };
   });
+
   return (
-    <div className="w-full p-5 sm:mt-5">
+    <div className="w-full py-6 px-1 sm:px-0 flex flex-col gap-10 sm:mt-4">
       <HomeTour />
-      <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
+
+      {/* ── hero ── */}
+      <section className="flex flex-col gap-10">
+        <FeaturedCarousel items={featured} />
+        <FeatureGrid promo={promo} features={features} />
+      </section>
+
+      <section className="sm:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
       </section>
+
       <MediaGrid
         imagesWidth={250}
         media={media}
         breakpointCols={{ default: 3, 1600: 4, 1450: 4, 1200: 3, 940: 2 }}
-      ></MediaGrid>
+      />
     </div>
   );
 }

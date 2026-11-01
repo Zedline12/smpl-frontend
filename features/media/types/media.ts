@@ -36,6 +36,12 @@ export interface Media {
   aspectRatio: AspectRatio;
   model: string;
   input:Record<string,any>;
+  projectId?: string;
+  generationId?: string;
+  liked?: boolean;
+  downloaded?: boolean;
+  isTemplate?: boolean;
+  isPublished?: boolean;
   width: number;
   height: number;
   format: string;
@@ -43,6 +49,8 @@ export interface Media {
   updatedAt: string;
 }
 export type MediaType = "image" | "video" | "audio";
+/** "music" (Artist page): waveform players and the DJ tile. "remix" (Remix page): the film-strip tile. */
+export type MediaDisplayVariant = "default" | "music" | "remix";
 export enum MediaTypeEnum{
   IMAGE="image",
   VIDEO="video",

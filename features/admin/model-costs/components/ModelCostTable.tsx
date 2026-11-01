@@ -14,9 +14,15 @@ import {
   IMAGE_MODELS,
   VIDEO_MODELS,
   AUDIO_MODELS,
+  STUDIO_MODELS,
 } from "@/features/generation/enums/models.enum";
 
-const ALL_MODELS = [...IMAGE_MODELS, ...VIDEO_MODELS, ...AUDIO_MODELS];
+const ALL_MODELS = [
+  ...IMAGE_MODELS,
+  ...VIDEO_MODELS,
+  ...AUDIO_MODELS,
+  ...STUDIO_MODELS,
+];
 
 export interface ModelCostRule {
   id: string;

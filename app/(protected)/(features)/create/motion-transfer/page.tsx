@@ -20,7 +20,10 @@ export default function MotionTransferPage() {
       <div className="md:grid hidden w-full h-full text-foreground">
         <div className="relative col-span-2 px-5 w-full flex flex-col justify-between gap-2">
           <div className="h-[500px]">
-            <MediaExplorer />
+            <MediaExplorer
+              explore
+              defaultModel={AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER}
+            />
           </div>
           <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
             <PromptComposer />
@@ -29,7 +32,10 @@ export default function MotionTransferPage() {
       </div>
       <div className="p-5 md:hidden block h-full grid grid-cols-1 gap-6 text-foreground">
         <div className="col-span-1 h-[600px]">
-          <MediaExplorer />
+          <MediaExplorer
+            explore
+            defaultModel={AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER}
+          />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           <PromptComposer />

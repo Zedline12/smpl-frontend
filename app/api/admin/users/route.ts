@@ -5,7 +5,9 @@ export async function GET(req: NextRequest) {
   try {
     const sortBy = req.nextUrl.searchParams.get("sortBy");
     const isSubscribed = req.nextUrl.searchParams.get("isSubscribed") ?? "true";
-    const params = new URLSearchParams({ isSubscribed });
+    const page = req.nextUrl.searchParams.get("page") ?? "1";
+    const limit = req.nextUrl.searchParams.get("limit") ?? "10";
+    const params = new URLSearchParams({ isSubscribed, page, limit });
     if (sortBy) params.set("sortBy", sortBy);
 
     const response = await fetchWithToken(`/admin/users?${params.toString()}`);

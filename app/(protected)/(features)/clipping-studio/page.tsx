@@ -1,5 +1,5 @@
-import { CreateClipsWorkspace } from "@/features/clipping/components/CreateClipsWorkspace";
+import { ClippingStudioHome } from "@/features/clipping/components/ClippingStudioHome";
 
 export default function ClippingStudioPage() {
-  return <CreateClipsWorkspace />;
+  return <ClippingStudioHome />;
 }

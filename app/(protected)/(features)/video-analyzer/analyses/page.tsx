@@ -1,5 +1,6 @@
-import { MyAnalysesWorkspace } from "@/features/video-analyzer/components/MyAnalysesWorkspace";
+import { redirect } from "next/navigation";
 
+/** The analyses list now lives on the analyzer page itself. */
 export default function VideoAnalysesPage() {
-  return <MyAnalysesWorkspace />;
+  redirect("/video-analyzer");
 }

@@ -10,6 +10,12 @@ type AiGenerationControlStore = {
   setModel: (model: AiModelsEnum) => void;
   setProjectId: (projectId: string) => void;
   setMediaType: (mediaType: GenerationTypeEnum) => void;
+  /** Admin template page: Create makes a template instead of a user generation. */
+  templateMode: boolean;
+  setTemplateMode: (templateMode: boolean) => void;
+  /** Which view is shown in the main content area of the create section. */
+  sidebarView: "default" | "howItWorks";
+  setSidebarView: (view: "default" | "howItWorks") => void;
 };
 type AiModelStore = {
   states: Partial<{
@@ -35,6 +41,18 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.GROK_IMAGINE_VIDEO_1_5],
     [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
       ModelDefaults[AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER],
+    [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]:
+      ModelDefaults[AiModelsEnum.HIGGSFIELD_AI_INFLUENCER],
+    [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]:
+      ModelDefaults[AiModelsEnum.HIGGSFIELD_ADS_STUDIO],
+    [AiModelsEnum.HIGGSFIELD_KATANA]:
+      ModelDefaults[AiModelsEnum.HIGGSFIELD_KATANA],
+    [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]:
+      ModelDefaults[AiModelsEnum.ELEVENLABS_MUSIC_V2_5],
+    [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]:
+      ModelDefaults[AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO],
+    [AiModelsEnum.ADS_MULTIPLIER]:
+      ModelDefaults[AiModelsEnum.ADS_MULTIPLIER],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();
@@ -56,8 +74,12 @@ export const useAiGenerationControlStore = create<AiGenerationControlStore>(
     model: AiModelsEnum.GEMINI_FLASH_IMAGE,
     projectId: "",
     mediaType: GenerationTypeEnum.IMAGE,
-    setModel: (model) => set({ model }),
+    setModel: (model) => set({ model, sidebarView: "default" }),
     setProjectId: (projectId: string) => set({ projectId }),
     setMediaType: (mediaType) => set({ mediaType, model: MediaTypeDefaultModel[mediaType] }),
+    templateMode: false,
+    setTemplateMode: (templateMode) => set({ templateMode }),
+    sidebarView: "default",
+    setSidebarView: (sidebarView) => set({ sidebarView }),
   }),
 );

@@ -15,9 +15,18 @@ export async function fetchGenerationCost(
   const json = await res.json();
   return json.data as CalculateMediaCostResponse;
 }
-export async function fetchGenerationQueues(): Promise<GenerationQueue[] | []> {
-  // if (!projectId) return [];
-  const res = await fetch(`/api/media/me/queues`);
+/** Models the current user has completed at least one generation with. */
+export async function fetchUserModels(): Promise<string[]> {
+  const res = await fetch("/api/generation/me/models");
+  if (!res.ok) throw new Error("Could not load your models");
+  const json = await res.json();
+  return Array.isArray(json) ? json : [];
+}
+
+export async function fetchGenerationQueues(
+  domain: string = "media-generation",
+): Promise<GenerationQueue[] | []> {
+  const res = await fetch(`/api/media/me/queues?domain=${encodeURIComponent(domain)}`);
   const json = await res.json();
   return json.data;
 }

@@ -11,11 +11,11 @@
 
 :root {
   /* Raw color palette */
-  --black-true: #000000;
-  --black-900: oklch(0.09 0 0);
-  --black-800: oklch(0.13 0 0);
-  --black-700: oklch(0.18 0 0);
-  --black-600: oklch(0.24 0 0);
+  --black-true: #141414;
+  --black-900: #1a1a1a;
+  --black-800: #202020;
+  --black-700: #2a2a2a;
+  --black-600: #333333;
   --black-500: oklch(0.32 0 0);
   --blue-100: #d6f7fe;
   --blue-200: #93e9fd;
@@ -239,7 +239,7 @@
 }
 
 .dark {
-  --background: var(--black-true);
+  --background: #141414;
   --foreground: var(--fg-1);
   --card: var(--black-800);
   --card-foreground: var(--fg-1);
@@ -647,7 +647,7 @@ select:focus {
 /* ── Glass nav ───────────────────────────────────────────── */
 
 .glass-nav {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(20, 20, 20, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
@@ -846,6 +846,74 @@ select:focus {
   animation: scanner 2s ease-in-out infinite;
 }
 
+@keyframes scan-down {
+  0%   { top: -4rem; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-scan-down {
+  animation: scan-down 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan-down {
+    animation: none;
+    top: 50%;
+  }
+}
+
+/* Artist page: sound bars and ripples coming off the DJ deck. */
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.15); }
+  50%      { transform: scaleY(1); }
+}
+.animate-wave-bar {
+  transform-origin: bottom;
+  animation: wave-bar 1.1s ease-in-out infinite;
+}
+@keyframes wave-ripple {
+  0%   { transform: scale(0.4); opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.animate-wave-ripple {
+  animation: wave-ripple 2.4s ease-out infinite;
+}
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-wave-bar {
+    animation: none;
+    transform: scaleY(0.5);
+  }
+  .animate-wave-ripple,
+  .animate-spin-slow {
+    animation: none;
+  }
+}
+
+/* Remix generating tile: a film strip scrolling past a playhead, frames lighting up as they're cut. */
+@keyframes film-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-film-scroll {
+  animation: film-scroll 6s linear infinite;
+}
+@keyframes frame-cut {
+  0%, 70%, 100% { opacity: 0; }
+  80%           { opacity: 1; }
+}
+.animate-frame-cut {
+  animation: frame-cut 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-film-scroll,
+  .animate-frame-cut {
+    animation: none;
+  }
+}
+
 /* ── react-colorful overrides ────────────────────────────── */
 
 .react-colorful {
@@ -870,7 +938,7 @@ select:focus {
 
 /* ── driver.js tour — brand overrides ───────────────────────── */
 .driver-popover {
-  background: oklch(0.13 0 0) !important;
+  background: #202020 !important;
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
   border-radius: 16px !important;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8), 0 0 32px rgba(107, 65, 255, 0.15) !important;
@@ -954,16 +1022,16 @@ select:focus {
 }
 
 .driver-popover-arrow-side-left.driver-popover-arrow {
-  border-left-color: oklch(0.13 0 0) !important;
+  border-left-color: #202020 !important;
 }
 .driver-popover-arrow-side-right.driver-popover-arrow {
-  border-right-color: oklch(0.13 0 0) !important;
+  border-right-color: #202020 !important;
 }
 .driver-popover-arrow-side-top.driver-popover-arrow {
-  border-top-color: oklch(0.13 0 0) !important;
+  border-top-color: #202020 !important;
 }
 .driver-popover-arrow-side-bottom.driver-popover-arrow {
-  border-bottom-color: oklch(0.13 0 0) !important;
+  border-bottom-color: #202020 !important;
 }
 
 /* ── Toasts (sonner) — always vertically centered on screen ── */
@@ -974,4 +1042,203 @@ select:focus {
 }
 [data-sonner-toaster][data-x-position="center"] {
   transform: translate(-50%, -50%) !important;
+}
+
+/* While media is being selected, the selection bar takes the composer's spot. */
+body[data-media-selecting] #tour-prompt-composer {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(1rem);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Artist page: Genre / Mood vinyl disc menus. */
+@keyframes disc-in {
+  from { opacity: 0; transform: scale(0.6) rotate(-60deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.animate-disc-in {
+  animation: disc-in 0.35s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+.animate-disc-spin {
+  animation: spin 14s linear infinite;
+}
+@keyframes emoji-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25%      { transform: rotate(-14deg) scale(1.1); }
+  75%      { transform: rotate(14deg) scale(1.1); }
+}
+.animate-emoji-wiggle {
+  animation: emoji-wiggle 0.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-disc-in,
+  .animate-disc-spin,
+  .animate-emoji-wiggle {
+    animation: none;
+  }
+}
+
+/* Clipping Studio hero: social feeds scrolling, a playhead cutting clips, stats floating up. */
+@keyframes feed-scroll-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes feed-scroll-down {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+.animate-feed-up {
+  animation: feed-scroll-up var(--feed-speed, 32s) linear infinite;
+}
+.animate-feed-down {
+  animation: feed-scroll-down var(--feed-speed, 32s) linear infinite;
+}
+@keyframes phone-float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50%      { transform: translateY(-22px) rotate(calc(var(--tilt, 0deg) + 4deg)); }
+}
+.animate-phone-float {
+  animation: phone-float var(--float-speed, 7s) ease-in-out infinite;
+}
+@keyframes playhead-sweep {
+  from { left: 0%; }
+  to   { left: 100%; }
+}
+.animate-playhead {
+  animation: playhead-sweep 9s linear infinite;
+}
+@keyframes snip {
+  0%, 70%, 100% { transform: rotate(0deg); }
+  80%           { transform: rotate(-28deg); }
+  90%           { transform: rotate(8deg); }
+}
+.animate-snip {
+  animation: snip 1.2s ease-in-out infinite;
+}
+@keyframes float-up {
+  0%   { transform: translateY(30px) scale(0.9); opacity: 0; }
+  15%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(-140px) scale(1); opacity: 0; }
+}
+.animate-float-up {
+  animation: float-up 7s ease-in-out infinite;
+}
+@keyframes cut-flash {
+  0%, 85%, 100% { opacity: 0.15; }
+  90%           { opacity: 1; }
+}
+.animate-cut-flash {
+  animation: cut-flash 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-feed-up,
+  .animate-feed-down,
+  .animate-phone-float,
+  .animate-playhead,
+  .animate-snip,
+  .animate-float-up,
+  .animate-cut-flash {
+    animation: none;
+  }
+}
+
+/* Clipping progress: a beam scans the film, the scissors cut, and finished clips pop out. */
+@keyframes clip-pop {
+  0%   { transform: translateY(10px) scale(0.4) rotate(0deg); opacity: 0; }
+  20%  { transform: translateY(-14px) scale(1) rotate(var(--pop-tilt, -6deg)); opacity: 1; }
+  70%  { transform: translateY(-34px) scale(1) rotate(var(--pop-tilt, -6deg)); opacity: 1; }
+  100% { transform: translateY(-52px) scale(0.85) rotate(var(--pop-tilt, -6deg)); opacity: 0; }
+}
+.animate-clip-pop {
+  animation: clip-pop 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes scan-beam {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(520%); }
+}
+.animate-scan-beam {
+  animation: scan-beam 2.8s ease-in-out infinite;
+}
+@keyframes status-cycle {
+  0%, 22%  { opacity: 1; transform: translateY(0); }
+  25%, 97% { opacity: 0; transform: translateY(-6px); }
+  100%     { opacity: 0; transform: translateY(6px); }
+}
+.animate-status-cycle {
+  animation: status-cycle 10s ease-in-out infinite;
+}
+@keyframes spark {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+}
+.animate-spark {
+  animation: spark 1.2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-clip-pop,
+  .animate-scan-beam,
+  .animate-spark {
+    animation: none;
+  }
+  .animate-status-cycle {
+    animation: none;
+    opacity: 0;
+  }
+  .animate-status-cycle:first-child {
+    opacity: 1;
+  }
+}
+
+/* Video Analyzer: film strips drift, a beam scans them, detection boxes flash, audio bars pulse. */
+@keyframes analyzer-strip-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes analyzer-strip-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.animate-analyzer-strip-left {
+  animation: analyzer-strip-left var(--strip-speed, 60s) linear infinite;
+}
+.animate-analyzer-strip-right {
+  animation: analyzer-strip-right var(--strip-speed, 60s) linear infinite;
+}
+@keyframes analyzer-sweep {
+  0%   { left: -4%; }
+  100% { left: 104%; }
+}
+.animate-analyzer-sweep {
+  animation: analyzer-sweep var(--sweep-speed, 7s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes analyzer-box {
+  0%, 100% { opacity: 0; transform: scale(1.12); }
+  12%      { opacity: 1; transform: scale(1); }
+  55%      { opacity: 1; transform: scale(1); }
+  70%      { opacity: 0; transform: scale(0.97); }
+}
+.animate-analyzer-box {
+  animation: analyzer-box 6s ease-out infinite;
+}
+@keyframes analyzer-bar {
+  0%, 100% { transform: scaleY(0.25); }
+  50%      { transform: scaleY(1); }
+}
+.animate-analyzer-bar {
+  transform-origin: bottom;
+  animation: analyzer-bar var(--bar-speed, 1.4s) ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-analyzer-strip-left,
+  .animate-analyzer-strip-right,
+  .animate-analyzer-sweep,
+  .animate-analyzer-bar {
+    animation: none;
+  }
+  .animate-analyzer-box {
+    animation: none;
+    opacity: 1;
+  }
 }

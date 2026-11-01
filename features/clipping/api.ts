@@ -38,10 +38,11 @@ export async function fetchClippingProject(
 export async function fetchClippingCost(
   videoUrl: string,
 ): Promise<ClippingCost> {
-  const res = await fetch("/api/video-clipping/calculate-cost", {
+  // Priced by the shared generation cost endpoint, under the "video-clipping" model.
+  const res = await fetch("/api/generation/calculate-cost", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ videoUrl }),
+    body: JSON.stringify({ model: "video-clipping", input: { videoUrl } }),
   });
   if (!res.ok) {
     throw new Error(await readError(res, "Failed to calculate cost"));

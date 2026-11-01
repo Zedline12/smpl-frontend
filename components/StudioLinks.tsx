@@ -5,6 +5,10 @@ import Link from "next/link";
 const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   { label: "Mcp Integration", href: "/settings/mcp", isNew: true },
   { label: "Clipping Studio", href: "/clipping-studio", isNew: true },
+  { label: "AI Influencer Studio", href: "/ai-influencer-studio", isNew: true },
+  { label: "Ads Studio", href: "/ads-studio", isNew: true },
+  { label: "Artist", href: "/artist", isNew: true },
+  { label: "Remix", href: "/remix", isNew: true },
   //{ label: "Marketing Studio", href: "/marketing-studio", isNew: true },
  // { label: "Video Analyzer", href: "/video-analyzer", isNew: true },
 ];
