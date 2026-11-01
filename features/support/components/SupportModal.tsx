@@ -10,7 +10,7 @@ import {
 import { CheckCircle2 } from "lucide-react";
 
 interface SupportCategory {
-  _id: string;
+  id: string;
   slug: string;
   label: string;
 }
@@ -90,7 +90,7 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
               <div className="grid grid-cols-2 gap-2">
                 {categories.map((cat) => (
                   <button
-                    key={cat._id}
+                    key={cat.id}
                     onClick={() => setCategoryId(cat.id)}
                     className="text-left p-3 rounded-xl transition-all duration-150"
                     style={{

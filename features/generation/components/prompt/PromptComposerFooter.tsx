@@ -136,7 +136,7 @@ export default function PromptComposerFooter({
             <button
               type="button"
               onClick={handleEnhancePrompt}
-              disabled={isFreePlan || prompt.length < 10 || isEnhancing}
+              disabled={isFreePlan || (prompt ?? "").length < 10 || isEnhancing}
               className="flex cursor-pointer items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-white/10"
             >
               <Image
