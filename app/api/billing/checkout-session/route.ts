@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { fetchWithToken } from "@/lib/fetcher";
 import { clientIpHeader } from "@/lib/client-ip";
 import { NextRequest, NextResponse } from "next/server";
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json(json);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Checkout session error:", error);
     return NextResponse.json(
       { message: "Internal server error" },

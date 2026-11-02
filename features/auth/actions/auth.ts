@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { fetchWithToken } from "@/lib/fetcher";
 import { clientIpHeader } from "@/lib/client-ip";
 import { AUTH_COOKIE_OPTIONS } from "@/lib/auth-tokens";
+import { ApiErrorCode, BLOCKED_PATH, getApiErrorCode } from "@/lib/api-errors";
 const SUSPENDED_COOKIE = "suspended_token";
 
 export async function logout() {
@@ -48,6 +49,7 @@ export async function login(
   }
 
   let suspended = false;
+  let blocked = false;
   try {
     const requestHeaders = await headers();
     const response = await fetch(
@@ -65,8 +67,11 @@ export async function login(
 
     const result = await response.json();
 
+    const errorCode = getApiErrorCode(result);
     const suspendedToken = result?.error?.details?.suspendedToken;
-    if (result?.error?.code === "ACCOUNT_SUSPENDED" && suspendedToken) {
+    if (errorCode === ApiErrorCode.IP_BLOCKED) {
+      blocked = true;
+    } else if (errorCode === ApiErrorCode.ACCOUNT_SUSPENDED && suspendedToken) {
       await startSuspendedSession(suspendedToken);
       suspended = true;
     } else if (!response.ok) {
@@ -89,7 +94,7 @@ export async function login(
     return { error: true, message: "Something went wrong. Please try again." };
   }
 
-  redirect(suspended ? `/suspended` : `/`);
+  redirect(blocked ? BLOCKED_PATH : suspended ? `/suspended` : `/`);
 }
 
 export async function exchangeToken(exchangeToken: string) {
@@ -173,6 +178,9 @@ export async function signup(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    if (getApiErrorCode(errorData) === ApiErrorCode.IP_BLOCKED) {
+      redirect(BLOCKED_PATH);
+    }
     return { error: true, message: errorData.message || "Registration failed" };
   }
   return;

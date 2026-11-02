@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -37,6 +38,7 @@ export async function GET(
       },
     });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error downloading invoice:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

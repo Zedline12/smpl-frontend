@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
     const data = await response.json().catch(() => null);
     return NextResponse.json(data || { success: true }, { status: 201 });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error creating model cost:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

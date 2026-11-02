@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -22,6 +23,7 @@ export async function DELETE(
     const data = await response.json().catch(() => ({ success: true }));
     return NextResponse.json(data);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error deleting user:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -23,6 +24,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error deleting prompt:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

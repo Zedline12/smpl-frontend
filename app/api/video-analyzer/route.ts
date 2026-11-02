@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -20,6 +21,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error loading video analyses:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -49,6 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error creating video analysis:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

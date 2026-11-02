@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -17,7 +18,8 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(await response.json());
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -28,6 +29,7 @@ export async function PATCH(
     const data = await response.json().catch(() => null);
     return NextResponse.json(data || { success: true });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error updating credit pricing:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

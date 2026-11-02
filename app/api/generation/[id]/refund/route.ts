@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -23,6 +24,7 @@ export async function POST(
 
     return NextResponse.json(data ?? { success: true });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error refunding generation:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

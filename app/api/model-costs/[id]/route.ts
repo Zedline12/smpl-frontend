@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -26,6 +27,7 @@ export async function PATCH(
     const data = await response.json().catch(() => null);
     return NextResponse.json(data || { success: true });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error updating model cost:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
@@ -52,6 +54,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error deleting model cost:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

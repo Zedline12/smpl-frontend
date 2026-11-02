@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -17,7 +18,8 @@ export async function DELETE(
       return NextResponse.json({ error: err.message || "Failed" }, { status: response.status });
     }
     return new NextResponse(null, { status: 204 });
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

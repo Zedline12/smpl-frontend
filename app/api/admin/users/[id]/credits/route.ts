@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -26,6 +27,7 @@ export async function POST(
     const data = await response.json().catch(() => ({ success: true }));
     return NextResponse.json(data);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error adding credits:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

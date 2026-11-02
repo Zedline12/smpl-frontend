@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data?.data ?? data);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error sending admin brain message:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

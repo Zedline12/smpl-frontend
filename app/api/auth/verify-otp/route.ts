@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -12,6 +13,7 @@ export async function POST(req: NextRequest) {
     const data = await response.json().catch(() => ({}));
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error verifying OTP:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }

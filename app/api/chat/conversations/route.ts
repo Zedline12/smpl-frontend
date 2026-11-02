@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
@@ -15,6 +16,7 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error loading conversations:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -44,6 +46,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Error creating conversation:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
