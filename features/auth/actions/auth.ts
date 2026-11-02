@@ -58,8 +58,8 @@ export async function login(
           "Content-Type": "application/json",
           ...clientIpHeader(requestHeaders),
         },
-        body: JSON.stringify({ ...data }),
-        //  body: JSON.stringify({ ...data, captchaToken }),
+       
+          body: JSON.stringify({ ...data, captchaToken }),
       },
     );
 
@@ -167,7 +167,6 @@ export async function signup(
         "Content-Type": "application/json",
         ...clientIpHeader(requestHeaders),
       },
-      //body: JSON.stringify({ ...data }),
       body: JSON.stringify({ ...data, captchaToken }),
     },
   );
