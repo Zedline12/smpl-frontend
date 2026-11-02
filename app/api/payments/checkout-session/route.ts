@@ -1,4 +1,5 @@
 import { fetchWithToken } from "@/lib/fetcher";
+import { clientIpHeader } from "@/lib/client-ip";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -8,8 +9,9 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
+      ...clientIpHeader(req.headers),
     },
   });
   const json = await res.json();
-  return NextResponse.json(json);
+  return NextResponse.json(json, { status: res.status });
 }

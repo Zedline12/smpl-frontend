@@ -1,68 +1,51 @@
 // lib/fetcher.ts
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import { cookies } from "next/headers";
+import {
+  AUTH_COOKIE_OPTIONS,
+  REFRESH_COOKIE,
+  TOKEN_COOKIE,
+  refreshTokens,
+} from "@/lib/auth-tokens";
+
+function send(url: string, options: RequestInit, accessToken?: string) {
+  return fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    credentials: "include",
+  });
+}
+
+/**
+ * Server-side fetch to the backend with the user's token.
+ * proxy.ts refreshes expired tokens before the request reaches here; if the backend
+ * still answers 401, this refreshes once and retries.
+ */
 export async function fetchWithToken(
   url: string,
   options: RequestInit = {},
 ): Promise<Response> {
   const cookieStore = await cookies();
-  let accessToken = cookieStore.get("token")?.value;
-  const authHeaders: Record<string, string> = accessToken
-    ? { Authorization: `Bearer ${accessToken}` }
-    : {};
+  const accessToken = cookieStore.get(TOKEN_COOKIE)?.value;
 
-  let res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
-    ...options,
-    headers: {
-      ...options.headers,
-      ...authHeaders,
-    },
-    credentials: "include",
-  });
+  const res = await send(url, options, accessToken);
+  if (res.status !== 401) return res;
 
-  // If token expired, refresh
-  //   if (res.status === 401) {
-  //     // Call refresh endpoint
-  //     const oldRefreshToken = cookieStore.get("refresh_token")?.value;
-  //     if (!oldRefreshToken) throw new Error("No refresh token available");
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+  if (!refreshToken) return res;
 
-  //     const refreshRes = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ oldRefreshToken }),
-  //       },
-  //     );
+  const tokens = await refreshTokens(refreshToken);
+  if (!tokens) return res;
 
-  //     if (!refreshRes.ok) throw new Error("Refresh token failed");
+  // Cookies can be written in route handlers and server actions, but not while
+  // rendering a page — there proxy.ts has already handled it, so ignore the error.
+  try {
+    cookieStore.set(TOKEN_COOKIE, tokens.token, AUTH_COOKIE_OPTIONS);
+    cookieStore.set(REFRESH_COOKIE, tokens.refreshToken, AUTH_COOKIE_OPTIONS);
+  } catch {}
 
-  //     const data = await refreshRes.json();
-  //     const newAccessToken = data.data.accessToken;
-  //     const newRefreshToken = data.data.refreshToken;
-
-  //     // Update cookie
-  //     cookieStore.set("token", newAccessToken, {
-  //       httpOnly: true,
-  //       path: "/",
-  //       secure: process.env.NODE_ENV === "production",
-  //       sameSite: "lax",
-  //     });
-  //     cookieStore.set("refresh_token", newRefreshToken, {
-  //       httpOnly: true,
-  //       path: "/",
-  //       secure: process.env.NODE_ENV === "production",
-  //       sameSite: "lax",
-  //     });
-  //     // Retry original request with new token
-  //     res = await fetch(url, {
-  //       ...options,
-  //       headers: {
-  //         ...options.headers,
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-  //   }
-
-  return res;
+  return send(url, options, tokens.token);
 }

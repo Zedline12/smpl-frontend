@@ -1,6 +1,7 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { AUTH_COOKIE_OPTIONS } from "@/lib/auth-tokens";
 
 export async function POST(req: NextRequest) {  
     const body = await req.json();
@@ -14,21 +15,8 @@ export async function POST(req: NextRequest) {
     });
     const result = await res.json();
     const { token, refreshToken } = result.data;
-    console.log("token", token)
-    console.log("refreshToken", refreshToken)
     const cookieStore = await cookies();
-    cookieStore.set("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-    });
-    cookieStore.set("refresh_token", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-    });
-    console.log("token", cookieStore.get("token"))
+    cookieStore.set("token", token, AUTH_COOKIE_OPTIONS);
+    cookieStore.set("refresh_token", refreshToken, AUTH_COOKIE_OPTIONS);
     return NextResponse.json({success: true});
 }

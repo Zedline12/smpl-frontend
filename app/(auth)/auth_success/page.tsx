@@ -2,17 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { startSuspendedSession } from "@/features/auth/actions/auth";
 
 export default function AuthSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const exchangeToken = searchParams.get("exchange_token");
+  const suspendedToken = searchParams.get("suspended_token");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Google login for a suspended account: keep the support-only token and show /suspended.
+    if (suspendedToken) {
+      startSuspendedSession(suspendedToken)
+        .then(() => router.replace("/suspended"))
+        .catch(() => {
+          setError("Authentication failed");
+          setLoading(false);
+        });
+      return;
+    }
+
     if (!exchangeToken) {
       setError("Missing exchange token");
       setLoading(false);
@@ -43,7 +56,7 @@ export default function AuthSuccessPage() {
     };
 
     exchange();
-  }, [exchangeToken, router]);
+  }, [exchangeToken, suspendedToken, router]);
 
   if (loading) {
     return (

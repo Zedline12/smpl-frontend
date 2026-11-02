@@ -22,6 +22,9 @@ export default async function ProtectedLayout({
   if (!user) {
     redirect("/login");
   }
+  if (user.isSuspended) {
+    redirect("/suspended");
+  }
   return (
     <AuthProvider user={user}>
       {children}
