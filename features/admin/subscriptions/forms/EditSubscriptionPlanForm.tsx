@@ -19,6 +19,7 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
     stripePriceId: plan.stripePriceId,
     metadata: plan.metadata || [],
     isMostPopular: plan.isMostPopular || false,
+    maxConcurrentJobs: plan.maxConcurrentJobs ?? 1,
   });
   const [isSaving, setIsSaving] = useState(false);
   
@@ -92,6 +93,22 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
             className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="maxConcurrentJobs" className="text-sm font-medium">Concurrent jobs</label>
+        <input
+          id="maxConcurrentJobs"
+          type="number"
+          min={1}
+          max={100}
+          value={formData.maxConcurrentJobs ?? 1}
+          onChange={(e) =>
+            setFormData({ ...formData, maxConcurrentJobs: Math.max(1, parseInt(e.target.value) || 1) })
+          }
+          className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <p className="text-xs text-neutral-500">How many generations a user on this plan can run at the same time.</p>
       </div>
 
       <div className="grid gap-2">

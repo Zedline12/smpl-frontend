@@ -78,8 +78,8 @@ export function NavbarUserMenu({ user }: { user: any }) {
         className="hidden sm:block"
         href={
           user?.subscription?.name === "Free Plan"
-            ? "/subscription-plans"
-            : "/settings/billing"
+            ? "/pricing"
+            : "/me/settings/subscription"
         }
       >
         {/* Tri-color gradient border pill */}

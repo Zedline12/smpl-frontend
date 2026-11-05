@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
 import InfluencerBuilder from "@/features/ai-influencer/components/InfluencerBuilder";
+import { InfluencerHero } from "@/features/ai-influencer/components/InfluencerHero";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
@@ -25,8 +26,10 @@ export default function AiInfluencerStudioPage() {
       <aside className="min-h-0 shrink-0 overflow-y-auto bg-white/[0.03] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:h-full lg:w-1/4 lg:border-r lg:border-r-white/[0.07]">
         {ready && <InfluencerBuilder />}
       </aside>
-      <section className="custom-scrollbar min-h-[600px] flex-1 overflow-y-auto p-5 lg:min-h-0">
-        <MediaExplorer explore defaultModel={AiModelsEnum.HIGGSFIELD_AI_INFLUENCER} />
+      <section className="custom-scrollbar flex min-h-[600px] flex-1 flex-col overflow-y-auto p-5 lg:min-h-0">
+        <MediaExplorer explore defaultModel={AiModelsEnum.HIGGSFIELD_AI_INFLUENCER}>
+          <InfluencerHero />
+        </MediaExplorer>
       </section>
     </div>
   );

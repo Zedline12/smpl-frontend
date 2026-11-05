@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export function NavbarGuestActions() {
   return (
     <div className="flex items-center gap-1.5 sm:gap-3">
-      <Link href="/subscription-plans">
+      <Link href="/pricing">
         <Button
           variant="ghost"
           className="text-foreground/75 hover:text-foreground bg-foreground/10 hover:bg-foreground/15 gap-1.5 font-medium"

@@ -17,4 +17,7 @@ export interface SubscriptionPlan {
   currency: string;
 
   stripePriceId: string;
+
+  /** Generation jobs a user on this plan can run at the same time. */
+  maxConcurrentJobs?: number;
 }

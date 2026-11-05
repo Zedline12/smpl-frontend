@@ -2,6 +2,10 @@
 import { useRef, useState } from "react";
 import {
   Dices,
+  Eye,
+  Glasses,
+  Globe,
+  Hourglass,
   Layers,
   Palette,
   Ruler,
@@ -28,6 +32,7 @@ import {
   AiInfluencerTier,
   IAiInfluencerInput,
   isHumanTier,
+  TIER_LABELS,
 } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
 import {
   useGenerateMutation,
@@ -54,38 +59,30 @@ const mkOpt = (key: string, label: string): AiInfluencerOption => ({
   key, label, img: null, color: null, tiers: null, slot: null, exclusive: false,
 });
 
-const CHARACTER_OPTIONS: AiInfluencerOption[] = [
-  mkOpt("normal", "Average"),
-  mkOpt("freak", "Bold"),
-  mkOpt("total", "Extreme"),
-  mkOpt("insects", "Insect"),
-  mkOpt("frogs", "Frog"),
-  mkOpt("cats", "Cat"),
-  mkOpt("dogs", "Dog"),
-  mkOpt("capybaras", "Rodent"),
-  mkOpt("birds", "Bird"),
-];
+const CHARACTER_OPTIONS: AiInfluencerOption[] = AiInfluencerInputConst.tier.map(
+  (tier) => mkOpt(tier, TIER_LABELS[tier]),
+);
 
-// Map each API category key to a lucide icon
+// Catalog category key → icon
 const CATEGORY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   gender: User,
-  build: Layers,
-  hairstyle: Scissors,
-  hair_color: Palette,
-  style: Shirt,
-  ethnicity: Sparkles,
-  age: Sparkles,
-  skin_color: Palette,
+  ethnicity_origin_base: Globe,
+  age: Hourglass,
+  skin_tone: Palette,
   height: Ruler,
+  body_type: Layers,
   proportions: Layers,
-  head_shape: Sparkles,
-  neck: Sparkles,
-  eye_shape: Smile,
-  eye_color: Palette,
-  features: Smile,
+  eye_color: Eye,
+  eye_shape: Eye,
+  freak_head: Smile,
+  freak_face: Smile,
+  freak_neck: User,
+  hair: Scissors,
+  hair_colour: Palette,
   facial_hair: Scissors,
-  distinctive_features: Sparkles,
-  accessories: Sparkles,
+  distinctive: Sparkles,
+  aesthetic: Shirt,
+  accessory: Glasses,
 };
 
 const randomSeed = () =>
@@ -129,6 +126,7 @@ export default function InfluencerBuilder() {
     seed,
     variationIndex,
     bodyColor,
+    resolution,
   } = state;
   const human = isHumanTier(tier);
   const categories = categoriesForTier(catalog, tier);
@@ -383,6 +381,27 @@ export default function InfluencerBuilder() {
           >
             <Dices className="size-4 text-foreground" />
           </button>
+        </div>
+      </section>
+
+      {/* Resolution */}
+      <section className="flex flex-col gap-1.5">
+        <p className="text-sm font-medium text-foreground">Resolution</p>
+        <div className="flex rounded-lg border border-white/10 p-1">
+          {AiInfluencerInputConst.resolution.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setField("resolution", r)}
+              className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
+                (resolution ?? "2K") === r
+                  ? "bg-white text-black"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
         </div>
       </section>
 

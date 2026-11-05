@@ -90,7 +90,7 @@ export function useUserModelsQuery() {
   });
 }
 
-/** Jobs are split by domain; studios with isolated jobs (e.g. "ads-studio") pass theirs. */
+/** Jobs are split by domain; features with their own job list pass theirs. */
 export const useGenerationQueuesQuery = (domain: string = "media-generation") => {
   const queryClient = useQueryClient();
   return useQuery({

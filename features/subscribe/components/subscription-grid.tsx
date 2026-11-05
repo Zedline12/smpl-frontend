@@ -10,53 +10,78 @@ import { useCheckout } from "../hooks/use-checkout";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Layers } from "lucide-react";
 
 interface SubscriptionGridProps {
   plans: SubscriptionPlan[];
   isLoading: boolean;
 }
 
-const PLAN_STYLES = [
+type Tier = "starter" | "creator" | "pro";
+
+/** Only the name header carries a fill; the card itself is just a hairline border. */
+const TIER_STYLES: Record<
+  Tier,
   {
-    bg: "#1a1a1a",
-    border: "rgba(255,255,255,0.08)",
-    hoverBorder: "rgba(255,255,255,0.18)",
-    accent: "#ffffff",
-    ctaBg: "#ffffff",
-    ctaText: "#0a0a0a",
-    barColor: "rgba(255,255,255,0.35)",
+    header: string;
+    headerText: string;
+    subtitleText: string;
+    accent: string;
+    bar: string;
+    cta: string;
+    subtitle: string;
+  }
+> = {
+  starter: {
+    header: "bg-foreground/[0.07]",
+    headerText: "text-foreground",
+    subtitleText: "text-muted-foreground",
+    accent: "text-foreground",
+    bar: "bg-foreground/40",
+    cta: "bg-foreground text-background hover:bg-foreground/90",
     subtitle: "For first-time AI creators",
-    ctaHover: "rgba(240,240,240,1)",
   },
-  {
-    bg: "#1a1530",
-    border: "rgba(107,65,255,0.4)",
-    hoverBorder: "rgba(107,65,255,0.7)",
-    accent: "#6b41ff",
-    ctaBg: "linear-gradient(135deg, #6b41ff 0%, #ea4bff 100%)",
-    ctaText: "#ffffff",
-    barColor: "#6b41ff",
+  creator: {
+    header: "bg-secondary",
+    headerText: "text-white",
+    subtitleText: "text-white/80",
+    accent: "text-secondary",
+    bar: "bg-secondary",
+    cta: "bg-secondary text-white hover:bg-secondary/90",
     subtitle: "For everyday AI creation",
-    ctaHover: null,
   },
-  {
-    bg: "#1e1228",
-    border: "rgba(234,75,255,0.4)",
-    hoverBorder: "rgba(234,75,255,0.7)",
-    accent: "#ea4bff",
-    ctaBg: "#ea4bff",
-    ctaText: "#ffffff",
-    barColor: "#ea4bff",
+  pro: {
+    header: "bg-primary",
+    headerText: "text-white",
+    subtitleText: "text-white/80",
+    accent: "text-primary",
+    bar: "bg-primary",
+    cta: "bg-primary text-white hover:bg-primary/90",
     subtitle: "For ambitious AI projects",
-    ctaHover: "#d93df5",
   },
-];
+};
+
+const TIER_ORDER: Tier[] = ["starter", "creator", "pro"];
+
+function tierOf(plan: SubscriptionPlan, index: number): Tier {
+  if (/pro/i.test(plan.name)) return "pro";
+  if (/creator/i.test(plan.name)) return "creator";
+  if (/starter|basic/i.test(plan.name)) return "starter";
+  return TIER_ORDER[Math.min(index, TIER_ORDER.length - 1)];
+}
+
+function concurrencyLabel(n = 1) {
+  return n <= 1 ? "1 generation at a time" : `Up to ${n} generations at once`;
+}
 
 const FAQ_ITEMS = [
   {
     q: "How do credits work?",
     a: "Credits are consumed each time you generate media. Different models cost different amounts of credits per generation. Your credits refresh every month based on your plan.",
+  },
+  {
+    q: "How many generations can run at once?",
+    a: "Free and Starter run one generation at a time, Creator runs up to 3, and Pro up to 10. You can still queue more: extra generations wait and start automatically as soon as one finishes.",
   },
   {
     q: "Can I cancel my subscription anytime?",
@@ -83,28 +108,28 @@ function FaqAccordion() {
       <h2 className="text-[28px] font-bold text-center mb-2">
         Frequently Asked Questions
       </h2>
-      <p className="text-center text-sm mb-10" style={{ color: "var(--fg-3)" }}>
+      <p className="text-center text-sm mb-10 text-muted-foreground">
         Everything you need to know about smpl pricing
       </p>
-      <div className="rounded-[16px] border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.08)", background: "#1a1a1a" }}>
+      <div className="rounded-2xl border border-foreground/[0.08] divide-y divide-foreground/[0.07] overflow-hidden">
         {FAQ_ITEMS.map((item, i) => (
-          <div key={i} style={{ borderBottom: i < FAQ_ITEMS.length - 1 ? "1px solid rgba(255,255,255,0.07)" : undefined }}>
+          <div key={i}>
             <button
               type="button"
               className="w-full flex items-center justify-between px-6 py-5 text-left"
               onClick={() => setOpen(open === i ? null : i)}
+              aria-expanded={open === i}
             >
-              <span className="text-[15px] font-medium text-white">{item.q}</span>
+              <span className="text-[15px] font-medium text-foreground">{item.q}</span>
               <ChevronDown
-                className="w-4 h-4 flex-shrink-0 ml-4 transition-transform duration-200"
-                style={{
-                  color: "var(--fg-3)",
-                  transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
-                }}
+                className={cn(
+                  "w-4 h-4 flex-shrink-0 ml-4 text-muted-foreground transition-transform duration-200",
+                  open === i && "rotate-180",
+                )}
               />
             </button>
             {open === i && (
-              <div className="px-6 pb-5 text-[14px] leading-relaxed" style={{ color: "var(--fg-3)" }}>
+              <div className="px-6 pb-5 text-[14px] leading-relaxed text-muted-foreground">
                 {item.a}
               </div>
             )}
@@ -140,13 +165,11 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
 
   if (isLoading) {
     return (
-      <div className="grid md:grid-cols-3 gap-5 max-w-[960px] mx-auto px-4">
+      <div className="grid md:grid-cols-3 gap-5 max-w-[1000px] mx-auto px-4">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="rounded-[16px] border h-96 animate-pulse"
-            style={{ background: "#1a1a1a", borderColor: "rgba(255,255,255,0.08)" }}
-          />
+          <div key={i} className="rounded-2xl border border-foreground/[0.08] p-7 h-96">
+            <div className="h-20 rounded-xl bg-foreground/[0.05] animate-pulse" />
+          </div>
         ))}
       </div>
     );
@@ -160,19 +183,10 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
     );
   }
 
-  const sortOrder: Record<string, number> = {
-    basic: 1,
-    creator: 2,
-    "creator pro": 3,
-  };
-
+  const freePlan = plans.find((p) => p.priceAmount === 0);
   const filteredPlans = plans
-    .filter((plan) => plan.billingPeriod === period && plan.priceAmount != 0)
-    .sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      return (sortOrder[aName] || 99) - (sortOrder[bName] || 99);
-    });
+    .filter((plan) => plan.billingPeriod === period && plan.priceAmount !== 0)
+    .sort((a, b) => a.priceAmount - b.priceAmount);
 
   const isYearly = period === billingPeriod.YEARLY;
   const maxCredits = Math.max(...filteredPlans.map((p) => p.creditsPerMonth ?? 0), 1);
@@ -203,19 +217,17 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
           )}
         >
           Annual
-          <span
-            className="text-[#0a0a0a] text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{ background: "#d4fc0e" }}
-          >
+          <span className="text-[#0a0a0a] text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#d4fc0e]">
             Save 25%
           </span>
         </button>
       </div>
 
       {/* Plan cards */}
-      <div className="grid md:grid-cols-3 gap-5 max-w-[960px] mx-auto px-4">
+      <div className="grid md:grid-cols-3 gap-5 max-w-[1000px] mx-auto px-4">
         {filteredPlans.map((plan, idx) => {
-          const style = PLAN_STYLES[Math.min(idx, PLAN_STYLES.length - 1)];
+          const tier = tierOf(plan, idx);
+          const style = TIER_STYLES[tier];
 
           const correspondingMonthly = plans.find(
             (p) =>
@@ -230,133 +242,115 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               : 0;
 
           const creditsBarPct = Math.round(((plan.creditsPerMonth ?? 0) / maxCredits) * 100);
-
-          const planLabel = plan.name.toUpperCase();
+          const features = [
+            concurrencyLabel(plan.maxConcurrentJobs),
+            ...(plan.metadata || []).slice(1),
+          ];
+          const isCurrent = user?.subscription?.id === plan.id;
+          const isRedirecting = isCheckoutLoading && processingPlanId === plan.id;
 
           return (
             <div
               key={plan.id}
-              className="relative rounded-[16px] p-6 flex flex-col transition-all duration-200"
-              style={{
-                background: style.bg,
-                border: `1px solid ${style.border}`,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = style.hoverBorder;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = style.border;
-              }}
+              className="relative flex flex-col rounded-2xl border border-foreground/[0.08] bg-transparent p-7 transition-colors duration-200 hover:border-foreground/[0.16]"
             >
-              {/* Plan name + discount badge */}
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[18px] font-extrabold tracking-wide text-white">
-                  {planLabel}
-                </span>
-                {discountPct > 0 && (
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded"
-                    style={{ background: "#d4fc0e", color: "#0a0a0a" }}
-                  >
-                    {discountPct}% OFF
+              {/* Plan name header: the only filled block on the card */}
+              <div className={cn("rounded-xl px-5 py-4 mb-6", style.header)}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={cn("text-[18px] font-extrabold tracking-wide uppercase", style.headerText)}>
+                    {plan.name}
                   </span>
-                )}
-                {plan.isMostPopular && (
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded"
-                    style={{ background: "#1e40af", color: "#93c5fd" }}
-                  >
-                    BEST VALUE
-                  </span>
-                )}
+                  {discountPct > 0 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#d4fc0e] text-[#0a0a0a]">
+                      {discountPct}% OFF
+                    </span>
+                  )}
+                  {plan.isMostPopular && (
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded",
+                        tier === "starter" ? "bg-primary text-white" : "bg-white text-black",
+                      )}
+                    >
+                      BEST VALUE
+                    </span>
+                  )}
+                </div>
+                <p className={cn("text-[13px] mt-1", style.subtitleText)}>{style.subtitle}</p>
               </div>
 
-              {/* Subtitle */}
-              <p className="text-[13px] mb-5" style={{ color: "var(--fg-3)" }}>
-                {style.subtitle}
-              </p>
-
-              {/* Credits block */}
-              <div
-                className="rounded-[10px] p-4 mb-5"
-                style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <div className="text-[15px] font-bold text-white mb-0.5">
+              {/* Credits */}
+              <div className="rounded-xl border border-foreground/[0.08] p-4 mb-6">
+                <div className="text-[15px] font-bold text-foreground mb-0.5">
                   {plan.creditsPerMonth?.toLocaleString()} credits/mo.
                 </div>
                 {plan.metadata?.[0] && (
-                  <div className="text-[12px] mb-3" style={{ color: "var(--fg-3)" }}>
-                    ≈ {plan.metadata[0]}
-                  </div>
+                  <div className="text-[12px] mb-3 text-muted-foreground">≈ {plan.metadata[0]}</div>
                 )}
-                {/* Range bar */}
-                <div className="relative h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <div className="relative h-1 rounded-full overflow-hidden bg-foreground/[0.08]">
                   <div
-                    className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${creditsBarPct}%`, background: style.barColor }}
+                    className={cn("absolute left-0 top-0 h-full rounded-full transition-all duration-500", style.bar)}
+                    style={{ width: `${creditsBarPct}%` }}
                   />
                 </div>
               </div>
 
               {/* Price */}
-              <div className="mb-5">
+              <div className="mb-6">
                 {isYearly && discountPct > 0 && (
-                  <div className="text-[14px] line-through mb-0.5" style={{ color: "var(--fg-3)" }}>
-                    ${monthlyPrice}
-                  </div>
+                  <div className="text-[14px] line-through mb-0.5 text-muted-foreground">${monthlyPrice}</div>
                 )}
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[38px] font-extrabold text-white leading-none">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[38px] font-extrabold text-foreground leading-none">
                     ${averageMonthly % 1 === 0 ? averageMonthly.toFixed(0) : averageMonthly.toFixed(2)}
                   </span>
-                  <span className="text-[13px]" style={{ color: "var(--fg-3)" }}>
+                  <span className="text-[13px] text-muted-foreground">
                     per month, billed {isYearly ? "annually" : "monthly"}
                   </span>
                 </div>
               </div>
 
-              {/* CTA button */}
+              {/* CTA */}
               <button
                 onClick={() => handleSubscribe(plan.id)}
-                disabled={isCheckoutLoading && processingPlanId === plan.id}
-                className="w-full py-3 rounded-[10px] text-[14px] font-bold transition-all disabled:opacity-50 mb-2"
-                style={{
-                  background: style.ctaBg,
-                  color: style.ctaText,
-                }}
+                disabled={isRedirecting || isCurrent}
+                className={cn(
+                  "w-full py-3 rounded-[10px] text-[14px] font-bold transition-colors disabled:opacity-50 mb-2",
+                  style.cta,
+                )}
               >
-                {isCheckoutLoading && processingPlanId === plan.id
-                  ? "Redirecting…"
-                  : `Get ${plan.name}`}
+                {isRedirecting ? "Redirecting…" : isCurrent ? "Current plan" : `Get ${plan.name}`}
               </button>
 
-              {/* Save note */}
-              <div className="text-center text-[12px] mb-5" style={{ color: "var(--fg-3)" }}>
+              <div className="text-center text-[12px] mb-6 text-muted-foreground">
                 {isYearly && yearlySavings > 0
                   ? `Save $${Math.round(yearlySavings)} compared to monthly`
                   : "No difference compared to monthly"}
               </div>
 
-              {/* Divider + features */}
-              <div className="border-t mb-4" style={{ borderColor: "rgba(255,255,255,0.07)" }} />
-
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#4ade80" }}>
+              {/* Features */}
+              <div className="border-t border-foreground/[0.07] pt-5 flex-grow">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#4ade80]">
                   Included features
                 </span>
-              </div>
-
-              <div className="space-y-2.5 flex-grow">
-                {(plan.metadata || []).slice(1).map((meta, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke={style.accent} strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-[13px] leading-snug" style={{ color: "rgba(255,255,255,0.75)" }}>
-                      {meta}
-                    </span>
-                  </div>
-                ))}
+                <div className="space-y-2.5 mt-3">
+                  {features.map((feature, i) => {
+                    const Icon = i === 0 ? Layers : Check;
+                    return (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", style.accent)} strokeWidth={2.5} />
+                        <span
+                          className={cn(
+                            "text-[13px] leading-snug",
+                            i === 0 ? "font-semibold text-foreground" : "text-foreground/75",
+                          )}
+                        >
+                          {feature}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           );
@@ -364,41 +358,36 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
       </div>
 
       {/* Free tier */}
-      <div className="max-w-[960px] mx-auto px-4 mt-5 pb-4">
-        <div
-          className="rounded-[16px] p-6 flex flex-col md:flex-row items-center justify-between gap-6"
-          style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
+      <div className="max-w-[1000px] mx-auto px-4 mt-5 pb-4">
+        <div className="rounded-2xl border border-foreground/[0.08] p-7 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col text-left min-w-[140px]">
-            <div className="text-[16px] font-bold mb-1 text-white">Free Plan</div>
+            <div className="text-[16px] font-bold mb-1 text-foreground">Free Plan</div>
             <div className="flex items-baseline gap-1">
-              <span className="text-[26px] font-bold text-white">$0</span>
-              <span className="text-[14px]" style={{ color: "var(--fg-3)" }}>/mo</span>
+              <span className="text-[26px] font-bold text-foreground">$0</span>
+              <span className="text-[14px] text-muted-foreground">/mo</span>
             </div>
           </div>
 
           <div className="flex-grow flex flex-col items-center md:items-start text-center md:text-left">
-            <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--fg-3)" }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider mb-1 text-muted-foreground">
               One-Time Credits
             </div>
-            <div className="text-[16px] font-bold mb-3 text-white">50 credits</div>
+            <div className="text-[16px] font-bold mb-3 text-foreground">50 credits</div>
             <div className="flex flex-col md:flex-row gap-3 md:gap-6">
-              {["Access to basic generation", "Standard quality outputs"].map((feat, i) => (
+              {[
+                concurrencyLabel(freePlan?.maxConcurrentJobs),
+                "Access to basic generation",
+                "Standard quality outputs",
+              ].map((feat, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-[#4ade80]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-[13px]" style={{ color: "rgba(255,255,255,0.75)" }}>{feat}</span>
+                  <Check className="w-4 h-4 text-[#4ade80]" strokeWidth={2.25} />
+                  <span className="text-[13px] text-foreground/75">{feat}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col items-center flex-shrink-0">
-            <div className="text-[12px]" style={{ color: "var(--fg-3)" }}>
-              No credit card required
-            </div>
-          </div>
+          <div className="text-[12px] flex-shrink-0 text-muted-foreground">No credit card required</div>
         </div>
       </div>
 

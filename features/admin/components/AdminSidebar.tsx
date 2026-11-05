@@ -15,6 +15,7 @@ import {
   Zap,
   Brain,
   LifeBuoy,
+  Bell,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 
@@ -25,6 +26,7 @@ const SECTIONS = [
       { icon: Brain, label: "Smpl Brain", href: "/admin/brain" },
       { icon: Users, label: "Users", href: "/admin/users" },
       { icon: ShieldAlert, label: "Security", href: "/admin/security" },
+      { icon: Bell, label: "Notifications", href: "/admin/notifications" },
       { icon: Image, label: "Media", href: "/admin/media" },
       { icon: BarChart3, label: "Generations", href: "/admin/generations" },
       { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },

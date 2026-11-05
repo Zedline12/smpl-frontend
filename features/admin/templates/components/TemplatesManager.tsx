@@ -15,6 +15,7 @@ import {
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import InfluencerBuilder from "@/features/ai-influencer/components/InfluencerBuilder";
 import AdsBuilder from "@/features/ads-studio/components/AdsBuilder";
+import { InfluencerBulkGenerator } from "./InfluencerBulkGenerator";
 import {
   AiModelsEnum,
   IMAGE_MODELS,
@@ -62,10 +63,7 @@ export function TemplatesManager() {
   const templates = data?.pages.flatMap((p) => p.data) ?? [];
 
   // Show this model's running jobs and refresh the list when one finishes.
-  // Ads Studio jobs are isolated in their own domain.
-  const { data: queues } = useGenerationQueuesQuery(
-    model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO ? "ads-studio" : undefined,
-  );
+  const { data: queues } = useGenerationQueuesQuery();
   const running = useMemo(
     () =>
       queues?.filter(
@@ -144,6 +142,8 @@ export function TemplatesManager() {
           <PromptComposer />
         )}
       </section>
+
+      {model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER && <InfluencerBulkGenerator />}
 
       {/* Templates for the selected model */}
       <section className="flex flex-col gap-4">

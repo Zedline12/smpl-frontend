@@ -108,7 +108,7 @@ export function useMoveMediaMutation() {
 const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: "/create/motion-transfer",
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: "/ai-influencer-studio",
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/ads-studio",
+  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/create/image?model=higgsfield-ads-studio",
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: "/artist?tab=clip",
 };

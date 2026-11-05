@@ -149,6 +149,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     seed: null,
     variationIndex: 0,
     bodyColor: "",
+    resolution: "2K",
   },
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: {
     prompt: "",
@@ -157,6 +158,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     targetAudience: "",
     language: "",
     aspectRatio: "1:1",
+    resolution: "2K",
     batchSize: 1,
   },
   [AiModelsEnum.HIGGSFIELD_KATANA]: {

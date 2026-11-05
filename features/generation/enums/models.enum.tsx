@@ -260,7 +260,7 @@ export const STUDIO_MODELS: Model[] = [
   {
     id: AiModelsEnum.HIGGSFIELD_ADS_STUDIO,
     name: "Ads Studio",
-    description: "Ready-to-use ads from a brief and your product photos.",
+    description: "Ready-to-use ads from a brief and your product photos, powered by Nano Banana Pro.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -293,7 +293,7 @@ export const STUDIO_MODELS: Model[] = [
   {
     id: AiModelsEnum.HIGGSFIELD_AI_INFLUENCER,
     name: "AI Influencer",
-    description: "Character reference sheet for a human or animal influencer.",
+    description: "Photoreal human or animal influencer: close-up and full-body shot, powered by Nano Banana Pro.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"

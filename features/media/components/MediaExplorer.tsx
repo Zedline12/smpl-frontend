@@ -2,7 +2,7 @@
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, ReactNode } from "react";
 import { Compass, History as HistoryIcon, LucideIcon } from "lucide-react";
 import {
   AlertDialog,
@@ -42,6 +42,8 @@ interface MediaExplorerProps {
   jobsDomain?: string;
   /** "music" (Artist page): waveform song players and the DJ generating tile. */
   variant?: MediaDisplayVariant;
+  /** Explore-only content (hero, examples), shown above the templates. */
+  children?: ReactNode;
 }
 type ExplorerView = "explore" | "history";
 
@@ -60,6 +62,7 @@ export default function MediaExplorer({
   explore = false,
   jobsDomain,
   variant = "default",
+  children,
 }: MediaExplorerProps) {
   const [view, setView] = useState<ExplorerView>(
     explore ? "explore" : "history",
@@ -164,7 +167,8 @@ export default function MediaExplorer({
     });
   }, [queues]);
   return (
-    <div className="max-h-full overflow-y-auto w-full rounded-2xl border border-white/15 px-3 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    // Always fills its parent, even with nothing to show.
+    <div className="flex h-full min-h-full w-full flex-1 flex-col overflow-y-auto rounded-2xl border border-white/15 px-3 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex items-center justify-between gap-3 w-full py-2">
         <div className="flex items-center gap-1">
           {explore &&
@@ -242,6 +246,8 @@ export default function MediaExplorer({
         </div>
       )}
 
+      {isExplore && children}
+
       {!isMediaFetched || (isMediaFetching && media.length === 0) ? (
         <MediaGridSkeleton />
       ) : (
@@ -255,7 +261,8 @@ export default function MediaExplorer({
           updatingMediaIds={isExplore ? undefined : updatingMediaIds}
           actions={!isExplore}
           template={isExplore}
-          emptyMessage={isExplore ? "No templates yet" : "Start Generating !"}
+          // No templates: show nothing rather than an empty message.
+          emptyMessage={isExplore ? null : "Start Generating !"}
         />
       )}
 

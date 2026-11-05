@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import { NotificationBell } from "@/features/admin/notifications/components/NotificationBell";
 
 export const AdminNavbar = () => {
   return (
@@ -64,20 +65,7 @@ export const AdminNavbar = () => {
           />
         </div>
 
-        <button
-          className="p-2 rounded-[10px] transition-colors"
-          style={{ color: "rgba(255,255,255,0.4)" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-            e.currentTarget.style.color = "white";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "";
-            e.currentTarget.style.color = "rgba(255,255,255,0.4)";
-          }}
-        >
-          <Bell className="w-4 h-4" />
-        </button>
+        <NotificationBell />
 
         {/* Avatar */}
         <div

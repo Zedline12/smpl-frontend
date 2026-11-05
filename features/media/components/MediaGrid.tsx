@@ -16,8 +16,8 @@ type MediaGridProps = {
   template?: boolean;
   /** "music" renders songs as waveform players (Artist page). */
   variant?: MediaDisplayVariant;
-  /** Message when there's nothing to show. */
-  emptyMessage?: string;
+  /** Message when there's nothing to show; null renders nothing. */
+  emptyMessage?: string | null;
 };
 
 export function MediaGrid({
@@ -33,6 +33,7 @@ export function MediaGrid({
   variant = "default",
 }: MediaGridProps) {
   if (!media.length) {
+    if (emptyMessage === null) return null;
     return (
       <div className="flex items-center justify-center h-full py-16">
         <p className="text-primary-foreground text-lg">{emptyMessage}</p>
@@ -45,7 +46,9 @@ export function MediaGrid({
       <div className="p-4 min-h-[calc(100vh-600px)]">
         <div
           className={
-            actions || template
+            template
+              ? "grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5"
+              : actions
               ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5"
               : "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-5 gap-6"
           }

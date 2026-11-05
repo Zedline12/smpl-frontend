@@ -60,7 +60,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.69-.03-1.38-.04-2.09-.04H7.5a4.5 4.5 0 1 1 0-9h.75c.71 0 1.4-.01 2.09-.04m0 9.08c.25.97.58 1.91.99 2.81.25.56.06 1.24-.48 1.55l-.65.38a1.14 1.14 0 0 1-1.6-.49 22.6 22.6 0 0 1-1.48-3.56m3.22-.69a24 24 0 0 1 0-9.08m0 9.08c3.52.16 6.82 1.1 9.75 2.65A24 24 0 0 0 21 12c0-1.69-.18-3.33-.51-4.92a23.7 23.7 0 0 1-9.75 2.68" />
           </svg>
         ),
-        url: "/ads-studio",
+        url: "/create/image?model=higgsfield-ads-studio",
       },
       {
         label: "Artist",
@@ -137,7 +137,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
           </svg>
         ),
-        url: "/settings/referrals",
+        url: "/me/settings/referrals",
       },
     ],
   },
@@ -249,7 +249,7 @@ export function Sidebar() {
         {/* Get More Credits */}
         <div className="mt-auto pt-5 w-full">
           <Link
-            href={user ? "/subscription-plans" : "/login"}
+            href={user ? "/pricing" : "/login"}
             className="flex w-full items-center justify-center xl:justify-start gap-x-3.5 py-2.5 px-2.5 text-sm text-foreground rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <span className="flex-shrink-0">

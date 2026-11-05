@@ -25,16 +25,16 @@ const NAV_ROWS: {
   icon: typeof User;
   isNew?: boolean;
 }[] = [
-  { href: "/settings/account", label: "Manage Account", icon: User },
-  { href: "/settings/credits-usage", label: "Credits & Usage", icon: Sparkles },
+  { href: "/me/settings/account", label: "Manage Account", icon: User },
+  { href: "/me/settings/usage", label: "Usage", icon: Sparkles },
   {
-    href: "/settings/referrals",
+    href: "/me/settings/referrals",
     label: "Affiliate program",
     icon: Share2,
     isNew: true,
   },
-  { href: "/settings/billing", label: "Plan & Billing", icon: CreditCard },
-  { href: "/settings/appearance", label: "Appearance", icon: Palette },
+  { href: "/me/settings/subscription", label: "Subscription", icon: CreditCard },
+  { href: "/me/settings/appearance", label: "Appearance", icon: Palette },
 ];
 
 const ROW_CLASS =
@@ -100,7 +100,7 @@ export function AccountMenuPanel({
             Credits
           </span>
           <Link
-            href="/settings/credits-usage"
+            href="/me/settings/usage"
             onClick={onNavigate}
             className="text-foreground hover:text-primary flex items-center gap-0.5 text-xs font-semibold transition-colors"
           >
@@ -140,7 +140,7 @@ export function AccountMenuPanel({
             Go Premium
           </span>
           <Link
-            href="/subscription-plans"
+            href="/pricing"
             onClick={onNavigate}
             className="bg-primary rounded-full px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
           >
@@ -150,7 +150,7 @@ export function AccountMenuPanel({
       ) : (
         <></>
         // <Link
-        //   href="/settings/billing"
+        //   href="/me/settings/subscription"
         //   onClick={onNavigate}
         //   className={cn(ROW_CLASS, "text-foreground hover:bg-accent mt-1.5")}
         // >

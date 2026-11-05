@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
+import { fetchWithToken } from "@/lib/fetcher";
 
-const OPTIONS_URL =
-  "https://api.higgsfield.ai/models/higgsfield/ai-influencer/options";
-
-/** Proxies Higgsfield's public appearance catalog (no auth needed), cached for an hour. */
+/** The AI Influencer appearance catalog (character types, hair, skin…), served by our backend. */
 export async function GET() {
   try {
-    const res = await fetch(OPTIONS_URL, { next: { revalidate: 3600 } });
-    if (!res.ok) {
+    const res = await fetchWithToken("/generation/ai-influencer/options");
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json) {
       return NextResponse.json(
         { message: "AI Influencer options are unavailable right now." },
-        { status: res.status },
+        { status: res.ok ? 502 : res.status },
       );
     }
-    return NextResponse.json(await res.json());
+    // The backend wraps responses as { success, data }.
+    return NextResponse.json(json.data ?? json);
   } catch {
     return NextResponse.json(
       { message: "Could not load AI Influencer options." },

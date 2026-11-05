@@ -28,6 +28,11 @@ import {
 const MODEL = AiModelsEnum.HIGGSFIELD_ADS_STUDIO;
 const c = AdsStudioInputConst;
 
+/**
+ * Ads Studio composer for the admin Templates page. Users reach Ads Studio from
+ * the Create page sidebar (/create/image), which has its own controls.
+ */
+
 /** A small box with the ratio's shape, fitted inside 22×22. */
 function RatioShape({ ratio }: { ratio: AdsStudioAspectRatio }) {
   const [w, h] = ratio.split(":").map(Number);
@@ -53,7 +58,7 @@ export default function AdsBuilder() {
   const templateGeneration = useGenerateTemplateMutation();
   const [imagesOpen, setImagesOpen] = useState(false);
 
-  const { prompt, images, niche, targetAudience, language, aspectRatio, batchSize } =
+  const { prompt, images, niche, targetAudience, language, aspectRatio, resolution, batchSize } =
     state;
   const isValid = ModelsValidatorSchemaMap[MODEL].safeParse(state).success;
   const pending = generation.isPending || templateGeneration.isPending;
@@ -131,7 +136,7 @@ export default function AdsBuilder() {
       {/* Format */}
       <section className="flex flex-col gap-1.5">
         <p className="text-sm font-medium text-foreground">Format</p>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {c.aspectRatio.map((ratio) => (
             <button
               key={ratio}
@@ -147,6 +152,27 @@ export default function AdsBuilder() {
                 <RatioShape ratio={ratio} />
               </span>
               {ratio}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Resolution */}
+      <section className="flex flex-col gap-1.5">
+        <p className="text-sm font-medium text-foreground">Resolution</p>
+        <div className="flex rounded-lg border border-white/10 p-1">
+          {c.resolution.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setField("resolution", r)}
+              className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
+                resolution === r
+                  ? "bg-white text-black"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {r}
             </button>
           ))}
         </div>

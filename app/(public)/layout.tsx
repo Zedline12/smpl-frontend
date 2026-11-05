@@ -7,8 +7,8 @@ import { Sidebar } from "@/components/sidebar";
 import Footer from "@/components/footer";
 const bottomNavbarItems = [
   {
-    title: "Subscribe",
-    link: "/subscription-plans",
+    title: "Pricing",
+    link: "/pricing",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"

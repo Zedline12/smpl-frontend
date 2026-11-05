@@ -7,10 +7,10 @@ import LazyImage from "@/components/LazyImage";
 import LazyVideo from "@/components/LazyVideo";
 import { MediaPreviewDialog } from "./MediaPreviewDialog";
 import { MediaEditDialog } from "./MediaEditDialog";
-import { Check, Heart } from "lucide-react";
+import { Check, Heart, RefreshCw } from "lucide-react";
 import { MediaCardActions } from "./actions/MediaCardActions";
 import { useMediaSelectionStore } from "../stores/useMediaSelectionStore";
-import { useDownloadMedia } from "../hooks/useMediaActions";
+import { useDownloadMedia, useRecreateMedia } from "../hooks/useMediaActions";
 
 export function MediaCard({
   media,
@@ -41,6 +41,10 @@ export function MediaCard({
   const selected = useMediaSelectionStore((s) => s.ids.has(media.id));
   const toggleSelected = useMediaSelectionStore((s) => s.toggle);
   const download = useDownloadMedia();
+  const recreate = useRecreateMedia();
+  // Templates size by width (16:9) so bigger columns mean bigger cards.
+  const cardHeight = template ? undefined : height;
+  const mediaAspect = template ? "16:9" : media.aspectRatio;
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -53,11 +57,11 @@ export function MediaCard({
     <>
       {/* Card thumbnail */}
       <div
-        style={{ height }}
+        style={{ height: cardHeight }}
         onClick={() =>
           selecting ? toggleSelected(media.id) : setPreviewOpen(true)
         }
-        className={`cursor-pointer w-full group relative aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ${
+        className={`cursor-pointer w-full group relative ${template ? "aspect-video" : "aspect-square"} rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all ${
           selecting && selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
         }`}
       >
@@ -66,9 +70,9 @@ export function MediaCard({
             <LazyVideo
               src={media.url}
               options={{
-                aspectRatio: media.aspectRatio,
+                aspectRatio: mediaAspect,
                 width,
-                height,
+                height: cardHeight,
                 autoplay: true,
                 loop: true,
                 muted: true,
@@ -108,12 +112,17 @@ export function MediaCard({
             <LazyImage
               key={media.id}
               src={media.url}
-              options={{ aspectRatio: media.aspectRatio, width, height }}
+              options={{ aspectRatio: mediaAspect, width, height: cardHeight }}
             />
           )}
         </div>
 
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
+        {template ? (
+          // Templates: no darkening, just a soft shadow along the bottom on hover.
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+        ) : (
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
+        )}
 
         {isUpdating && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 rounded-xl pointer-events-none">
@@ -121,7 +130,20 @@ export function MediaCard({
           </div>
         )}
 
-        {template ? null : actions ? (
+        {template ? (
+          media.model && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                recreate(media);
+              }}
+              className="absolute right-3 bottom-3 z-20 flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-black/40 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-105 focus-visible:opacity-100"
+            >
+              <RefreshCw className="size-3.5" /> Recreate
+            </button>
+          )
+        ) : actions ? (
           selecting ? (
             <span
               className={`absolute top-2 left-2 z-20 flex size-6 items-center justify-center rounded-full border-2 transition-colors ${

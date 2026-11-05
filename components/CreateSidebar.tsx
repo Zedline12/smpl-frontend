@@ -14,6 +14,7 @@ import {
   IMAGE_MODELS,
   VIDEO_MODELS,
   AUDIO_MODELS,
+  STUDIO_MODELS,
   AiModelsEnum,
   type Model,
 } from "@/features/generation/enums/models.enum";
@@ -51,11 +52,21 @@ import {
   type IAdsMultiplierInput,
 } from "@/features/generation/types/models/ads-multiplier.type";
 import { Seedance25RefLimits } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import {
+  AdsStudioInputConst,
+  type IAdsStudioInput,
+} from "@/features/generation/types/models/higgsfield-ads-studio.type";
 import { readVideoDuration } from "@/features/artist/utils/audio-clip";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
-const ALL_MODELS = [...VIDEO_MODELS, ...IMAGE_MODELS, ...AUDIO_MODELS];
+/** Ads Studio sits in the image list on /create/image, right after Nano Banana Pro. */
+const ADS_STUDIO_MODEL = STUDIO_MODELS.find((m) => m.id === AiModelsEnum.HIGGSFIELD_ADS_STUDIO);
+const CREATE_IMAGE_MODELS: Model[] = ADS_STUDIO_MODEL
+  ? [IMAGE_MODELS[0], ADS_STUDIO_MODEL, ...IMAGE_MODELS.slice(1)]
+  : IMAGE_MODELS;
+
+const ALL_MODELS = [...VIDEO_MODELS, ...CREATE_IMAGE_MODELS, ...AUDIO_MODELS];
 
 const CREATE_VIDEO_MODEL_IDS = new Set([
   AiModelsEnum.VEO_3,
@@ -83,6 +94,15 @@ const NO_PROMPT_MODELS = new Set([
   AiModelsEnum.ADS_MULTIPLIER,
 ]);
 
+// per-model prompt label/placeholder (default: "Prompt")
+const PROMPT_COPY: Partial<Record<AiModelsEnum, { label: string; placeholder: string }>> = {
+  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: {
+    label: "Brief",
+    placeholder:
+      "Describe the ad: your product, the offer, the vibe… e.g. Summer sale on our iced coffee, bright and playful, 20% off this week.",
+  },
+};
+
 // ─── prompt section ───────────────────────────────────────────────────────────
 
 function PromptSection({ model }: { model: AiModelsEnum }) {
@@ -94,14 +114,17 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
 
   if (hasNoPrompt) return null;
 
-  const placeholder = isOptional ? "Add a prompt to guide generation…" : "Describe what you want to generate…";
+  const copy = PROMPT_COPY[model];
+  const placeholder =
+    copy?.placeholder ??
+    (isOptional ? "Add a prompt to guide generation…" : "Describe what you want to generate…");
 
   return (
     <div className="flex flex-col gap-2">
       {/* Header row — label + optional toggle */}
       <div className="flex items-center justify-between px-0.5">
         <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-          Prompt{isOptional ? "" : ""}
+          {copy?.label ?? "Prompt"}
         </span>
         {isOptional && (
           <button
@@ -249,6 +272,15 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
 
   if (model === AiModelsEnum.ADS_MULTIPLIER)
     return <SelectRow label="Quality" options={AdsMultiplierOptionsConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />;
+
+  if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO)
+    return (
+      <>
+        <SelectRow label="Aspect Ratio" options={AdsStudioInputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
+        <SelectRow label="Resolution" options={AdsStudioInputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
+        <SelectRow label="Number of ads" options={AdsStudioInputConst.batchSize} value={s.batchSize} onChange={(v) => set("batchSize", v)} />
+      </>
+    );
 
   if (model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5)
     return (
@@ -708,6 +740,9 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
   // ── AD MULTIPLIER ──────────────────────────────────────────────────────────
   if (model === AiModelsEnum.ADS_MULTIPLIER) return <AdsMultiplierPanel />;
 
+  // ── ADS STUDIO ─────────────────────────────────────────────────────────────
+  if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO) return <AdsStudioPanel />;
+
   return null;
 }
 
@@ -910,6 +945,65 @@ function AdsMultiplierPanel() {
   );
 }
 
+// ─── ads studio ───────────────────────────────────────────────────────────────
+
+function AdsStudioPanel() {
+  const model = AiModelsEnum.HIGGSFIELD_ADS_STUDIO;
+  const { states, setField: raw } = useAiModelStore();
+  const set = (k: keyof IAdsStudioInput, v: unknown) => raw(model, k, v);
+  const s = states[model] as IAdsStudioInput;
+  const images = s.images ?? [];
+  const c = AdsStudioInputConst;
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  return (
+    <>
+      <MultiImageSlots
+        label="Product & reference images"
+        images={images}
+        maxImages={c.maxImages}
+        onOpenPicker={() => setPickerOpen(true)}
+        onRemove={(url) => set("images", images.filter((u) => u !== url))}
+      />
+
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/40 p-3">
+        <ToggleField
+          label="Niche"
+          value={s.niche}
+          onChange={(v) => set("niche", v)}
+          placeholder="e.g. Specialty coffee"
+          maxLength={c.maxNicheLength}
+        />
+        <ToggleField
+          label="Target audience"
+          value={s.targetAudience}
+          onChange={(v) => set("targetAudience", v)}
+          placeholder="e.g. Students and young professionals, 18–30"
+          maxLength={c.maxTargetAudienceLength}
+        />
+        <ToggleField
+          label="Language"
+          value={s.language}
+          onChange={(v) => set("language", v)}
+          placeholder="Language of the ad text, e.g. English"
+          maxLength={c.maxLanguageLength}
+        />
+      </div>
+
+      <MediaManagerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        selectedImages={images}
+        onSelect={(u) => {
+          set("images", u.slice(0, c.maxImages));
+          setPickerOpen(false);
+        }}
+        maxSelections={c.maxImages}
+      />
+    </>
+  );
+}
+
 // ─── model hero card ──────────────────────────────────────────────────────────
 
 function ModelHeroCard({
@@ -1061,7 +1155,8 @@ function GenerateButton() {
     try {
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
       await generation.mutateAsync({ model, projectId, mediaType, input: states[model]! });
-      if (pathname !== "/create" && !pathname.startsWith("/create/motion-transfer")) {
+      // Already on a create page (image, video, …)? Stay there to watch the result.
+      if (!pathname.startsWith("/create")) {
         router.push("/create");
       }
     } catch (e) {
@@ -1144,7 +1239,7 @@ export function CreateSidebar() {
 
   let modelsToShow: Model[];
   if (isImage) {
-    modelsToShow = IMAGE_MODELS;
+    modelsToShow = CREATE_IMAGE_MODELS;
   } else if (isAudio) {
     modelsToShow = AUDIO_MODELS;
   } else if (videoMode === "create") {
