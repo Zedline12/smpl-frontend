@@ -7,30 +7,30 @@ import { MediaManagerDialog } from "../MediaManagerDialog";
 import PromptComposerFooter from "../PromptComposerFooter";
 import ResolutionSelector from "@/features/generation/components/selectors/ResolutionSelector";
 import {
-  GENJUTSU_MOTION_TRANSFER_MAX_IMAGES,
-  GenjutsuMotionTransferInputConst,
-  IGenjutsuMotionTransferInput,
-} from "@/features/generation/types/models/higgsfield-genjutsu-motion-transfer.type";
+  GENSU_MAX_IMAGES,
+  GensuInputConst,
+  IGensuInput,
+} from "@/features/generation/types/models/gensu.type";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
-interface GenjutsuMotionTransferComposerProps {
+interface GensuComposerProps {
   isFocused: boolean;
   editMode?: boolean;
 }
 
-export default function GenjutsuMotionTransferComposer({
+export default function GensuComposer({
   isFocused,
   editMode,
-}: GenjutsuMotionTransferComposerProps) {
+}: GensuComposerProps) {
   const [isImageManagerOpen, setIsImageManagerOpen] = useState(false);
   const [isVideoManagerOpen, setIsVideoManagerOpen] = useState(false);
 
   const { states, setField: setModelField } = useAiModelStore();
   const state = states[
-    AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER
-  ] as IGenjutsuMotionTransferInput;
-  const setField = (key: keyof IGenjutsuMotionTransferInput, value: unknown) =>
-    setModelField(AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER, key, value);
+    AiModelsEnum.SMPL_GENSU
+  ] as IGensuInput;
+  const setField = (key: keyof IGensuInput, value: unknown) =>
+    setModelField(AiModelsEnum.SMPL_GENSU, key, value);
   const { prompt, videoUrl, images = [], resolution } = state;
 
   const removeReferenceImage = (url: string) => {
@@ -83,7 +83,7 @@ export default function GenjutsuMotionTransferComposer({
           {/* Reference images */}
           <div className="flex flex-col gap-1">
             <span className="text-xs text-primary-foreground">
-              References ({images.length}/{GENJUTSU_MOTION_TRANSFER_MAX_IMAGES})
+              References ({images.length}/{GENSU_MAX_IMAGES})
             </span>
             <div className="flex flex-row gap-2 flex-wrap max-w-[280px]">
               {images.map((url, index) => (
@@ -104,7 +104,7 @@ export default function GenjutsuMotionTransferComposer({
                   </button>
                 </div>
               ))}
-              {images.length < GENJUTSU_MOTION_TRANSFER_MAX_IMAGES && (
+              {images.length < GENSU_MAX_IMAGES && (
                 <button
                   onClick={() => setIsImageManagerOpen(true)}
                   className="w-20 h-20 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 hover:bg-white/5 flex flex-col items-center justify-center transition-all group"
@@ -130,7 +130,7 @@ export default function GenjutsuMotionTransferComposer({
         onOpenChange={setIsImageManagerOpen}
         selectedImages={images}
         onSelect={(imgs) => setField("images", imgs)}
-        maxSelections={GENJUTSU_MOTION_TRANSFER_MAX_IMAGES}
+        maxSelections={GENSU_MAX_IMAGES}
       />
 
       <MediaManagerDialog
@@ -155,7 +155,7 @@ export default function GenjutsuMotionTransferComposer({
         >
           <MenuItem className="p-0 m-0 sm:w-100 w-[max-content]">
             <ResolutionSelector
-              options={GenjutsuMotionTransferInputConst.resolution}
+              options={GensuInputConst.resolution}
               value={resolution ?? "720p"}
               onChange={(v) => setField("resolution", v)}
             />

@@ -13,7 +13,8 @@ export enum AiModelsEnum {
   SEEDANCE_2_5 = "seedance-2.5",
   GPT_IMAGE_2 = "gpt-image-2",
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
-  HIGGSFIELD_GENJUTSU_MOTION_TRANSFER = "higgsfield-genjutsu-motion-transfer",
+  SMPL_GENSU = "gensu",
+  SMPL_REMIX = "remix",
   HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
   HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
   HIGGSFIELD_KATANA = "higgsfield-katana",
@@ -171,8 +172,8 @@ export const VIDEO_MODELS: Model[] = [
     ),
   },
   {
-    id: AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER,
-    name: "Genjutsu Motion Transfer",
+    id: AiModelsEnum.SMPL_GENSU,
+    name: "Gensu",
     description: "Swap characters, locations and styles in a video, keeping its motion.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
@@ -276,6 +277,17 @@ export const STUDIO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9 9l12-2" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_REMIX,
+    name: "Remix",
+    description: "Drop your character into any video.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M4 7h11l-3-3m8 13H9l3 3M20 7v4M4 17v-4" />
       </svg>
     ),
   },

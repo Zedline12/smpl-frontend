@@ -55,9 +55,10 @@ import {
   grokImagineVideo15ValidationSchema,
 } from "./models/grok-imagine-video-1.5.type";
 import {
-  IGenjutsuMotionTransferInput,
-  genjutsuMotionTransferValidationSchema,
-} from "./models/higgsfield-genjutsu-motion-transfer.type";
+  IGensuInput,
+  gensuValidationSchema,
+} from "./models/gensu.type";
+import { IRemixInput, remixValidationSchema } from "./models/remix.type";
 import {
   IAiInfluencerInput,
   aiInfluencerValidationSchema,
@@ -103,7 +104,8 @@ export type AllModelsInput =
   | ISeedance25Input
   | IGptImage2Input
   | IGrokImagineVideo15Input
-  | IGenjutsuMotionTransferInput
+  | IGensuInput
+  | IRemixInput
   | IAiInfluencerInput
   | IAdsStudioInput
   | IKatanaInput
@@ -124,8 +126,9 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SEEDANCE_2_5]: seedance25ValidationSchema,
   [AiModelsEnum.GPT_IMAGE_2]: gptImage2ValidationSchema,
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: grokImagineVideo15ValidationSchema,
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
-    genjutsuMotionTransferValidationSchema,
+  [AiModelsEnum.SMPL_GENSU]:
+    gensuValidationSchema,
+  [AiModelsEnum.SMPL_REMIX]: remixValidationSchema,
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
   [AiModelsEnum.HIGGSFIELD_KATANA]: katanaValidationSchema,

@@ -21,7 +21,7 @@ import Seedance20Composer from "@/features/generation/components/prompt/composer
 import Seedance25Composer from "@/features/generation/components/prompt/composers/seedance-2.5.composer";
 import GptImage2Composer from "@/features/generation/components/prompt/composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "@/features/generation/components/prompt/composers/grok-imagine-video-1.5.composer";
-import GenjutsuMotionTransferComposer from "@/features/generation/components/prompt/composers/higgsfield-genjutsu-motion-transfer.composer";
+import GensuComposer from "@/features/generation/components/prompt/composers/gensu.composer";
 
 interface MediaEditDialogProps {
   media: Media;
@@ -110,7 +110,7 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
             {model === AiModelsEnum.SEEDANCE_2_5 && <Seedance25Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.GPT_IMAGE_2 && <GptImage2Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5 && <GrokImagineVideo15Composer isFocused={true} editMode={true} />}
-            {model === AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER && <GenjutsuMotionTransferComposer isFocused={true} editMode={true} />}
+            {model === AiModelsEnum.SMPL_GENSU && <GensuComposer isFocused={true} editMode={true} />}
           </div>
 
           {/* Confirm button */}

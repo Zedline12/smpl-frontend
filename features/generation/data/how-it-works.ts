@@ -1,7 +1,7 @@
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import type { HowItWorksSlide } from "@/components/HowItWorks";
 
-const genjutsuSlides: HowItWorksSlide[] = [
+const gensuSlides: HowItWorksSlide[] = [
   {
     eyebrow: "THE IDEA",
     title: "ONE VIDEO, MANY VERSIONS",
@@ -85,5 +85,5 @@ const genjutsuSlides: HowItWorksSlide[] = [
 export const HOW_IT_WORKS_MAP: Partial<
   Record<AiModelsEnum, HowItWorksSlide[]>
 > = {
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: genjutsuSlides,
+  [AiModelsEnum.SMPL_GENSU]: gensuSlides,
 };

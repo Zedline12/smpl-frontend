@@ -12,7 +12,7 @@ export default function MotionTransferPage() {
   useEffect(() => {
     // setMediaType resets the model to the media type's default, so set the model after it.
     setMediaType(GenerationTypeEnum.VIDEO);
-    setModel(AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER);
+    setModel(AiModelsEnum.SMPL_GENSU);
   }, [setMediaType, setModel]);
 
   return (
@@ -22,7 +22,7 @@ export default function MotionTransferPage() {
           <div className="h-[500px]">
             <MediaExplorer
               explore
-              defaultModel={AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER}
+              defaultModel={AiModelsEnum.SMPL_GENSU}
             />
           </div>
           <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
@@ -34,7 +34,7 @@ export default function MotionTransferPage() {
         <div className="col-span-1 h-[600px]">
           <MediaExplorer
             explore
-            defaultModel={AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER}
+            defaultModel={AiModelsEnum.SMPL_GENSU}
           />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">

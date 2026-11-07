@@ -263,7 +263,7 @@ function SlideCard({
 export function HowItWorksEditor() {
   const [config, setConfig] = useState<HowItWorksConfig>({ models: {} });
   const [selectedModel, setSelectedModel] = useState<string>(
-    AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER
+    AiModelsEnum.SMPL_GENSU
   );
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);

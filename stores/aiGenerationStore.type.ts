@@ -12,7 +12,8 @@ import { ISeedance20Input } from "@/features/generation/types/models/seedance-2.
 import { ISeedance25Input } from "@/features/generation/types/models/seedance-2.5.type";
 import { IGptImage2Input } from "@/features/generation/types/models/gpt-image-2.type";
 import { IGrokImagineVideo15Input } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
-import { IGenjutsuMotionTransferInput } from "@/features/generation/types/models/higgsfield-genjutsu-motion-transfer.type";
+import { IGensuInput } from "@/features/generation/types/models/gensu.type";
+import { IRemixInput } from "@/features/generation/types/models/remix.type";
 import { IAiInfluencerInput } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
 import { IAdsStudioInput } from "@/features/generation/types/models/higgsfield-ads-studio.type";
 import { IKatanaInput } from "@/features/generation/types/models/higgsfield-katana.type";
@@ -34,7 +35,8 @@ export type ModelStateMap = {
   [AiModelsEnum.SEEDANCE_2_5]: ISeedance25Input;
   [AiModelsEnum.GPT_IMAGE_2]: IGptImage2Input;
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: IGrokImagineVideo15Input;
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: IGenjutsuMotionTransferInput;
+  [AiModelsEnum.SMPL_GENSU]: IGensuInput;
+  [AiModelsEnum.SMPL_REMIX]: IRemixInput;
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: IAiInfluencerInput;
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: IAdsStudioInput;
   [AiModelsEnum.HIGGSFIELD_KATANA]: IKatanaInput;
@@ -133,10 +135,16 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
     aspectRatio: "16:9",
   },
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: {
+  [AiModelsEnum.SMPL_GENSU]: {
     prompt: "",
     videoUrl: "",
     images: [],
+    resolution: "720p",
+  },
+  [AiModelsEnum.SMPL_REMIX]: {
+    prompt: "",
+    videoUrl: "",
+    image: "",
     resolution: "720p",
   },
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: {

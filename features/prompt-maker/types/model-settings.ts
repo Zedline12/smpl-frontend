@@ -16,7 +16,7 @@ import { KlingV3ImageToVideoInputConst } from "@/features/generation/types/model
 import { Seedance20InputConst } from "@/features/generation/types/models/seedance-2.0.type";
 import { Seedance25InputConst } from "@/features/generation/types/models/seedance-2.5.type";
 import { GrokImagineVideo15InputConst } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
-import { GenjutsuMotionTransferInputConst } from "@/features/generation/types/models/higgsfield-genjutsu-motion-transfer.type";
+import { GensuInputConst } from "@/features/generation/types/models/gensu.type";
 import { ModelDefaults } from "@/stores/aiGenerationStore.type";
 import { PromptMakerSettings } from "./prompt-maker";
 
@@ -82,8 +82,8 @@ export const MODEL_SETTINGS: Partial<Record<AiModelsEnum, ModelSettingsSpec>> = 
     resolution: GrokImagineVideo15InputConst.resolution,
     duration: { key: "duration", options: GrokImagineVideo15InputConst.duration },
   },
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: {
-    resolution: GenjutsuMotionTransferInputConst.resolution,
+  [AiModelsEnum.SMPL_GENSU]: {
+    resolution: GensuInputConst.resolution,
   },
   // KLING_V3_PRO_MOTION_CONTROL and ELEVEN_LABS_V3_TTS expose no common settings.
 };

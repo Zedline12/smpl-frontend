@@ -106,7 +106,8 @@ export function useMoveMediaMutation() {
 
 /** Where each model's composer lives; everything else uses /create. */
 const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
-  [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]: "/create/motion-transfer",
+  [AiModelsEnum.SMPL_GENSU]: "/create/motion-transfer",
+  [AiModelsEnum.SMPL_REMIX]: "/remix",
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: "/ai-influencer-studio",
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/create/image?model=higgsfield-ads-studio",
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",

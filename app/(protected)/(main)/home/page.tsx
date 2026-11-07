@@ -13,7 +13,7 @@ import { FeatureGrid, type FeatureItem } from "@/components/FeatureGrid";
 const featured: FeaturedItem[] = [
   {
     title: "Smpl Gensu",
-    description: "Transfer motion from any video onto your subjects with Genjutsu.",
+    description: "Transfer motion from any video onto your subjects with Gensu.",
     video: "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Homepage%20Videos/31_SMPL_Gensu_Promo_16x9.mp4",
     poster: "",
     href: "/create/video",

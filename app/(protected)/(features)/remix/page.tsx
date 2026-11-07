@@ -6,7 +6,7 @@ import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStor
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 
-const MODEL = AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO;
+const MODEL = AiModelsEnum.SMPL_REMIX;
 
 export default function RemixPage() {
   const { model, setMediaType, setModel } = useAiGenerationControlStore();

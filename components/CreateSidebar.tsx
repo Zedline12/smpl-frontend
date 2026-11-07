@@ -43,7 +43,7 @@ import { KlingO3ImageOptionsConst } from "@/features/generation/types/models/kli
 import { SeedreamV45OptionsConst } from "@/features/generation/types/models/seedream-v4-5.type";
 import { GptImage2OptionsConst } from "@/features/generation/types/models/gpt-image-2.type";
 import { ElevenLabsV3InputConst } from "@/features/generation/types/models/elevenlabs-v3.type";
-import { GENJUTSU_MOTION_TRANSFER_MAX_IMAGES } from "@/features/generation/types/models/higgsfield-genjutsu-motion-transfer.type";
+import { GENSU_MAX_IMAGES } from "@/features/generation/types/models/gensu.type";
 import { KATANA_MAX_IMAGES } from "@/features/generation/types/models/higgsfield-katana.type";
 import { GPT_IMAGE_2_MAX_IMAGES } from "@/features/generation/types/models/gpt-image-2.type";
 import {
@@ -81,7 +81,7 @@ type VideoMode = "create" | "edit";
 
 // models where prompt is optional (toggle to show)
 const OPTIONAL_PROMPT_MODELS = new Set([
-  AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER,
+  AiModelsEnum.SMPL_GENSU,
   AiModelsEnum.HIGGSFIELD_KATANA,
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
@@ -611,8 +611,8 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
-  // ── GENJUTSU Motion Transfer ───────────────────────────────────────────────
-  if (model === AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER) {
+  // ── Gensu (motion transfer) ───────────────────────────────────────────────
+  if (model === AiModelsEnum.SMPL_GENSU) {
     const images: string[] = s.images ?? [];
     return (
       <>
@@ -626,14 +626,14 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
         <MultiImageSlots
           label="Reference Images"
           images={images}
-          maxImages={GENJUTSU_MOTION_TRANSFER_MAX_IMAGES}
+          maxImages={GENSU_MAX_IMAGES}
           onOpenPicker={() => setDlg("images")}
           onRemove={(url) => set("images", images.filter((u) => u !== url))}
         />
         <MediaManagerDialog open={dlg === "video"} onOpenChange={(o) => !o && setDlg(null)}
           selectedImage={s.videoUrl} onSelect={(u) => { set("videoUrl", u[0]); setDlg(null); }} maxSelections={1} mediaType="video" />
         <MediaManagerDialog open={dlg === "images"} onOpenChange={(o) => !o && setDlg(null)}
-          selectedImages={images} onSelect={(u) => { set("images", u); setDlg(null); }} maxSelections={GENJUTSU_MOTION_TRANSFER_MAX_IMAGES} />
+          selectedImages={images} onSelect={(u) => { set("images", u); setDlg(null); }} maxSelections={GENSU_MAX_IMAGES} />
       </>
     );
   }
@@ -1013,15 +1013,15 @@ function ModelHeroCard({
   model: AiModelsEnum;
   onChangePicker: () => void;
 }) {
-  const isGenjutsu = model === AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER;
+  const isGensu = model === AiModelsEnum.SMPL_GENSU;
   const isKatana = model === AiModelsEnum.HIGGSFIELD_KATANA;
   const modelDef = ALL_MODELS.find((m) => m.id === model);
-  const title = isGenjutsu ? "Smpl Riven" : isKatana ? "Katana" : (modelDef?.name ?? model);
-  const subtitle = isGenjutsu ? "Reality Manipulation" : isKatana ? "Character Motion Transfer" : (modelDef?.description ?? "");
+  const title = isGensu ? "Gensu" : isKatana ? "Katana" : (modelDef?.name ?? model);
+  const subtitle = isGensu ? "Reality Manipulation" : isKatana ? "Character Motion Transfer" : (modelDef?.description ?? "");
 
   // Per-model hero videos — add more as assets become available
   const VIDEO_MAP: Partial<Record<AiModelsEnum, string>> = {
-    [AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER]:
+    [AiModelsEnum.SMPL_GENSU]:
       "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/Smpl%20Riven.mp4",
     [AiModelsEnum.ADS_MULTIPLIER]:
       "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/ads-multiplier.mp4",
@@ -1262,7 +1262,7 @@ export function CreateSidebar() {
 
   const showSettings =
     !pickerOpen &&
-    model !== AiModelsEnum.HIGGSFIELD_GENJUTSU_MOTION_TRANSFER &&
+    model !== AiModelsEnum.SMPL_GENSU &&
     model !== AiModelsEnum.HIGGSFIELD_KATANA;
 
   return (
