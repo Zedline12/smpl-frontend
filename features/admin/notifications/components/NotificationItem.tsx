@@ -21,6 +21,8 @@ const KIND_ICONS: Record<NotificationKind, LucideIcon> = {
   payment_received: CreditCard,
   subscription_canceled: XCircle,
   refund: RotateCcw,
+  payment_disputed: AlertTriangle,
+  payment_failed: CreditCard,
 };
 
 export function NotificationItem({

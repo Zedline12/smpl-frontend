@@ -1,12 +1,15 @@
 import { Media } from "@/features/media/types/media";
 
+/** free, or the state of the user's paid plan. */
+export type SubscriptionStatusLabel = "free" | "trialing" | "active" | "past_due" | "canceling" | "canceled";
+
 export interface SubscribedUser {
   id: string;
   firstName: string | null;
   lastName: string | null;
   email: string;
   creditsBalance: number;
-  subscriptionStatus: "active" | "past_due" | "canceled" | null;
+  subscriptionStatus: SubscriptionStatusLabel | null;
   subscriptionPlanName: string | null;
   subscriptionPlanPriceAmount: number;
   billingPeriod: string | null;
@@ -35,7 +38,7 @@ export interface AdminUserDetail {
   lastName: string | null;
   email: string;
   creditsBalance: number;
-  subscriptionStatus: "active" | "past_due" | "canceled" | null;
+  subscriptionStatus: SubscriptionStatusLabel | null;
   subscriptionPlanName: string | null;
   subscriptionPlanPriceAmount: number;
   providerCustomerId: string | null;

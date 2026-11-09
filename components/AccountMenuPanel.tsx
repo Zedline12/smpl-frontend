@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
+import { isFreePlan as isUserOnFreePlan } from "@/lib/subscription";
 
 const AVATAR_GRADIENT =
   "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)";
@@ -68,7 +69,7 @@ export function AccountMenuPanel({
     useCreditsAllowance(user);
 
   const planName: string = user?.subscription?.name ?? "Free Plan";
-  const isFreePlan = planName === "Free Plan";
+  const isFreePlan = isUserOnFreePlan(user);
   const filledDots = hasAllowance
     ? Math.round(((100 - usedPercentage) / 100) * DOT_COUNT)
     : 0;

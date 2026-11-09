@@ -11,7 +11,10 @@ const LocationHeatMap = dynamic(() => import("./LocationHeatMap"), { ssr: false 
 interface Props {
   userId: string;
   isSuspended: boolean;
+  /** Has a paid plan right now (shows Refund). */
   hasSubscription: boolean;
+  /** The plan is already set to end (hides Cancel). */
+  isCanceling?: boolean;
   subscriptionPlanName?: string | null;
   subscriptionPlanPriceAmount?: number | null;
   // security fields
@@ -29,6 +32,7 @@ export default function UserActionsBar({
   userId,
   isSuspended,
   hasSubscription,
+  isCanceling = false,
   subscriptionPlanName,
   subscriptionPlanPriceAmount,
   clientIp,
@@ -53,9 +57,10 @@ export default function UserActionsBar({
     isThreat && "Threat",
   ].filter(Boolean) as string[];
 
-  const formatPrice = (cents: number | null | undefined) => {
-    if (!cents) return "";
-    return ` · $${(cents / 100).toFixed(2)}`;
+  // Plan prices are stored in dollars.
+  const formatPrice = (dollars: number | null | undefined) => {
+    if (!dollars) return "";
+    return ` · $${dollars % 1 === 0 ? dollars.toFixed(0) : dollars.toFixed(2)}`;
   };
 
   async function doSuspend(suspend: boolean) {
@@ -105,11 +110,12 @@ export default function UserActionsBar({
       const res = await fetch(`/api/admin/users/${userId}/cancel-subscription`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error("Failed");
-      toast.success("Subscription cancelled");
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error || json?.message || "Cancel failed");
+      toast.success("Subscription will end at the end of the paid period");
       router.refresh();
-    } catch {
-      toast.error("Cancel failed");
+    } catch (error) {
+      toast.error((error as Error).message || "Cancel failed");
     } finally {
       setLoading(null);
     }
@@ -200,14 +206,16 @@ export default function UserActionsBar({
               <RotateCcw className="h-3.5 w-3.5" />
               {loading === "refund" ? "Working…" : "Refund Latest Payment"}
             </button>
-            <button
-              onClick={() => setConfirmDialog("cancel")}
-              disabled={!!loading}
-              className="flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800/50 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-neutral-500 hover:text-foreground disabled:opacity-50"
-            >
-              <XCircle className="h-3.5 w-3.5" />
-              {loading === "cancel" ? "Working…" : "Cancel Subscription"}
-            </button>
+            {!isCanceling && (
+              <button
+                onClick={() => setConfirmDialog("cancel")}
+                disabled={!!loading}
+                className="flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-800/50 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-neutral-500 hover:text-foreground disabled:opacity-50"
+              >
+                <XCircle className="h-3.5 w-3.5" />
+                {loading === "cancel" ? "Working…" : "Cancel Subscription"}
+              </button>
+            )}
           </>
         )}
       </section>
@@ -227,7 +235,8 @@ export default function UserActionsBar({
               {confirmDialog === "unsuspend" && "The user will be able to log in again."}
               {confirmDialog === "refund" &&
                 `This will issue a full refund for the most recent payment${subscriptionPlanName ? ` (${subscriptionPlanName}${formatPrice(subscriptionPlanPriceAmount)})` : ""}.`}
-              {confirmDialog === "cancel" && "The subscription will be cancelled in Stripe immediately."}
+              {confirmDialog === "cancel" &&
+                "The subscription stops renewing. The user keeps the plan until the end of the period they paid for, then moves to Free."}
             </p>
             <div className="flex justify-end gap-2">
               <button

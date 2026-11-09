@@ -15,6 +15,7 @@ export enum AiModelsEnum {
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
   SMPL_GENSU = "gensu",
   SMPL_REMIX = "remix",
+  SMPL_ARTIST = "artist",
   HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
   HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
   HIGGSFIELD_KATANA = "higgsfield-katana",
@@ -288,6 +289,17 @@ export const STUDIO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M4 7h11l-3-3m8 13H9l3 3M20 7v4M4 17v-4" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_ARTIST,
+    name: "Artist",
+    description: "Your character performs your song, following a reference video.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm6-3a6 6 0 0 1-12 0m6 6v3m-3 0h6" />
       </svg>
     ),
   },

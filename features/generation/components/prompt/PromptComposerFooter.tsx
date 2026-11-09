@@ -26,6 +26,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import SpeechToText from "./SpeechToText";
 import { useGenerateTemplateMutation } from "@/features/media/hooks/useTemplates";
+import { isFreePlan as isUserOnFreePlan } from "@/lib/subscription";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -68,7 +69,7 @@ export default function PromptComposerFooter({
       setIsEnhancing(false);
     }
   };
-  const isFreePlan = user?.subscription?.id === "69d0069900c1312c5ba5a577";
+  const isFreePlan = isUserOnFreePlan(user);
   const isFormValid = () => {
     const validator = ModelsValidatorSchemaMap[model];
     return validator.safeParse(states[model]).success;

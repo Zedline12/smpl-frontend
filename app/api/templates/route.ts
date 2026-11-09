@@ -1,13 +1,14 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { NextRequest, NextResponse } from "next/server";
 
+/** Published Explore templates. */
 export async function GET(req: NextRequest) {
   const params = new URLSearchParams();
   for (const key of ["model", "type", "limit", "offset"]) {
     const value = req.nextUrl.searchParams.get(key);
     if (value) params.set(key, value);
   }
-  const res = await fetchWithToken(`/media/templates?${params}`);
+  const res = await fetchWithToken(`/templates?${params}`);
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     return NextResponse.json(

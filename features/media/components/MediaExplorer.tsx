@@ -3,6 +3,8 @@ import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { Compass, History as HistoryIcon, LucideIcon } from "lucide-react";
 import {
   AlertDialog,
@@ -20,6 +22,8 @@ import {
 import { createMediaFilters, MediaFilters } from "../types/media-filters";
 import { MediaDisplayVariant } from "../types/media";
 import { MediaGrid } from "./MediaGrid";
+import { TemplateGrid } from "@/features/templates/components/TemplateGrid";
+import { Template } from "@/features/templates/types";
 import { calculateHeight } from "@/lib/utils";
 import { MediaFilterMenu } from "./filters/MediaFilterMenu";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
@@ -89,16 +93,34 @@ export default function MediaExplorer({
     filters,
     enabled: !isExplore,
   });
-  const templatesQuery = useInfiniteTemplatesQuery(undefined, defaultModel, isExplore);
+  // Explore shows the templates of one model: the page's own model (studios), else the
+  // ?model= in the URL (set when a model is picked), else the model selected right now.
+  const searchParams = useSearchParams();
+  const selectedModel = useAiGenerationControlStore((s) => s.model);
+  const urlModel = searchParams.get("model");
+  const templateModel =
+    defaultModel ??
+    (urlModel && (Object.values(AiModelsEnum) as string[]).includes(urlModel)
+      ? (urlModel as AiModelsEnum)
+      : selectedModel);
+  const templatesQuery = useInfiniteTemplatesQuery(undefined, templateModel, isExplore);
+  const active = isExplore ? templatesQuery : historyQuery;
   const {
-    data: pagedData,
     isFetching: isMediaFetching,
     isFetched: isMediaFetched,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = isExplore ? templatesQuery : historyQuery;
-  const media = pagedData?.pages.flatMap((p) => p.data ?? []) ?? [];
+  } = active;
+  const pagedData = active.data;
+  // Explore shows templates (images[] + videos[]); History shows the user's media.
+  const templates: Template[] = isExplore
+    ? (templatesQuery.data?.pages.flatMap((p) => p.data ?? []) ?? [])
+    : [];
+  const media = isExplore
+    ? []
+    : (historyQuery.data?.pages.flatMap((p) => p.data ?? []) ?? []);
+  const shownCount = isExplore ? templates.length : media.length;
   const selecting = useMediaSelectionStore((s) => s.active);
   const clearSelection = useMediaSelectionStore((s) => s.clear);
 
@@ -248,8 +270,10 @@ export default function MediaExplorer({
 
       {isExplore && children}
 
-      {!isMediaFetched || (isMediaFetching && media.length === 0) ? (
+      {!isMediaFetched || (isMediaFetching && shownCount === 0) ? (
         <MediaGridSkeleton />
+      ) : isExplore ? (
+        <TemplateGrid templates={templates} />
       ) : (
         <MediaGrid
           aspectRatio={CARD_ASPECT_RATIO}
@@ -268,10 +292,10 @@ export default function MediaExplorer({
 
       {!isExplore && <MediaSelectionBar media={media} />}
 
-      {isMediaFetched && media.length > 0 && (
+      {isMediaFetched && shownCount > 0 && (
         <div className="flex flex-col items-center gap-3 mt-6 pb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {media.length} of {totalCount}
+            Showing {shownCount} of {totalCount}
           </p>
           {hasNextPage && (
             <button

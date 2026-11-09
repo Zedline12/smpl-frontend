@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,11 +27,15 @@ import {
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
-import { useInfiniteTemplatesQuery } from "@/features/media/queries/media";
+import { useAdminTemplatesQuery } from "@/features/media/queries/media";
 import { useDeleteTemplateMutation } from "@/features/media/hooks/useTemplates";
 import { QueuedGenerationTile } from "@/features/media/components/QueuedGenerationTile";
-import { MediaPreviewDialog } from "@/features/media/components/MediaPreviewDialog";
-import { Media } from "@/features/media/types/media";
+import { Template } from "@/features/templates/types";
+import { reorderTemplates, updateTemplate } from "@/features/templates/api";
+import { TemplateMedia } from "@/features/templates/components/TemplateMedia";
+import { TemplatePreviewDialog } from "@/features/templates/components/TemplatePreviewDialog";
+import { TemplateEditDialog } from "./TemplateEditDialog";
+import { LegacyTemplatesImport } from "./LegacyTemplatesImport";
 
 const MODEL_GROUPS: { label: string; type: GenerationTypeEnum; models: Model[] }[] = [
   { label: "Image", type: GenerationTypeEnum.IMAGE, models: IMAGE_MODELS },
@@ -42,8 +47,9 @@ export function TemplatesManager() {
   const queryClient = useQueryClient();
   const { model, setModel, setMediaType, setTemplateMode } =
     useAiGenerationControlStore();
-  const [preview, setPreview] = useState<Media | null>(null);
-  const [toDelete, setToDelete] = useState<Media | null>(null);
+  const [preview, setPreview] = useState<Template | null>(null);
+  const [editing, setEditing] = useState<Template | null>(null);
+  const [toDelete, setToDelete] = useState<Template | null>(null);
   const deleteTemplate = useDeleteTemplateMutation();
 
   // Composers on this page create templates, not the admin's own media.
@@ -59,8 +65,32 @@ export function TemplatesManager() {
   };
 
   const { data, isFetched, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteTemplatesQuery(undefined, model);
+    // Up to 200 per model, so the display order covers all of them.
+    useAdminTemplatesQuery(model, 200);
   const templates = data?.pages.flatMap((p) => p.data) ?? [];
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["templates"] });
+
+  const togglePublished = async (t: Template) => {
+    try {
+      await updateTemplate(t.id, { isPublished: !t.isPublished });
+      refresh();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const moveTemplate = async (index: number, dir: -1 | 1) => {
+    const ids = templates.map((t) => t.id);
+    const j = index + dir;
+    if (j < 0 || j >= ids.length) return;
+    [ids[index], ids[j]] = [ids[j], ids[index]];
+    try {
+      await reorderTemplates(ids);
+      refresh();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
 
   // Show this model's running jobs and refresh the list when one finishes.
   const { data: queues } = useGenerationQueuesQuery();
@@ -145,6 +175,8 @@ export function TemplatesManager() {
 
       {model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER && <InfluencerBulkGenerator />}
 
+      <LegacyTemplatesImport />
+
       {/* Templates for the selected model */}
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">
@@ -159,28 +191,41 @@ export function TemplatesManager() {
           {running.map((q) => (
             <QueuedGenerationTile key={q.id} queue={q} />
           ))}
-          {templates.map((t) => (
-            <div
-              key={t.id}
-              className="group relative aspect-video cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-black"
-              onClick={() => setPreview(t)}
-            >
-              {t.type === "video" ? (
-                <video src={t.url} muted loop autoPlay className="h-full w-full object-cover" />
-              ) : (
-                <img src={t.url} alt="Template" className="h-full w-full object-cover" />
-              )}
-              <button
-                type="button"
-                title="Delete template"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setToDelete(t);
-                }}
-                className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-red-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
+          {templates.map((t, i) => (
+            <div key={t.id} className="flex flex-col gap-2">
+              <div
+                className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-black ${
+                  t.isPublished ? "border-white/10" : "border-dashed border-amber-400/40 opacity-60"
+                }`}
+                onClick={() => setPreview(t)}
               >
-                <Trash2 className="size-4" />
-              </button>
+                <TemplateMedia template={t} />
+                {!t.isPublished && (
+                  <span className="absolute bottom-2 left-2 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-semibold text-black">
+                    Hidden
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <button type="button" title="Move earlier" disabled={i === 0} onClick={() => moveTemplate(i, -1)} className="rounded-md p-1.5 text-white/60 hover:bg-white/10 disabled:opacity-30">
+                  <ArrowUp className="size-4" />
+                </button>
+                <button type="button" title="Move later" disabled={i === templates.length - 1} onClick={() => moveTemplate(i, 1)} className="rounded-md p-1.5 text-white/60 hover:bg-white/10 disabled:opacity-30">
+                  <ArrowDown className="size-4" />
+                </button>
+                <button type="button" title={t.isPublished ? "Hide from Explore" : "Show in Explore"} onClick={() => togglePublished(t)} className="rounded-md p-1.5 text-white/60 hover:bg-white/10">
+                  {t.isPublished ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                </button>
+                <button type="button" title="Edit media" onClick={() => setEditing(t)} className="rounded-md p-1.5 text-white/60 hover:bg-white/10">
+                  <Pencil className="size-4" />
+                </button>
+                <span className="ml-auto text-[11px] text-white/35">
+                  {t.videos.length} video{t.videos.length === 1 ? "" : "s"} · {t.images.length} image{t.images.length === 1 ? "" : "s"}
+                </span>
+                <button type="button" title="Delete template" onClick={() => setToDelete(t)} className="rounded-md p-1.5 text-red-400 hover:bg-white/10">
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -199,13 +244,9 @@ export function TemplatesManager() {
         )}
       </section>
 
-      {preview && (
-        <MediaPreviewDialog
-          media={preview}
-          open
-          template
-          onClose={() => setPreview(null)}
-        />
+      <TemplatePreviewDialog template={preview} onClose={() => setPreview(null)} />
+      {editing && (
+        <TemplateEditDialog template={editing} onClose={() => setEditing(null)} onSaved={() => refresh()} />
       )}
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>

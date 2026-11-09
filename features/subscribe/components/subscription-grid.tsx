@@ -6,7 +6,9 @@ import {
 } from "@/lib/types/subscription-plan.type";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCheckout } from "../hooks/use-checkout";
+import { useChangePlan, useCheckout } from "../hooks/use-checkout";
+import { ChangePlanDialog } from "./ChangePlanDialog";
+import { isFreePlan } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
@@ -146,15 +148,34 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const router = useRouter();
   const user = useAuth()?.user;
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
+  const { changePlan, isLoading: isChangingPlan } = useChangePlan();
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
   const [captchaPlanId, setCaptchaPlanId] = useState<string | null>(null);
+  const [changePlanId, setChangePlanId] = useState<string | null>(null);
 
+  // Paying users switch plans in place; a second checkout would start a second subscription.
   const handleSubscribe = (planId: string) => {
     if (!user) {
       router.push("/login");
       return;
     }
+    if (!isFreePlan(user)) {
+      setChangePlanId(planId);
+      return;
+    }
     setCaptchaPlanId(planId);
+  };
+
+  const handleChangePlan = async () => {
+    if (!changePlanId) return;
+    setProcessingPlanId(changePlanId);
+    const ok = await changePlan(changePlanId);
+    setProcessingPlanId(null);
+    if (ok) {
+      setChangePlanId(null);
+      router.push("/me/settings/subscription");
+      router.refresh();
+    }
   };
 
   const handleCaptchaVerified = (token: string) => {
@@ -247,7 +268,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             ...(plan.metadata || []).slice(1),
           ];
           const isCurrent = user?.subscription?.id === plan.id;
-          const isRedirecting = isCheckoutLoading && processingPlanId === plan.id;
+          const isRedirecting = (isCheckoutLoading || isChangingPlan) && processingPlanId === plan.id;
 
           return (
             <div
@@ -400,6 +421,17 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         }}
         onVerified={handleCaptchaVerified}
         isRedirecting={isCheckoutLoading}
+      />
+
+      <ChangePlanDialog
+        open={!!changePlanId}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setChangePlanId(null);
+        }}
+        currentPlan={plans.find((p) => p.id === user?.subscription?.id) ?? null}
+        targetPlan={plans.find((p) => p.id === changePlanId) ?? null}
+        onConfirm={handleChangePlan}
+        isLoading={isChangingPlan}
       />
     </>
   );

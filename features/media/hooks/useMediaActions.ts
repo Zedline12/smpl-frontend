@@ -112,6 +112,7 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/create/image?model=higgsfield-ads-studio",
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: "/artist?tab=clip",
+  [AiModelsEnum.SMPL_ARTIST]: "/artist?tab=clip",
 };
 
 /** Loads a media's model and settings into the composer and takes the user there. */

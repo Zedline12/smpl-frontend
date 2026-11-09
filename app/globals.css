@@ -1242,3 +1242,19 @@ body[data-media-selecting] #tour-prompt-composer {
     opacity: 1;
   }
 }
+
+/* ---- Templates: photo gallery (the before/after sweep is driven from JS) ---- */
+
+/* Photos: crossfade + slow pan. */
+@keyframes template-kenburns {
+  0% { transform: scale(1.04) translate(0, 0); }
+  100% { transform: scale(1.12) translate(-2%, -1.5%); }
+}
+.template-kenburns {
+  animation: template-kenburns 9s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .template-kenburns {
+    animation: none;
+  }
+}

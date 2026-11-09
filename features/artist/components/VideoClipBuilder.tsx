@@ -9,11 +9,10 @@ import ProjectSelector from "@/features/generation/components/prompt/selectors/P
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import {
-  ISeedance25RefToVideoInput,
   Seedance25RefDuration,
-  Seedance25RefInputConst,
   Seedance25RefLimits,
 } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import { ArtistInputConst, IArtistInput } from "@/features/generation/types/models/artist.type";
 import {
   useGenerateMutation,
   useGenerationCostQuery,
@@ -29,13 +28,13 @@ import { ArtistTitle } from "./ArtistTitle";
 import { AudioWindow, AudioWindowPicker } from "./AudioWindowPicker";
 import { StyleMenuButton } from "./StyleMenuButton";
 
-const MODEL = AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO;
+const MODEL = AiModelsEnum.SMPL_ARTIST;
 
 const sectionLabel =
   "text-[11px] font-semibold uppercase tracking-widest text-white/50";
 
-const RESOLUTION_OPTIONS = Seedance25RefInputConst.resolution.map((id) => ({ id, label: id }));
-const ASPECT_OPTIONS = Seedance25RefInputConst.aspectRatio.map((id) => ({
+const RESOLUTION_OPTIONS = ArtistInputConst.resolution.map((id) => ({ id, label: id }));
+const ASPECT_OPTIONS = ArtistInputConst.aspectRatio.map((id) => ({
   id,
   label: id === "auto" ? "Auto" : id,
 }));
@@ -50,8 +49,8 @@ export default function VideoClipBuilder() {
   const { user } = useAuth();
   const { projectId, templateMode } = useAiGenerationControlStore();
   const { states, setField } = useAiModelStore();
-  const state = states[MODEL] as ISeedance25RefToVideoInput;
-  const set = <K extends keyof ISeedance25RefToVideoInput>(key: K, value: ISeedance25RefToVideoInput[K]) =>
+  const state = states[MODEL] as IArtistInput;
+  const set = <K extends keyof IArtistInput>(key: K, value: IArtistInput[K]) =>
     setField(MODEL, key, value);
 
   const [dialog, setDialog] = useState<"image" | "video" | null>(null);
@@ -64,7 +63,7 @@ export default function VideoClipBuilder() {
   const templateGeneration = useGenerateTemplateMutation();
 
   const image = state.images[0];
-  const video = state.videos[0];
+  const video = state.videoUrl || undefined;
 
   // The clip is as long as the chosen part of the song (that's also what's priced).
   const handleAudioChange = (next: AudioWindow | null) => {
@@ -85,7 +84,7 @@ export default function VideoClipBuilder() {
       return;
     }
     setVideoError(null);
-    set("videos", [url]);
+    set("videoUrl", url);
   };
 
   const missing = !image
@@ -111,10 +110,10 @@ export default function VideoClipBuilder() {
     } finally {
       setUploading(false);
     }
-    const input: ISeedance25RefToVideoInput = {
+    const input: IArtistInput = {
       ...state,
       duration: toDuration(audio.lengthSec),
-      audios: [audioUrl],
+      audioUrl,
     };
     const request = { model: MODEL, mediaType: GenerationTypeEnum.VIDEO, input };
     if (templateMode) templateGeneration.mutate(request);
@@ -142,7 +141,7 @@ export default function VideoClipBuilder() {
             onOpenPicker={() => setDialog("video")}
             onClear={() => {
               setVideoError(null);
-              set("videos", []);
+              set("videoUrl", "");
             }}
           />
           {videoError ? (
@@ -164,7 +163,7 @@ export default function VideoClipBuilder() {
             onChange={(e) => set("prompt", e.target.value)}
             maxLength={Seedance25RefLimits.maxPromptLength}
             rows={4}
-            placeholder="A neon-lit rooftop at night. Use @Image1, @Video1 and @Audio1 to point at your references."
+            placeholder="A neon-lit rooftop at night, smoke and stage lights."
             className="resize-none rounded-[10px] border border-white/10 bg-white/[0.04] px-3.5 py-3 text-sm leading-relaxed text-white placeholder:text-white/30 focus:border-white/25 focus:outline-none"
           />
         </div>

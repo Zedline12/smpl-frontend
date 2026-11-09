@@ -6,6 +6,7 @@ import {
   SubscriptionsStatistics,
 } from "@/features/admin/subscriptions/types/types";
 import { fetchWithToken } from "@/lib/fetcher";
+import { BillingMetricsPanel } from "@/features/admin/subscriptions/components/BillingMetricsPanel";
 interface PaymentStats {
   totalRevenue: number;
   salesCount: number;
@@ -35,6 +36,7 @@ export default async function SubscriptionsPage() {
     const subStats: PaymentStats = json.data;
   return (
     <>
+      <BillingMetricsPanel />
       <div>
         <h2 className="text-2xl font-bold tracking-tight">
           Subscriptions Analytics

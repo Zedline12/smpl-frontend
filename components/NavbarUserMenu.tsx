@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import { AccountMenuPanel } from "@/components/AccountMenuPanel";
+import { isFreePlan } from "@/lib/subscription";
 
 const TRI_GRADIENT =
   "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)";
@@ -76,11 +77,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
     <>
       <Link
         className="hidden sm:block"
-        href={
-          user?.subscription?.name === "Free Plan"
-            ? "/pricing"
-            : "/me/settings/subscription"
-        }
+        href={isFreePlan(user) ? "/pricing" : "/me/settings/subscription"}
       >
         {/* Tri-color gradient border pill */}
         <div

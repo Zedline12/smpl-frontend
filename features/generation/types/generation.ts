@@ -59,6 +59,7 @@ import {
   gensuValidationSchema,
 } from "./models/gensu.type";
 import { IRemixInput, remixValidationSchema } from "./models/remix.type";
+import { IArtistInput, artistValidationSchema } from "./models/artist.type";
 import {
   IAiInfluencerInput,
   aiInfluencerValidationSchema,
@@ -106,6 +107,7 @@ export type AllModelsInput =
   | IGrokImagineVideo15Input
   | IGensuInput
   | IRemixInput
+  | IArtistInput
   | IAiInfluencerInput
   | IAdsStudioInput
   | IKatanaInput
@@ -129,6 +131,7 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SMPL_GENSU]:
     gensuValidationSchema,
   [AiModelsEnum.SMPL_REMIX]: remixValidationSchema,
+  [AiModelsEnum.SMPL_ARTIST]: artistValidationSchema,
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
   [AiModelsEnum.HIGGSFIELD_KATANA]: katanaValidationSchema,

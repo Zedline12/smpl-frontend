@@ -47,27 +47,3 @@ export async function fetchMedia({
   return { data: json.data.data, totalCount: json.data.totalCount, limit: json.data.limit };
 }
 
-export async function fetchTemplates({
-  type,
-  model,
-  limit = 12,
-  offset = 0,
-}: {
-  type?: MediaType;
-  model?: string;
-  limit?: number;
-  offset?: number;
-}): Promise<{ data: Media[]; totalCount: number; limit: number }> {
-  const params = new URLSearchParams();
-  if (type) params.set("type", type);
-  if (model) params.set("model", model);
-  params.set("limit", String(limit));
-  params.set("offset", String(offset));
-  const res = await fetch(`/api/media/templates?${params}`);
-  const json = await res.json();
-  return {
-    data: json.data?.data ?? [],
-    totalCount: json.data?.totalCount ?? 0,
-    limit: json.data?.limit ?? limit,
-  };
-}

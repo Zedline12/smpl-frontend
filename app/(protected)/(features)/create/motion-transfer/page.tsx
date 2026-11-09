@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
+import { GensuHero } from "@/features/gensu/components/GensuHero";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
@@ -23,7 +24,9 @@ export default function MotionTransferPage() {
             <MediaExplorer
               explore
               defaultModel={AiModelsEnum.SMPL_GENSU}
-            />
+            >
+              <GensuHero />
+            </MediaExplorer>
           </div>
           <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
             <PromptComposer />
@@ -35,7 +38,9 @@ export default function MotionTransferPage() {
           <MediaExplorer
             explore
             defaultModel={AiModelsEnum.SMPL_GENSU}
-          />
+          >
+            <GensuHero />
+          </MediaExplorer>
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           <PromptComposer />

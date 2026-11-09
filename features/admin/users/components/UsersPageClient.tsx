@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Map } from "lucide-react";
 import { SubscribedUser } from "@/features/admin/users/types/types";
@@ -10,7 +11,18 @@ import dynamic from "next/dynamic";
 const LocationHeatMap = dynamic(() => import("./LocationHeatMap"), { ssr: false });
 
 type SortBy = "" | "date" | "subscriptionPlan";
-type SubscriptionFilter = "paid" | "unpaid";
+type SubscriptionFilter = "paid" | "unpaid" | "lapsed" | "past_due" | "canceling" | "ever_paid";
+
+/** Paying now / not paying, then billing-history filters. */
+const FILTERS: { label: string; value: SubscriptionFilter }[] = [
+  { label: "Paid", value: "paid" },
+  { label: "Unpaid", value: "unpaid" },
+  { label: "Lapsed", value: "lapsed" },
+  { label: "Past due", value: "past_due" },
+  { label: "Canceling", value: "canceling" },
+  { label: "Ever paid", value: "ever_paid" },
+];
+const BILLING_FILTERS: SubscriptionFilter[] = ["lapsed", "past_due", "canceling", "ever_paid"];
 
 const SORT_OPTIONS: { label: string; value: SortBy }[] = [
   { label: "Default", value: "" },
@@ -30,11 +42,13 @@ async function fetchUsers(
   subscriptionFilter: SubscriptionFilter,
   page: number,
 ): Promise<PageResult> {
+  const isBillingFilter = BILLING_FILTERS.includes(subscriptionFilter);
   const params = new URLSearchParams({
-    isSubscribed: subscriptionFilter === "paid" ? "true" : "false",
+    isSubscribed: isBillingFilter ? "all" : subscriptionFilter === "paid" ? "true" : "false",
     page: String(page),
     limit: "10",
   });
+  if (isBillingFilter) params.set("billing", subscriptionFilter);
   if (sortBy) params.set("sortBy", sortBy);
   const res = await fetch(`/api/admin/users?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch users");
@@ -43,8 +57,12 @@ async function fetchUsers(
 }
 
 export default function UsersPageClient() {
+  const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState<SortBy>("");
-  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionFilter>("paid");
+  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionFilter>(() => {
+    const fromUrl = searchParams.get("billing") as SubscriptionFilter | null;
+    return fromUrl && FILTERS.some((f) => f.value === fromUrl) ? fromUrl : "paid";
+  });
   const [page, setPage] = useState(1);
   const [accumulated, setAccumulated] = useState<SubscribedUser[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
@@ -96,27 +114,20 @@ export default function UsersPageClient() {
         </button>
 
         {/* Subscription filter */}
-        <div className="flex items-center rounded-lg border border-neutral-700 bg-neutral-800/50 p-1 gap-1">
-          <button
-            onClick={() => handleFilterChange("paid")}
-            className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-              subscriptionFilter === "paid"
-                ? "bg-neutral-700 text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Paid
-          </button>
-          <button
-            onClick={() => handleFilterChange("unpaid")}
-            className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-              subscriptionFilter === "unpaid"
-                ? "bg-neutral-700 text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Unpaid
-          </button>
+        <div className="flex flex-wrap items-center rounded-lg border border-neutral-700 bg-neutral-800/50 p-1 gap-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => handleFilterChange(f.value)}
+              className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
+                subscriptionFilter === f.value
+                  ? "bg-neutral-700 text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         {/* Sort filter */}
@@ -162,7 +173,7 @@ export default function UsersPageClient() {
 
       {mapOpen && (
         <LocationHeatMap
-          isSubscribed={subscriptionFilter === "paid" ? true : false}
+          isSubscribed={subscriptionFilter !== "unpaid"}
           onClose={() => setMapOpen(false)}
         />
       )}

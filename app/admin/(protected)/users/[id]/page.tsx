@@ -8,18 +8,34 @@ import {
   CreditsUsageCard,
   CreditsUsageData,
 } from "@/features/admin/users/components/CreditsUsageCard";
+import { BillingHistory } from "@/features/admin/users/components/BillingHistory";
+import { AdminUserBilling } from "@/features/admin/users/types/billing";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-green-900/40 text-green-300 border border-green-700/40",
+  trialing: "bg-sky-900/40 text-sky-300 border border-sky-700/40",
   past_due: "bg-yellow-900/40 text-yellow-300 border border-yellow-700/40",
+  canceling: "bg-amber-900/40 text-amber-300 border border-amber-700/40",
   canceled: "bg-red-900/40 text-red-300 border border-red-700/40",
 };
 
-function formatPrice(cents: number | null): string {
-  if (!cents) return "—";
-  return `$${(cents / 100).toFixed(2)}`;
+/** Plan prices are stored in dollars (e.g. 19), not cents. */
+function formatPrice(dollars: number | null): string {
+  if (!dollars) return "—";
+  return `$${dollars % 1 === 0 ? dollars.toFixed(0) : dollars.toFixed(2)}`;
+}
+
+async function getUserBilling(userId: string): Promise<AdminUserBilling | null> {
+  try {
+    const res = await fetchWithToken(`/admin/billing/users/${userId}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data ?? json ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function formatName(u: AdminUserDetail): string {
@@ -125,15 +141,16 @@ export default async function UserDetailPage({
 }) {
   const { id } = await params;
 
-  const [res, creditsUsage] = await Promise.all([
+  const [res, creditsUsage, billing] = await Promise.all([
     fetchWithToken(`/admin/users/${id}`),
     getAdminCreditsUsage(id),
+    getUserBilling(id),
   ]);
   if (!res.ok) notFound();
   const json = await res.json();
-  console.log(json.data)
   const user: AdminUserDetail & { stats: Record<string, number> } & {providerCustomerId:string} = json.data;
   const status = user.subscriptionStatus;
+  const hasPaidPlan = !!status && ["active", "trialing", "past_due", "canceling"].includes(status);
   const statusStyle = status
     ? (STATUS_STYLES[status] ??
       "bg-neutral-800 text-neutral-400 border border-neutral-700")
@@ -186,7 +203,8 @@ export default async function UserDetailPage({
       <UserActionsBar
         userId={user.id}
         isSuspended={!!(user as any).isSuspended}
-        hasSubscription={!!user.subscriptionStatus && user.subscriptionStatus !== "canceled"}
+        hasSubscription={hasPaidPlan}
+        isCanceling={status === "canceling"}
         subscriptionPlanName={user.subscriptionPlanName}
         subscriptionPlanPriceAmount={user.subscriptionPlanPriceAmount}
         clientIp={(user as any).clientIp}
@@ -228,9 +246,11 @@ export default async function UserDetailPage({
         )}
       </div>
 
+      <BillingHistory userId={user.id} billing={billing} />
+
       {/* Invoices */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold">Billing &amp; Invoices</h2>
+        <h2 className="text-base font-semibold">Invoices</h2>
         {user.invoices.length === 0 ? (
           <div
             className="rounded-xl border px-6 py-10 text-center"

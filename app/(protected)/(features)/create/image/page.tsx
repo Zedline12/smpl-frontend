@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
@@ -28,7 +29,7 @@ export default function CreateImagePage() {
           <MediaExplorer explore />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-          <PromptComposer />
+          {/* <PromptComposer /> */}
         </section>
       </div>
 
@@ -38,7 +39,7 @@ export default function CreateImagePage() {
           <MediaExplorer explore />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-          <PromptComposer />
+          {/* <PromptComposer /> */}
         </section>
       </div>
     </>

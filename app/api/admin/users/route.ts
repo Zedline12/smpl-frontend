@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
     const limit = req.nextUrl.searchParams.get("limit") ?? "10";
     const params = new URLSearchParams({ isSubscribed, page, limit });
     if (sortBy) params.set("sortBy", sortBy);
+    const billing = req.nextUrl.searchParams.get("billing");
+    if (billing) params.set("billing", billing);
 
     const response = await fetchWithToken(`/admin/users?${params.toString()}`);
 

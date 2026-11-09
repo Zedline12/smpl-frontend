@@ -12,9 +12,10 @@ import { SubscribedUser } from "@/features/admin/users/types/types";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-function formatPrice(cents: number | null): string {
-  if (!cents) return "—";
-  return `$${(cents / 100).toFixed(2)}`;
+/** Plan prices are stored in dollars (e.g. 19), not cents. */
+function formatPrice(dollars: number | null): string {
+  if (!dollars) return "—";
+  return `$${dollars % 1 === 0 ? dollars.toFixed(0) : dollars.toFixed(2)}`;
 }
 
 function formatName(user: SubscribedUser): string {
@@ -24,7 +25,9 @@ function formatName(user: SubscribedUser): string {
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  trialing: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",
   past_due: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+  canceling: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
   canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
@@ -36,7 +39,7 @@ function StatusBadge({ status }: { status: SubscribedUser["subscriptionStatus"] 
         status ? (STATUS_STYLES[status] ?? "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400") : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
       )}
     >
-      {status ?? "None"}
+      {status ? status.replace(/_/g, " ") : "free"}
     </span>
   );
 }

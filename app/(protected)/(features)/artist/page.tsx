@@ -9,7 +9,7 @@ import { GenerationTypeEnum } from "@/features/generation/types/generation";
 
 const TAB_MODEL: Record<ArtistTab, { model: AiModelsEnum; mediaType: GenerationTypeEnum }> = {
   song: { model: AiModelsEnum.ELEVENLABS_MUSIC_V2_5, mediaType: GenerationTypeEnum.AUDIO },
-  clip: { model: AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO, mediaType: GenerationTypeEnum.VIDEO },
+  clip: { model: AiModelsEnum.SMPL_ARTIST, mediaType: GenerationTypeEnum.VIDEO },
 };
 
 export default function ArtistPage() {
