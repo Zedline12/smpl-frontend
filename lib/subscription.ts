@@ -13,6 +13,15 @@ export interface UserPlanSummary {
   cancelAtPeriodEnd?: boolean;
   currentPeriodEnd?: string | null;
   lastPaymentFailedAt?: string | null;
+  /** The coupon lowering the price right now. */
+  discount?: {
+    code: string | null;
+    percentOff: number | null;
+    amountOff: number | null;
+    duration: string | null;
+    durationInMonths: number | null;
+    end: string | null;
+  } | null;
 }
 
 /** True when the user has no paid plan. */

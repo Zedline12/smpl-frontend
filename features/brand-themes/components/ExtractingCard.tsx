@@ -2,6 +2,8 @@
 
 import { Clock } from "lucide-react";
 import { BrandThemeQueue } from "../types";
+import { JobProgress } from "@/features/live/JobProgress";
+import { useLiveItem } from "@/features/live/store";
 
 function hostnameOf(url?: string): string | null {
   if (!url) return null;
@@ -15,6 +17,7 @@ function hostnameOf(url?: string): string | null {
 export function ExtractingCard({ job }: { job: BrandThemeQueue }) {
   const host = hostnameOf(job.websiteUrl);
   const isQueued = job.status === "pending";
+  const live = useLiveItem("brand-theme", job.id);
 
   return (
     <div className="border-border bg-card relative min-h-64 overflow-hidden rounded-2xl border p-6">
@@ -57,6 +60,15 @@ export function ExtractingCard({ job }: { job: BrandThemeQueue }) {
           <div className="bg-background-light h-2.5 w-1/3 animate-pulse rounded" />
         </div>
       </div>
+
+      <JobProgress
+        className="relative mt-5"
+        job={{
+          status: live?.status ?? job.status,
+          startedAt: live?.startedAt,
+          estimatedSeconds: live?.estimatedSeconds,
+        }}
+      />
     </div>
   );
 }

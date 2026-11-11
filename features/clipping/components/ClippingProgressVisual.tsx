@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 
 /** Frame colors along the film strip. */
 const FRAMES = [
-  "linear-gradient(160deg, #1d4ed8, #0ea5e9)",
-  "linear-gradient(160deg, #312e81, #6366f1)",
-  "linear-gradient(160deg, #0e7490, #22d3ee)",
-  "linear-gradient(160deg, #1e3a8a, #38bdf8)",
-  "linear-gradient(160deg, #4338ca, #06b6d4)",
-  "linear-gradient(160deg, #0f172a, #3b82f6)",
+  "linear-gradient(160deg, #262626, #737373)",
+  "linear-gradient(160deg, #171717, #525252)",
+  "linear-gradient(160deg, #404040, #a3a3a3)",
+  "linear-gradient(160deg, #0a0a0a, #404040)",
+  "linear-gradient(160deg, #1f1f1f, #8a8a8a)",
+  "linear-gradient(160deg, #2a2a2a, #d4d4d4)",
 ];
 
 const STEPS = ["Watching your video…", "Finding viral moments…", "Cutting the clips…", "Adding the finishing touches…"];
@@ -61,9 +61,9 @@ export function ClippingProgressVisual({ queued }: { queued: boolean }) {
         {!queued && (
           <>
             {/* Scanning beam */}
-            <div className="animate-scan-beam absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-transparent via-cyan-300/45 to-transparent mix-blend-screen" />
+            <div className="animate-scan-beam absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-transparent via-white/45 to-transparent mix-blend-screen" />
             {/* Cut line */}
-            <span className="absolute inset-y-[-6px] left-1/2 w-0.5 -translate-x-1/2 bg-cyan-200 shadow-[0_0_12px_3px_rgba(34,211,238,0.9)]" />
+            <span className="absolute inset-y-[-6px] left-1/2 w-0.5 -translate-x-1/2 bg-white shadow-[0_0_12px_3px_rgba(255,255,255,0.5)]" />
           </>
         )}
       </div>
@@ -76,12 +76,12 @@ export function ClippingProgressVisual({ queued }: { queued: boolean }) {
       ) : (
         <>
           {/* Scissors at the cut, with sparks */}
-          <span className="absolute bottom-[54px] left-1/2 flex size-7 -translate-x-1/2 items-center justify-center rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,0.9)]">
-            <Scissors className="animate-snip size-4 rotate-90 text-slate-950" />
+          <span className="absolute bottom-[54px] left-1/2 flex size-7 -translate-x-1/2 items-center justify-center rounded-full bg-white shadow-[0_0_18px_rgba(255,255,255,0.5)]">
+            <Scissors className="animate-snip size-4 rotate-90 text-neutral-950" />
             {SPARKS.map((s, i) => (
               <span
                 key={i}
-                className="animate-spark absolute size-1 rounded-full bg-cyan-100"
+                className="animate-spark absolute size-1 rounded-full bg-white"
                 style={{ "--sx": s.sx, "--sy": s.sy, animationDelay: `${s.delay}s` } as CSSProperties}
               />
             ))}
@@ -91,7 +91,7 @@ export function ClippingProgressVisual({ queued }: { queued: boolean }) {
           {POPS.map((p, i) => (
             <span
               key={i}
-              className="animate-clip-pop absolute bottom-[58px] h-9 w-5 rounded-[4px] border border-white/40 opacity-0 shadow-[0_0_14px_rgba(59,130,246,0.8)]"
+              className="animate-clip-pop absolute bottom-[58px] h-9 w-5 rounded-[4px] border border-white/40 opacity-0 shadow-[0_0_14px_rgba(255,255,255,0.44)]"
               style={
                 {
                   // The animation owns `transform`, so center with left instead of translate.
@@ -105,7 +105,7 @@ export function ClippingProgressVisual({ queued }: { queued: boolean }) {
           ))}
 
           {/* Rotating status line */}
-          <div className="absolute inset-x-0 top-[50px] h-4 text-center text-[11px] font-semibold text-cyan-100">
+          <div className="absolute inset-x-0 top-[50px] h-4 text-center text-[11px] font-semibold text-white">
             {STEPS.map((step, i) => (
               <span
                 key={step}

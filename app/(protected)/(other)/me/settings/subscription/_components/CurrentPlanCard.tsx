@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowUpRight, CalendarClock, Coins, Crown, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, CalendarClock, Coins, Crown, Loader2, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
@@ -28,6 +28,19 @@ function formatPrice(plan?: SubscriptionPlan): string | null {
 const formatDate = (value?: string | null) =>
   value ? new Date(value).toLocaleDateString(undefined, { dateStyle: "long" }) : null;
 
+/** "SUMMER25 · 25% off until March 3, 2027" for the coupon lowering the price now. */
+function discountLabel(discount: UserPlanSummary["discount"], currency = "usd"): string | null {
+  if (!discount) return null;
+  const off =
+    discount.percentOff != null
+      ? `${discount.percentOff}% off`
+      : `${new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() }).format(
+          (discount.amountOff ?? 0) / 100,
+        )} off`;
+  const until = discount.end ? ` until ${formatDate(discount.end)}` : discount.duration === "forever" ? " forever" : "";
+  return `${discount.code ? `${discount.code} · ` : ""}${off}${until}`;
+}
+
 function usePlan() {
   const { user } = useCurrentUser();
   // Shares the query key with useCreditsAllowance, so this is cache-only.
@@ -49,6 +62,7 @@ function usePlan() {
     isPastDue: subscription?.status === "past_due",
     periodEnd: subscription?.currentPeriodEnd ?? null,
     price: formatPrice(plans?.find((plan) => plan.id === subscriptionId)),
+    discount: discountLabel(subscription?.discount ?? null, subscription?.currency),
   };
 }
 
@@ -83,7 +97,7 @@ function ResumeButton() {
 
 /** Card 1: the current plan, its renewal state and the upgrade button. */
 export function PlanCard() {
-  const { user, planName, isFreePlan: onFree, price, isCanceling, isPastDue, periodEnd } = usePlan();
+  const { user, planName, isFreePlan: onFree, price, discount, isCanceling, isPastDue, periodEnd } = usePlan();
   if (!user) return null;
   const endDate = formatDate(periodEnd);
 
@@ -93,6 +107,12 @@ export function PlanCard() {
         <div>
           <p className="text-xl font-bold text-white capitalize">{planName}</p>
           {price && <p className="mt-0.5 text-sm text-white/45">{price}</p>}
+          {!onFree && discount && (
+            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+              <Tag className="size-3" />
+              {discount}
+            </p>
+          )}
           {!onFree && endDate && !isCanceling && !isPastDue && (
             <p className="mt-0.5 text-xs text-white/40">Renews on {endDate}</p>
           )}
@@ -134,12 +154,17 @@ export function PlanCard() {
 /** Card 2: how much of the monthly credits is left. */
 export function MonthlyCreditsCard() {
   const { user } = useCurrentUser();
-  const { remaining, allowance, used, usedPercentage, hasAllowance } =
+  const { remaining, packCredits, allowance, used, usedPercentage, hasAllowance } =
     useCreditsAllowance(user);
   if (!user) return null;
 
   return (
     <SettingsPanel icon={Coins} title="Monthly credits">
+      {packCredits > 0 && (
+        <p className="mb-2 text-xs text-amber-300/90">
+          + {packCredits.toLocaleString("en-US")} credits from credit packs (they don&apos;t reset at renewal)
+        </p>
+      )}
       <SettingsTile>
         {hasAllowance ? (
           <>

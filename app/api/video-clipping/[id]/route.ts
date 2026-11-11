@@ -29,3 +29,26 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const id = (await params).id;
+    const response = await fetchWithToken(`/video-clipping/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      return NextResponse.json(
+        { error: data?.message || "Failed to delete clipping project" },
+        { status: response.status },
+      );
+    }
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    unstable_rethrow(error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

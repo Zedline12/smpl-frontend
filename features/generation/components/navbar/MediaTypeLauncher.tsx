@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -37,6 +38,8 @@ export function MediaTypeLauncher() {
   const setModel = useAiGenerationControlStore((state) => state.setModel);
 
   const [openType, setOpenType] = useState<GenerationTypeEnum | null>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(null);
+  const currentModel = useAiGenerationControlStore((state) => state.model);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearCloseTimer = () => {
@@ -46,8 +49,12 @@ export function MediaTypeLauncher() {
     }
   };
 
-  const open = (type: GenerationTypeEnum) => {
+  const open = (type: GenerationTypeEnum, target?: HTMLElement) => {
     clearCloseTimer();
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      setAnchor({ top: rect.bottom + 8, left: Math.max(12, Math.min(rect.left, window.innerWidth - 472)) });
+    }
     setOpenType(type);
   };
 
@@ -60,10 +67,11 @@ export function MediaTypeLauncher() {
   useEffect(() => clearCloseTimer, []);
 
   // Never let the card survive a navigation.
-  useEffect(() => {
-    clearCloseTimer();
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
     setOpenType(null);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (!openType) return;
@@ -74,49 +82,56 @@ export function MediaTypeLauncher() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [openType]);
 
-  const goToCreate = () => {
+  const goTo = (href: string) => {
     clearCloseTimer();
     setOpenType(null);
-    router.push("/create");
+    router.push(href);
   };
 
   const handleTypeClick = (type: GenerationTypeEnum) => {
     // setMediaType already selects that type's default model.
     setMediaType(type);
-    goToCreate();
+    goTo(`/create/${type}`);
   };
 
   const handleModelSelect = (type: GenerationTypeEnum, selected: Model) => {
     // Order matters — setMediaType resets the model to the type's default.
     setMediaType(type);
     setModel(selected.id);
-    goToCreate();
+    // The model in the URL too, so the page opens on it (and the link can be shared).
+    goTo(`/create/${type}?model=${encodeURIComponent(selected.id)}`);
   };
 
   const activeCard = MEDIA_TYPES.find((type) => type.value === openType);
 
   return (
     <div
-      className="relative hidden md:flex md:items-center md:gap-1"
+      className="relative flex shrink-0 items-center gap-0.5 sm:gap-1"
       onMouseEnter={clearCloseTimer}
       onMouseLeave={scheduleClose}
     >
       {MEDIA_TYPES.map((type) => {
         const isOpen = openType === type.value;
+        // Ads Studio lives on the image page but has its own navbar link.
+        const isCurrent =
+          pathname.startsWith(`/create/${type.value}`) &&
+          !(type.value === GenerationTypeEnum.IMAGE && currentModel === "higgsfield-ads-studio");
 
         return (
           <button
             key={type.value}
             type="button"
             onClick={() => handleTypeClick(type.value)}
-            onMouseEnter={() => open(type.value)}
-            onFocus={() => open(type.value)}
+            onMouseEnter={(e) => open(type.value, e.currentTarget)}
+            onFocus={(e) => open(type.value, e.currentTarget)}
             aria-expanded={isOpen}
             className={cn(
-              "cursor-pointer rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
-              isOpen
-                ? "bg-accent text-foreground"
-                : "text-foreground/75 hover:text-foreground",
+              "shrink-0 cursor-pointer rounded-lg px-2 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm",
+              isCurrent
+                ? "text-primary"
+                : isOpen
+                  ? "bg-accent text-foreground"
+                  : "text-foreground/55 hover:text-foreground",
             )}
           >
             {type.label}
@@ -124,12 +139,18 @@ export function MediaTypeLauncher() {
         );
       })}
 
-      {activeCard && (
-        <ModelCard
-          models={activeCard.models}
-          onSelect={(selected) => handleModelSelect(activeCard.value, selected)}
-        />
-      )}
+      {activeCard &&
+        anchor &&
+        createPortal(
+          <ModelCard
+            models={activeCard.models}
+            style={{ top: anchor.top, left: anchor.left }}
+            onMouseEnter={clearCloseTimer}
+            onMouseLeave={scheduleClose}
+            onSelect={(selected) => handleModelSelect(activeCard.value, selected)}
+          />,
+          document.body,
+        )}
     </div>
   );
 }

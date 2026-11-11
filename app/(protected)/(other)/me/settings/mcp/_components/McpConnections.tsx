@@ -1,19 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Trash2 } from "lucide-react";
-import { MCP_URL } from "./McpButton";
+import { Plug, Trash2 } from "lucide-react";
 
 interface McpConnection {
   id: string;
   clientName: string;
+  /** Set for apps that identify by URL (e.g. ChatGPT: https://chatgpt.com/...). */
+  clientId?: string;
   scope: string;
   lastUsedAt: string | null;
   createdAt: string;
 }
 
-const CONNECTORS_URL =
-  "https://claude.ai/new?modal=add-custom-connector#customize/connectors";
+function hostOf(url: string) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -23,8 +29,26 @@ function formatDate(iso: string) {
   });
 }
 
+/** Logo file for apps we know; others fall back to their initial. */
+function logoFor(clientName: string): string | null {
+  if (/claude/i.test(clientName)) return "/mcp-clients/Claude.png";
+  return null;
+}
+
 function ClientLogo({ clientName }: { clientName: string }) {
   const [failed, setFailed] = useState(false);
+  const src = logoFor(clientName) ?? `/mcp-clients/${clientName}.png`;
+
+  if (/chatgpt|openai/i.test(clientName)) {
+    return (
+      <div
+        className="flex size-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold tracking-tight text-white"
+        style={{ background: "#10a37f" }}
+      >
+        GPT
+      </div>
+    );
+  }
 
   if (failed) {
     return (
@@ -42,7 +66,7 @@ function ClientLogo({ clientName }: { clientName: string }) {
 
   return (
     <img
-      src={`/mcp-clients/${clientName}.png`}
+      src={src}
       alt=""
       onError={() => setFailed(true)}
       className="size-9 shrink-0 rounded-lg object-contain"
@@ -54,58 +78,19 @@ function ClientLogo({ clientName }: { clientName: string }) {
   );
 }
 
-function ConnectClaudeCard() {
-  const [copied, setCopied] = useState(false);
-
-  const handleConnect = async () => {
-    try {
-      await navigator.clipboard.writeText(MCP_URL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard permission denied — still open connectors below.
-    }
-    window.open(CONNECTORS_URL, "_blank", "noopener,noreferrer");
-  };
-
+function EmptyState() {
   return (
     <div
-      className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+      className="flex items-center gap-3 rounded-xl px-4 py-3"
       style={{
         background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.07)",
       }}
     >
-      <div className="flex items-center gap-3 min-w-0">
-        <img
-          src="/mcp-clients/Claude.png"
-          alt=""
-          className="size-9 shrink-0 rounded-lg object-contain"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}
-        />
-        <p
-          className="text-xs leading-snug"
-          style={{ color: "rgba(255,255,255,0.55)" }}
-        >
-          Copy our MCP URL and open Claude connectors
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={handleConnect}
-        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold flex-shrink-0 transition-colors"
-        style={{
-          background: "#22c55e",
-          color: "#08130b",
-        }}
-      >
-        {copied ? <Check className="w-3.5 h-3.5" /> : null}
-        {copied ? "Copied" : "Connect"}
-      </button>
+      <Plug className="size-4 shrink-0" style={{ color: "rgba(255,255,255,0.35)" }} />
+      <p className="text-xs leading-snug" style={{ color: "rgba(255,255,255,0.55)" }}>
+        Nothing connected yet. Follow the steps above to add SMPL to ChatGPT or Claude.
+      </p>
     </div>
   );
 }
@@ -201,7 +186,7 @@ export default function McpConnections() {
         </div>
       )}
 
-      {connections?.length === 0 && <ConnectClaudeCard />}
+      {connections?.length === 0 && <EmptyState />}
 
       {connections?.map((connection) => (
         <div
@@ -222,7 +207,8 @@ export default function McpConnections() {
                 className="text-xs mt-0.5 truncate"
                 style={{ color: "rgba(255,255,255,0.4)" }}
               >
-                {connection.scope} · Connected{" "}
+                {connection.clientId ? `${hostOf(connection.clientId)} · ` : ""}
+                Connected{" "}
                 {formatDate(connection.createdAt)}
                 {" · "}
                 {connection.lastUsedAt

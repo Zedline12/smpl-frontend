@@ -1,3 +1,4 @@
+import { useLiveStore } from "@/features/live/store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -32,7 +33,9 @@ export function useBrandThemesQuery() {
     retry: 0,
     // Safety net: if the queues endpoint ever returns nothing while a theme is
     // still pending, this is what stops the card spinning forever.
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((theme) => isActiveStatus(theme.status))
         ? 5_000
         : false,
@@ -61,7 +64,9 @@ export function useBrandThemeQueuesQuery() {
       return Array.from(byId.values());
     },
     // Self-stopping: only poll while something is actually running.
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((job) => isActiveStatus(job.status))
         ? POLL_INTERVAL_MS
         : false,

@@ -6,7 +6,7 @@ import MediaExplorer from "@/features/media/components/MediaExplorer";
 import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
-import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import { AiModelsEnum,  normalizeModelId } from "@/features/generation/enums/models.enum";
 
 export default function CreateImagePage() {
   const { setMediaType, setModel } = useAiGenerationControlStore();
@@ -15,7 +15,7 @@ export default function CreateImagePage() {
     // setMediaType resets the model to the default, and it runs after the sidebar
     // read ?model= — so re-apply a linked model (e.g. Ads Studio) here.
     setMediaType(GenerationTypeEnum.IMAGE);
-    const linked = new URLSearchParams(window.location.search).get("model");
+    const linked = normalizeModelId(new URLSearchParams(window.location.search).get("model"));
     if (linked && (Object.values(AiModelsEnum) as string[]).includes(linked)) {
       setModel(linked as AiModelsEnum);
     }

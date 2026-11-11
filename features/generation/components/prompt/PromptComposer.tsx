@@ -20,7 +20,6 @@ import Seedance25Composer from "./composers/seedance-2.5.composer";
 import GptImage2Composer from "./composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
 import GensuComposer from "./composers/gensu.composer";
-import KatanaComposer from "./composers/higgsfield-katana.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -106,9 +105,6 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.SMPL_GENSU && (
           <GensuComposer isFocused={isFocused} />
-        )}
-        {model === AiModelsEnum.HIGGSFIELD_KATANA && (
-          <KatanaComposer isFocused={isFocused} />
         )}
       </div>
     </div>

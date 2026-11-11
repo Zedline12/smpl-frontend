@@ -9,7 +9,8 @@ export type NotificationKind =
   | "subscription_canceled"
   | "refund"
   | "payment_disputed"
-  | "payment_failed";
+  | "payment_failed"
+  | "support_ticket";
 
 export interface AdminNotification {
   id: string;

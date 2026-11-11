@@ -17,11 +17,11 @@ import { IRemixInput } from "@/features/generation/types/models/remix.type";
 import { IArtistInput } from "@/features/generation/types/models/artist.type";
 import { IAiInfluencerInput } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
 import { IAdsStudioInput } from "@/features/generation/types/models/higgsfield-ads-studio.type";
-import { IKatanaInput } from "@/features/generation/types/models/higgsfield-katana.type";
 import { IMusicV25Input } from "@/features/generation/types/models/elevenlabs-music-v2-5.type";
 import { createMusicInput } from "@/features/artist/utils/composition-plan";
 import { ISeedance25RefToVideoInput } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
 import { IAdsMultiplierInput } from "@/features/generation/types/models/ads-multiplier.type";
+import { IVoiceChangerInput } from "@/features/generation/types/models/voice-changer.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
@@ -41,10 +41,10 @@ export type ModelStateMap = {
   [AiModelsEnum.SMPL_ARTIST]: IArtistInput;
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: IAiInfluencerInput;
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: IAdsStudioInput;
-  [AiModelsEnum.HIGGSFIELD_KATANA]: IKatanaInput;
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: ISeedance25RefToVideoInput;
-  [AiModelsEnum.ADS_MULTIPLIER]: IAdsMultiplierInput;
+  [AiModelsEnum.SMPL_AD_MULTIPLIER]: IAdsMultiplierInput;
+  [AiModelsEnum.SMPL_VOICE_CHANGER]: IVoiceChangerInput;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -180,12 +180,6 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "2K",
     batchSize: 1,
   },
-  [AiModelsEnum.HIGGSFIELD_KATANA]: {
-    prompt: "",
-    videoUrl: "",
-    images: [],
-    resolution: "720p",
-  },
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: createMusicInput(),
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: {
     prompt: "",
@@ -197,7 +191,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     aspectRatio: "auto",
     generateAudio: true,
   },
-  [AiModelsEnum.ADS_MULTIPLIER]: {
+  [AiModelsEnum.SMPL_AD_MULTIPLIER]: {
     prompt: "",
     videoUrl: "",
     images: [],
@@ -205,5 +199,12 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     cta: "",
     resolution: "720p",
     duration: 8,
+  },
+  [AiModelsEnum.SMPL_VOICE_CHANGER]: {
+    prompt: "",
+    videoUrl: "",
+    voiceId: "",
+    removeBackgroundNoise: false,
+    duration: 0,
   },
 };

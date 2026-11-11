@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Ban,
   CreditCard,
+  LifeBuoy,
   RotateCcw,
   ShieldAlert,
   UserPlus,
@@ -23,6 +24,7 @@ const KIND_ICONS: Record<NotificationKind, LucideIcon> = {
   refund: RotateCcw,
   payment_disputed: AlertTriangle,
   payment_failed: CreditCard,
+  support_ticket: LifeBuoy,
 };
 
 export function NotificationItem({

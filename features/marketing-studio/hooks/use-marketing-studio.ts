@@ -1,3 +1,4 @@
+import { useLiveStore } from "@/features/live/store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fetchGenerationCost } from "@/features/generation/api/generation";
@@ -34,7 +35,9 @@ export function useMarketingCreationsQuery(options?: { brandThemeId?: string }) 
     retry: 0,
     // Safety net: if the queues endpoint ever drops an item before its media
     // shows up here, this is what stops the card spinning forever.
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((creation) => isMarketingStudioActive(creation))
         ? 5_000
         : false,
@@ -65,7 +68,9 @@ export function useMarketingQueuesQuery() {
       return Array.from(byId.values());
     },
     // Self-stopping: only poll while something is actually running.
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((job) => isMarketingStudioActive(job))
         ? POLL_INTERVAL_MS
         : false,

@@ -13,9 +13,12 @@ import {
   TrendingUp,
   Paintbrush,
   Zap,
+  Timer,
   Brain,
   LifeBuoy,
   Bell,
+  Package,
+  Tag,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 
@@ -37,8 +40,11 @@ const SECTIONS = [
     label: "Billing & Monetization",
     links: [
       { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
+      { icon: Package, label: "Credit Packs", href: "/admin/credit-packs" },
+      { icon: Tag, label: "Discounts", href: "/admin/discounts" },
       { icon: Zap, label: "Credit Pricing", href: "/admin/credit-pricing" },
       { icon: DollarSign, label: "Model Costs", href: "/admin/model-costs" },
+      { icon: Timer, label: "Generation Times", href: "/admin/generation-times" },
       { icon: TrendingUp, label: "Profit", href: "/admin/profit" },
     ],
   },

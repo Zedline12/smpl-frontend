@@ -113,6 +113,8 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: "/artist?tab=clip",
   [AiModelsEnum.SMPL_ARTIST]: "/artist?tab=clip",
+  // Its result is a video, but the model lives on the audio page.
+  [AiModelsEnum.SMPL_VOICE_CHANGER]: "/create/audio?model=smpl-voice-changer",
 };
 
 /** Loads a media's model and settings into the composer and takes the user there. */

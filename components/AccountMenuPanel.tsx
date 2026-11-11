@@ -10,6 +10,7 @@ import {
   Share2,
   Sparkles,
   User,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
@@ -149,7 +150,17 @@ export function AccountMenuPanel({
           </Link>
         </div>
       ) : (
-        <></>
+        <Link
+          href="/me/settings/subscription#credit-packs"
+          onClick={onNavigate}
+          className="bg-primary/10 hover:bg-primary/15 mx-1 mt-1.5 flex items-center justify-between gap-2 rounded-xl p-2.5 transition-colors"
+        >
+          <span className="text-foreground flex items-center gap-2 text-sm font-semibold">
+            <Zap className="text-primary size-4" />
+            Need more credits?
+          </span>
+          <span className="bg-primary rounded-full px-3 py-1.5 text-xs font-semibold text-white">Buy</span>
+        </Link>
         // <Link
         //   href="/me/settings/subscription"
         //   onClick={onNavigate}

@@ -1,16 +1,16 @@
 import { CSSProperties } from "react";
-import { Heart, MessageCircle, Play, Scissors, Send } from "lucide-react";
+import { Heart, MessageCircle, Play, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Thumbnail gradients for the fake posts, all in the studio's blue family plus a few accents. */
+/** Thumbnail gradients for the fake posts, all in greyscale. */
 const THUMBS = [
-  "linear-gradient(160deg, #1d4ed8, #0ea5e9)",
-  "linear-gradient(160deg, #312e81, #6366f1)",
-  "linear-gradient(160deg, #0e7490, #22d3ee)",
-  "linear-gradient(160deg, #6d28d9, #ec4899)",
-  "linear-gradient(160deg, #1e3a8a, #38bdf8)",
-  "linear-gradient(160deg, #0f172a, #3b82f6)",
-  "linear-gradient(160deg, #4338ca, #06b6d4)",
+  "linear-gradient(160deg, #262626, #737373)",
+  "linear-gradient(160deg, #171717, #525252)",
+  "linear-gradient(160deg, #404040, #a3a3a3)",
+  "linear-gradient(160deg, #0a0a0a, #404040)",
+  "linear-gradient(160deg, #1f1f1f, #8a8a8a)",
+  "linear-gradient(160deg, #2a2a2a, #d4d4d4)",
+  "linear-gradient(160deg, #111111, #6b6b6b)",
 ];
 const TAGS = ["Shorts", "Reels", "TikTok", null, "Shorts", null, "Reels"];
 const LIKES = ["12.4K", "98K", "3.1K", "441K", "27K", "1.2M", "8.8K"];
@@ -52,7 +52,7 @@ function Phone({ phone, index }: { phone: (typeof PHONES)[number]; index: number
         } as CSSProperties
       }
     >
-      <div className="relative aspect-[9/19] rounded-[22px] border-[3px] border-slate-700/90 bg-black p-[3px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8),0_0_30px_-8px_rgba(59,130,246,0.6)]">
+      <div className="relative aspect-[9/19] rounded-[22px] border-[3px] border-neutral-700/90 bg-black p-[3px] ">
         <div className="relative h-full overflow-hidden rounded-[18px]">
           <div
             className={phone.feedUp ? "animate-feed-up" : "animate-feed-down"}
@@ -82,8 +82,6 @@ const CHIPS: { label: string; left: string; top: string; delay: number }[] = [
   { label: "+3.2K shares", left: "54%", top: "64%", delay: 5.9 },
 ];
 
-/** Clip segments on the timeline, as widths in %. */
-const SEGMENTS = [9, 14, 7, 12, 10, 16, 8, 13, 11];
 
 function PostCard({ index }: { index: number }) {
   const i = index % THUMBS.length;
@@ -94,10 +92,9 @@ function PostCard({ index }: { index: number }) {
       style={{ background: THUMBS[i] }}
     >
       {/* A soft "subject" blob so the thumbnail reads as a video frame */}
-      <div className="absolute top-[22%] left-1/2 size-[55%] -translate-x-1/2 rounded-full bg-white/15 blur-md" />
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="flex size-8 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm">
-          <Play className="size-3.5 translate-x-px fill-white text-white" />
+          <Play className="size-3.5 translate-x-px fill-white text-white/80" />
         </span>
       </div>
       {tag && (
@@ -126,53 +123,24 @@ export function ClippingHeroBackground({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
       {/* Floating phones scrolling social feeds */}
-      {PHONES.map((phone, i) => (
-        <Phone key={i} phone={phone} index={i} />
-      ))}
+      {/* Blurred so they stay in the background behind the form. */}
+      <div className="absolute inset-0 opacity-70 blur-[6px]">
+        {PHONES.map((phone, i) => (
+          <Phone key={i} phone={phone} index={i} />
+        ))}
+      </div>
 
       {/* Floating stats */}
       {CHIPS.map((chip, k) => (
         <span
           key={k}
-          className="animate-float-up absolute rounded-full border border-blue-300/30 bg-blue-500/20 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-blue-50 opacity-0 shadow-[0_0_16px_-4px_rgba(59,130,246,0.8)] backdrop-blur-sm"
+          className="animate-float-up absolute rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-white opacity-0 backdrop-blur-sm"
           style={{ left: chip.left, top: chip.top, animationDelay: `${chip.delay}s` }}
         >
           {chip.label}
         </span>
       ))}
 
-      {/* Editing timeline with a playhead cutting clips */}
-      <div className="absolute inset-x-[6%] bottom-5 h-10">
-        <div className="flex h-full items-center gap-1 rounded-lg border border-white/10 bg-black/40 px-1.5 backdrop-blur-sm">
-          {SEGMENTS.map((w, k) => (
-            <div
-              key={k}
-              className="relative h-6 rounded-md"
-              style={{
-                width: `${w}%`,
-                background:
-                  k % 3 === 0
-                    ? "linear-gradient(90deg, #2563eb, #38bdf8)"
-                    : k % 3 === 1
-                      ? "linear-gradient(90deg, #4f46e5, #60a5fa)"
-                      : "linear-gradient(90deg, #0891b2, #22d3ee)",
-                opacity: 0.75,
-              }}
-            >
-              <span
-                className="animate-cut-flash absolute inset-y-[-4px] -right-[3px] w-[2px] rounded bg-white shadow-[0_0_8px_white]"
-                style={{ animationDelay: `${k * 0.35}s` }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="animate-playhead absolute -top-3 -bottom-1 w-0">
-          <span className="absolute inset-y-0 -left-px w-0.5 bg-cyan-300 shadow-[0_0_14px_3px_rgba(34,211,238,0.8)]" />
-          <span className="absolute -top-6 -left-3 flex size-6 items-center justify-center rounded-full bg-cyan-400/90 shadow-[0_0_14px_rgba(34,211,238,0.9)]">
-            <Scissors className="animate-snip size-3.5 text-slate-950" />
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

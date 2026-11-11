@@ -16,6 +16,13 @@ export interface AdminUserBilling {
     churnedAt: string | null;
     churnReason: string | null;
     subscriptionCount: number;
+    /** MRR before coupons (`mrr` is after them). */
+    listMrr?: number;
+    discountedNow?: boolean;
+    couponsUsed?: number;
+    acquiredWithCoupon?: boolean;
+    firstCouponCode?: string | null;
+    totalDiscounted?: number;
   } | null;
   subscriptions: {
     id: string;
@@ -60,7 +67,36 @@ export interface AdminUserBilling {
     paidAt: string;
     creditsGranted: number | null;
     hostedInvoiceUrl: string | null;
+    subtotal?: number | null;
+    discountAmount?: number;
+    discounts?: { providerDiscountId: string; couponId: string | null; code: string | null; amount: number }[];
   }[];
+  /** Every coupon the user redeemed, newest first. */
+  coupons?: UserCouponRedemption[];
+}
+
+/** One coupon applied to one subscription, with what happened after. */
+export interface UserCouponRedemption {
+  id: string;
+  couponId: string | null;
+  code: string | null;
+  planName: string | null;
+  appliedVia: string;
+  isNewCustomer: boolean;
+  start: string;
+  scheduledEnd: string | null;
+  endedAt: string | null;
+  status: "active" | "ended" | "removed";
+  discountedInvoiceCount: number;
+  totalDiscounted: number;
+  firstDiscountedInvoiceAt: string | null;
+  lastDiscountedInvoiceAt: string | null;
+  discountedThrough: string | null;
+  paidFullPriceAfter: boolean;
+  canceledAt: string | null;
+  subscriptionEndedAt: string | null;
+  endedWhileDiscounted: boolean;
+  endedWithinDaysOfDiscountEnd: number | null;
 }
 
 /** GET /admin/billing/metrics (money in cents). */
@@ -70,6 +106,9 @@ export interface BillingMetrics {
   current: {
     mrr: number;
     arr: number;
+    /** MRR before coupons. */
+    listMrr?: number;
+    discountedCustomers?: number;
     payingCustomers: number;
     trialing: number;
     pastDue: number;
@@ -94,6 +133,8 @@ export interface BillingMetrics {
     paymentRecoveries: number;
     refunds: number;
     disputes: number;
+    /** One-time credit pack sales (cents). */
+    creditPacks?: { count: number; revenue: number };
     customerChurnRate: number;
     revenue: { gross: number; refunded: number; net: number; invoices: number };
     mrrMovement: {

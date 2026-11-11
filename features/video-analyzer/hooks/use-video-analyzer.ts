@@ -1,3 +1,4 @@
+import { useLiveStore } from "@/features/live/store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -30,7 +31,9 @@ export function useVideoAnalysesQuery() {
     retry: 0,
     // Safety net: if the queues endpoint ever drops an item before its status
     // shows up here, this is what stops the card spinning forever.
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((analysis) => isActiveStatus(analysis.status))
         ? 5_000
         : false,
@@ -58,7 +61,9 @@ export function useVideoAnalysisQueuesQuery() {
       incoming.forEach((job) => byId.set(job.id, job));
       return Array.from(byId.values());
     },
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data?.some((job) => isActiveStatus(job.status))
         ? QUEUE_POLL_MS
         : false,
@@ -76,7 +81,9 @@ export function useVideoAnalysisQuery(id: string) {
     queryFn: () => fetchVideoAnalysis(id),
     enabled: !!id,
     retry: 0,
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) =>
+      useLiveStore.getState().connected ? false :
       query.state.data && isActiveStatus(query.state.data.status)
         ? DETAIL_POLL_MS
         : false,

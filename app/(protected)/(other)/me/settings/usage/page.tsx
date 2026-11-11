@@ -93,6 +93,8 @@ const TYPE_STYLES: Record<string, { label: string; className: string }> = {
   PURCHASE: { label: "Purchase", className: "bg-emerald-500/15 text-emerald-300" },
   SUBSCRIPTION_GRANT: { label: "Subscription", className: "bg-blue-500/15 text-blue-300" },
   SUBSCRIPTION_ENDED: { label: "Plan ended", className: "bg-white/10 text-white/60" },
+  CREDIT_PACK: { label: "Credit pack", className: "bg-amber-500/15 text-amber-300" },
+  CREDIT_PACK_REFUND: { label: "Pack refunded", className: "bg-white/10 text-white/60" },
   BONUS: { label: "Bonus", className: "bg-violet-500/15 text-violet-300" },
   REFERRAL: { label: "Referral", className: "bg-amber-500/15 text-amber-300" },
   FRAUD: { label: "Adjustment", className: "bg-white/10 text-white/60" },
@@ -101,7 +103,10 @@ const TYPE_STYLES: Record<string, { label: string; className: string }> = {
 
 /** Spending types take credits away; everything else adds them. */
 const isSpend = (t: CreditTransaction) =>
-  t.type === "USAGE" || t.type === "FRAUD" || (t.type === "SUBSCRIPTION_ENDED" && t.amount < 0);
+  t.type === "USAGE" ||
+  t.type === "FRAUD" ||
+  t.type === "CREDIT_PACK_REFUND" ||
+  (t.type === "SUBSCRIPTION_ENDED" && t.amount < 0);
 
 async function fetchUsage(range: Range, offset: number): Promise<UsageData> {
   const res = await fetch(`/api/usage?range=${range}&offset=${offset}&limit=${PAGE_SIZE}`);

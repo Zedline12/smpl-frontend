@@ -6,6 +6,7 @@ import {
   PlanCard,
 } from "./_components/CurrentPlanCard";
 import { Building2, CreditCard, Receipt } from "lucide-react";
+import { CreditPacksCard } from "@/features/credit-packs/components/CreditPacksCard";
 import {
   EmptyState,
   SettingsHeader,
@@ -19,6 +20,9 @@ interface Invoice {
   date: string;
   amount: string;
   invoiceId: string;
+  /** Coupon savings on this invoice (cents) and the code used. */
+  discountAmount?: number;
+  couponCode?: string | null;
 }
 
 async function getInvoices(): Promise<Invoice[]> {
@@ -60,6 +64,7 @@ export default async function SubscriptionPage() {
       {/* Client islands: they need the auth context and react-query. */}
       <PlanCard />
       <MonthlyCreditsCard />
+      <CreditPacksCard />
       <ManageCard
         icon={CreditCard}
         title="Payment methods"
@@ -101,6 +106,12 @@ export default async function SubscriptionPage() {
                     style={{ color: "rgba(255,255,255,0.35)" }}
                   >
                     {invoice.date}
+                    {!!invoice.discountAmount && (
+                      <span className="ml-2 text-emerald-300/90">
+                        −{`$${(invoice.discountAmount / 100).toFixed(2)}`}
+                        {invoice.couponCode ? ` · ${invoice.couponCode}` : " discount"}
+                      </span>
+                    )}
                   </span>
                 </div>
 

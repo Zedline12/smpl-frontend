@@ -348,7 +348,7 @@ export function BillingMetricsPanel() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Revenue &amp; churn</h2>
-          <p className="text-muted-foreground text-sm">From the subscription history (list prices, before coupons and tax).</p>
+          <p className="text-muted-foreground text-sm">From the subscription history. MRR is after running coupons, before tax.</p>
         </div>
         <div className="flex rounded-lg border border-white/10 p-0.5">
           {RANGES.map((r) => (
@@ -371,7 +371,15 @@ export function BillingMetricsPanel() {
       {c && p ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Kpi label="MRR" value={money(c.mrr)} hint={`ARR ${money(c.arr)}`} />
+            <Kpi
+              label="MRR"
+              value={money(c.mrr)}
+              hint={
+                c.listMrr != null && c.listMrr > c.mrr
+                  ? `ARR ${money(c.arr)} · ${money(c.listMrr - c.mrr)} off with coupons (${c.discountedCustomers ?? 0} customers)`
+                  : `ARR ${money(c.arr)}`
+              }
+            />
             <Kpi
               label="Paying customers"
               value={String(c.payingCustomers)}
@@ -422,6 +430,7 @@ export function BillingMetricsPanel() {
                 ["Cancels scheduled", p.cancelsScheduled],
                 ["Cancels undone", p.cancelsUndone],
                 ["Refunds", p.refunds],
+                ["Credit packs sold", `${p.creditPacks?.count ?? 0} · ${money(p.creditPacks?.revenue ?? 0)}`],
               ].map(([label, value]) => (
                 <div key={label as string} className="flex justify-between py-1.5 text-sm">
                   <span className="text-muted-foreground">{label}</span>

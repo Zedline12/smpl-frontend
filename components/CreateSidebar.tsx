@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { SettingsSelect } from "@/components/SettingsSelect";
-import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen } from "lucide-react";
+import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload } from "lucide-react";
 import { HOW_IT_WORKS_MAP } from "@/features/generation/data/how-it-works";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
@@ -17,7 +17,7 @@ import {
   STUDIO_MODELS,
   AiModelsEnum,
   type Model,
-} from "@/features/generation/enums/models.enum";
+ normalizeModelId } from "@/features/generation/enums/models.enum";
 import { ModelsValidatorSchemaMap } from "@/features/generation/types/generation";
 import {
   useGenerateMutation,
@@ -44,7 +44,6 @@ import { SeedreamV45OptionsConst } from "@/features/generation/types/models/seed
 import { GptImage2OptionsConst } from "@/features/generation/types/models/gpt-image-2.type";
 import { ElevenLabsV3InputConst } from "@/features/generation/types/models/elevenlabs-v3.type";
 import { GENSU_MAX_IMAGES } from "@/features/generation/types/models/gensu.type";
-import { KATANA_MAX_IMAGES } from "@/features/generation/types/models/higgsfield-katana.type";
 import { GPT_IMAGE_2_MAX_IMAGES } from "@/features/generation/types/models/gpt-image-2.type";
 import {
   AdsMultiplierLimits,
@@ -57,6 +56,11 @@ import {
   type IAdsStudioInput,
 } from "@/features/generation/types/models/higgsfield-ads-studio.type";
 import { readVideoDuration } from "@/features/artist/utils/audio-clip";
+import { VoicePickerButton } from "@/features/voice-changer/components/VoicePicker";
+import {
+  IVoiceChangerInput,
+  VoiceChangerInputConst,
+} from "@/features/generation/types/models/voice-changer.type";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -74,7 +78,7 @@ const CREATE_VIDEO_MODEL_IDS = new Set([
   AiModelsEnum.SEEDANCE_2_0,
   AiModelsEnum.SEEDANCE_2_5,
   AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
-  AiModelsEnum.ADS_MULTIPLIER,
+  AiModelsEnum.SMPL_AD_MULTIPLIER,
 ]);
 
 type VideoMode = "create" | "edit";
@@ -82,7 +86,6 @@ type VideoMode = "create" | "edit";
 // models where prompt is optional (toggle to show)
 const OPTIONAL_PROMPT_MODELS = new Set([
   AiModelsEnum.SMPL_GENSU,
-  AiModelsEnum.HIGGSFIELD_KATANA,
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
 ]);
@@ -91,7 +94,9 @@ const OPTIONAL_PROMPT_MODELS = new Set([
 const NO_PROMPT_MODELS = new Set([
   AiModelsEnum.ELEVEN_LABS_V3_TTS,
   // Its optional prompt sits with the hook/CTA toggles in its own panel.
-  AiModelsEnum.ADS_MULTIPLIER,
+  AiModelsEnum.SMPL_AD_MULTIPLIER,
+  // Video + voice only.
+  AiModelsEnum.SMPL_VOICE_CHANGER,
 ]);
 
 // per-model prompt label/placeholder (default: "Prompt")
@@ -270,7 +275,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       </>
     );
 
-  if (model === AiModelsEnum.ADS_MULTIPLIER)
+  if (model === AiModelsEnum.SMPL_AD_MULTIPLIER)
     return <SelectRow label="Quality" options={AdsMultiplierOptionsConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />;
 
   if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO)
@@ -347,71 +352,95 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
 
 // ─── media slot primitives ────────────────────────────────────────────────────
 
+/** "Required" / "Optional" chip in a slot card's top-right corner. */
+export function RequirementTag({ optional }: { optional?: boolean }) {
+  return (
+    <span className="absolute top-2.5 right-2.5 z-[2] rounded-md bg-white/[0.07] px-2 py-0.5 text-[10px] font-medium text-white/50 backdrop-blur-sm">
+      {optional ? "Optional" : "Required"}
+    </span>
+  );
+}
+
+/** Round icon bubble used in empty slot cards. */
+export function SlotIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-[#1b1c20] text-white/85 shadow-[0_2px_10px_rgba(0,0,0,.35)] transition-transform group-hover:scale-105">
+      {children}
+    </span>
+  );
+}
+
+/** Labels mark optional slots with "(optional)"; the card shows a tag instead. */
+function parseSlotLabel(label: string) {
+  const optional = /\(optional\)/i.test(label);
+  return { optional, title: label.replace(/\s*\(optional\)\s*/i, " ").trim() };
+}
+
+const slotCard =
+  "group relative w-full overflow-hidden rounded-2xl border border-dashed border-white/[0.12] bg-white/[0.035] transition-colors hover:border-white/25 hover:bg-white/[0.05]";
+
 export function SingleMediaSlot({
   label,
   type = "image",
   url,
   onOpenPicker,
   onClear,
+  description,
 }: {
   label: string;
   type?: "image" | "video";
   url?: string;
   onOpenPicker: () => void;
   onClear: () => void;
+  description?: string;
 }) {
+  const { optional, title } = parseSlotLabel(label);
+  const Icon = type === "video" ? VideoIcon : ImageIcon;
+
+  if (!url) {
+    return (
+      <button type="button" onClick={onOpenPicker} className={`${slotCard} flex flex-col items-center px-4 pt-7 pb-5 text-center`}>
+        <RequirementTag optional={optional} />
+        <span className="flex -space-x-2">
+          <SlotIcon>
+            <Icon className="size-4" />
+          </SlotIcon>
+          <SlotIcon>
+            <Upload className="size-4" />
+          </SlotIcon>
+        </span>
+        <span className="mt-3 text-[14px] font-bold text-white">{title}</span>
+        <span className="mt-1 text-[12px] leading-snug text-white/45">
+          {description ?? (type === "video" ? "Upload a video or pick one from your library" : "Upload an image or pick one from your library")}
+        </span>
+      </button>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-0.5">
-        {label}
-      </span>
-      <div
-        className="relative w-full h-28 rounded-xl overflow-hidden border border-dashed border-border bg-card cursor-pointer group"
-        onClick={!url ? onOpenPicker : undefined}
+    <div className={`${slotCard} h-36 cursor-pointer border-solid`} onClick={onOpenPicker}>
+      {type === "video" ? (
+        <video src={url} className="absolute inset-0 h-full w-full object-cover" muted loop autoPlay playsInline />
+      ) : (
+        <img src={url} alt={title} className="absolute inset-0 h-full w-full object-cover" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/30" />
+      <RequirementTag optional={optional} />
+      <span className="absolute bottom-2.5 left-3 z-[1] text-[12px] font-semibold text-white">{title}</span>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClear();
+        }}
+        aria-label="Remove"
+        className="absolute top-2.5 left-2.5 z-[2] flex size-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover:opacity-100"
       >
-        {url ? (
-          type === "video" ? (
-            <video
-              src={url}
-              className="absolute inset-0 w-full h-full object-cover"
-              muted
-              loop
-              autoPlay
-              playsInline
-            />
-          ) : (
-            <img src={url} alt={label} className="absolute inset-0 w-full h-full object-cover" />
-          )
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-1.5 text-muted-foreground group-hover:text-foreground transition-colors">
-            {type === "video" ? (
-              <VideoIcon className="w-6 h-6" />
-            ) : (
-              <ImageIcon className="w-6 h-6" />
-            )}
-            <span className="text-[10px] font-medium">Click to select</span>
-          </div>
-        )}
-        {url && (
-          <>
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onClear(); }}
-              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="w-3 h-3" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onOpenPicker(); }}
-              className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              Change
-            </button>
-          </>
-        )}
-      </div>
+        <X className="size-3" />
+      </button>
+      <span className="absolute right-2.5 bottom-2.5 z-[1] rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+        Change
+      </span>
     </div>
   );
 }
@@ -422,28 +451,54 @@ function MultiImageSlots({
   maxImages,
   onOpenPicker,
   onRemove,
+  description,
 }: {
   label: string;
   images: string[];
   maxImages: number;
   onOpenPicker: () => void;
   onRemove: (url: string) => void;
+  description?: string;
 }) {
+  const { optional, title } = parseSlotLabel(label);
+
+  if (images.length === 0) {
+    return (
+      <button type="button" onClick={onOpenPicker} className={`${slotCard} flex flex-col items-center px-4 pt-7 pb-5 text-center`}>
+        <RequirementTag optional={optional} />
+        <span className="flex -space-x-2">
+          <SlotIcon>
+            <ImageIcon className="size-4" />
+          </SlotIcon>
+          <SlotIcon>
+            <Upload className="size-4" />
+          </SlotIcon>
+        </span>
+        <span className="mt-3 text-[14px] font-bold text-white">{title}</span>
+        <span className="mt-1 text-[12px] leading-snug text-white/45">
+          {description ?? `Add up to ${maxImages} image${maxImages === 1 ? "" : "s"}`}
+        </span>
+      </button>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-0.5">
-        {label} ({images.length}/{maxImages})
-      </span>
+    <div className={`${slotCard} border-solid p-3`}>
+      <RequirementTag optional={optional} />
+      <p className="mb-2.5 pr-16 text-[13px] font-bold text-white">
+        {title} <span className="font-normal text-white/40">{images.length}/{maxImages}</span>
+      </p>
       <div className="flex flex-wrap gap-2">
         {images.map((url, i) => (
-          <div key={url + i} className="relative w-[72px] h-[72px] rounded-xl overflow-hidden border border-border bg-card group flex-shrink-0">
-            <img src={url} alt="" className="w-full h-full object-cover" />
+          <div key={url + i} className="group/img relative size-[64px] shrink-0 overflow-hidden rounded-xl border border-white/10">
+            <img src={url} alt="" className="h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => onRemove(url)}
-              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Remove image"
+              className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover/img:opacity-100"
             >
-              <X className="w-2.5 h-2.5" />
+              <X className="size-2.5" />
             </button>
           </div>
         ))}
@@ -451,9 +506,10 @@ function MultiImageSlots({
           <button
             type="button"
             onClick={onOpenPicker}
-            className="w-[72px] h-[72px] rounded-xl border-2 border-dashed border-border bg-card hover:border-foreground/50 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground flex-shrink-0"
+            aria-label="Add image"
+            className="flex size-[64px] shrink-0 items-center justify-center rounded-xl border border-dashed border-white/20 text-white/50 transition-colors hover:border-white/40 hover:text-white"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="size-5" />
           </button>
         )}
       </div>
@@ -638,33 +694,6 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
-  // ── KATANA ─────────────────────────────────────────────────────────────────
-  if (model === AiModelsEnum.HIGGSFIELD_KATANA) {
-    const images: string[] = s.images ?? [];
-    return (
-      <>
-        <SingleMediaSlot
-          label="Put your edit video reference"
-          type="video"
-          url={s.videoUrl}
-          onOpenPicker={() => setDlg("video")}
-          onClear={() => set("videoUrl", "")}
-        />
-        <MultiImageSlots
-          label="Add Your Character"
-          images={images}
-          maxImages={KATANA_MAX_IMAGES}
-          onOpenPicker={() => setDlg("images")}
-          onRemove={(url) => set("images", images.filter((u) => u !== url))}
-        />
-        <MediaManagerDialog open={dlg === "video"} onOpenChange={(o) => !o && setDlg(null)}
-          selectedImage={s.videoUrl} onSelect={(u) => { set("videoUrl", u[0]); setDlg(null); }} maxSelections={1} mediaType="video" />
-        <MediaManagerDialog open={dlg === "images"} onOpenChange={(o) => !o && setDlg(null)}
-          selectedImages={images} onSelect={(u) => { set("images", u); setDlg(null); }} maxSelections={KATANA_MAX_IMAGES} />
-      </>
-    );
-  }
-
   // ── GEMINI Flash Image ─────────────────────────────────────────────────────
   if (model === AiModelsEnum.GEMINI_FLASH_IMAGE) {
     const images: string[] = s.images ?? [];
@@ -738,7 +767,10 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
   }
 
   // ── AD MULTIPLIER ──────────────────────────────────────────────────────────
-  if (model === AiModelsEnum.ADS_MULTIPLIER) return <AdsMultiplierPanel />;
+  if (model === AiModelsEnum.SMPL_AD_MULTIPLIER) return <AdsMultiplierPanel />;
+
+  // ── VOICE CHANGER ──────────────────────────────────────────────────────────
+  if (model === AiModelsEnum.SMPL_VOICE_CHANGER) return <VoiceChangerPanel />;
 
   // ── ADS STUDIO ─────────────────────────────────────────────────────────────
   if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO) return <AdsStudioPanel />;
@@ -843,7 +875,7 @@ function ToggleField({
 const { minReferenceSec, maxReferenceSec, minDurationSec, maxDurationSec } = Seedance25RefLimits;
 
 function AdsMultiplierPanel() {
-  const model = AiModelsEnum.ADS_MULTIPLIER;
+  const model = AiModelsEnum.SMPL_AD_MULTIPLIER;
   const { states, setField: raw } = useAiModelStore();
   const set = (k: keyof IAdsMultiplierInput, v: unknown) => raw(model, k, v);
   const s = states[model] as IAdsMultiplierInput;
@@ -945,6 +977,78 @@ function AdsMultiplierPanel() {
   );
 }
 
+// ─── voice changer ────────────────────────────────────────────────────────────
+
+function VoiceChangerPanel() {
+  const model = AiModelsEnum.SMPL_VOICE_CHANGER;
+  const { states, setField: raw } = useAiModelStore();
+  const set = (k: keyof IVoiceChangerInput, v: unknown) => raw(model, k, v);
+  const s = states[model] as IVoiceChangerInput;
+  const { minSeconds, maxSeconds } = VoiceChangerInputConst;
+
+  const [dlg, setDlg] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+
+  // Every second of the video is re-voiced, so its length sets the price.
+  const pickVideo = async (url: string | undefined) => {
+    setDlg(false);
+    if (!url) return;
+    setVideoError(null);
+    const seconds = await readVideoDuration(url);
+    if (seconds !== null && (seconds < minSeconds || seconds > maxSeconds + 0.5)) {
+      setVideoError(`The video must be up to ${maxSeconds} seconds (this one is ${Math.round(seconds)}s).`);
+      return;
+    }
+    set("videoUrl", url);
+    set("duration", Math.min(Math.max(Math.ceil(seconds ?? 10), minSeconds), maxSeconds));
+  };
+
+  return (
+    <>
+      <div className="flex flex-col gap-1.5">
+        <SingleMediaSlot
+          label="Video with someone talking"
+          type="video"
+          url={s.videoUrl || undefined}
+          onOpenPicker={() => setDlg(true)}
+          onClear={() => {
+            set("videoUrl", "");
+            set("duration", 0);
+            setVideoError(null);
+          }}
+        />
+        {videoError ? (
+          <p className="px-0.5 text-[11px] leading-snug text-red-400">{videoError}</p>
+        ) : (
+          <p className="px-0.5 text-[11px] text-muted-foreground">
+            {s.videoUrl
+              ? `${s.duration}s video. Same words and timing, new voice.`
+              : `Up to ${maxSeconds} seconds. The speech is re-voiced; the picture stays the same.`}
+          </p>
+        )}
+      </div>
+
+      <VoicePickerButton value={s.voiceId} onChange={(id) => set("voiceId", id)} />
+
+      <SelectRow
+        label="Remove background noise"
+        options={[false, true]}
+        value={s.removeBackgroundNoise}
+        onChange={(v) => set("removeBackgroundNoise", v)}
+      />
+
+      <MediaManagerDialog
+        open={dlg}
+        onOpenChange={(o) => !o && setDlg(false)}
+        selectedImage={s.videoUrl || undefined}
+        onSelect={(u) => void pickVideo(u[0])}
+        maxSelections={1}
+        mediaType="video"
+      />
+    </>
+  );
+}
+
 // ─── ads studio ───────────────────────────────────────────────────────────────
 
 function AdsStudioPanel() {
@@ -1014,16 +1118,15 @@ function ModelHeroCard({
   onChangePicker: () => void;
 }) {
   const isGensu = model === AiModelsEnum.SMPL_GENSU;
-  const isKatana = model === AiModelsEnum.HIGGSFIELD_KATANA;
   const modelDef = ALL_MODELS.find((m) => m.id === model);
-  const title = isGensu ? "Gensu" : isKatana ? "Katana" : (modelDef?.name ?? model);
-  const subtitle = isGensu ? "Reality Manipulation" : isKatana ? "Character Motion Transfer" : (modelDef?.description ?? "");
+  const title = isGensu ? "Gensu" : (modelDef?.name ?? model);
+  const subtitle = isGensu ? "Reality Manipulation" : (modelDef?.description ?? "");
 
   // Per-model hero videos — add more as assets become available
   const VIDEO_MAP: Partial<Record<AiModelsEnum, string>> = {
     [AiModelsEnum.SMPL_GENSU]:
       "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/Smpl%20Riven.mp4",
-    [AiModelsEnum.ADS_MULTIPLIER]:
+    [AiModelsEnum.SMPL_AD_MULTIPLIER]:
       "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/ads-multiplier.mp4",
   };
   const videoSrc = VIDEO_MAP[model];
@@ -1199,6 +1302,13 @@ function GenerateButton() {
                 </svg>
                 {costData?.creditsCost ?? 0}
               </span>
+              {costData?.estimatedSeconds ? (
+                <span className="text-xs opacity-50" title="Estimated time">
+                  ~{costData.estimatedSeconds < 90
+                    ? `${Math.max(5, Math.round(costData.estimatedSeconds / 5) * 5)}s`
+                    : `${Math.round(costData.estimatedSeconds / 60)} min`}
+                </span>
+              ) : null}
             </>
           )}
         </button>
@@ -1219,7 +1329,7 @@ export function CreateSidebar() {
 
   // Sync model from ?model= URL param on mount
   useEffect(() => {
-    const urlModel = searchParams.get("model") as AiModelsEnum | null;
+    const urlModel = normalizeModelId(searchParams.get("model")) as AiModelsEnum | null;
     if (urlModel && Object.values(AiModelsEnum).includes(urlModel)) {
       setModel(urlModel);
     }
@@ -1263,7 +1373,8 @@ export function CreateSidebar() {
   const showSettings =
     !pickerOpen &&
     model !== AiModelsEnum.SMPL_GENSU &&
-    model !== AiModelsEnum.HIGGSFIELD_KATANA;
+    // Its only setting sits in its own panel.
+    model !== AiModelsEnum.SMPL_VOICE_CHANGER;
 
   return (
     // The panel sits one shade above the page, so its controls move one shade up too.

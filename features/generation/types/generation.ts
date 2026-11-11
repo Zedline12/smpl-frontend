@@ -68,12 +68,12 @@ import {
   IAdsStudioInput,
   adsStudioValidationSchema,
 } from "./models/higgsfield-ads-studio.type";
-import { IKatanaInput, katanaValidationSchema } from "./models/higgsfield-katana.type";
 import { IMusicV25Input, musicV25ValidationSchema } from "./models/elevenlabs-music-v2-5.type";
 import {
   IAdsMultiplierInput,
   adsMultiplierValidationSchema,
 } from "./models/ads-multiplier.type";
+import { IVoiceChangerInput, voiceChangerValidationSchema } from "./models/voice-changer.type";
 import {
   ISeedance25RefToVideoInput,
   seedance25RefValidationSchema,
@@ -110,10 +110,10 @@ export type AllModelsInput =
   | IArtistInput
   | IAiInfluencerInput
   | IAdsStudioInput
-  | IKatanaInput
   | IMusicV25Input
   | ISeedance25RefToVideoInput
-  | IAdsMultiplierInput;
+  | IAdsMultiplierInput
+  | IVoiceChangerInput;
 
 export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.VEO_3]: veo3ValidationSchema,
@@ -134,10 +134,10 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SMPL_ARTIST]: artistValidationSchema,
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
-  [AiModelsEnum.HIGGSFIELD_KATANA]: katanaValidationSchema,
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: musicV25ValidationSchema,
   [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: seedance25RefValidationSchema,
-  [AiModelsEnum.ADS_MULTIPLIER]: adsMultiplierValidationSchema,
+  [AiModelsEnum.SMPL_AD_MULTIPLIER]: adsMultiplierValidationSchema,
+  [AiModelsEnum.SMPL_VOICE_CHANGER]: voiceChangerValidationSchema,
 };
 export enum GenerationTypeEnum {
   VIDEO = "video",
@@ -155,6 +155,11 @@ export interface GenerationQueue {
   providerUrl?: string;
   createdAt: Date;
   updatedAt: Date;
+  /** When a worker picked it up (for the progress bar). */
+  startedAt?: string | Date | null;
+  /** Expected duration in seconds (for the progress bar). */
+  estimatedSeconds?: number | null;
+  failedMeta?: { category?: string; retryable?: boolean; clientMessage?: string } | null;
 }
 export enum GenerationStatus {
   COMPLETED = "COMPLETED",

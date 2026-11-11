@@ -26,7 +26,16 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      return NextResponse.json({ error: data?.message || "Failed" }, { status: response.status });
+      // Validation errors come as { error: { errors: { field: message } } }.
+      const fieldErrors = data?.error?.errors;
+      const message =
+        fieldErrors && typeof fieldErrors === "object"
+          ? Object.values(fieldErrors).flat().join(", ")
+          : data?.message;
+      return NextResponse.json(
+        { error: message || "Failed", code: data?.error?.code ?? null },
+        { status: response.status },
+      );
     }
     return NextResponse.json(data?.data ?? data);
   } catch (error) {

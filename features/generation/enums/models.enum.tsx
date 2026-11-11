@@ -13,15 +13,31 @@ export enum AiModelsEnum {
   SEEDANCE_2_5 = "seedance-2.5",
   GPT_IMAGE_2 = "gpt-image-2",
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
-  SMPL_GENSU = "gensu",
-  SMPL_REMIX = "remix",
-  SMPL_ARTIST = "artist",
+  SMPL_GENSU = "smpl-gensu",
+  SMPL_REMIX = "smpl-remix",
+  SMPL_ARTIST = "smpl-artist",
   HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
   HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
-  HIGGSFIELD_KATANA = "higgsfield-katana",
   ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
   SEEDANCE_2_5_REF_TO_VIDEO = "seedance-2.5-ref-to-video",
-  ADS_MULTIPLIER = "ads-multiplier",
+  SMPL_AD_MULTIPLIER = "smpl-ad-multiplier",
+  SMPL_VOICE_CHANGER = "smpl-voice-changer",
+}
+
+/** Ids models had before they were renamed (old links and media still use them). */
+export const LEGACY_MODEL_IDS: Record<string, AiModelsEnum> = {
+  gensu: AiModelsEnum.SMPL_GENSU,
+  remix: AiModelsEnum.SMPL_REMIX,
+  artist: AiModelsEnum.SMPL_ARTIST,
+  "ads-multiplier": AiModelsEnum.SMPL_AD_MULTIPLIER,
+  "elevenlabs-voice-changer": AiModelsEnum.SMPL_VOICE_CHANGER,
+};
+
+/** The current id for a model id that may be an old one. */
+export function normalizeModelId(id: string): string;
+export function normalizeModelId(id: string | null | undefined): string | null | undefined;
+export function normalizeModelId(id: string | null | undefined) {
+  return id && id in LEGACY_MODEL_IDS ? LEGACY_MODEL_IDS[id] : id;
 }
 export interface Model {
   id: AiModelsEnum;
@@ -95,7 +111,7 @@ export const IMAGE_MODELS: Model[] = [
 ];
 export const VIDEO_MODELS: Model[] = [
   {
-    id: AiModelsEnum.ADS_MULTIPLIER,
+    id: AiModelsEnum.SMPL_AD_MULTIPLIER,
     name: "Ad Multiplier",
     description: "Turn one winning ad into new versions with your characters and products.",
     svg: (
@@ -184,17 +200,6 @@ export const VIDEO_MODELS: Model[] = [
     ),
   },
   {
-    id: AiModelsEnum.HIGGSFIELD_KATANA,
-    name: "Katana",
-    description: "Drop your character into any video edit with one reference photo.",
-    svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-          d="M3 17L17 3l1 1-1 1 2 2 1-1 1 1-7 7v5l-2 2v-4l-1-1-4 4H7l-2-2h4l4-4-1-1H8l2-2" />
-      </svg>
-    ),
-  },
-  {
     id: AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
     name: "Grok Imagine Video 1.5",
     description: "Fast, expressive video from a prompt or a single image.",
@@ -252,6 +257,21 @@ export const AUDIO_MODELS: Model[] = [
           fill="white"
           d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3Zm0 14c2.76 0 5-2.24 5-5h2c0 3.53-2.61 6.43-6 6.92V21h-2v-3.08c-3.39-.49-6-3.39-6-6.92h2c0 2.76 2.24 5 5 5Z"
         ></path>
+      </svg>
+    )
+  },
+  {
+    id: AiModelsEnum.SMPL_VOICE_CHANGER,
+    name: "Voice Changer",
+    description: "Swap the speaker's voice in a video, same words",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 10v3" />
+        <path d="M6 6v11" />
+        <path d="M10 3v18" />
+        <path d="M14 8v7" />
+        <path d="M18 5v13" />
+        <path d="M22 10v3" />
       </svg>
     )
   }
@@ -337,5 +357,5 @@ export function isAiModel(value: string): value is AiModelsEnum {
 
 /** The model definition for an id, or null when the id isn't a known model. */
 export function getModel(id: string): Model | null {
-  return MODEL_BY_ID.get(id) ?? null;
+  return MODEL_BY_ID.get(normalizeModelId(id)) ?? null;
 }

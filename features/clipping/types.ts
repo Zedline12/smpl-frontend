@@ -7,12 +7,23 @@ export type VideoClippingStatus =
   | "pending"
   | "processing"
   | "completed"
+  /** Some shapes finished, others failed (and were refunded). */
+  | "partial"
   | "failed";
+
+export type VideoClippingOutputStatus = "pending" | "processing" | "completed" | "failed";
 
 export const ACTIVE_STATUSES: VideoClippingStatus[] = ["pending", "processing"];
 
-export function isActiveStatus(status: VideoClippingStatus): boolean {
-  return ACTIVE_STATUSES.includes(status);
+export function isActiveStatus(status: VideoClippingStatus | VideoClippingOutputStatus): boolean {
+  return status === "pending" || status === "processing";
+}
+
+/** AI-written post text for one platform. */
+export interface ClipPostCopy {
+  title: string;
+  caption: string;
+  hashtags: string[];
 }
 
 export interface VideoClip {
@@ -23,9 +34,29 @@ export interface VideoClip {
   transcript: string;
   /** A string on the wire — parse with `parseViralScore`. */
   viralScore: string;
+  /** The same score as 0–100 (null when unreadable). */
+  viralScoreNum?: number | null;
   viralReason: string;
   relatedTopic: string;
   providerClipEditorUrl: string;
+  /** Post copy per platform id. */
+  postCopy?: Record<string, ClipPostCopy> | null;
+  savedMediaId?: string | null;
+}
+
+/** One shape's clips (one Vizard job). */
+export interface VideoClippingOutput {
+  ratio: number;
+  ratioLabel: string;
+  platforms: string[];
+  preferLength: number[];
+  providerProjectId: string;
+  status: VideoClippingOutputStatus;
+  errorMessage: string | null;
+  clips: VideoClip[];
+  creditsUsed: number;
+  refundedAt: string | null;
+  startedAt?: string | null;
 }
 
 export interface VideoClippingProject {
@@ -46,21 +77,33 @@ export interface VideoClippingProject {
   headline: boolean;
   status: VideoClippingStatus;
   errorMessage: string | null;
+  /** Every clip of every shape. */
   clips: VideoClip[];
+  platforms: string[];
+  sourceKind: "link" | "upload";
+  outputs: VideoClippingOutput[];
+  /** Expected clipping time in seconds (for the progress bar). */
+  estimatedSeconds?: number | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ClippingCost {
-  sourceDurationMinutes: number;
+  sourceDurationMinutes: number | null;
   creditsCost: number;
+  shapes?: number;
+  creditsPerShape?: number;
 }
 
 export interface CreateVideoClippingRequest {
   videoUrl: string;
   lang: string;
-  preferLength: number[];
+  /** Missing = each platform's best lengths. */
+  preferLength?: number[];
   videoType: number;
+  platforms?: string[];
+  sourceKind?: "link" | "upload";
+  ext?: string;
   ratioOfClip?: number;
   templateId?: number;
   maxClipNumber?: number;

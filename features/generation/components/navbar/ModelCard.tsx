@@ -6,11 +6,20 @@ import { ModelRow } from "@/features/generation/components/ModelRow";
 interface ModelCardProps {
   models: Model[];
   onSelect: (model: Model) => void;
+  /** Screen position (fixed); the navbar scrolls sideways and would clip an absolute card. */
+  style?: React.CSSProperties;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-export function ModelCard({ models, onSelect }: ModelCardProps) {
+export function ModelCard({ models, onSelect, style, onMouseEnter, onMouseLeave }: ModelCardProps) {
   return (
-    <div className="border-border bg-popover absolute top-full left-0 mt-2 w-[460px] rounded-2xl border p-3 shadow-lg">
+    <div
+      style={style}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="border-border bg-popover fixed z-[90] w-[min(460px,calc(100vw-24px))] rounded-2xl border p-3 shadow-lg"
+    >
       <p className="text-muted-foreground px-2 pt-1 pb-2 text-[11px] font-semibold tracking-wider uppercase">
         Features
       </p>

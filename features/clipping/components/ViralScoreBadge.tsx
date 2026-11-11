@@ -19,7 +19,7 @@ export function ViralScoreBadge({
       <span
         className={cn(
           BADGE_CLASS,
-          "bg-foreground/10 text-muted-foreground",
+          "bg-white/10 text-white/60",
           className,
         )}
       >
@@ -33,7 +33,7 @@ export function ViralScoreBadge({
       ? "bg-green-500/15 text-green-500"
       : value >= 50
         ? "bg-amber-500/15 text-amber-500"
-        : "bg-foreground/10 text-muted-foreground";
+        : "bg-white/10 text-white/60";
 
   return (
     <span className={cn(BADGE_CLASS, tone, className)}>

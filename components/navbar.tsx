@@ -8,6 +8,7 @@ import { StudioLinks } from "@/components/StudioLinks";
 import { NavbarUserMenu } from "@/components/NavbarUserMenu";
 import { NavbarGuestActions } from "@/components/NavbarGuestActions";
 import { SupportModal } from "@/features/support/components/SupportModal";
+import { JobsIndicator } from "@/features/live/JobsIndicator";
 
 export function Navbar() {
   const { user, isAuthenticated } = useCurrentUser();
@@ -18,30 +19,31 @@ export function Navbar() {
     <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
     <header
       id="tour-navbar"
-      className="h-14 backdrop-blur-sm  flex items-center justify-between px-4 sm:px-8 "
+      className="flex h-14 items-center gap-3 px-3 backdrop-blur-sm sm:gap-4 sm:px-8"
     >
-      <div className="flex items-center gap-4">
-        <Link href="/" className="shrink-0">
-          {/* The source is 1000x1000 — the className is what actually caps it. */}
-          <Image
-            className="h-10 w-25 cursor-pointer"
+      <Link href="/" className="shrink-0">
+        {/* The source is 1000x1000 — the className is what actually caps it. */}
+        <Image
+          className="h-7 w-[70px] cursor-pointer object-contain sm:h-8 sm:w-20"
             src="/logo.png"
-            alt="Logo"
-            width={200}
-            height={100}
-          />
-        </Link>
+          alt="Logo"
+          width={200}
+          height={100}
+        />
+      </Link>
 
+      {/* Scrolls sideways when the links don't fit (phones, narrow windows). */}
+      <nav className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden">
         <MediaTypeLauncher />
 
         {/* bg-foreground/20 rather than bg-border: reads lighter on the dark
             theme and darker on the light one, from a single class. */}
-        <span className="bg-foreground/20 hidden h-5 w-px md:block" />
+        <span className="bg-foreground/20 h-5 w-px shrink-0" />
 
         <StudioLinks />
-      </div>
+      </nav>
 
-      <div className="flex items-center gap-6">
+      <div className="flex shrink-0 items-center gap-3 sm:gap-6">
         <button
           type="button"
           onClick={() => setSupportOpen(true)}
@@ -56,6 +58,8 @@ export function Navbar() {
           </svg>
           <span className="hidden sm:inline">Support</span>
         </button>
+
+        {isAuthenticated && <JobsIndicator />}
 
         {isAuthenticated ? (
           <NavbarUserMenu user={user} />

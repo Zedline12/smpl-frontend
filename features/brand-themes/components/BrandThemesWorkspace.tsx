@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import {
-  brandThemeKeys,
   useBrandThemeQueuesQuery,
   useBrandThemesQuery,
   useDeleteBrandThemeMutation,
@@ -15,16 +12,11 @@ import { isActiveStatus } from "../types";
 import { BrandThemeGrid } from "./BrandThemeGrid";
 
 export function BrandThemesWorkspace() {
-  const queryClient = useQueryClient();
 
   const { data: themes, isLoading, isError, error, refetch } =
     useBrandThemesQuery();
   const { data: queues } = useBrandThemeQueuesQuery();
   const deleteTheme = useDeleteBrandThemeMutation();
-
-  // A ref, not state: the effect below depends only on `queues`, so a state Set
-  // would be stale on every run and the same job could be handled twice.
-  const handled = useRef(new Set<string>());
 
   /**
    * The themes list is the source of truth for what renders — a just-created
@@ -52,40 +44,6 @@ export function BrandThemesWorkspace() {
       finished: list.filter((theme) => !isActiveStatus(theme.status)),
     };
   }, [themes, queues]);
-
-  useEffect(() => {
-    if (!queues?.length) return;
-
-    let succeeded = 0;
-    let failed = 0;
-
-    queues.forEach((job) => {
-      if (isActiveStatus(job.status) || handled.current.has(job.id)) return;
-      handled.current.add(job.id);
-      if (job.status === "success") succeeded += 1;
-      if (job.status === "failure") failed += 1;
-    });
-
-    if (!succeeded && !failed) return;
-
-    // One toast per batch, not per job.
-    if (succeeded) {
-      toast.success(
-        succeeded === 1
-          ? "Brand theme ready"
-          : `${succeeded} brand themes ready`,
-      );
-    }
-    if (failed) {
-      toast.error(
-        failed === 1
-          ? "A brand theme extraction failed"
-          : `${failed} brand theme extractions failed`,
-      );
-    }
-
-    queryClient.invalidateQueries({ queryKey: brandThemeKeys.all });
-  }, [queues, queryClient]);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-5 md:p-8">

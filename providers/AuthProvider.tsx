@@ -2,6 +2,7 @@
 
 import { User } from "@/features/auth/types/auth";
 import { createContext, useContext, useState } from "react";
+import { LiveEventsProvider } from "@/features/live/LiveEventsProvider";
 
 const AuthContext = createContext<any>(null);
 
@@ -17,6 +18,7 @@ export default function AuthProvider({
   return (
     <AuthContext.Provider value={{ user: currentUser, setCurrentUser }}>
       {children}
+      <LiveEventsProvider />
     </AuthContext.Provider>
   );
 }

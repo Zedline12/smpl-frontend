@@ -1,3 +1,4 @@
+import { useLiveStore } from "@/features/live/store";
 import {
   editGeneration,
   fetchGenerationCost,
@@ -102,12 +103,15 @@ export const useGenerationQueuesQuery = (domain: string = "media-generation") =>
       newJobs.forEach((j: any) => jobsMap.set(j.id, j));
       return Array.from(jobsMap.values());
     },
+    // Live updates replace polling; polling only runs while the live stream is down.
     refetchInterval: (query) => {
+      if (useLiveStore.getState().connected) return false;
       const data = query.state.data;
       if (
         data?.some((item: any) => ["pending", "processing"].includes(item.status))
       ) {
-        return 1000;
+        // Fallback only: a bit slower than before, the live stream is the fast path.
+        return 3000;
       }
       return false;
     },

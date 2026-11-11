@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { toast } from "sonner";
+import { useMemo } from "react";
 import { ScanLine } from "lucide-react";
 import {
   useVideoAnalysesQuery,
   useVideoAnalysisQueuesQuery,
 } from "../hooks/use-video-analyzer";
-import { isActiveStatus } from "../types";
 import { VideoAnalysisCard } from "./VideoAnalysisCard";
 
 /** The user's video analyses, with loading, error and empty states. */
@@ -24,37 +22,6 @@ export function VideoAnalysesGrid({ onOpen }: { onOpen: (id: string) => void }) 
     const byId = new Map(queue.map((job) => [job.id, job]));
     return rawAnalyses.map((analysis) => byId.get(analysis.id) ?? analysis);
   }, [rawAnalyses, queue]);
-
-  // A ref, not state — the effect depends only on `analyses`, so a state Set
-  // would be stale on every run and the same analysis could toast twice.
-  const handled = useRef(new Set<string>());
-
-  useEffect(() => {
-    if (!analyses?.length) return;
-
-    let succeeded = 0;
-    let failed = 0;
-
-    analyses.forEach((analysis) => {
-      if (isActiveStatus(analysis.status) || handled.current.has(analysis.id)) {
-        return;
-      }
-      handled.current.add(analysis.id);
-      if (analysis.status === "success") succeeded += 1;
-      if (analysis.status === "failure") failed += 1;
-    });
-
-    if (succeeded) {
-      toast.success(
-        succeeded === 1 ? "Video analysis ready" : `${succeeded} analyses ready`,
-      );
-    }
-    if (failed) {
-      toast.error(
-        failed === 1 ? "A video analysis failed" : `${failed} analyses failed`,
-      );
-    }
-  }, [analyses]);
 
   if (isLoading) {
     return (

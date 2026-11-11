@@ -5,6 +5,8 @@ import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Clock, Coins, ListVideo, Loader2, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VideoAnalysisProject, isActiveStatus } from "../types";
+import { JobProgress } from "@/features/live/JobProgress";
+import { useLiveItem } from "@/features/live/store";
 import { formatDuration } from "../utils";
 
 function relativeTime(value: string): string | null {
@@ -59,6 +61,7 @@ export function VideoAnalysisCard({
   const title = analysis.name?.trim() || "Untitled analysis";
   const timestamp = relativeTime(analysis.createdAt);
   const active = isActiveStatus(analysis.status);
+  const live = useLiveItem("video-analysis", analysis.id);
   const failed = analysis.status === "failure";
   const sceneCount = Math.min(analysis.totalScenes ?? 0, 16);
 
@@ -108,9 +111,16 @@ export function VideoAnalysisCard({
               <span className="absolute inset-y-0 -left-8 w-16 bg-gradient-to-r from-transparent via-fuchsia-400/25 to-transparent" />
               <span className="absolute inset-y-0 -left-px w-0.5 bg-fuchsia-300 shadow-[0_0_14px_3px_rgba(232,121,249,0.8)]" />
             </div>
-            <p className="absolute inset-x-0 bottom-3 text-center font-mono text-[10px] tracking-widest text-fuchsia-100/80 uppercase">
-              {analysis.status === "pending" ? "Waiting in queue…" : "Reading scenes…"}
-            </p>
+            <div className="absolute inset-x-3 bottom-2 rounded-lg bg-black/55 px-2.5 py-1.5 backdrop-blur-sm">
+              <JobProgress
+                size="sm"
+                job={{
+                  status: live?.status ?? analysis.status,
+                  startedAt: live?.startedAt,
+                  estimatedSeconds: live?.estimatedSeconds,
+                }}
+              />
+            </div>
           </>
         )}
 

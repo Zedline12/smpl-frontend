@@ -12,7 +12,15 @@ import { isFreePlan } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
-import { Check, ChevronDown, Layers } from "lucide-react";
+import { PromoCodeBox } from "./PromoCodeBox";
+import { PlanFinder } from "./PlanFinder";
+import { usePromotionCode } from "../hooks/use-promotion-code";
+import { Check, ChevronDown, Layers, Tag } from "lucide-react";
+
+const formatCents = (cents: number) => {
+  const dollars = cents / 100;
+  return `$${dollars % 1 === 0 ? dollars.toFixed(0) : dollars.toFixed(2)}`;
+};
 
 interface SubscriptionGridProps {
   plans: SubscriptionPlan[];
@@ -152,6 +160,10 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
   const [captchaPlanId, setCaptchaPlanId] = useState<string | null>(null);
   const [changePlanId, setChangePlanId] = useState<string | null>(null);
+  // Codes are for new subscriptions only (paying users change plans instead).
+  const canUseCode = !!user && isFreePlan(user);
+  const promo = usePromotionCode(canUseCode);
+  const promoPrice = (planId: string) => promo.promotion?.plans.find((p) => p.planId === planId);
 
   // Paying users switch plans in place; a second checkout would start a second subscription.
   const handleSubscribe = (planId: string) => {
@@ -178,10 +190,22 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
     }
   };
 
-  const handleCaptchaVerified = (token: string) => {
+  const handleCaptchaVerified = async (token: string) => {
     if (!captchaPlanId) return;
     setProcessingPlanId(captchaPlanId);
-    startCheckout(captchaPlanId, token);
+    const price = promoPrice(captchaPlanId);
+    const result = await startCheckout(
+      captchaPlanId,
+      token,
+      promo.promotion && price?.eligible
+        ? { code: promo.promotion.code, appliedVia: promo.promotion.appliedVia }
+        : null,
+    );
+    // The code ran out meanwhile: drop it so the next try goes through at full price.
+    if (result === "invalid_code") {
+      promo.clear();
+      setCaptchaPlanId(null);
+    }
   };
 
   if (isLoading) {
@@ -244,6 +268,18 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         </button>
       </div>
 
+      {(!user || canUseCode) && (
+        <PromoCodeBox
+          promotion={promo.promotion}
+          pendingCode={promo.pendingCode}
+          error={promo.error}
+          isChecking={promo.isChecking}
+          isSignedIn={!!user}
+          onApply={(code) => void promo.apply(code, "code_box")}
+          onClear={promo.clear}
+        />
+      )}
+
       {/* Plan cards */}
       <div className="grid md:grid-cols-3 gap-5 max-w-[1000px] mx-auto px-4">
         {filteredPlans.map((plan, idx) => {
@@ -268,6 +304,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             ...(plan.metadata || []).slice(1),
           ];
           const isCurrent = user?.subscription?.id === plan.id;
+          const codePrice = promoPrice(plan.id);
           const isRedirecting = (isCheckoutLoading || isChangingPlan) && processingPlanId === plan.id;
 
           return (
@@ -329,6 +366,27 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
                     per month, billed {isYearly ? "annually" : "monthly"}
                   </span>
                 </div>
+                {promo.promotion && codePrice && (
+                  codePrice.eligible ? (
+                    <div className="mt-3 flex items-start gap-2 rounded-lg bg-[#4ade80]/10 px-3 py-2 text-[12.5px] leading-snug">
+                      <Tag className="mt-0.5 size-3.5 shrink-0 text-[#4ade80]" />
+                      <span className="text-foreground/85">
+                        With <span className="font-mono font-bold">{promo.promotion.code}</span>:{" "}
+                        <span className="font-bold text-foreground">{formatCents(codePrice.firstPayment)}</span>{" "}
+                        <span className="text-muted-foreground line-through">{formatCents(codePrice.regularPrice)}</span>{" "}
+                        {promo.promotion.duration === "forever"
+                          ? `every ${isYearly ? "year" : "month"}`
+                          : promo.promotion.duration === "repeating" && !isYearly && (promo.promotion.durationInMonths ?? 1) > 1
+                            ? `/mo for ${promo.promotion.durationInMonths} months`
+                            : `for your first ${isYearly ? "year" : "month"}`}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-[12px] text-muted-foreground">
+                      {promo.promotion.code} doesn&apos;t apply to this plan
+                    </p>
+                  )
+                )}
               </div>
 
               {/* CTA */}
@@ -411,6 +469,15 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
           <div className="text-[12px] flex-shrink-0 text-muted-foreground">No credit card required</div>
         </div>
       </div>
+
+      <PlanFinder
+        plans={plans}
+        period={period}
+        onPeriodChange={setPeriod}
+        onSubscribe={handleSubscribe}
+        processingPlanId={processingPlanId}
+        currentPlanId={user && !isFreePlan(user) ? user.subscription?.id : null}
+      />
 
       <FaqAccordion />
 

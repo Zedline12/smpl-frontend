@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { AdminUserBilling, humanize, money, shortDate } from "../types/billing";
+import { AdminUserBilling, humanize, money, shortDate, UserCouponRedemption } from "../types/billing";
 import { ResyncBillingButton } from "./ResyncBillingButton";
+import { RedemptionOutcome } from "@/features/admin/discounts/components/RedemptionOutcome";
 
 /** Colour per timeline event: green = money in, red = money out / risk, amber = warning. */
 const EVENT_STYLE: Record<string, { label: string; dot: string }> = {
@@ -20,7 +22,19 @@ const EVENT_STYLE: Record<string, { label: string; dot: string }> = {
   ended: { label: "Subscription ended", dot: "bg-red-500" },
   refunded: { label: "Refunded", dot: "bg-red-400" },
   disputed: { label: "Payment disputed", dot: "bg-red-600" },
+  credits_purchased: { label: "Bought a credit pack", dot: "bg-amber-400" },
+  discount_applied: { label: "Coupon applied", dot: "bg-emerald-400" },
+  discount_ended: { label: "Coupon ended", dot: "bg-emerald-700" },
 };
+
+/** "while on SUMMER25" / "12 days after SUMMER25 ended" for cancel and end events. */
+function couponContext(meta: AdminUserBilling["events"][number]["metadata"]): string | null {
+  if (!meta?.hadCoupon) return null;
+  const code = meta.couponCode ?? "a coupon";
+  if (meta.discountActive) return `while on ${code}`;
+  if (meta.daysSinceDiscountEnded != null) return `${meta.daysSinceDiscountEnded} days after ${code} ended`;
+  return `had used ${code}`;
+}
 
 const STATUS_STYLES: Record<string, string> = {
   active: "bg-green-900/40 text-green-300 border-green-700/40",
@@ -46,13 +60,134 @@ function eventDetail(e: AdminUserBilling["events"][number]): string {
   const parts: string[] = [];
   if (e.type === "upgraded" || e.type === "downgraded") parts.push(`${e.fromPlanName ?? "?"} → ${e.toPlanName ?? "?"}`);
   else if (e.toPlanName && ["started", "reactivated", "activated", "renewed", "ended", "cancel_scheduled"].includes(e.type)) parts.push(e.toPlanName);
+  if (e.type === "credits_purchased" && e.metadata?.packName) {
+    parts.push(`${e.metadata.packName} · ${Number(e.metadata.credits ?? 0).toLocaleString("en-US")} credits`);
+  }
   if (e.amount) parts.push(money(e.amount, e.currency ?? "usd"));
   const reason = e.metadata?.feedback ?? e.metadata?.reason;
   if (reason && (e.type === "ended" || e.type === "cancel_scheduled")) parts.push(humanize(reason));
   if (e.metadata?.by && (e.type === "ended" || e.type === "cancel_scheduled")) parts.push(`by ${humanize(e.metadata.by)}`);
   if (e.type === "payment_failed" && e.metadata?.attempt) parts.push(`attempt ${e.metadata.attempt}`);
+  if (e.type === "discount_applied") {
+    const m = e.metadata ?? {};
+    const off = m.percentOff != null ? `${m.percentOff}% off` : m.amountOff ? `${money(m.amountOff)} off` : null;
+    const length =
+      m.duration === "repeating" ? `for ${m.durationInMonths} months` : m.duration === "once" ? "first payment" : m.duration;
+    parts.push([m.code ?? m.couponName, off, length].filter(Boolean).join(" · "));
+    if (m.appliedVia && m.appliedVia !== "unknown") parts.push(`via ${humanize(m.appliedVia)}`);
+  }
+  if (e.type === "discount_ended") {
+    const m = e.metadata ?? {};
+    parts.push([m.code, humanize(m.reason)].filter(Boolean).join(" · "));
+    if (m.totalDiscounted) parts.push(`saved ${money(m.totalDiscounted)} over ${m.discountedInvoiceCount} invoices`);
+  }
+  if (e.type === "renewed" && e.metadata?.discountAmount) {
+    parts.push(`−${money(e.metadata.discountAmount)}${e.metadata.code ? ` with ${e.metadata.code}` : ""}`);
+  }
+  if (e.type === "ended" || e.type === "cancel_scheduled") {
+    const context = couponContext(e.metadata);
+    if (context) parts.push(context);
+  }
   if (e.metadata?.comment) parts.push(`“${e.metadata.comment}”`);
   return parts.join(" · ");
+}
+
+/** Coupons this user redeemed, and month by month which invoices were discounted. */
+function CouponsPanel({ billing, currency }: { billing: AdminUserBilling; currency: string }) {
+  const s = billing.summary;
+  const coupons: UserCouponRedemption[] = billing.coupons ?? [];
+  const discounted = billing.invoices.filter((i) => (i.discountAmount ?? 0) > 0);
+  if (!coupons.length && !discounted.length) return null;
+
+  return (
+    <div className={cn(panel, "p-5")}>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <h3 className="mr-2 text-sm font-semibold text-white/80">Coupons &amp; discounts</h3>
+        {s?.acquiredWithCoupon && (
+          <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[11px] text-emerald-300">
+            Acquired with {s.firstCouponCode ?? "a coupon"}
+          </span>
+        )}
+        {s?.discountedNow && (
+          <span className="rounded-full bg-sky-400/10 px-2 py-0.5 text-[11px] text-sky-300">Discounted now</span>
+        )}
+        {!!s?.totalDiscounted && (
+          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-white/60">
+            Saved {money(s.totalDiscounted, currency)} in total
+          </span>
+        )}
+        {s?.listMrr != null && s.listMrr !== s.mrr && (
+          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-white/60">
+            MRR {money(s.mrr, currency)} of {money(s.listMrr, currency)} list
+          </span>
+        )}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-2">
+          {coupons.map((r) => (
+            <div key={r.id} className="rounded-lg border border-white/[0.06] px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {r.couponId ? (
+                    <Link
+                      href={`/admin/discounts/${r.couponId}`}
+                      className="font-mono text-sm font-semibold text-white/90 hover:underline"
+                    >
+                      {r.code ?? "No code"}
+                    </Link>
+                  ) : (
+                    <span className="font-mono text-sm font-semibold text-white/90">{r.code ?? "No code"}</span>
+                  )}
+                  {r.isNewCustomer && <span className="text-[10px] uppercase text-emerald-300">new customer</span>}
+                </div>
+                <span className="text-[11px] text-white/40">{humanize(r.appliedVia)}</span>
+              </div>
+              <p className="mt-1 text-xs text-white/45">
+                {r.planName ?? "Unknown plan"} · from {shortDate(r.start)}
+                {r.status === "active"
+                  ? r.scheduledEnd
+                    ? ` until ${shortDate(r.scheduledEnd)}`
+                    : " (no end date)"
+                  : ` to ${shortDate(r.endedAt)}`}
+                {" · "}
+                {r.discountedInvoiceCount} invoice{r.discountedInvoiceCount === 1 ? "" : "s"}, saved{" "}
+                {money(r.totalDiscounted, currency)}
+              </p>
+              <div className="mt-1.5">
+                <RedemptionOutcome redemption={r} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-medium text-white/50">Discounted invoices</p>
+          {discounted.length === 0 ? (
+            <p className="text-sm text-white/35">None yet.</p>
+          ) : (
+            <div className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06]">
+              {discounted.map((i) => (
+                <div key={i.id} className="flex items-center justify-between gap-3 px-4 py-2 text-xs">
+                  <span className="text-white/60">
+                    {new Date(i.paidAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                    <span className="ml-2 text-white/35">{humanize(i.billingReason)}</span>
+                  </span>
+                  <span className="tabular-nums text-white/80">
+                    {money(i.amount, i.currency)}{" "}
+                    <span className="text-emerald-300/90">
+                      −{money(i.discountAmount ?? 0, i.currency)}
+                      {i.discounts?.find((d) => d.code)?.code ? ` · ${i.discounts.find((d) => d.code)!.code}` : ""}
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /** Admin: everything that ever happened to a user's billing. */
@@ -96,6 +231,8 @@ export function BillingHistory({ userId, billing }: { userId: string; billing: A
         />
         <Stat label="Why" value={s?.churnReason ? humanize(s.churnReason) : "—"} />
       </div>
+
+      <CouponsPanel billing={billing} currency={currency} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Timeline */}

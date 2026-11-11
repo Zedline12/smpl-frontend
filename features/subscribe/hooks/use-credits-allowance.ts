@@ -11,6 +11,8 @@ async function fetchSubscriptionPlans(): Promise<SubscriptionPlan[]> {
 
 export interface CreditsAllowance {
   remaining: number;
+  /** Credits from credit packs (kept across renewals). */
+  packCredits: number;
   allowance: number;
   used: number;
   usedPercentage: number;
@@ -32,7 +34,9 @@ export function useCreditsAllowance(user: any): CreditsAllowance {
 
   const plan = plans?.find((p) => p.id === user?.subscription?.id);
   const allowance = Number(plan?.creditsPerMonth) || 0;
-  const remaining = Math.max(0, Number(user?.creditsBalance) || 0);
+  // Pack credits sit on top of the monthly ones and don't reset, so the bar shows plan credits only.
+  const packCredits = Math.max(0, Number(user?.packCreditsBalance) || 0);
+  const remaining = Math.max(0, (Number(user?.creditsBalance) || 0) - packCredits);
 
   // Clamped: someone with topped-up or rolled-over credits can hold more than
   // their monthly grant, which would otherwise render a negative "used".
@@ -42,6 +46,7 @@ export function useCreditsAllowance(user: any): CreditsAllowance {
 
   return {
     remaining,
+    packCredits,
     allowance,
     used,
     usedPercentage,

@@ -1,6 +1,6 @@
 "use client";
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
-import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import { AiModelsEnum,  normalizeModelId } from "@/features/generation/enums/models.enum";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
@@ -28,7 +28,6 @@ import { calculateHeight } from "@/lib/utils";
 import { MediaFilterMenu } from "./filters/MediaFilterMenu";
 import { MediaGridSkeleton } from "./skeletons/MediaGridSkeleton";
 import { QueuedGenerationTile } from "./QueuedGenerationTile";
-import { toast } from "sonner";
 import { MediaSelectionBar } from "./actions/MediaSelectionBar";
 import { useMediaSelectionStore } from "../stores/useMediaSelectionStore";
 interface MediaExplorerProps {
@@ -85,7 +84,6 @@ export default function MediaExplorer({
     Set<string>
   >(new Set());
   // Tracks jobs where we've already shown the toast
-  const [toastedQueues, setToastedQueues] = useState<Set<string>>(new Set());
   // Tracks jobs where we've already invalidated the media query (CDN URL ready)
   const [mediaInvalidatedQueues, setMediaInvalidatedQueues] = useState<Set<string>>(new Set());
   const historyQuery = useInfiniteMediaQuery({
@@ -97,7 +95,7 @@ export default function MediaExplorer({
   // ?model= in the URL (set when a model is picked), else the model selected right now.
   const searchParams = useSearchParams();
   const selectedModel = useAiGenerationControlStore((s) => s.model);
-  const urlModel = searchParams.get("model");
+  const urlModel = normalizeModelId(searchParams.get("model"));
   const templateModel =
     defaultModel ??
     (urlModel && (Object.values(AiModelsEnum) as string[]).includes(urlModel)
@@ -173,11 +171,6 @@ export default function MediaExplorer({
 
   useEffect(() => {
     queues?.forEach((queue) => {
-      // Toast as soon as the provider returns (may not have mediaId yet)
-      if (queue.status === "success" && !toastedQueues.has(queue.id)) {
-        toast.success("Generation completed successfully!");
-        setToastedQueues((prev) => new Set([...prev, queue.id]));
-      }
       // Invalidate media query only when CDN URL is ready (mediaId is set)
       if (queue.status === "success" && queue.mediaId && !mediaInvalidatedQueues.has(queue.id)) {
         queryClient.invalidateQueries({ queryKey: ["media"] });

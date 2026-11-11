@@ -49,14 +49,14 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.HIGGSFIELD_AI_INFLUENCER],
     [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]:
       ModelDefaults[AiModelsEnum.HIGGSFIELD_ADS_STUDIO],
-    [AiModelsEnum.HIGGSFIELD_KATANA]:
-      ModelDefaults[AiModelsEnum.HIGGSFIELD_KATANA],
     [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]:
       ModelDefaults[AiModelsEnum.ELEVENLABS_MUSIC_V2_5],
     [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]:
       ModelDefaults[AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO],
-    [AiModelsEnum.ADS_MULTIPLIER]:
-      ModelDefaults[AiModelsEnum.ADS_MULTIPLIER],
+    [AiModelsEnum.SMPL_AD_MULTIPLIER]:
+      ModelDefaults[AiModelsEnum.SMPL_AD_MULTIPLIER],
+    [AiModelsEnum.SMPL_VOICE_CHANGER]:
+      ModelDefaults[AiModelsEnum.SMPL_VOICE_CHANGER],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();

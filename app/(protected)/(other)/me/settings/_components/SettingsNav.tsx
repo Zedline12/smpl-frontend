@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Bell,
   CreditCard,
+  LifeBuoy,
   LucideIcon,
   Palette,
   Plug,
@@ -28,6 +30,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/me/settings/account", label: "Profile", icon: User, color: "#3b82f6" },
       { href: "/me/settings/appearance", label: "Appearance", icon: Palette, color: "#8b5cf6" },
+      { href: "/me/settings/notifications", label: "Notifications", icon: Bell, color: "#ec4899" },
     ],
   },
   {
@@ -41,6 +44,10 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Integrations",
     items: [{ href: "/me/settings/mcp", label: "MCP", icon: Plug, color: "#06b6d4" }],
+  },
+  {
+    title: "Help",
+    items: [{ href: "/me/settings/support", label: "Support", icon: LifeBuoy, color: "#64748b" }],
   },
 ];
 

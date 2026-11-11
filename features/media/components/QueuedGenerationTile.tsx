@@ -6,6 +6,7 @@ import { GenerationQueue } from "@/features/generation/types/generation";
 import { DjGeneratingTile } from "@/features/artist/components/DjGeneratingTile";
 import { RemixGeneratingTile } from "@/features/remix/components/RemixGeneratingTile";
 import { MediaDisplayVariant } from "../types/media";
+import { JobProgress } from "@/features/live/JobProgress";
 
 export function QueuedGenerationTile({
   queue,
@@ -60,11 +61,26 @@ export function QueuedGenerationTile({
     );
   }
 
-  if (variant === "music") {
-    return <DjGeneratingTile processing={isProcessing} style={sizeStyle} className={sizeClass} />;
-  }
-  if (variant === "remix") {
-    return <RemixGeneratingTile processing={isProcessing} style={sizeStyle} className={sizeClass} />;
+  const progress = (
+    <JobProgress
+      job={{
+        status: queue.status,
+        createdAt: queue.createdAt,
+        startedAt: queue.startedAt,
+        estimatedSeconds: queue.estimatedSeconds,
+      }}
+      size="sm"
+    />
+  );
+
+  if (variant === "music" || variant === "remix") {
+    const Tile = variant === "music" ? DjGeneratingTile : RemixGeneratingTile;
+    return (
+      <div style={sizeStyle} className={`relative w-full ${sizeClass}`}>
+        <Tile processing={isProcessing} className="h-full" />
+        <div className="absolute inset-x-3 bottom-2.5 rounded-lg bg-black/55 px-2.5 py-2 backdrop-blur-sm">{progress}</div>
+      </div>
+    );
   }
 
   return (
@@ -107,10 +123,9 @@ export function QueuedGenerationTile({
           )}
           {isProcessing ? "Generating" : "In queue"}
         </span>
-        <span className="text-[11px] text-white/40">
-          {isProcessing ? "Your media is being created…" : "Waiting for a free slot…"}
-        </span>
       </div>
+
+      <div className="absolute inset-x-3 bottom-3">{progress}</div>
 
       {/* Caution notice — always visible, hidden while hovering so it doesn't
           compete with the refund button. */}

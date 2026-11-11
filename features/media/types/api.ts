@@ -16,4 +16,6 @@ export interface CalculateMediaCostRequest{
 }
 export interface CalculateMediaCostResponse{
     creditsCost: number;
+    /** Expected generation time in seconds. */
+    estimatedSeconds?: number | null;
 }

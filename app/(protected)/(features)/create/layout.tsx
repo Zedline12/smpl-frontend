@@ -27,7 +27,7 @@ export default function CreateLayout({
   }
 
   return (
-    <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[300px_1fr]">
+    <div className="bg-background h-screen grid grid-rows-[auto_1fr] grid-cols-1 sm:grid-cols-[minmax(280px,20%)_1fr]">
       {/* NAVBAR */}
       <header className="col-span-full z-[60] mb-3">
         <Navbar />
