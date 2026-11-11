@@ -27,8 +27,11 @@ export async function fetchGenerationQueues(
   domain: string = "media-generation",
 ): Promise<GenerationQueue[] | []> {
   const res = await fetch(`/api/media/me/queues?domain=${encodeURIComponent(domain)}`);
-  const json = await res.json();
-  return json.data;
+  const json = await res.json().catch(() => null);
+  // Throw so React Query keeps the last queue on screen and retries, instead of
+  // replacing it with nothing while the backend is briefly unavailable.
+  if (!res.ok || !json) throw new Error(json?.error || "Failed to load generation queue");
+  return json.data ?? [];
 }
 /**
  * Takes the queue record's `id`. The GenerationQueue type also declares a
