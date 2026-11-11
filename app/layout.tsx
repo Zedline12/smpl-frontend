@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/providers/providers";
 import { GlobalLoginModal } from "@/features/auth/components/GlobalLoginModal";
 import { ApiRedirectWatcher } from "@/components/ApiRedirectWatcher";
+import { BillingResultWatcher } from "@/features/billing-result/BillingResultWatcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
           {children}
           <GlobalLoginModal />
           <ApiRedirectWatcher />
+          <BillingResultWatcher />
         </Providers>
         <Toaster />
       </body>

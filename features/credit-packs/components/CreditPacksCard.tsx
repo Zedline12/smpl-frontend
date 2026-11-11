@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -17,9 +16,6 @@ import { fetchCreditPacks, startCreditPackCheckout } from "../api";
 /** One-time credit packs: only buyable on an active plan. */
 export function CreditPacksCard() {
   const { user } = useCurrentUser();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [buyingId, setBuyingId] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
 
@@ -33,20 +29,7 @@ export function CreditPacksCard() {
     enabled: !!user,
   });
 
-  // Back from Stripe.
-  useEffect(() => {
-    const result = searchParams.get("pack");
-    if (!result) return;
-    if (result === "success") {
-      toast.success("Payment received. Your credits are being added (it can take a few seconds).");
-      // The webhook may land a moment after the redirect: refresh twice.
-      router.refresh();
-      setTimeout(() => router.refresh(), 4000);
-    } else if (result === "canceled") {
-      toast("Checkout canceled. No charge was made.");
-    }
-    router.replace(pathname, { scroll: false });
-  }, [searchParams, router, pathname]);
+  // Back from Stripe: the billing popup (BillingResultWatcher) shows the result.
 
   const checkout = async (token: string) => {
     if (!buyingId) return;

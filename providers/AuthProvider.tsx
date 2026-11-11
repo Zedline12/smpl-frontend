@@ -3,6 +3,7 @@
 import { User } from "@/features/auth/types/auth";
 import { createContext, useContext, useState } from "react";
 import { LiveEventsProvider } from "@/features/live/LiveEventsProvider";
+import { PaymentFailedNotice } from "@/features/billing-result/PaymentFailedNotice";
 
 const AuthContext = createContext<any>(null);
 
@@ -19,6 +20,7 @@ export default function AuthProvider({
     <AuthContext.Provider value={{ user: currentUser, setCurrentUser }}>
       {children}
       <LiveEventsProvider />
+      {currentUser && <PaymentFailedNotice />}
     </AuthContext.Provider>
   );
 }

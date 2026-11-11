@@ -56,33 +56,3 @@ export function useCheckout() {
   return { startCheckout, isLoading };
 }
 
-/** Moves an existing paid subscription to another plan (no new checkout). */
-export function useChangePlan() {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const changePlan = useCallback(async (planId: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/user-subscriptions/change-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
-      });
-      const result = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(result?.error || "Couldn't change your plan.");
-      toast.success(
-        result?.changed === "upgraded"
-          ? "Plan upgraded. Your extra credits are on the way."
-          : "Plan changed. The new price applies from your next bill.",
-      );
-      return true;
-    } catch (error) {
-      toast.error((error as Error).message);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  return { changePlan, isLoading };
-}

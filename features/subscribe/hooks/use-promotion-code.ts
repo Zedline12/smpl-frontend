@@ -25,6 +25,11 @@ const STORAGE_KEY = "smpl:promo-code";
 
 type Stored = { code: string; appliedVia: CheckoutPromotion["appliedVia"] };
 
+/** A code remembered for this tab (share link or pricing page), if any. */
+export function readStoredPromotion(): Stored | null {
+  return readStored();
+}
+
 function readStored(): Stored | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);

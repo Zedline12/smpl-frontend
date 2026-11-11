@@ -6,8 +6,7 @@ import {
 } from "@/lib/types/subscription-plan.type";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useChangePlan, useCheckout } from "../hooks/use-checkout";
-import { ChangePlanDialog } from "./ChangePlanDialog";
+import { useCheckout } from "../hooks/use-checkout";
 import { isFreePlan } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
@@ -103,7 +102,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I switch plans later?",
-    a: "Absolutely. You can upgrade or downgrade your plan at any time from your account settings. Changes take effect at the next billing cycle.",
+    a: "Absolutely. You can upgrade or downgrade your plan at any time. Upgrades apply right away (you only pay the difference for the rest of the period); downgrades start with your next bill.",
   },
   {
     q: "Is there a free trial?",
@@ -156,10 +155,8 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   const router = useRouter();
   const user = useAuth()?.user;
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
-  const { changePlan, isLoading: isChangingPlan } = useChangePlan();
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
   const [captchaPlanId, setCaptchaPlanId] = useState<string | null>(null);
-  const [changePlanId, setChangePlanId] = useState<string | null>(null);
   // Codes are for new subscriptions only (paying users change plans instead).
   const canUseCode = !!user && isFreePlan(user);
   const promo = usePromotionCode(canUseCode);
@@ -172,22 +169,11 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
       return;
     }
     if (!isFreePlan(user)) {
-      setChangePlanId(planId);
+      // A checkout-style page: price today, renewal, and a code for the new plan.
+      router.push(`/checkout/change-plan?plan=${encodeURIComponent(planId)}`);
       return;
     }
     setCaptchaPlanId(planId);
-  };
-
-  const handleChangePlan = async () => {
-    if (!changePlanId) return;
-    setProcessingPlanId(changePlanId);
-    const ok = await changePlan(changePlanId);
-    setProcessingPlanId(null);
-    if (ok) {
-      setChangePlanId(null);
-      router.push("/me/settings/subscription");
-      router.refresh();
-    }
   };
 
   const handleCaptchaVerified = async (token: string) => {
@@ -305,7 +291,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
           ];
           const isCurrent = user?.subscription?.id === plan.id;
           const codePrice = promoPrice(plan.id);
-          const isRedirecting = (isCheckoutLoading || isChangingPlan) && processingPlanId === plan.id;
+          const isRedirecting = isCheckoutLoading && processingPlanId === plan.id;
 
           return (
             <div
@@ -488,17 +474,6 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         }}
         onVerified={handleCaptchaVerified}
         isRedirecting={isCheckoutLoading}
-      />
-
-      <ChangePlanDialog
-        open={!!changePlanId}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) setChangePlanId(null);
-        }}
-        currentPlan={plans.find((p) => p.id === user?.subscription?.id) ?? null}
-        targetPlan={plans.find((p) => p.id === changePlanId) ?? null}
-        onConfirm={handleChangePlan}
-        isLoading={isChangingPlan}
       />
     </>
   );

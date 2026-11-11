@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
-import { useChangePlan, useCheckout } from "../hooks/use-checkout";
-import { ChangePlanDialog } from "./ChangePlanDialog";
+import { useCheckout } from "../hooks/use-checkout";
 import { isFreePlan } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
 import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
@@ -17,22 +16,14 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
-  const { changePlan, isLoading: isChangingPlan } = useChangePlan();
-  const isLoading = isCheckoutLoading || isChangingPlan;
+  const isLoading = isCheckoutLoading;
   const [captchaOpen, setCaptchaOpen] = useState(false);
-  const [changeOpen, setChangeOpen] = useState(false);
   const onPaidPlan = !!user && !isFreePlan(user);
 
   const handleVerified = (token: string) => {
     startCheckout(plan.id, token);
   };
 
-  const handleChangePlan = async () => {
-    if (await changePlan(plan.id)) {
-      setChangeOpen(false);
-      router.refresh();
-    }
-  };
 
   // const isPremiumOrPro = !isBasic && !isStandard;
 
@@ -86,7 +77,11 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
       </div>
 
       <button
-        onClick={() => (onPaidPlan ? setChangeOpen(true) : setCaptchaOpen(true))}
+        onClick={() =>
+          onPaidPlan
+            ? router.push(`/checkout/change-plan?plan=${encodeURIComponent(plan.id)}`)
+            : setCaptchaOpen(true)
+        }
         disabled={isLoading || user?.subscription?.id === plan.id}
         className={`w-full py-3 px-6 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-primary-foreground ${
           plan.isMostPopular
@@ -132,21 +127,6 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
         onOpenChange={setCaptchaOpen}
         onVerified={handleVerified}
         isRedirecting={isCheckoutLoading}
-      />
-      <ChangePlanDialog
-        open={changeOpen}
-        onOpenChange={setChangeOpen}
-        currentPlan={
-          user?.subscription
-            ? ({
-                priceAmount: user.subscription.priceAmount ?? 0,
-                billingPeriod: user.subscription.billingPeriod ?? "MONTHLY",
-              } as SubscriptionPlan)
-            : null
-        }
-        targetPlan={plan}
-        onConfirm={handleChangePlan}
-        isLoading={isChangingPlan}
       />
     </div>
   );
