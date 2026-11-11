@@ -27,10 +27,16 @@ interface Invoice {
 
 async function getInvoices(): Promise<Invoice[]> {
   try {
-    const res = await fetchWithToken("/users/invoices");
-    const json = await res.json();
+    const res = await fetchWithToken("/payments/invoices");
+    const json = await res.json().catch(() => null);
+    if (!res.ok) {
+      // Log it: an empty list here used to hide a wrong URL.
+      console.error("Loading invoices failed:", res.status, json?.message);
+      return [];
+    }
     return json?.data ?? [];
-  } catch {
+  } catch (error) {
+    console.error("Loading invoices failed:", error);
     return [];
   }
 }
