@@ -16,7 +16,7 @@ import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.compo
 import ElevenLabsV3Composer from "./composers/eleven-labs-v3.composer";
 import SeedreamV45Composer from "./composers/seedream-v4-5.composer";
 import Seedance20Composer from "./composers/seedance-2.0.composer";
-import Seedance25Composer from "./composers/seedance-2.5.composer";
+import Seedance25RefComposer from "./composers/seedance-2.5-ref.composer";
 import GptImage2Composer from "./composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
 import GensuComposer from "./composers/gensu.composer";
@@ -94,8 +94,8 @@ export default function PromptComposer() {
         {model === AiModelsEnum.SEEDANCE_2_0 && (
           <Seedance20Composer isFocused={isFocused} />
         )}
-        {model === AiModelsEnum.SEEDANCE_2_5 && (
-          <Seedance25Composer isFocused={isFocused} />
+        {(model === AiModelsEnum.SEEDANCE_2_5 || model === AiModelsEnum.FAL_SEEDANCE_2_5) && (
+          <Seedance25RefComposer isFocused={isFocused} model={model} />
         )}
         {model === AiModelsEnum.GPT_IMAGE_2 && (
           <GptImage2Composer isFocused={isFocused} />

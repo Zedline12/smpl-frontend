@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, Check } from "lucide-react";
 
 export interface SettingsSelectOption {
@@ -27,6 +28,34 @@ export function SettingsSelect({
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // Fixed position next to the trigger: the sidebar clips anything that overflows it.
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  const place = useCallback(() => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const width = Math.max(200, Math.min(260, rect.width));
+    const menuHeight = Math.min(280, options.length * 40 + 2);
+    const gap = 8;
+    // Right of the trigger when it fits, otherwise below it (phones).
+    if (rect.right + gap + width <= window.innerWidth - 8) {
+      const top = Math.max(8, Math.min(rect.top, window.innerHeight - menuHeight - 8));
+      setPos({ top, left: rect.right + gap, width });
+    } else {
+      setPos({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+    }
+  }, [options.length]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener("resize", place);
+    // Capture: the sidebar's own scrolling moves the trigger too.
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, place]);
 
   const selectedOption = options.find((o) => o.value === value) ?? options[0];
   const selectedIndex = options.findIndex((o) => o.value === value);
@@ -62,16 +91,16 @@ export function SettingsSelect({
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       if (open) close();
-      else { setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
+      else { place(); setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
     } else if (e.key === "Escape") {
       close();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (!open) { setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
+      if (!open) { place(); setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
       else setFocusedIndex((i) => Math.min(i + 1, options.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (!open) { setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
+      if (!open) { place(); setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
       else setFocusedIndex((i) => Math.max(i - 1, 0));
     }
   }
@@ -94,8 +123,8 @@ export function SettingsSelect({
     >
       <style>{`
         @keyframes ssSelectIn {
-          from { opacity: 0; transform: scale(0.97) translateY(-4px); }
-          to   { opacity: 1; transform: scale(1)    translateY(0); }
+          from { opacity: 0; transform: scale(0.97) translateX(-4px); }
+          to   { opacity: 1; transform: scale(1)    translateX(0); }
         }
       `}</style>
 
@@ -110,10 +139,10 @@ export function SettingsSelect({
         disabled={disabled}
         onClick={() => {
           if (open) close();
-          else { setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
+          else { place(); setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
         }}
         onKeyDown={handleTriggerKeyDown}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-[10px] border transition-colors duration-100 focus:outline-none focus-visible:ring-2"
+        className="w-full flex items-center justify-between pl-3 pr-3 py-3 rounded-[10px] border transition-colors duration-100 focus:outline-none focus-visible:ring-2"
         style={{
           backgroundColor: open ? "var(--bg-elevated)" : "var(--bg-card)",
           borderColor: "var(--border-subtle)",
@@ -128,10 +157,10 @@ export function SettingsSelect({
         }}
       >
         <span className="flex flex-col items-start gap-[3px] text-left">
-          <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-muted)", lineHeight: 1.2 }}>
+          <span className="text-white/40" style={{ fontSize: "12px", fontWeight: 500, lineHeight: 1.2 }}>
             {label}
           </span>
-          <span style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)", lineHeight: 1.2 }}>
+          <span className="text-white" style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.2 }}>
             {selectedOption?.label ?? "—"}
           </span>
         </span>
@@ -147,15 +176,18 @@ export function SettingsSelect({
       </button>
 
       {/* Dropdown */}
-      {open && (
+      {open && pos && createPortal(
         <div
           ref={menuRef}
           role="listbox"
           aria-label={label}
           tabIndex={-1}
           onKeyDown={handleMenuKeyDown}
-          className="absolute left-0 right-0 z-50 mt-1.5 rounded-[10px] border overflow-hidden"
+          className="fixed z-[80] rounded-[10px] border overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [--bg-card:var(--background-light)] [--bg-elevated:var(--background-lighter)]"
           style={{
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
             backgroundColor: "var(--bg-card)",
             borderColor: "var(--border-subtle)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
@@ -194,7 +226,8 @@ export function SettingsSelect({
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

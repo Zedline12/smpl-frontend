@@ -51,8 +51,8 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.HIGGSFIELD_ADS_STUDIO],
     [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]:
       ModelDefaults[AiModelsEnum.ELEVENLABS_MUSIC_V2_5],
-    [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]:
-      ModelDefaults[AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO],
+    [AiModelsEnum.FAL_SEEDANCE_2_5]:
+      ModelDefaults[AiModelsEnum.FAL_SEEDANCE_2_5],
     [AiModelsEnum.SMPL_AD_MULTIPLIER]:
       ModelDefaults[AiModelsEnum.SMPL_AD_MULTIPLIER],
     [AiModelsEnum.SMPL_VOICE_CHANGER]:

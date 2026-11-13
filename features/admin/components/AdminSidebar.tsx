@@ -19,8 +19,10 @@ import {
   Bell,
   Package,
   Tag,
+  Rocket,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
+import { useQuery } from "@tanstack/react-query";
 
 const SECTIONS = [
   {
@@ -34,6 +36,8 @@ const SECTIONS = [
       { icon: BarChart3, label: "Generations", href: "/admin/generations" },
       { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
       { icon: LifeBuoy, label: "Support", href: "/admin/support" },
+      // Shown only to the owner and devs (OWNER_EMAILS / DEV_EMAILS on the server).
+      { icon: Rocket, label: "Updates", href: "/admin/updates", ownerOrDev: true },
     ],
   },
   {
@@ -52,6 +56,15 @@ const SECTIONS = [
 
 export const AdminSidebar = () => {
   const pathname = usePathname();
+  const { data: releaseAccess } = useQuery({
+    queryKey: ["admin-releases-access"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/releases/access");
+      return res.ok ? ((await res.json()) as { owner: boolean; dev: boolean }) : null;
+    },
+    staleTime: 5 * 60_000,
+  });
+  const canSeeUpdates = !!(releaseAccess?.owner || releaseAccess?.dev);
 
   if (pathname.startsWith("/admin/appearance")) {
     return <AppearanceSidebar />;
@@ -85,7 +98,9 @@ export const AdminSidebar = () => {
               {section.label}
             </p>
             <div className="space-y-0.5">
-              {section.links.map((link) => {
+              {section.links
+                .filter((link) => !("ownerOrDev" in link) || canSeeUpdates)
+                .map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
                 return (

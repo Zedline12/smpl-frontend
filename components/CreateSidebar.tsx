@@ -50,7 +50,11 @@ import {
   AdsMultiplierOptionsConst,
   type IAdsMultiplierInput,
 } from "@/features/generation/types/models/ads-multiplier.type";
-import { Seedance25RefLimits } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import {
+  Seedance25RefInputConst,
+  Seedance25RefLimits,
+} from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import { Seedance25RefPanel } from "@/components/Seedance25RefPanel";
 import {
   AdsStudioInputConst,
   type IAdsStudioInput,
@@ -271,6 +275,16 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
         <SelectRow label="Resolution" options={Seedance25InputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={Seedance25InputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
         <SelectRow label="Duration (s)" options={Seedance25InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
+      </>
+    );
+
+  if (model === AiModelsEnum.FAL_SEEDANCE_2_5)
+    return (
+      <>
+        <SelectRow label="Resolution" options={Seedance25RefInputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
+        <SelectRow label="Aspect Ratio" options={Seedance25RefInputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
+        <SelectRow label="Duration (s)" options={Seedance25RefInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -576,29 +590,9 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
-  // ── SEEDANCE 2.5 ───────────────────────────────────────────────────────────
-  if (model === AiModelsEnum.SEEDANCE_2_5) {
-    return (
-      <>
-        <SingleMediaSlot
-          label="Start Image (optional)"
-          url={s.imageUrl}
-          onOpenPicker={() => setDlg("start")}
-          onClear={() => set("imageUrl", "")}
-        />
-        <SingleMediaSlot
-          label="End Image (optional)"
-          url={s.endImageUrl}
-          onOpenPicker={() => setDlg("end")}
-          onClear={() => set("endImageUrl", "")}
-        />
-        <MediaManagerDialog open={dlg === "start"} onOpenChange={(o) => !o && setDlg(null)}
-          selectedImage={s.imageUrl} onSelect={(u) => { set("imageUrl", u[0]); setDlg(null); }} maxSelections={1} />
-        <MediaManagerDialog open={dlg === "end"} onOpenChange={(o) => !o && setDlg(null)}
-          selectedImage={s.endImageUrl} onSelect={(u) => { set("endImageUrl", u[0]); setDlg(null); }} maxSelections={1} />
-      </>
-    );
-  }
+  // ── SEEDANCE 2.5 (references: images, videos, audio) ──────────────────────
+  if (model === AiModelsEnum.SEEDANCE_2_5) return <Seedance25RefPanel model={model} />;
+  if (model === AiModelsEnum.FAL_SEEDANCE_2_5) return <Seedance25RefPanel model={model} />;
 
   // ── GROK ───────────────────────────────────────────────────────────────────
   if (model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5) {
@@ -1329,7 +1323,7 @@ export function CreateSidebar() {
 
   // Sync model from ?model= URL param on mount
   useEffect(() => {
-    const urlModel = normalizeModelId(searchParams.get("model")) as AiModelsEnum | null;
+    let urlModel = normalizeModelId(searchParams.get("model")) as AiModelsEnum | null;
     if (urlModel && Object.values(AiModelsEnum).includes(urlModel)) {
       setModel(urlModel);
     }
@@ -1420,7 +1414,7 @@ export function CreateSidebar() {
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {/* Hero card — always visible */}
         <ModelHeroCard model={model} onChangePicker={() => setPickerOpen((o) => !o)} />
 

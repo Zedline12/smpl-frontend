@@ -135,7 +135,7 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: musicV25ValidationSchema,
-  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: seedance25RefValidationSchema,
+  [AiModelsEnum.FAL_SEEDANCE_2_5]: seedance25RefValidationSchema,
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: adsMultiplierValidationSchema,
   [AiModelsEnum.SMPL_VOICE_CHANGER]: voiceChangerValidationSchema,
 };

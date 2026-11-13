@@ -42,7 +42,7 @@ export type ModelStateMap = {
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: IAiInfluencerInput;
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: IAdsStudioInput;
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
-  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: ISeedance25RefToVideoInput;
+  [AiModelsEnum.FAL_SEEDANCE_2_5]: ISeedance25RefToVideoInput;
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: IAdsMultiplierInput;
   [AiModelsEnum.SMPL_VOICE_CHANGER]: IVoiceChangerInput;
 };
@@ -120,9 +120,10 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
     duration: 5,
     aspectRatio: "16:9",
-    generateAudio: false,
-    imageUrl: "",
-    endImageUrl: "",
+    generateAudio: true,
+    images: [],
+    videos: [],
+    audios: [],
   },
   [AiModelsEnum.GPT_IMAGE_2]: {
     prompt: "",
@@ -181,7 +182,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     batchSize: 1,
   },
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: createMusicInput(),
-  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: {
+  [AiModelsEnum.FAL_SEEDANCE_2_5]: {
     prompt: "",
     images: [],
     videos: [],

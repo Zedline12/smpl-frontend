@@ -19,7 +19,8 @@ export enum AiModelsEnum {
   HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
   HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
   ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
-  SEEDANCE_2_5_REF_TO_VIDEO = "seedance-2.5-ref-to-video",
+  /** The fal version (Artist, Ad Multiplier). Was "seedance-2.5-ref-to-video". */
+  FAL_SEEDANCE_2_5 = "fal-seedance-2.5",
   SMPL_AD_MULTIPLIER = "smpl-ad-multiplier",
   SMPL_VOICE_CHANGER = "smpl-voice-changer",
 }
@@ -31,6 +32,7 @@ export const LEGACY_MODEL_IDS: Record<string, AiModelsEnum> = {
   artist: AiModelsEnum.SMPL_ARTIST,
   "ads-multiplier": AiModelsEnum.SMPL_AD_MULTIPLIER,
   "elevenlabs-voice-changer": AiModelsEnum.SMPL_VOICE_CHANGER,
+  "seedance-2.5-ref-to-video": AiModelsEnum.FAL_SEEDANCE_2_5,
 };
 
 /** The current id for a model id that may be an old one. */
@@ -213,7 +215,7 @@ export const VIDEO_MODELS: Model[] = [
   {
     id: AiModelsEnum.SEEDANCE_2_5,
     name: "Seedance 2.5",
-    description: "Cinematic video generation with optional start/end image control.",
+    description: "Cinematic video from your reference images, videos and audio.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -280,6 +282,17 @@ export const AUDIO_MODELS: Model[] = [
 /** Models that run from their own studio page, not the /create prompt composer. */
 export const STUDIO_MODELS: Model[] = [
   {
+    id: AiModelsEnum.FAL_SEEDANCE_2_5,
+    name: "Seedance 2.5 (fal)",
+    description: "Seedance 2.5 on fal: powers Artist clips and Ad Multiplier.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+      </svg>
+    ),
+  },
+  {
     id: AiModelsEnum.HIGGSFIELD_ADS_STUDIO,
     name: "Ads Studio",
     description: "Ready-to-use ads from a brief and your product photos, powered by Nano Banana Pro.",
@@ -320,17 +333,6 @@ export const STUDIO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm6-3a6 6 0 0 1-12 0m6 6v3m-3 0h6" />
-      </svg>
-    ),
-  },
-  {
-    id: AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO,
-    name: "Seedance 2.5 Reference",
-    description: "Music video clips from a character, a reference video and a song.",
-    svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-          d="M15 10l4.553-2.277A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
       </svg>
     ),
   },

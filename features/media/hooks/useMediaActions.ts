@@ -111,7 +111,8 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: "/ai-influencer-studio",
   [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/create/image?model=higgsfield-ads-studio",
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",
-  [AiModelsEnum.SEEDANCE_2_5_REF_TO_VIDEO]: "/artist?tab=clip",
+  [AiModelsEnum.FAL_SEEDANCE_2_5]: "/artist?tab=clip",
+  [AiModelsEnum.SEEDANCE_2_5]: "/create/video",
   [AiModelsEnum.SMPL_ARTIST]: "/artist?tab=clip",
   // Its result is a video, but the model lives on the audio page.
   [AiModelsEnum.SMPL_VOICE_CHANGER]: "/create/audio?model=smpl-voice-changer",
@@ -130,11 +131,23 @@ export function useRecreateMedia() {
       toast.error("This item has no settings to recreate from");
       return;
     }
+    let input: Record<string, unknown> = { ...(media.input ?? {}) };
+    // Seedance 2.5 now works from references: old start/end frames become reference images.
+    if (model === AiModelsEnum.SEEDANCE_2_5) {
+      const old = input as { imageUrl?: string; endImageUrl?: string; images?: string[]; videoUrl?: string; videos?: string[]; audios?: string[] };
+      input = {
+        ...input,
+        imageUrl: "",
+        endImageUrl: "",
+        videoUrl: "",
+        images: [old.imageUrl, old.endImageUrl, ...(old.images ?? [])].filter(Boolean).slice(0, 9),
+        videos: [old.videoUrl, ...(old.videos ?? [])].filter(Boolean).slice(0, 3),
+        audios: old.audios ?? [],
+      };
+    }
     setMediaType(media.type as GenerationTypeEnum);
     setModel(model);
-    Object.entries(media.input ?? {}).forEach(([key, value]) =>
-      setField(model, key, value),
-    );
+    Object.entries(input).forEach(([key, value]) => setField(model, key, value));
     if (media.projectId) setProjectId(media.projectId);
 
     const target = COMPOSER_ROUTES[model] ?? "/create";
