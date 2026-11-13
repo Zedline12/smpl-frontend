@@ -1104,6 +1104,29 @@ function AdsStudioPanel() {
 
 // ─── model hero card ──────────────────────────────────────────────────────────
 
+// Hero card media, in R2 bucket smpl-ui / "Models Selection Thumbnail Videos".
+const THUMBS = "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/";
+const thumb = (file: string) => THUMBS + encodeURIComponent(file);
+
+const MODEL_PREVIEWS: Partial<Record<AiModelsEnum, { video?: string; image?: string }>> = {
+  // Video models
+  [AiModelsEnum.SMPL_GENSU]: { video: thumb("Smpl Riven.mp4") },
+  [AiModelsEnum.SMPL_AD_MULTIPLIER]: { video: thumb("ads-multiplier.mp4") },
+  [AiModelsEnum.SMPL_ARTIST]: { video: thumb("ARTIST.mp4") },
+  [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: { video: thumb("GROK.mp4") },
+  [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: { video: thumb("KLING IMAGE TO VIDEO.mp4") },
+  [AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL]: { video: thumb("Kling Motion Control.mp4") },
+  [AiModelsEnum.SEEDANCE_2_5]: { video: thumb("SEEDANCE 2.5.mp4") },
+  [AiModelsEnum.FAL_SEEDANCE_2_5]: { video: thumb("SEEDANCE 2.5.mp4") },
+  [AiModelsEnum.SEEDANCE_2_0]: { video: thumb("SEEDDANCE 2.0.mp4") },
+  [AiModelsEnum.VEO_3]: { video: thumb("VEO 3.mp4") },
+  // Image models
+  [AiModelsEnum.GPT_IMAGE_2]: { image: thumb("CHAT GPT IMAGE.png") },
+  [AiModelsEnum.KLING_O3_IMAGE]: { image: thumb("KLING 03 IMAGE.png") },
+  [AiModelsEnum.GEMINI_FLASH_IMAGE]: { image: thumb("Nano Bananna.png") },
+  [AiModelsEnum.SEEDREAM_V4_5]: { image: thumb("SEEDREAM.jpeg") },
+};
+
 function ModelHeroCard({
   model,
   onChangePicker,
@@ -1116,28 +1139,29 @@ function ModelHeroCard({
   const title = isGensu ? "Gensu" : (modelDef?.name ?? model);
   const subtitle = isGensu ? "Reality Manipulation" : (modelDef?.description ?? "");
 
-  // Per-model hero videos — add more as assets become available
-  const VIDEO_MAP: Partial<Record<AiModelsEnum, string>> = {
-    [AiModelsEnum.SMPL_GENSU]:
-      "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/Smpl%20Riven.mp4",
-    [AiModelsEnum.SMPL_AD_MULTIPLIER]:
-      "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/ads-multiplier.mp4",
-  };
-  const videoSrc = VIDEO_MAP[model];
+  const preview = MODEL_PREVIEWS[model];
 
   return (
     <div className="relative rounded-2xl overflow-hidden h-44 flex-shrink-0 bg-muted">
-      {videoSrc && (
+      {preview?.video ? (
         <video
-          key={videoSrc}
+          key={preview.video}
           autoPlay
           muted
           loop
           playsInline
-          src={videoSrc}
+          src={preview.video}
           className="absolute inset-0 w-full h-full object-cover"
         />
-      )}
+      ) : preview?.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={preview.image}
+          src={preview.image}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : null}
 
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
