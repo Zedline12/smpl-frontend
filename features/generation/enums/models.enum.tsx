@@ -23,6 +23,25 @@ export enum AiModelsEnum {
   FAL_SEEDANCE_2_5 = "fal-seedance-2.5",
   SMPL_AD_MULTIPLIER = "smpl-ad-multiplier",
   SMPL_VOICE_CHANGER = "smpl-voice-changer",
+  // ffmpeg edit tools (Edit Image / Edit Video), run on our backend.
+  SMPL_IMAGE_REFRAME = "smpl-image-reframe",
+  SMPL_IMAGE_UPSCALE = "smpl-image-upscale",
+  SMPL_VIDEO_REFRAME = "smpl-video-reframe",
+  SMPL_VIDEO_FPS_BOOST = "smpl-video-fps-boost",
+  SMPL_VIDEO_UPSCALE = "smpl-video-upscale",
+}
+
+/** The ffmpeg edit tools: listed under Edit Image / Edit Video, never in composers or templates. */
+export const EDIT_TOOL_IDS: ReadonlySet<string> = new Set([
+  AiModelsEnum.SMPL_IMAGE_REFRAME,
+  AiModelsEnum.SMPL_IMAGE_UPSCALE,
+  AiModelsEnum.SMPL_VIDEO_REFRAME,
+  AiModelsEnum.SMPL_VIDEO_FPS_BOOST,
+  AiModelsEnum.SMPL_VIDEO_UPSCALE,
+]);
+
+export function isEditTool(id: string | null | undefined): boolean {
+  return !!id && EDIT_TOOL_IDS.has(id);
 }
 
 /** Ids models had before they were renamed (old links and media still use them). */
@@ -107,6 +126,30 @@ export const IMAGE_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M4 16.5 8.5 12l3 3 3.5-3.5 5 5M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm5.5 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_IMAGE_REFRAME,
+    name: "Smpl Image Reframe",
+    description: "Change an image's aspect ratio: crop, blur fill or black bars.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2v14a2 2 0 0 0 2 2h14" />
+        <path d="M18 22V8a2 2 0 0 0-2-2H2" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_IMAGE_UPSCALE,
+    name: "Smpl Image Upscale",
+    description: "Make an image 2x or 4x bigger and sharper.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 3h6v6" />
+        <path d="M9 21H3v-6" />
+        <path d="m21 3-7 7" />
+        <path d="m3 21 7-7" />
       </svg>
     ),
   },
@@ -241,7 +284,43 @@ export const VIDEO_MODELS: Model[] = [
         ></path>
       </svg>
     )
-  }
+  },
+  // Edit Video tools (ffmpeg on our backend).
+  {
+    id: AiModelsEnum.SMPL_VIDEO_REFRAME,
+    name: "Smpl Video Reframe",
+    description: "Change a video's aspect ratio: crop, blur fill or black bars.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 2v14a2 2 0 0 0 2 2h14" />
+        <path d="M18 22V8a2 2 0 0 0-2-2H2" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_VIDEO_FPS_BOOST,
+    name: "Smpl FPS Boost",
+    description: "Smoother motion: raise a video to 30 or 60 fps.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 14 4-4" />
+        <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_VIDEO_UPSCALE,
+    name: "Smpl Video Upscale",
+    description: "Upscale a video to 1080p, 1440p or 4K.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.5em" height="1.5em" fill="none" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 3h6v6" />
+        <path d="M9 21H3v-6" />
+        <path d="m21 3-7 7" />
+        <path d="m3 21 7-7" />
+      </svg>
+    ),
+  },
 ];
 export const AUDIO_MODELS: Model[] = [
   {

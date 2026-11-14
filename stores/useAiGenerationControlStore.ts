@@ -16,6 +16,12 @@ type AiGenerationControlStore = {
   /** Which view is shown in the main content area of the create section. */
   sidebarView: "default" | "howItWorks";
   setSidebarView: (view: "default" | "howItWorks") => void;
+  /** The picked style (sent as input.styleId to models that take styles). */
+  styleId: string | null;
+  setStyleId: (styleId: string | null) => void;
+  /** The create pages' explorer tab, shared so the sidebar's Style card can open Styles. */
+  explorerView: "explore" | "history" | "styles";
+  setExplorerView: (view: "explore" | "history" | "styles") => void;
 };
 type AiModelStore = {
   states: Partial<{
@@ -57,6 +63,11 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.SMPL_AD_MULTIPLIER],
     [AiModelsEnum.SMPL_VOICE_CHANGER]:
       ModelDefaults[AiModelsEnum.SMPL_VOICE_CHANGER],
+    [AiModelsEnum.SMPL_IMAGE_REFRAME]: ModelDefaults[AiModelsEnum.SMPL_IMAGE_REFRAME],
+    [AiModelsEnum.SMPL_IMAGE_UPSCALE]: ModelDefaults[AiModelsEnum.SMPL_IMAGE_UPSCALE],
+    [AiModelsEnum.SMPL_VIDEO_REFRAME]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_REFRAME],
+    [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_FPS_BOOST],
+    [AiModelsEnum.SMPL_VIDEO_UPSCALE]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_UPSCALE],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();
@@ -85,5 +96,9 @@ export const useAiGenerationControlStore = create<AiGenerationControlStore>(
     setTemplateMode: (templateMode) => set({ templateMode }),
     sidebarView: "default",
     setSidebarView: (sidebarView) => set({ sidebarView }),
+    styleId: null,
+    setStyleId: (styleId) => set({ styleId }),
+    explorerView: "explore",
+    setExplorerView: (explorerView) => set({ explorerView }),
   }),
 );

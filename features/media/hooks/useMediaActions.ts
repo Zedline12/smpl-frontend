@@ -122,7 +122,7 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
 export function useRecreateMedia() {
   const router = useRouter();
   const pathname = usePathname();
-  const { setModel, setMediaType, setProjectId } = useAiGenerationControlStore();
+  const { setModel, setMediaType, setProjectId, setStyleId } = useAiGenerationControlStore();
   const { setField } = useAiModelStore();
 
   return (media: Media) => {
@@ -148,6 +148,8 @@ export function useRecreateMedia() {
     setMediaType(media.type as GenerationTypeEnum);
     setModel(model);
     Object.entries(input).forEach(([key, value]) => setField(model, key, value));
+    // The style isn't part of the model's settings; it lives in the control store.
+    setStyleId(typeof input.styleId === "string" ? input.styleId : null);
     if (media.projectId) setProjectId(media.projectId);
 
     const target = COMPOSER_ROUTES[model] ?? "/create";

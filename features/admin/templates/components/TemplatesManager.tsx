@@ -23,6 +23,7 @@ import {
   Model,
   STUDIO_MODELS,
   VIDEO_MODELS,
+  isEditTool,
 } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
@@ -38,8 +39,8 @@ import { TemplateEditDialog } from "./TemplateEditDialog";
 import { LegacyTemplatesImport } from "./LegacyTemplatesImport";
 
 const MODEL_GROUPS: { label: string; type: GenerationTypeEnum; models: Model[] }[] = [
-  { label: "Image", type: GenerationTypeEnum.IMAGE, models: IMAGE_MODELS },
-  { label: "Video", type: GenerationTypeEnum.VIDEO, models: VIDEO_MODELS },
+  { label: "Image", type: GenerationTypeEnum.IMAGE, models: IMAGE_MODELS.filter((m) => !isEditTool(m.id)) },
+  { label: "Video", type: GenerationTypeEnum.VIDEO, models: VIDEO_MODELS.filter((m) => !isEditTool(m.id)) },
   { label: "Studios", type: GenerationTypeEnum.IMAGE, models: STUDIO_MODELS },
 ];
 

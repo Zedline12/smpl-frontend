@@ -6,6 +6,8 @@ import { Media } from "@/features/media/types/media";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { InfluencerParams } from "@/features/ai-influencer/components/InfluencerParams";
 import { copyText } from "../utils/media-actions";
+import { findStyle } from "@/features/styles/styles";
+import { useStylesQuery } from "@/features/styles/api";
 
 export function isUrl(value: unknown): value is string {
   if (typeof value !== "string") return false;
@@ -108,6 +110,7 @@ export function ParamRows({ rows }: { rows: [string, React.ReactNode][] }) {
 /** The inputs a media item was generated with: prompt, settings and references. */
 export function MediaParams({ media }: { media: Media }) {
   const input = (media.input ?? {}) as Record<string, unknown>;
+  const { data: styles } = useStylesQuery();
 
   if (media.model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER) {
     return <InfluencerParams input={input} />;
@@ -120,6 +123,10 @@ export function MediaParams({ media }: { media: Media }) {
   const settings: [string, React.ReactNode][] = [];
   Object.entries(input).forEach(([key, value]) => {
     if (key === "prompt" || isEmptyParam(key, value)) return;
+    if (key === "styleId") {
+      settings.push(["Style", findStyle(styles, String(value))?.name ?? "Style"]);
+      return;
+    }
     if (isUrl(value)) references.push(value);
     else if (Array.isArray(value) && value.every(isUrl)) references.push(...value);
     else settings.push([formatKey(key), formatValue(value)]);

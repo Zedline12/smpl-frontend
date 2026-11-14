@@ -20,6 +20,7 @@ import {
   Package,
   Tag,
   Rocket,
+  LineChart,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +44,7 @@ const SECTIONS = [
   {
     label: "Billing & Monetization",
     links: [
+      { icon: LineChart, label: "Analytics", href: "/admin/billing/analytics" },
       { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
       { icon: Package, label: "Credit Packs", href: "/admin/credit-packs" },
       { icon: Tag, label: "Discounts", href: "/admin/discounts" },

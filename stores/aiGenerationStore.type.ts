@@ -22,6 +22,13 @@ import { createMusicInput } from "@/features/artist/utils/composition-plan";
 import { ISeedance25RefToVideoInput } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
 import { IAdsMultiplierInput } from "@/features/generation/types/models/ads-multiplier.type";
 import { IVoiceChangerInput } from "@/features/generation/types/models/voice-changer.type";
+import {
+  IImageReframeInput,
+  IImageUpscaleInput,
+  IVideoFpsBoostInput,
+  IVideoReframeInput,
+  IVideoUpscaleInput,
+} from "@/features/generation/types/models/media-edit-tools.type";
 
 export type ModelStateMap = {
   [AiModelsEnum.VEO_3]: Veo3Input;
@@ -45,6 +52,11 @@ export type ModelStateMap = {
   [AiModelsEnum.FAL_SEEDANCE_2_5]: ISeedance25RefToVideoInput;
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: IAdsMultiplierInput;
   [AiModelsEnum.SMPL_VOICE_CHANGER]: IVoiceChangerInput;
+  [AiModelsEnum.SMPL_IMAGE_REFRAME]: IImageReframeInput;
+  [AiModelsEnum.SMPL_IMAGE_UPSCALE]: IImageUpscaleInput;
+  [AiModelsEnum.SMPL_VIDEO_REFRAME]: IVideoReframeInput;
+  [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: IVideoFpsBoostInput;
+  [AiModelsEnum.SMPL_VIDEO_UPSCALE]: IVideoUpscaleInput;
 };
 export const MediaTypeDefaultModel: Record<GenerationTypeEnum, AiModelsEnum> = {
   [GenerationTypeEnum.VIDEO]: AiModelsEnum.VEO_3,
@@ -206,6 +218,42 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     videoUrl: "",
     voiceId: "",
     removeBackgroundNoise: false,
+    duration: 0,
+  },
+  [AiModelsEnum.SMPL_IMAGE_REFRAME]: {
+    prompt: "",
+    imageUrl: "",
+    aspectRatio: "9:16",
+    fit: "crop",
+    position: "center",
+  },
+  [AiModelsEnum.SMPL_IMAGE_UPSCALE]: {
+    prompt: "",
+    imageUrl: "",
+    scale: 2,
+    aspectRatio: "",
+  },
+  [AiModelsEnum.SMPL_VIDEO_REFRAME]: {
+    prompt: "",
+    videoUrl: "",
+    aspectRatio: "9:16",
+    fit: "crop",
+    position: "center",
+    duration: 0,
+  },
+  [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: {
+    prompt: "",
+    videoUrl: "",
+    fps: 60,
+    mode: "smooth",
+    aspectRatio: "",
+    duration: 0,
+  },
+  [AiModelsEnum.SMPL_VIDEO_UPSCALE]: {
+    prompt: "",
+    videoUrl: "",
+    resolution: "1080p",
+    aspectRatio: "",
     duration: 0,
   },
 };

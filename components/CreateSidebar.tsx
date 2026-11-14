@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { SettingsSelect } from "@/components/SettingsSelect";
-import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload } from "lucide-react";
+import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload, ChevronRight } from "lucide-react";
+import {
+  STYLE_FALLBACK_GRADIENTS,
+  STYLE_MODEL_IDS,
+  findStyle,
+  hasReferences,
+  withStyle,
+} from "@/features/styles/styles";
+import { useStylesQuery } from "@/features/styles/api";
 import { HOW_IT_WORKS_MAP } from "@/features/generation/data/how-it-works";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
@@ -17,6 +25,7 @@ import {
   STUDIO_MODELS,
   AiModelsEnum,
   type Model,
+  isEditTool,
  normalizeModelId } from "@/features/generation/enums/models.enum";
 import { ModelsValidatorSchemaMap } from "@/features/generation/types/generation";
 import {
@@ -65,16 +74,29 @@ import {
   IVoiceChangerInput,
   VoiceChangerInputConst,
 } from "@/features/generation/types/models/voice-changer.type";
+import {
+  FIT_LABELS,
+  FPS_LABELS,
+  FPS_MODE_LABELS,
+  MediaEditToolLimits,
+  MediaEditToolOptions,
+  POSITION_LABELS,
+  RESOLUTION_LABELS,
+  SCALE_LABELS,
+  nearestAspectRatio,
+} from "@/features/generation/types/models/media-edit-tools.type";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
 /** Ads Studio sits in the image list on /create/image, right after Nano Banana Pro. */
 const ADS_STUDIO_MODEL = STUDIO_MODELS.find((m) => m.id === AiModelsEnum.HIGGSFIELD_ADS_STUDIO);
-const CREATE_IMAGE_MODELS: Model[] = ADS_STUDIO_MODEL
-  ? [IMAGE_MODELS[0], ADS_STUDIO_MODEL, ...IMAGE_MODELS.slice(1)]
-  : IMAGE_MODELS;
+const CREATE_IMAGE_MODELS: Model[] = (
+  ADS_STUDIO_MODEL ? [IMAGE_MODELS[0], ADS_STUDIO_MODEL, ...IMAGE_MODELS.slice(1)] : IMAGE_MODELS
+).filter((m) => !isEditTool(m.id));
+/** Edit Image: the ffmpeg tools (reframe, upscale). */
+const EDIT_IMAGE_MODELS: Model[] = IMAGE_MODELS.filter((m) => isEditTool(m.id));
 
-const ALL_MODELS = [...VIDEO_MODELS, ...CREATE_IMAGE_MODELS, ...AUDIO_MODELS];
+const ALL_MODELS = [...VIDEO_MODELS, ...CREATE_IMAGE_MODELS, ...EDIT_IMAGE_MODELS, ...AUDIO_MODELS];
 
 const CREATE_VIDEO_MODEL_IDS = new Set([
   AiModelsEnum.VEO_3,
@@ -85,7 +107,11 @@ const CREATE_VIDEO_MODEL_IDS = new Set([
   AiModelsEnum.SMPL_AD_MULTIPLIER,
 ]);
 
-type VideoMode = "create" | "edit";
+/** Edit Video: every video model that isn't a "create" one, plus the ffmpeg tools (reframe, FPS boost, upscale). */
+const CREATE_VIDEO_MODELS = VIDEO_MODELS.filter((m) => CREATE_VIDEO_MODEL_IDS.has(m.id));
+const EDIT_VIDEO_MODELS = VIDEO_MODELS.filter((m) => !CREATE_VIDEO_MODEL_IDS.has(m.id));
+
+type EditMode = "create" | "edit";
 
 // models where prompt is optional (toggle to show)
 const OPTIONAL_PROMPT_MODELS = new Set([
@@ -101,6 +127,12 @@ const NO_PROMPT_MODELS = new Set([
   AiModelsEnum.SMPL_AD_MULTIPLIER,
   // Video + voice only.
   AiModelsEnum.SMPL_VOICE_CHANGER,
+  // ffmpeg edit tools: a file and settings, no prompt.
+  AiModelsEnum.SMPL_IMAGE_REFRAME,
+  AiModelsEnum.SMPL_IMAGE_UPSCALE,
+  AiModelsEnum.SMPL_VIDEO_REFRAME,
+  AiModelsEnum.SMPL_VIDEO_FPS_BOOST,
+  AiModelsEnum.SMPL_VIDEO_UPSCALE,
 ]);
 
 // per-model prompt label/placeholder (default: "Prompt")
@@ -116,17 +148,23 @@ const PROMPT_COPY: Partial<Record<AiModelsEnum, { label: string; placeholder: st
 
 function PromptSection({ model }: { model: AiModelsEnum }) {
   const { states, setField } = useAiModelStore();
+  const styleId = useAiGenerationControlStore((st) => st.styleId);
   const s = states[model] as any;
   const isOptional = OPTIONAL_PROMPT_MODELS.has(model);
   const hasNoPrompt = NO_PROMPT_MODELS.has(model);
+  // A picked style describes the look, so a required prompt becomes optional.
+  // A picked style plus reference images/videos makes a required prompt optional.
+  const styled = !!styleId && STYLE_MODEL_IDS.has(model) && !!s && hasReferences(s);
+  const styleNoRefs = !!styleId && STYLE_MODEL_IDS.has(model) && !styled;
   const [enabled, setEnabled] = useState(!!s?.prompt);
 
   if (hasNoPrompt) return null;
 
   const copy = PROMPT_COPY[model];
-  const placeholder =
-    copy?.placeholder ??
-    (isOptional ? "Add a prompt to guide generation…" : "Describe what you want to generate…");
+  const placeholder = styled
+    ? "Optional: describe what's in the shot. The style sets the look."
+    : (copy?.placeholder ??
+      (isOptional ? "Add a prompt to guide generation…" : "Describe what you want to generate…"));
 
   return (
     <div className="flex flex-col gap-2">
@@ -134,6 +172,14 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
       <div className="flex items-center justify-between px-0.5">
         <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
           {copy?.label ?? "Prompt"}
+          {styled && !isOptional && (
+            <span className="ml-1.5 normal-case tracking-normal font-medium text-white/40">optional with a style</span>
+          )}
+          {styleNoRefs && !isOptional && (
+            <span className="ml-1.5 normal-case tracking-normal font-medium text-white/40">
+              required, or add a reference
+            </span>
+          )}
         </span>
         {isOptional && (
           <button
@@ -198,11 +244,14 @@ function SelectRow({
   options,
   value,
   onChange,
+  labels,
 }: {
   label: string;
   options: readonly any[];
   value: any;
   onChange: (v: any) => void;
+  /** Display text per option value (default: the value itself). */
+  labels?: Record<string, string>;
 }) {
   const isBool = typeof options[0] === "boolean";
   const isNum = typeof options[0] === "number";
@@ -214,7 +263,7 @@ function SelectRow({
   };
 
   const mappedOptions = options.map((o: any) => ({
-    label: toDisplay(o),
+    label: labels?.[String(o)] ?? toDisplay(o),
     value: typeof o === "boolean" ? o : typeof o === "number" ? o : String(o),
   }));
 
@@ -350,6 +399,31 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Aspect Ratio" options={GptImage2OptionsConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
         <SelectRow label="Quality" options={GptImage2OptionsConst.quality} value={s.quality} onChange={(v) => set("quality", v)} />
+      </>
+    );
+
+  if (model === AiModelsEnum.SMPL_IMAGE_REFRAME || model === AiModelsEnum.SMPL_VIDEO_REFRAME)
+    return (
+      <>
+        <SelectRow label="Aspect Ratio" options={MediaEditToolOptions.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
+        <SelectRow label="Fill" options={MediaEditToolOptions.fit} labels={FIT_LABELS} value={s.fit} onChange={(v) => set("fit", v)} />
+        {s.fit === "crop" && (
+          <SelectRow label="Focus" options={MediaEditToolOptions.position} labels={POSITION_LABELS} value={s.position} onChange={(v) => set("position", v)} />
+        )}
+      </>
+    );
+
+  if (model === AiModelsEnum.SMPL_IMAGE_UPSCALE)
+    return <SelectRow label="Scale" options={MediaEditToolOptions.imageScale} labels={SCALE_LABELS} value={s.scale} onChange={(v) => set("scale", v)} />;
+
+  if (model === AiModelsEnum.SMPL_VIDEO_UPSCALE)
+    return <SelectRow label="Resolution" options={MediaEditToolOptions.videoResolution} labels={RESOLUTION_LABELS} value={s.resolution} onChange={(v) => set("resolution", v)} />;
+
+  if (model === AiModelsEnum.SMPL_VIDEO_FPS_BOOST)
+    return (
+      <>
+        <SelectRow label="Frame Rate" options={MediaEditToolOptions.fps} labels={FPS_LABELS} value={s.fps} onChange={(v) => set("fps", v)} />
+        <SelectRow label="Mode" options={MediaEditToolOptions.fpsMode} labels={FPS_MODE_LABELS} value={s.mode} onChange={(v) => set("mode", v)} />
       </>
     );
 
@@ -769,6 +843,9 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
   // ── ADS STUDIO ─────────────────────────────────────────────────────────────
   if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO) return <AdsStudioPanel />;
 
+  // ── EDIT TOOLS (ffmpeg: reframe, upscale, FPS boost) ──────────────────────
+  if (isEditTool(model)) return <EditToolPanel key={model} model={model} />;
+
   return null;
 }
 
@@ -1043,6 +1120,159 @@ function VoiceChangerPanel() {
   );
 }
 
+// ─── edit tools (reframe / upscale / fps boost) ───────────────────────────────
+
+type MediaInfo = { width: number; height: number; duration: number };
+
+/** Size (and length, for videos) of a picked file, read by the browser; null if it can't. */
+function readMediaInfo(url: string, type: "image" | "video"): Promise<MediaInfo | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(null), 15_000);
+    const done = (info: MediaInfo | null) => {
+      clearTimeout(timer);
+      resolve(info);
+    };
+    if (type === "image") {
+      const img = new window.Image();
+      img.onload = () => done({ width: img.naturalWidth, height: img.naturalHeight, duration: 0 });
+      img.onerror = () => done(null);
+      img.src = url;
+      return;
+    }
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.onloadedmetadata = () => {
+      done({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: Number.isFinite(video.duration) ? video.duration : 0,
+      });
+      video.removeAttribute("src");
+      video.load();
+    };
+    video.onerror = () => done(null);
+    video.src = url;
+  });
+}
+
+const L = MediaEditToolLimits;
+const EDIT_TOOL_COPY: Partial<Record<AiModelsEnum, { label: string; hint: string; maxSeconds?: number }>> = {
+  [AiModelsEnum.SMPL_IMAGE_REFRAME]: { label: "Image to reframe", hint: "Pick a new aspect ratio and how to fill it." },
+  [AiModelsEnum.SMPL_IMAGE_UPSCALE]: { label: "Image to upscale", hint: `Up to ${L.imageMaxLongSide}px on the long side.` },
+  [AiModelsEnum.SMPL_VIDEO_REFRAME]: { label: "Video to reframe", hint: `Up to ${L.videoReframeMaxSeconds} seconds. The sound is kept.`, maxSeconds: L.videoReframeMaxSeconds },
+  [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: { label: "Video to smooth", hint: `Up to ${L.fpsBoostMaxSeconds} seconds. Smooth mode works up to 1080p.`, maxSeconds: L.fpsBoostMaxSeconds },
+  [AiModelsEnum.SMPL_VIDEO_UPSCALE]: { label: "Video to upscale", hint: `Up to ${L.videoUpscaleMaxSeconds} seconds. The sound is kept.`, maxSeconds: L.videoUpscaleMaxSeconds },
+};
+const UPSCALE_SHORT_SIDE: Record<string, number> = { "1080p": 1080, "1440p": 1440, "4k": 2160 };
+
+/** One image or video slot, plus what the tool will make of it. Runs with ffmpeg on our backend. */
+function EditToolPanel({ model }: { model: AiModelsEnum }) {
+  const { states, setField: raw } = useAiModelStore();
+  const set = (k: string, v: unknown) => raw(model, k, v);
+  const s = states[model] as
+    | (Record<string, unknown> & { mode?: string; resolution?: string })
+    | undefined;
+  const isVideoTool = !!s && "videoUrl" in s;
+  const urlKey = isVideoTool ? "videoUrl" : "imageUrl";
+  const copy = EDIT_TOOL_COPY[model];
+  const keepsShape = model !== AiModelsEnum.SMPL_IMAGE_REFRAME && model !== AiModelsEnum.SMPL_VIDEO_REFRAME;
+
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Size of the picked file, for the hints below (kept with its URL so a stale one never shows).
+  const [measured, setMeasured] = useState<{ url: string; info: MediaInfo | null } | null>(null);
+
+  const url = typeof s?.[urlKey] === "string" ? (s[urlKey] as string) : "";
+  const info = measured && measured.url === url ? measured.info : null;
+  // Measure a file picked before (e.g. after switching tools or reloading).
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    readMediaInfo(url, isVideoTool ? "video" : "image").then((m) => {
+      if (!cancelled) setMeasured({ url, info: m });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [url, isVideoTool]);
+
+  if (!s || !copy) return null;
+
+  const pick = async (picked: string | undefined) => {
+    setOpen(false);
+    if (!picked) return;
+    setError(null);
+    const meta = await readMediaInfo(picked, isVideoTool ? "video" : "image");
+    if (isVideoTool && meta?.duration && copy.maxSeconds && meta.duration > copy.maxSeconds + 0.5) {
+      setError(
+        `This tool works on videos up to ${copy.maxSeconds} seconds (this one is ${Math.round(meta.duration)}s). You can cut it when you upload it.`,
+      );
+      return;
+    }
+    set(urlKey, picked);
+    setMeasured({ url: picked, info: meta });
+    // Every second is processed, so the video's length sets the price.
+    if (isVideoTool) set("duration", meta?.duration ? Math.ceil(meta.duration) : 0);
+    if (keepsShape) set("aspectRatio", meta ? nearestAspectRatio(meta.width, meta.height) : "");
+  };
+
+  // Warnings for settings that would fail on this file (the backend refunds, but say it first).
+  let warning: string | null = null;
+  if (info) {
+    const long = Math.max(info.width, info.height);
+    const short = Math.min(info.width, info.height);
+    if (model === AiModelsEnum.SMPL_VIDEO_FPS_BOOST && s.mode === "smooth" && long > L.fpsBoostSmoothMaxLongSide) {
+      warning = "Smooth mode works on videos up to 1080p. Choose Fast, or a smaller video.";
+    } else if (
+      model === AiModelsEnum.SMPL_VIDEO_UPSCALE &&
+      s.resolution &&
+      short >= UPSCALE_SHORT_SIDE[s.resolution] * 0.95
+    ) {
+      warning = `This video is already ${s.resolution === "4k" ? "4K" : s.resolution} or sharper. Pick a higher resolution.`;
+    } else if (model === AiModelsEnum.SMPL_IMAGE_UPSCALE && long * 1.05 > L.imageMaxLongSide) {
+      warning = `This image is already at the largest size we make (${L.imageMaxLongSide}px).`;
+    }
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-1.5">
+        <SingleMediaSlot
+          label={copy.label}
+          type={isVideoTool ? "video" : "image"}
+          url={url || undefined}
+          onOpenPicker={() => setOpen(true)}
+          onClear={() => {
+            set(urlKey, "");
+            if (isVideoTool) set("duration", 0);
+            if (keepsShape) set("aspectRatio", "");
+            setError(null);
+          }}
+        />
+        {error || warning ? (
+          <p className="px-0.5 text-[11px] leading-snug text-red-400">{error ?? warning}</p>
+        ) : (
+          <p className="px-0.5 text-[11px] leading-snug text-muted-foreground">
+            {url && info
+              ? `${info.width} × ${info.height}${isVideoTool && info.duration ? ` · ${info.duration.toFixed(1)}s` : ""}. ${copy.hint}`
+              : copy.hint}
+          </p>
+        )}
+      </div>
+
+      <MediaManagerDialog
+        open={open}
+        onOpenChange={(o) => !o && setOpen(false)}
+        selectedImage={url || undefined}
+        onSelect={(u) => void pick(u[0])}
+        maxSelections={1}
+        mediaType={isVideoTool ? "video" : "image"}
+      />
+    </>
+  );
+}
+
 // ─── ads studio ───────────────────────────────────────────────────────────────
 
 function AdsStudioPanel() {
@@ -1161,6 +1391,13 @@ function ModelHeroCard({
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />
+      ) : isEditTool(model) && modelDef ? (
+        // Edit tools: a tinted tile with the tool's icon until preview files exist.
+        <div className="absolute inset-0 flex items-start justify-center pt-8 bg-[radial-gradient(120%_90%_at_50%_0%,rgba(107,65,255,0.35),rgba(234,75,255,0.12)_45%,transparent_75%)]">
+          <span className="text-[40px] opacity-90" aria-hidden>
+            {modelDef.svg}
+          </span>
+        </div>
       ) : null}
 
       {/* Gradient overlay */}
@@ -1256,12 +1493,87 @@ function ModelPickerPanel({
   );
 }
 
+// ─── style card ───────────────────────────────────────────────────────────────
+
+function StyleThumb({ index, videoUrl }: { index: number; videoUrl?: string }) {
+  return videoUrl ? (
+    <video src={videoUrl} autoPlay muted loop playsInline className="h-full w-full object-cover" />
+  ) : (
+    <span
+      className={`block h-full w-full bg-gradient-to-br ${STYLE_FALLBACK_GRADIENTS[index % STYLE_FALLBACK_GRADIENTS.length]}`}
+    />
+  );
+}
+
+/** "Style · New · Apply >": opens the Styles tab; shows the picked style once there is one. */
+function StyleCard() {
+  const { styleId, setStyleId, setExplorerView, setSidebarView } = useAiGenerationControlStore();
+  const { data: styles = [] } = useStylesQuery();
+  const style = findStyle(styles, styleId);
+  const shown = style ? [style, ...styles.filter((x) => x.id !== style.id).slice(0, 2)] : styles.slice(0, 3);
+  const TILT = ["-rotate-[8deg]", "rotate-0", "rotate-[8deg]"];
+
+  const open = () => {
+    setSidebarView("default");
+    setExplorerView("styles");
+  };
+
+  return (
+    <div className="group flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.04] pr-2 transition-colors hover:bg-white/[0.07]">
+      <button
+        type="button"
+        onClick={open}
+        className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-3 text-left"
+        aria-label={style ? `Style: ${style.name}. Change style` : "Apply a style"}
+      >
+        {/* Stacked tiles */}
+        <span className="relative h-9 w-12 shrink-0" aria-hidden>
+          {shown
+            .map((s, i) => (
+              <span
+                key={s.id}
+                className={`absolute top-0 h-9 w-7 overflow-hidden rounded-md border border-white/25 shadow-md shadow-black/50 ${TILT[i]}`}
+                style={{ left: i * 8, zIndex: 3 - i }}
+              >
+                <StyleThumb index={styles.indexOf(s)} videoUrl={s.videoUrl} />
+              </span>
+            ))}
+        </span>
+        <span className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="truncate text-[14px] font-semibold text-white">{style ? style.name : "Style"}</span>
+          {!style && (
+            <span className="shrink-0 rounded-md bg-[#d4ff00]/15 px-1.5 py-px text-[10px] font-semibold text-[#d4ff00]">
+              New
+            </span>
+          )}
+        </span>
+        <span className="flex shrink-0 items-center gap-0.5 text-[12px] font-medium text-white/45 transition-colors group-hover:text-white/70">
+          {style ? "Change" : "Apply"}
+          <ChevronRight className="size-3.5" />
+        </span>
+      </button>
+      {style && (
+        <button
+          type="button"
+          onClick={() => setStyleId(null)}
+          aria-label="Remove style"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <X className="size-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── generate button ──────────────────────────────────────────────────────────
 
 function GenerateButton() {
-  const { model, projectId, mediaType } = useAiGenerationControlStore();
+  const { model, projectId, mediaType, styleId } = useAiGenerationControlStore();
   const { states } = useAiModelStore();
   const { data: costData } = useGenerationCostQuery();
+  // The picked style rides along for models that take one (and makes the prompt optional).
+  const styled = withStyle(model, (states[model] ?? {}) as object, styleId);
   const generation = useGenerateMutation();
   const router = useRouter();
   const pathname = usePathname();
@@ -1269,13 +1581,18 @@ function GenerateButton() {
 
   const isValid = () => {
     const v = ModelsValidatorSchemaMap[model];
-    return v ? v.safeParse(states[model]).success : false;
+    return v ? v.safeParse(styled.forValidation).success : false;
   };
 
   const handleGenerate = async () => {
     try {
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
-      await generation.mutateAsync({ model, projectId, mediaType, input: states[model]! });
+      await generation.mutateAsync({
+        model,
+        projectId,
+        mediaType,
+        input: styled.input as NonNullable<(typeof states)[typeof model]>,
+      });
       // Already on a create page (image, video, …)? Stay there to watch the result.
       if (!pathname.startsWith("/create")) {
         router.push("/create");
@@ -1342,7 +1659,7 @@ export function CreateSidebar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { model, setModel, sidebarView, setSidebarView } = useAiGenerationControlStore();
-  const [videoMode, setVideoMode] = useState<VideoMode>("create");
+  const [mode, setMode] = useState<EditMode>("create");
   const [pickerOpen, setPickerOpen] = useState(false);
 
   // Sync model from ?model= URL param on mount
@@ -1364,27 +1681,27 @@ export function CreateSidebar() {
   const isImage = pathname.includes("/image");
   const isAudio = pathname.includes("/audio");
   const isVideo = !isImage && !isAudio;
+  // Video and image pages have Create / Edit tabs; audio has one list.
+  const hasModes = !isAudio;
+  const createList = isImage ? CREATE_IMAGE_MODELS : CREATE_VIDEO_MODELS;
+  const editList = isImage ? EDIT_IMAGE_MODELS : EDIT_VIDEO_MODELS;
 
-  let modelsToShow: Model[];
-  if (isImage) {
-    modelsToShow = CREATE_IMAGE_MODELS;
-  } else if (isAudio) {
-    modelsToShow = AUDIO_MODELS;
-  } else if (videoMode === "create") {
-    modelsToShow = VIDEO_MODELS.filter((m) => CREATE_VIDEO_MODEL_IDS.has(m.id));
-  } else {
-    modelsToShow = VIDEO_MODELS.filter((m) => !CREATE_VIDEO_MODEL_IDS.has(m.id));
-  }
+  // The tab follows the model, so links like ?model=smpl-video-upscale open on Edit.
+  useEffect(() => {
+    if (!hasModes) return;
+    if (editList.some((m) => m.id === model)) setMode("edit");
+    else if (createList.some((m) => m.id === model)) setMode("create");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model, isImage, hasModes]);
 
-  const handleVideoModeChange = (mode: VideoMode) => {
-    setVideoMode(mode);
+  const modelsToShow: Model[] = isAudio ? AUDIO_MODELS : mode === "create" ? createList : editList;
+
+  const handleModeChange = (next: EditMode) => {
+    setMode(next);
     setSidebarView("default");
-    const next =
-      mode === "create"
-        ? VIDEO_MODELS.filter((m) => CREATE_VIDEO_MODEL_IDS.has(m.id))
-        : VIDEO_MODELS.filter((m) => !CREATE_VIDEO_MODEL_IDS.has(m.id));
-    if (next.length > 0 && !next.some((m) => m.id === model)) {
-      handleModelSelect(next[0].id);
+    const list = next === "create" ? createList : editList;
+    if (list.length > 0 && !list.some((m) => m.id === model)) {
+      handleModelSelect(list[0].id);
     }
   };
 
@@ -1397,28 +1714,28 @@ export function CreateSidebar() {
   return (
     // The panel sits one shade above the page, so its controls move one shade up too.
     <aside className="h-full border-r border-border bg-white/[0.025] flex flex-col overflow-hidden [--card:var(--background-light)] [--bg-card:var(--background-light)] [--bg-elevated:var(--background-lighter)]">
-      {/* Video Create / Edit sub-tabs */}
-      {isVideo && (
+      {/* Create / Edit sub-tabs (video and image pages) */}
+      {hasModes && (
         <div className="flex flex-col border-b border-border flex-shrink-0">
           <div className="flex w-full">
-            {(["create", "edit"] as const).map((mode) => (
+            {(["create", "edit"] as const).map((tab) => (
               <button
-                key={mode}
+                key={tab}
                 type="button"
-                onClick={() => handleVideoModeChange(mode)}
+                onClick={() => handleModeChange(tab)}
                 className={`flex-1 py-3 text-xs font-semibold border-b-2 transition-colors ${
-                  videoMode === mode && sidebarView === "default"
+                  mode === tab && sidebarView === "default"
                     ? "border-white text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {mode === "create" ? "Create Video" : "Edit Video"}
+                {tab === "create" ? "Create" : "Edit"} {isImage ? "Image" : "Video"}
               </button>
             ))}
           </div>
 
-          {/* How it works tab — only for models that have data */}
-          {HOW_IT_WORKS_MAP[model] && (
+          {/* How it works tab — video models that have data (only the video page shows it) */}
+          {isVideo && HOW_IT_WORKS_MAP[model] && (
             <button
               type="button"
               onClick={() =>
@@ -1452,6 +1769,9 @@ export function CreateSidebar() {
           />
         ) : (
           <>
+            {/* Style (image and video prompt models) */}
+            {hasModes && STYLE_MODEL_IDS.has(model) && <StyleCard />}
+
             {/* Prompt section */}
             <PromptSection model={model} />
 

@@ -9,6 +9,7 @@ import {
   IMAGE_MODELS,
   Model,
   VIDEO_MODELS,
+  isEditTool,
 } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
@@ -21,8 +22,8 @@ const MEDIA_TYPES: {
   label: string;
   models: Model[];
 }[] = [
-  { value: GenerationTypeEnum.IMAGE, label: "Image", models: IMAGE_MODELS },
-  { value: GenerationTypeEnum.VIDEO, label: "Video", models: VIDEO_MODELS },
+  { value: GenerationTypeEnum.IMAGE, label: "Image", models: IMAGE_MODELS.filter((m) => !isEditTool(m.id)) },
+  { value: GenerationTypeEnum.VIDEO, label: "Video", models: VIDEO_MODELS.filter((m) => !isEditTool(m.id)) },
   { value: GenerationTypeEnum.AUDIO, label: "Audio", models: AUDIO_MODELS },
 ];
 

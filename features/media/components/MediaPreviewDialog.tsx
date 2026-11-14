@@ -16,6 +16,7 @@ import {
   IMAGE_MODELS,
   STUDIO_MODELS,
   VIDEO_MODELS,
+  isEditTool,
 } from "@/features/generation/enums/models.enum";
 import {
   useDownloadMedia,
@@ -140,7 +141,9 @@ export function MediaPreviewDialog({
             {!template &&
               media.model &&
               onEditOpen &&
-              media.model !== AiModelsEnum.HIGGSFIELD_ADS_STUDIO && (
+              media.model !== AiModelsEnum.HIGGSFIELD_ADS_STUDIO &&
+              // Edit-tool results are re-made from the Create sidebar, not edited in place.
+              !isEditTool(media.model) && (
                 <button
                   type="button"
                   onClick={onEditOpen}

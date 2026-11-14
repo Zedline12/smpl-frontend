@@ -9,6 +9,7 @@ import {
   IMAGE_MODELS,
   VIDEO_MODELS,
   AUDIO_MODELS,
+  isEditTool,
 } from "@/features/generation/enums/models.enum";
 import {
   GenerationTypeEnum,
@@ -117,11 +118,12 @@ export default function PromptComposerFooter({
           {mediaType && (
             <ModelSelector
               models={
-                mediaType === GenerationTypeEnum.VIDEO
+                (mediaType === GenerationTypeEnum.VIDEO
                   ? VIDEO_MODELS
                   : mediaType === GenerationTypeEnum.AUDIO
                   ? AUDIO_MODELS
                   : IMAGE_MODELS
+                ).filter((m) => !isEditTool(m.id))
               }
             />
           )}

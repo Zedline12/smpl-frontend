@@ -75,6 +75,18 @@ import {
 } from "./models/ads-multiplier.type";
 import { IVoiceChangerInput, voiceChangerValidationSchema } from "./models/voice-changer.type";
 import {
+  IImageReframeInput,
+  IImageUpscaleInput,
+  IVideoFpsBoostInput,
+  IVideoReframeInput,
+  IVideoUpscaleInput,
+  imageReframeValidationSchema,
+  imageUpscaleValidationSchema,
+  videoFpsBoostValidationSchema,
+  videoReframeValidationSchema,
+  videoUpscaleValidationSchema,
+} from "./models/media-edit-tools.type";
+import {
   ISeedance25RefToVideoInput,
   seedance25RefValidationSchema,
 } from "./models/seedance-2.5-ref-to-video.type";
@@ -113,7 +125,12 @@ export type AllModelsInput =
   | IMusicV25Input
   | ISeedance25RefToVideoInput
   | IAdsMultiplierInput
-  | IVoiceChangerInput;
+  | IVoiceChangerInput
+  | IImageReframeInput
+  | IImageUpscaleInput
+  | IVideoReframeInput
+  | IVideoFpsBoostInput
+  | IVideoUpscaleInput;
 
 export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.VEO_3]: veo3ValidationSchema,
@@ -138,6 +155,11 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.FAL_SEEDANCE_2_5]: seedance25RefValidationSchema,
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: adsMultiplierValidationSchema,
   [AiModelsEnum.SMPL_VOICE_CHANGER]: voiceChangerValidationSchema,
+  [AiModelsEnum.SMPL_IMAGE_REFRAME]: imageReframeValidationSchema,
+  [AiModelsEnum.SMPL_IMAGE_UPSCALE]: imageUpscaleValidationSchema,
+  [AiModelsEnum.SMPL_VIDEO_REFRAME]: videoReframeValidationSchema,
+  [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: videoFpsBoostValidationSchema,
+  [AiModelsEnum.SMPL_VIDEO_UPSCALE]: videoUpscaleValidationSchema,
 };
 export enum GenerationTypeEnum {
   VIDEO = "video",

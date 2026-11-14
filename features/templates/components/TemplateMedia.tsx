@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Template, templateLayout } from "../types";
 
 /** Plays the videos inside `ref` only while it's on screen. */
-function usePlayWhenVisible<T extends HTMLElement>() {
+export function usePlayWhenVisible<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   useEffect(() => {
     const el = ref.current;

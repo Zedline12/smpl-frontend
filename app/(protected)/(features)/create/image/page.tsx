@@ -26,7 +26,7 @@ export default function CreateImagePage() {
       {/* Desktop */}
       <div className="md:flex hidden w-full h-full flex-col text-foreground">
         <div className="flex-1 overflow-hidden">
-          <MediaExplorer explore />
+          <MediaExplorer explore styles />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           {/* <PromptComposer /> */}
@@ -36,7 +36,7 @@ export default function CreateImagePage() {
       {/* Mobile */}
       <div className="p-5 md:hidden block h-full text-foreground">
         <div className="h-[600px]">
-          <MediaExplorer explore />
+          <MediaExplorer explore styles />
         </div>
         <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
           {/* <PromptComposer /> */}

@@ -5,7 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo, ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
-import { Compass, History as HistoryIcon, LucideIcon } from "lucide-react";
+import { Compass, History as HistoryIcon, LucideIcon, WandSparkles } from "lucide-react";
+import { StylesView } from "@/features/styles/components/StylesView";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,11 @@ interface MediaExplorerProps {
   defaultModel?: AiModelsEnum;
   /** Adds the Explore view (templates) next to History. */
   explore?: boolean;
+  /**
+   * Adds the Styles tab (create pages). The tab is then kept in the shared store,
+   * so the sidebar's Style card can open it.
+   */
+  styles?: boolean;
   /** Job domain to poll; studios with isolated jobs pass their own. */
   jobsDomain?: string;
   /** "music" (Artist page): waveform song players and the DJ generating tile. */
@@ -48,29 +54,38 @@ interface MediaExplorerProps {
   /** Explore-only content (hero, examples), shown above the templates. */
   children?: ReactNode;
 }
-type ExplorerView = "explore" | "history";
+type ExplorerView = "explore" | "history" | "styles";
 
 const CARD_ASPECT_RATIO = "16:9";
 const CARD_WIDTH = 400;
 const CARD_HEIGHT = calculateHeight(CARD_ASPECT_RATIO, CARD_WIDTH);
 
-const VIEW_TABS: { value: ExplorerView; label: string; icon: LucideIcon }[] = [
+const VIEW_TABS: { value: ExplorerView; label: string; icon: LucideIcon; isNew?: boolean }[] = [
   { value: "explore", label: "Explore", icon: Compass },
   { value: "history", label: "History", icon: HistoryIcon },
+  { value: "styles", label: "Styles", icon: WandSparkles, isNew: true },
 ];
 
 export default function MediaExplorer({
   defaultProjectId,
   defaultModel,
   explore = false,
+  styles = false,
   jobsDomain,
   variant = "default",
   children,
 }: MediaExplorerProps) {
-  const [view, setView] = useState<ExplorerView>(
+  const [localView, setLocalView] = useState<ExplorerView>(
     explore ? "explore" : "history",
   );
+  const storeView = useAiGenerationControlStore((s) => s.explorerView);
+  const setStoreView = useAiGenerationControlStore((s) => s.setExplorerView);
+  // With Styles the tab lives in the store (the sidebar opens it); elsewhere it's local.
+  const view: ExplorerView = styles ? storeView : localView;
+  const setView = styles ? setStoreView : setLocalView;
   const isExplore = explore && view === "explore";
+  const isStyles = styles && view === "styles";
+  const isHistory = !isExplore && !isStyles;
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<MediaFilters>(() =>
     createMediaFilters(defaultModel),
@@ -89,7 +104,7 @@ export default function MediaExplorer({
   const historyQuery = useInfiniteMediaQuery({
     projectId: defaultProjectId,
     filters,
-    enabled: !isExplore,
+    enabled: isHistory,
   });
   // Explore shows the templates of one model: the page's own model (studios), else the
   // ?model= in the URL (set when a model is picked), else the model selected right now.
@@ -160,7 +175,7 @@ export default function MediaExplorer({
   const [lastQueuedCount, setLastQueuedCount] = useState(queuedCount);
   if (queuedCount !== lastQueuedCount) {
     setLastQueuedCount(queuedCount);
-    if (queuedCount > lastQueuedCount && view === "explore") setView("history");
+    if (queuedCount > lastQueuedCount && view !== "history") setView("history");
   }
 
   const failedQueue = useMemo(() => {
@@ -187,7 +202,7 @@ export default function MediaExplorer({
       <div className="flex items-center justify-between gap-3 w-full py-2">
         <div className="flex items-center gap-1">
           {explore &&
-            VIEW_TABS.map(({ value, label, icon: Icon }) => (
+            VIEW_TABS.filter((t) => t.value !== "styles" || styles).map(({ value, label, icon: Icon, isNew }) => (
               <button
                 key={value}
                 type="button"
@@ -200,10 +215,15 @@ export default function MediaExplorer({
               >
                 <Icon className="size-4" />
                 {label}
+                {isNew && (
+                  <span className="rounded-md bg-[#d4ff00]/15 px-1.5 py-px text-[10px] font-semibold text-[#d4ff00]">
+                    New
+                  </span>
+                )}
               </button>
             ))}
         </div>
-        {!isExplore && (
+        {isHistory && (
           <MediaFilterMenu
             value={filters}
             onChange={setFilters}
@@ -253,7 +273,7 @@ export default function MediaExplorer({
         </AlertDialog>
       )}
 
-      {!isExplore && topRowQueues.length > 0 && (
+      {isHistory && topRowQueues.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 px-4 pt-4">
           {topRowQueues.map((queue) => (
             <QueuedGenerationTile key={queue.id} queue={queue} height={CARD_HEIGHT} variant={variant} />
@@ -263,7 +283,9 @@ export default function MediaExplorer({
 
       {isExplore && children}
 
-      {!isMediaFetched || (isMediaFetching && shownCount === 0) ? (
+      {isStyles ? (
+        <StylesView />
+      ) : !isMediaFetched || (isMediaFetching && shownCount === 0) ? (
         <MediaGridSkeleton />
       ) : isExplore ? (
         <TemplateGrid templates={templates} />
@@ -283,9 +305,9 @@ export default function MediaExplorer({
         />
       )}
 
-      {!isExplore && <MediaSelectionBar media={media} />}
+      {isHistory && <MediaSelectionBar media={media} />}
 
-      {isMediaFetched && shownCount > 0 && (
+      {!isStyles && isMediaFetched && shownCount > 0 && (
         <div className="flex flex-col items-center gap-3 mt-6 pb-6">
           <p className="text-sm text-muted-foreground">
             Showing {shownCount} of {totalCount}

@@ -5,8 +5,19 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CloudUpload, Check, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import {
+  UploadCancelledError,
+  applyUploadEdit,
+  uploadWithProgress,
+  type UploadEdit,
+} from "@/features/media/api/upload";
+import { UploadEditor } from "@/features/media/components/upload-editor/UploadEditor";
+import { cropImageFile } from "@/features/media/utils/crop-image";
 
 type MediaItem = { id: string; url: string; type?: string; liked?: boolean };
+/** An upload in progress: the file goes up first, then (if edited) ffmpeg runs on it. */
+type UploadState = { phase: "uploading" | "processing"; progress: number; edited: boolean };
 type ActiveTab = "uploads" | "ai-influencer" | "generations" | "liked";
 
 const TABS: { value: ActiveTab; label: string; special?: boolean }[] = [
@@ -54,10 +65,21 @@ export function MediaManagerDialog({
   const [isLoadingAiInfluencer, setIsLoadingAiInfluencer] = useState(false);
   const [generationsMedia, setGenerationsMedia] = useState<MediaItem[]>([]);
   const [isLoadingGenerations, setIsLoadingGenerations] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [upload, setUpload] = useState<UploadState | null>(null);
+  /** A picked file waiting in the editor (reframe / cut) before it's uploaded. */
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [tempSelection, setTempSelection] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadAbort = useRef<AbortController | null>(null);
+  const isUploading = upload !== null;
+
+  // Closing the dialog drops the editor, but an upload keeps going in the background:
+  // reopening shows its progress, and when it finishes it's selected as usual.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!open) setPendingFile(null);
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -126,42 +148,93 @@ export function MediaManagerDialog({
 
   // ─── Upload / delete ──────────────────────────────────────────────────────────
 
-  const uploadImage = async (file: File) => {
-    if (mediaType === "video") {
-      const isValid = await validateVideoDuration(file, 3);
-      if (!isValid) {
-        toast.error("Video must be at least 3 seconds long");
-        return;
-      }
+  /** Checks a picked / dropped file, then opens the editor for it. */
+  const pickFile = async (file: File) => {
+    const prefix = mediaType === "video" ? "video/" : "image/";
+    if (!file.type.startsWith(prefix)) {
+      toast.error(`Please choose a ${mediaType} file`);
+      return;
     }
-    setIsUploading(true);
+    if (mediaType === "video" && !(await validateVideoDuration(file, 3))) {
+      toast.error("Video must be at least 3 seconds long");
+      return;
+    }
+    setPendingFile(file);
+  };
+
+  const single = maxSelections === 1;
+
+  /** Picking is the choice: one-pick dialogs return it and close right away. */
+  const choose = (next: string[]) => {
+    setTempSelection(next);
+    if (single && next.length) {
+      onSelect(next);
+      onOpenChange(false);
+    }
+  };
+
+  /** Multi-pick dialogs hand back what's ticked when they close. No confirm button. */
+  const close = () => {
+    if (!single) onSelect(tempSelection.filter(Boolean));
+    onOpenChange(false);
+  };
+
+  const selectUploaded = (url: string) => {
+    if (single) return choose([url]);
+    if (tempSelection.includes(url) || tempSelection.length >= maxSelections) return;
+    choose([...tempSelection, url]);
+  };
+
+  /**
+   * Uploads with progress. Image crops happen in the browser first, so only the crop
+   * goes up; video cuts (and image crops the browser can't do) upload the original
+   * as a temporary source and run with ffmpeg on our backend.
+   */
+  const uploadFile = async (file: File, requested: UploadEdit | null) => {
+    setPendingFile(null);
+    setActiveTab("uploads");
+    const controller = new AbortController();
+    uploadAbort.current = controller;
+    let edit = requested;
+    let toUpload = file;
     try {
-      const previousUrls = new Set(libraryImages);
-      const sigRes = await fetch("/api/media/upload-signature", {
-        method: "POST",
-        body: JSON.stringify({ contentType: file.type }),
-        headers: { "Content-Type": "application/json" },
-      });
-      const { data: { url } } = await sigRes.json();
-      await fetch(url, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
-      toast.success("Uploaded successfully");
-      const newRes = await fetch(`/api/media/reference-${mediaType}s`);
-      const newJson = await newRes.json();
-      const newUrls: string[] = newJson.data || [];
-      setLibraryImages(newUrls);
-      const newItem = newUrls.find((u) => !previousUrls.has(u));
-      if (newItem) {
-        setTempSelection((prev) => {
-          if (maxSelections === 1) return [newItem];
-          if (prev.includes(newItem) || prev.length >= maxSelections) return prev;
-          return [...prev, newItem];
-        });
+      if (edit?.type === "image") {
+        setUpload({ phase: "processing", progress: 0, edited: true });
+        try {
+          toUpload = await cropImageFile(file, edit.crop);
+          edit = null; // already cropped
+        } catch {
+          // Too big for this browser's canvas: crop on the backend instead.
+        }
+        if (controller.signal.aborted) return;
       }
-      setActiveTab("uploads");
-    } catch {
-      toast.error("Failed to upload");
+      setUpload({ phase: "uploading", progress: 0, edited: !!requested });
+      let url = await uploadWithProgress(toUpload, {
+        purpose: edit ? "media-edit-source" : undefined,
+        signal: controller.signal,
+        onProgress: (fraction) =>
+          setUpload((u) => (u ? { ...u, progress: fraction } : u)),
+      });
+      if (edit) {
+        setUpload((u) => (u ? { ...u, phase: "processing", progress: 1 } : u));
+        url = await applyUploadEdit(url, edit);
+      }
+      if (controller.signal.aborted) return;
+      toast.success(
+        !requested
+          ? "Uploaded successfully"
+          : requested.type === "image"
+            ? "Image cropped and uploaded"
+            : "Video cut and uploaded",
+      );
+      selectUploaded(url);
+      await fetchLibrary();
+    } catch (err) {
+      if (err instanceof UploadCancelledError || controller.signal.aborted) return;
+      toast.error(err instanceof Error && err.message ? err.message : "Failed to upload");
     } finally {
-      setIsUploading(false);
+      if (uploadAbort.current === controller) uploadAbort.current = null;
+      setUpload(null);
     }
   };
 
@@ -184,33 +257,15 @@ export function MediaManagerDialog({
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const prefix = mediaType === "video" ? "video/" : "image/";
-    if (!file.type.startsWith(prefix)) {
-      toast.error(`Please drop a ${mediaType} file`);
-      return;
-    }
-    if (mediaType === "video") {
-      const isValid = await validateVideoDuration(file, 3);
-      if (!isValid) {
-        toast.error("Video must be at least 3 seconds long");
-        return;
-      }
-    }
-    uploadImage(file);
+    if (!file || isUploading) return;
+    await pickFile(file);
   };
 
   const toggleSelection = (url: string) => {
-    setTempSelection((prev) => {
-      if (prev.includes(url)) return prev.filter((item) => item !== url);
-      if (prev.length >= maxSelections) return maxSelections === 1 ? [url] : prev;
-      return [...prev, url];
-    });
-  };
-
-  const handleConfirm = () => {
-    onSelect(tempSelection.filter(Boolean));
-    onOpenChange(false);
+    if (single) return choose([url]);
+    if (tempSelection.includes(url)) return choose(tempSelection.filter((item) => item !== url));
+    if (tempSelection.length >= maxSelections) return;
+    choose([...tempSelection, url]);
   };
 
   // ─── Shared card renderer ─────────────────────────────────────────────────────
@@ -274,7 +329,7 @@ export function MediaManagerDialog({
   const selectionCount = tempSelection.filter(Boolean).length;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())}>
       <DialogContent className="max-w-[860px] w-full p-0 gap-0 border-0 bg-transparent shadow-none [&>button]:hidden">
         <div
           className="relative flex flex-col rounded-2xl overflow-hidden"
@@ -286,14 +341,23 @@ export function MediaManagerDialog({
         >
           {/* Close */}
           <button
-            onClick={() => onOpenChange(false)}
+            onClick={close}
             className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-[#2a2a2a] hover:bg-[#3a3a3a] transition-colors"
           >
             <X className="w-4 h-4 text-white" />
           </button>
 
+          {pendingFile ? (
+            <UploadEditor
+              file={pendingFile}
+              mediaType={mediaType}
+              onBack={() => setPendingFile(null)}
+              onUpload={(edit) => uploadFile(pendingFile, edit)}
+            />
+          ) : (
+          <>
           {/* Tab bar */}
-          <div className="flex items-center gap-3 px-5 pt-5 pb-4 flex-shrink-0">
+          <div className="flex items-center gap-3 px-5 pt-5 pb-4 pr-16 flex-shrink-0">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.value;
               return (
@@ -314,10 +378,12 @@ export function MediaManagerDialog({
               );
             })}
           </div>
+          {/* Divider under the tabs and the close button */}
+          <div className="h-px w-full bg-white/20 flex-shrink-0" />
 
           {/* Scrollable content */}
           <div
-            className="flex-1 overflow-y-auto px-5 pb-5"
+            className="flex-1 overflow-y-auto px-5 pt-5 pb-5"
             style={{ minHeight: 0 }}
             onDragOver={activeTab === "uploads" ? (e) => { e.preventDefault(); setIsDragging(true); } : undefined}
             onDragLeave={activeTab === "uploads" ? () => setIsDragging(false) : undefined}
@@ -330,14 +396,43 @@ export function MediaManagerDialog({
                 <div
                   onClick={() => !isUploading && fileInputRef.current?.click()}
                   className={cn(
-                    "aspect-square rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors",
+                    "aspect-square rounded-xl flex flex-col items-center justify-center gap-2 transition-colors",
+                    isUploading ? "cursor-default" : "cursor-pointer",
                     isDragging
                       ? "border-2 border-dashed border-white/40 bg-white/5"
                       : "border border-dashed border-[#3a3a3a] bg-[#222] hover:border-white/20",
                   )}
                 >
-                  {isUploading ? (
-                    <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
+                  {upload ? (
+                    <div className="w-full px-4 flex flex-col items-center gap-2" aria-live="polite">
+                      {upload.phase === "uploading" ? (
+                        <>
+                          <span className="text-[20px] font-semibold text-white tabular-nums">
+                            {Math.round(upload.progress * 100)}%
+                          </span>
+                          <Progress value={Math.round(upload.progress * 100)} aria-label="Upload progress" />
+                          <span className="text-[12px] text-[#8a8a8a]">Uploading…</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              uploadAbort.current?.abort();
+                            }}
+                            className="text-[12px] font-medium text-[#b5b5b5] hover:text-white underline-offset-2 hover:underline"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Loader2 className="w-6 h-6 text-white/70 animate-spin" />
+                          <span className="text-[13px] font-medium text-white">Processing…</span>
+                          <span className="text-[12px] text-[#8a8a8a] text-center">
+                            {mediaType === "video" ? "Cutting your video" : "Cropping your image"}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <>
                       <div
@@ -413,31 +508,19 @@ export function MediaManagerDialog({
             )}
           </div>
 
-          {/* Footer */}
-          <div
-            className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
-          >
-            <span className="text-[13px] text-[#8a8a8a]">
-              {selectionCount} of {maxSelections} selected
-            </span>
-            <div className="flex gap-3">
-              <button
-                onClick={() => onOpenChange(false)}
-                className="px-4 py-2 rounded-lg text-[13px] font-medium text-[#8a8a8a] hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={isUploading}
-                className="px-4 py-2 rounded-lg text-[13px] font-medium text-white disabled:opacity-50 transition-opacity"
-                style={{ background: "linear-gradient(135deg, #6b41ff 0%, #ea4bff 100%)" }}
-              >
-                Confirm Selection
-              </button>
+          {/* Multi-pick: just the count (what's ticked is used when the dialog closes) */}
+          {!single && (
+            <div
+              className="flex items-center px-5 py-3 flex-shrink-0"
+              style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+            >
+              <span className="text-[13px] text-[#8a8a8a]">
+                {selectionCount} of {maxSelections} selected
+              </span>
             </div>
-          </div>
+          )}
+          </>
+          )}
 
           {/* Hidden file input */}
           <input
@@ -447,7 +530,7 @@ export function MediaManagerDialog({
             accept={mediaType === "video" ? "video/*" : "image/*"}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) uploadImage(file);
+              if (file) void pickFile(file);
               e.target.value = "";
             }}
           />
