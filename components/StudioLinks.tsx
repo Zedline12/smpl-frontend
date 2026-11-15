@@ -40,7 +40,7 @@ export function StudioLinks() {
             aria-current={current ? "page" : undefined}
             className={cn(
               "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm",
-              current ? "text-primary" : "text-foreground/55 hover:text-foreground",
+              current ? "text-[var(--purple-300)]" : "text-foreground/55 hover:text-foreground",
             )}
           >
             {studio.label}

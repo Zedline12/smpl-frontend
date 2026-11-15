@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ChevronRight,
   CreditCard,
+  LifeBuoy,
   Crown,
   LogOut,
   Palette,
@@ -59,12 +60,15 @@ interface AccountMenuPanelProps {
   user: any;
   onNavigate: () => void;
   onSignOut: () => void;
+  /** Opens the support form. */
+  onSupport?: () => void;
 }
 
 export function AccountMenuPanel({
   user,
   onNavigate,
   onSignOut,
+  onSupport,
 }: AccountMenuPanelProps) {
   const { remaining, allowance, usedPercentage, hasAllowance } =
     useCreditsAllowance(user);
@@ -192,6 +196,17 @@ export function AccountMenuPanel({
           </Link>
         );
       })}
+
+      {onSupport && (
+        <button
+          type="button"
+          onClick={onSupport}
+          className={cn(ROW_CLASS, "text-foreground hover:bg-accent")}
+        >
+          <LifeBuoy className="text-muted-foreground size-4 shrink-0" />
+          Support
+        </button>
+      )}
 
       <Divider />
 

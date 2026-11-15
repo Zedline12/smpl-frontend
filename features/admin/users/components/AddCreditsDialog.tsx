@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +21,13 @@ interface Props {
 export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Props) {
   const [type, setType] = useState<TransactionType>("BONUS");
   const [credits, setCredits] = useState("");
+  const [note, setNote] = useState("");
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isValid = Number(credits) > 0;
+  const amount = Number(credits);
+  const isValid = Number.isInteger(amount) && amount > 0 && note.trim().length >= 3;
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -32,16 +37,20 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
       const res = await fetch(`/api/admin/users/${userId}/credits/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, credits: Number(credits) }),
+        body: JSON.stringify({ type, credits: amount, note: note.trim() }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Something went wrong.");
         return;
       }
-      onSuccess(json.data?.creditsBalance ?? json.creditsBalance);
+      const result = json.data ?? json;
+      onSuccess(result.creditsBalance);
+      toast.success(`Added ${amount.toLocaleString()} credits`);
+      void queryClient.invalidateQueries({ queryKey: ["admin", "credit-ledger", userId] });
       onOpenChange(false);
       setCredits("");
+      setNote("");
       setType("BONUS");
     } catch {
       setError("Network error. Please try again.");
@@ -91,9 +100,23 @@ export function AddCreditsDialog({ open, onOpenChange, userId, onSuccess }: Prop
               placeholder="e.g. 500"
               className="w-full rounded-xl border border-white/10 bg-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
-            {credits !== "" && Number(credits) <= 0 && (
-              <p className="text-xs text-red-400">Amount must be greater than 0.</p>
+            {credits !== "" && !(Number.isInteger(amount) && amount > 0) && (
+              <p className="text-xs text-red-400">Use a whole number above 0.</p>
             )}
+          </div>
+
+          {/* Reason: kept on the ledger row and shown to the user next to it */}
+          <div className="space-y-2">
+            <label className="text-xs text-white/40 uppercase tracking-wider">Reason</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={500}
+              rows={2}
+              placeholder="e.g. Make-good for the outage on May 3"
+              className="w-full resize-none rounded-xl border border-white/10 bg-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-white/20"
+            />
+            <p className="text-[11px] text-white/30">Saved on the credit history and shown to the user.</p>
           </div>
 
           {error && (

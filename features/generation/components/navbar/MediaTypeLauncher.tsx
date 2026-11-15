@@ -129,7 +129,7 @@ export function MediaTypeLauncher() {
             className={cn(
               "shrink-0 cursor-pointer rounded-lg px-2 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors sm:px-2.5 sm:text-sm",
               isCurrent
-                ? "text-primary"
+                ? "text-[var(--purple-300)]"
                 : isOpen
                   ? "bg-accent text-foreground"
                   : "text-foreground/55 hover:text-foreground",

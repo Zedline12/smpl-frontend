@@ -13,13 +13,11 @@ import {
   type Style,
 } from "../styles";
 
-const display = { fontFamily: "var(--font-display)" };
-
 function StylesHero() {
   return (
     <section className="mb-10 mt-4 flex flex-col items-center justify-between gap-8 md:flex-row md:gap-16">
       <div className="max-w-xl flex-1">
-        <h2 className="text-3xl uppercase tracking-tight text-white md:text-4xl" style={display}>
+        <h2 className="text-[34px] font-extrabold leading-none tracking-tight text-white md:text-[44px]">
           One idea, any style
         </h2>
         <p className="mt-3 text-base leading-relaxed text-white/60">
@@ -92,8 +90,7 @@ function StyleCard({
         </span>
       )}
       <span
-        className="absolute bottom-4 left-4 right-4 text-[15px] uppercase leading-tight text-white"
-        style={display}
+        className="absolute bottom-4 left-4 right-4 text-[16px] font-extrabold leading-tight tracking-tight text-white"
       >
         {style.name}
       </span>

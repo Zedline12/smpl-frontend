@@ -6,10 +6,10 @@ export default function AssetsPage() {
       <div className="container mx-auto flex min-h-full max-w-7xl flex-col gap-8 p-6 md:p-10">
         <div className="flex flex-col gap-1.5">
           <h1 className="bg-gradient-to-br from-white via-white to-neutral-500 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
-            Media Library
+            Assets
           </h1>
           <p className="text-neutral-400">
-            Explore and manage your generated assets across your projects.
+            Everything you have made, in one place. Filter by type, model or project.
           </p>
         </div>
 

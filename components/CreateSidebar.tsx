@@ -1414,7 +1414,7 @@ function ModelHeroCard({
 
       {/* Text — bottom left */}
       <div className="absolute bottom-0 left-0 p-4">
-        <h2 className="text-primary font-bold text-xl leading-tight tracking-tight">
+        <h2 className="text-[var(--purple-300)] font-bold text-xl leading-tight tracking-tight">
           {title}
         </h2>
         <p className="text-white/50 text-xs mt-1 font-medium tracking-wide line-clamp-2">

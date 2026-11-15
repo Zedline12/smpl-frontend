@@ -3,6 +3,7 @@ import { AdminUserDetail } from "@/features/admin/users/types/types";
 import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
+import { CreditLedgerCard } from "@/features/admin/users/components/CreditLedgerCard";
 import UserActionsBar from "@/features/admin/users/components/UserActionsBar";
 import {
   CreditsUsageCard,
@@ -365,6 +366,8 @@ export default async function UserDetailPage({
           </p>
         )}
       </section>
+
+      <CreditLedgerCard userId={user.id} />
 
       {/* Media */}
       <section className="space-y-4">

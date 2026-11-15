@@ -29,11 +29,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  AUDIO_MODELS,
-  IMAGE_MODELS,
-  STUDIO_MODELS,
-  VIDEO_MODELS,
-} from "@/features/generation/enums/models.enum";
+  type LedgerRow,
+  ledgerTypeStyle,
+  modelName,
+  signedCredits,
+  subjectHref,
+} from "@/features/credits/ledger";
+import { LedgerThumb } from "@/features/credits/components/LedgerThumb";
 import { cn } from "@/lib/utils";
 import {
   EmptyState,
@@ -53,14 +55,6 @@ const RANGES: { value: Range; label: string }[] = [
 
 const PAGE_SIZE = 50;
 
-interface CreditTransaction {
-  id: string;
-  type: string;
-  amount: number;
-  balanceAfter: number;
-  createdAt: string;
-}
-
 interface UsageData {
   totalCost: number;
   currency: string;
@@ -69,44 +63,15 @@ interface UsageData {
   totalGenerations: number;
   daily: { date: string; credits: number }[];
   byFeature: { model: string; count: number; credits: number }[];
-  history: { data: CreditTransaction[]; total: number };
+  history: { data: LedgerRow[]; total: number };
 }
 
-const MODEL_NAMES = new Map(
-  [...IMAGE_MODELS, ...VIDEO_MODELS, ...AUDIO_MODELS, ...STUDIO_MODELS].map((m) => [
-    m.id as string,
-    m.name,
-  ]),
-);
-
-const modelName = (model: string) =>
-  MODEL_NAMES.get(model) ??
-  model
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-
-/** Label and colour per credit transaction type. */
-const TYPE_STYLES: Record<string, { label: string; className: string }> = {
-  USAGE: { label: "Usage", className: "bg-red-500/15 text-red-300" },
-  REFUND: { label: "Refund", className: "bg-emerald-500/15 text-emerald-300" },
-  PURCHASE: { label: "Purchase", className: "bg-emerald-500/15 text-emerald-300" },
-  SUBSCRIPTION_GRANT: { label: "Subscription", className: "bg-blue-500/15 text-blue-300" },
-  SUBSCRIPTION_ENDED: { label: "Plan ended", className: "bg-white/10 text-white/60" },
-  CREDIT_PACK: { label: "Credit pack", className: "bg-amber-500/15 text-amber-300" },
-  CREDIT_PACK_REFUND: { label: "Pack refunded", className: "bg-white/10 text-white/60" },
-  BONUS: { label: "Bonus", className: "bg-violet-500/15 text-violet-300" },
-  REFERRAL: { label: "Referral", className: "bg-amber-500/15 text-amber-300" },
-  FRAUD: { label: "Adjustment", className: "bg-white/10 text-white/60" },
-  OTHER: { label: "Other", className: "bg-white/10 text-white/60" },
+/** What a row was for, in a few words: the model, or the reason it was given. */
+const rowLabel = (t: LedgerRow) => {
+  if (t.model) return modelName(t.model);
+  if (t.note) return t.note;
+  return null;
 };
-
-/** Spending types take credits away; everything else adds them. */
-const isSpend = (t: CreditTransaction) =>
-  t.type === "USAGE" ||
-  t.type === "FRAUD" ||
-  t.type === "CREDIT_PACK_REFUND" ||
-  (t.type === "SUBSCRIPTION_ENDED" && t.amount < 0);
 
 async function fetchUsage(range: Range, offset: number): Promise<UsageData> {
   const res = await fetch(`/api/usage?range=${range}&offset=${offset}&limit=${PAGE_SIZE}`);
@@ -307,37 +272,59 @@ export default function UsagePage() {
           <SettingsTile className="p-0">
             <div className="divide-y divide-white/[0.05]">
               {history.map((t) => {
-                const style = TYPE_STYLES[t.type] ?? TYPE_STYLES.OTHER;
-                const spend = isSpend(t);
+                const style = ledgerTypeStyle(t.type);
+                const spend = t.amount < 0;
+                const label = rowLabel(t);
+                const project = subjectHref(t.subject);
+                // A model row can still carry a reason (e.g. why a refund happened).
+                const reason = t.model && t.note ? t.note : null;
                 return (
                   <div key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span
-                        className={cn(
-                          "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold",
-                          style.className,
-                        )}
-                      >
-                        {style.label}
-                      </span>
-                      <span className="truncate text-xs text-white/45">
-                        {new Date(t.createdAt).toLocaleString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                      <LedgerThumb media={t.media} count={t.mediaCount} />
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span
+                            className={cn(
+                              "shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+                              style.className,
+                            )}
+                          >
+                            {style.label}
+                          </span>
+                          {label && (
+                            <span className="truncate text-xs font-medium text-white/75" title={label}>
+                              {label}
+                            </span>
+                          )}
+                        </div>
+                        <span className="truncate text-xs text-white/45">
+                          {new Date(t.createdAt).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                          {reason && <span title={reason}> · {reason}</span>}
+                          {project && (
+                            <>
+                              {" · "}
+                              <Link href={project} className="underline-offset-2 hover:text-white hover:underline">
+                                Open project
+                              </Link>
+                            </>
+                          )}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-4">
                       <span
                         className={cn(
                           "text-sm font-semibold tabular-nums",
-                          spend ? "text-red-300" : "text-emerald-300",
+                          spend ? "text-red-300" : t.amount === 0 ? "text-white/50" : "text-emerald-300",
                         )}
                       >
-                        {spend ? "−" : "+"}
-                        {Math.abs(t.amount).toLocaleString()}
+                        {signedCredits(t.amount)}
                       </span>
                       <span className="hidden w-28 text-right text-xs text-white/40 tabular-nums sm:block">
                         Balance {t.balanceAfter.toLocaleString()}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import { AccountMenuPanel } from "@/components/AccountMenuPanel";
+import { SupportModal } from "@/features/support/components/SupportModal";
 import { isFreePlan } from "@/lib/subscription";
 
 const TRI_GRADIENT =
@@ -20,6 +21,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
   const pathname = usePathname();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearCloseTimer = () => {
@@ -75,6 +77,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
 
   return (
     <>
+      <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
       <Link
         className="hidden sm:block"
         href={isFreePlan(user) ? "/pricing" : "/me/settings/subscription"}
@@ -175,6 +178,10 @@ export function NavbarUserMenu({ user }: { user: any }) {
             user={user}
             onNavigate={close}
             onSignOut={handleLogout}
+            onSupport={() => {
+              close();
+              setSupportOpen(true);
+            }}
           />
         )}
       </div>
