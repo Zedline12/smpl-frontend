@@ -90,6 +90,11 @@ import {
   ISeedance25RefToVideoInput,
   seedance25RefValidationSchema,
 } from "./models/seedance-2.5-ref-to-video.type";
+import {
+  IKling40Input,
+  kling40FlashValidationSchema,
+  kling40ValidationSchema,
+} from "./models/kling-4-0.type";
 
 export interface BaseAiInput {
   prompt: string;
@@ -130,7 +135,8 @@ export type AllModelsInput =
   | IImageUpscaleInput
   | IVideoReframeInput
   | IVideoFpsBoostInput
-  | IVideoUpscaleInput;
+  | IVideoUpscaleInput
+  | IKling40Input;
 
 export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.VEO_3]: veo3ValidationSchema,
@@ -160,6 +166,8 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SMPL_VIDEO_REFRAME]: videoReframeValidationSchema,
   [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: videoFpsBoostValidationSchema,
   [AiModelsEnum.SMPL_VIDEO_UPSCALE]: videoUpscaleValidationSchema,
+  [AiModelsEnum.KLING_4_0]: kling40ValidationSchema,
+  [AiModelsEnum.KLING_4_0_FLASH]: kling40FlashValidationSchema,
 };
 export enum GenerationTypeEnum {
   VIDEO = "video",

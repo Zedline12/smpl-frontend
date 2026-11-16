@@ -35,35 +35,11 @@ import {
 import { cn } from "@/lib/utils";
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
 import type { BillingAnalytics, PackStats, PeriodKpis, PlanStats, RangeKey } from "./types";
+import { GRID, INK, MUTED, RAMP, SERIES, SURFACE, axisProps, cardClass } from "@/features/admin/components/data-viz/palette";
+import { humanize, int, monthLabel, pct, usd } from "@/features/admin/components/data-viz/format";
+import { ChartCard, Legend, TooltipBox as BaseTooltipBox } from "@/features/admin/components/data-viz/parts";
 
-// ─── palette (dataviz reference, dark steps; validated on #161616) ───────────────
-const SERIES = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"]; // blue, orange, aqua, yellow, magenta
-const INK = "#f0efec";
-const MUTED = "#898781";
-const GRID = "#2c2c2a";
-const SURFACE = "#161616";
-// Sequential blue ramp, low → high (dark mode: higher values are brighter).
-const RAMP = ["#184f95", "#1c5cab", "#256abf", "#2a78d6", "#3987e5", "#5598e7", "#6da7ec", "#86b6ef"];
-
-// ─── formatting ────────────────────────────────────────────────────────────────
-const usd = (cents: number | null | undefined, compact = false) => {
-  const v = (cents ?? 0) / 100;
-  if (compact && Math.abs(v) >= 1000)
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(v);
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: Math.abs(v) >= 1000 ? 0 : 2 }).format(v);
-};
-const int = (n: number | null | undefined) => new Intl.NumberFormat("en-US").format(n ?? 0);
-const pct = (r: number | null | undefined, digits = 1) => (r == null ? "—" : `${(r * 100).toFixed(digits)}%`);
 const months = (m: number | null | undefined) => (m == null ? "—" : `${m.toFixed(1)} mo`);
-const monthLabel = (key: string, withYear = false) => {
-  const [y, m] = key.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-US", {
-    month: "short",
-    year: withYear ? "2-digit" : undefined,
-    timeZone: "UTC",
-  });
-};
-const humanize = (s: string) => (s === "unknown" ? "Not given" : s.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()));
 
 const RANGES: { key: RangeKey; label: string }[] = [
   { key: "3", label: "3M" },
@@ -79,7 +55,7 @@ async function fetchAnalytics(range: RangeKey, refresh: boolean): Promise<Billin
   return json as BillingAnalytics;
 }
 
-const card = "rounded-2xl border border-white/[0.08] bg-[#161616]";
+const card = cardClass;
 
 // ─── page ──────────────────────────────────────────────────────────────────────
 
@@ -218,42 +194,6 @@ function Section({ title, description, children }: { title: string; description?
   );
 }
 
-function ChartCard({
-  title,
-  subtitle,
-  className,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={cn(card, "p-5 min-w-0", className)}>
-      <p className="text-[14px] font-semibold text-white">{title}</p>
-      {subtitle && <p className="text-[12px] text-white/40 mt-0.5">{subtitle}</p>}
-      <div className="mt-4">{children}</div>
-    </div>
-  );
-}
-
-function Legend({ items }: { items: { label: string; color: string; line?: boolean }[] }) {
-  return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
-      {items.map((i) => (
-        <span key={i.label} className="inline-flex items-center gap-1.5 text-[12px] text-white/60">
-          <span
-            className={cn("inline-block", i.line ? "w-3.5 h-0.5 rounded-full" : "w-2.5 h-2.5 rounded-[3px]")}
-            style={{ background: i.color }}
-          />
-          {i.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 // ─── KPIs ──────────────────────────────────────────────────────────────────────
 
 type Accent = "blue" | "violet" | "emerald" | "red" | "cyan" | "orange" | "amber" | "sky";
@@ -356,38 +296,9 @@ function KpiGrid({ current: c, previous: p }: { current: PeriodKpis; previous: P
 
 // ─── charts ────────────────────────────────────────────────────────────────────
 
-const axisProps = {
-  tickLine: false,
-  axisLine: false,
-  tick: { fill: MUTED, fontSize: 11 },
-} as const;
-
-function TooltipBox({
-  active,
-  label,
-  rows,
-}: {
-  active?: boolean;
-  label?: string;
-  rows: { label: string; value: string; color?: string; bold?: boolean }[];
-}) {
-  if (!active) return null;
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#1f1f1f] px-3 py-2.5 shadow-xl text-[12px] min-w-[170px]">
-      {label && <p className="font-semibold text-white mb-1.5">{monthLabel(label, true)}</p>}
-      <div className="space-y-1">
-        {rows.map((r) => (
-          <div key={r.label} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-1.5 text-white/60">
-              {r.color && <span className="w-2 h-2 rounded-[2px]" style={{ background: r.color }} />}
-              {r.label}
-            </span>
-            <span className={cn("tabular-nums text-white", r.bold && "font-bold")}>{r.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+/** Billing tooltips are headed by a month key ("2026-03" → "Mar 26"). */
+function TooltipBox({ label, ...rest }: React.ComponentProps<typeof BaseTooltipBox>) {
+  return <BaseTooltipBox {...rest} label={label ? monthLabel(label, true) : undefined} />;
 }
 
 const cfg = (keys: string[]): ChartConfig => Object.fromEntries(keys.map((k, i) => [k, { label: k, color: SERIES[i] }]));

@@ -142,7 +142,7 @@ export function SettingsSelect({
           else { place(); setOpen(true); setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0); }
         }}
         onKeyDown={handleTriggerKeyDown}
-        className="w-full flex items-center justify-between pl-3 pr-3 py-3 rounded-[10px] border transition-colors duration-100 focus:outline-none focus-visible:ring-2"
+        className="w-full min-w-0 flex items-center justify-between pl-3 pr-2 py-3 rounded-[10px] border transition-colors duration-100 focus:outline-none focus-visible:ring-2"
         style={{
           backgroundColor: open ? "var(--bg-elevated)" : "var(--bg-card)",
           borderColor: "var(--border-subtle)",
@@ -156,16 +156,16 @@ export function SettingsSelect({
           if (!open) (e.currentTarget as HTMLElement).style.backgroundColor = "var(--bg-card)";
         }}
       >
-        <span className="flex flex-col items-start gap-[3px] text-left">
-          <span className="text-white/40" style={{ fontSize: "12px", fontWeight: 500, lineHeight: 1.2 }}>
+        <span className="flex min-w-0 flex-col items-start gap-[3px] text-left">
+          <span className="max-w-full truncate text-white/40" style={{ fontSize: "12px", fontWeight: 500, lineHeight: 1.2 }}>
             {label}
           </span>
-          <span className="text-white" style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.2 }}>
+          <span className="max-w-full truncate text-white" style={{ fontSize: "16px", fontWeight: 600, lineHeight: 1.2 }}>
             {selectedOption?.label ?? "—"}
           </span>
         </span>
         <ChevronRight
-          className="flex-shrink-0 ml-2 transition-transform duration-150"
+          className="flex-shrink-0 ml-1 transition-transform duration-150"
           style={{
             width: 16,
             height: 16,

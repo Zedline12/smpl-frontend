@@ -198,7 +198,7 @@ export default function MediaExplorer({
   }, [queues]);
   return (
     // Always fills its parent, even with nothing to show.
-    <div className="flex h-full min-h-full w-full flex-1 flex-col overflow-y-auto rounded-2xl border border-white/15 px-3 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex h-full min-h-full w-full flex-1 flex-col overflow-y-auto [&>*]:shrink-0 rounded-2xl border border-white/15 px-3 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex items-center justify-between gap-3 w-full py-2">
         <div className="flex items-center gap-1">
           {explore &&

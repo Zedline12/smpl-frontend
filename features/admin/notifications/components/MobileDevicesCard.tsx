@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Copy, Globe, Loader2, RefreshCw, Smartphone, Trash2 } from "lucide-react";
+import { Copy, Globe, Loader2, Monitor, RefreshCw, Smartphone, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -33,6 +33,7 @@ function useCountdown(expiresAt?: string) {
 }
 
 function deviceLabel(d: AdminDevice) {
+  if (d.platform === "desktop") return d.deviceName || "Maintenance app";
   if (d.platform !== "web") return d.deviceName || (d.platform === "ios" ? "iPhone" : "Android phone");
   const ua = d.userAgent ?? "";
   const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
@@ -77,9 +78,10 @@ function ConnectPhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChang
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm border-white/10 bg-[#111] text-white">
         <DialogHeader>
-          <DialogTitle>Connect your phone</DialogTitle>
+          <DialogTitle>Connect a device</DialogTitle>
           <DialogDescription className="text-white/50">
-            Open the SMPL Notifications app and scan this code. It works once and expires in 5 minutes.
+            Scan this code with the SMPL Notifications app, or copy it into the SMPL Maintenance desktop
+            app. It works once and expires in 5 minutes.
           </DialogDescription>
         </DialogHeader>
 
@@ -116,7 +118,7 @@ function ConnectPhoneDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                 }
                 className="inline-flex items-center gap-1 text-white/60 underline-offset-2 hover:text-white hover:underline"
               >
-                <Copy className="h-3 w-3" /> Can&apos;t scan? Copy code
+                <Copy className="h-3 w-3" /> Copy code (desktop app, or can&apos;t scan)
               </button>
             </div>
           )}
@@ -176,7 +178,7 @@ export function MobileDevicesCard() {
           <p className="py-3 text-[13px] text-white/40">No devices yet.</p>
         ) : (
           list.map((d) => {
-            const Icon = d.platform === "web" ? Globe : Smartphone;
+            const Icon = d.platform === "web" ? Globe : d.platform === "desktop" ? Monitor : Smartphone;
             return (
               <div key={d.id} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/[0.03]">
                 <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04]">

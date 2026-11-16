@@ -20,6 +20,7 @@ import Seedance25RefComposer from "./composers/seedance-2.5-ref.composer";
 import GptImage2Composer from "./composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
 import GensuComposer from "./composers/gensu.composer";
+import Kling40Composer from "./composers/kling-4-0.composer";
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
@@ -105,6 +106,9 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.SMPL_GENSU && (
           <GensuComposer isFocused={isFocused} />
+        )}
+        {(model === AiModelsEnum.KLING_4_0 || model === AiModelsEnum.KLING_4_0_FLASH) && (
+          <Kling40Composer isFocused={isFocused} model={model} />
         )}
       </div>
     </div>

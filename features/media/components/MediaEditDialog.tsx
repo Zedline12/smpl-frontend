@@ -22,6 +22,7 @@ import Seedance25RefComposer from "@/features/generation/components/prompt/compo
 import GptImage2Composer from "@/features/generation/components/prompt/composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "@/features/generation/components/prompt/composers/grok-imagine-video-1.5.composer";
 import GensuComposer from "@/features/generation/components/prompt/composers/gensu.composer";
+import Kling40Composer from "@/features/generation/components/prompt/composers/kling-4-0.composer";
 
 interface MediaEditDialogProps {
   media: Media;
@@ -113,6 +114,9 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
             {model === AiModelsEnum.GPT_IMAGE_2 && <GptImage2Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5 && <GrokImagineVideo15Composer isFocused={true} editMode={true} />}
             {model === AiModelsEnum.SMPL_GENSU && <GensuComposer isFocused={true} editMode={true} />}
+            {(model === AiModelsEnum.KLING_4_0 || model === AiModelsEnum.KLING_4_0_FLASH) && (
+              <Kling40Composer isFocused={true} editMode={true} model={model} />
+            )}
           </div>
 
           {/* Confirm button */}

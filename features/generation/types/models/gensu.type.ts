@@ -3,7 +3,8 @@ import { z } from "zod";
 export const GENSU_MAX_IMAGES = 3;
 
 export const GensuInputConst = {
-  resolution: ["480p", "720p", "1080p"] as const,
+  /** Gensu runs on Kling 4.0 (720p/1080p); saved 480p requests become 720p. */
+  resolution: ["720p", "1080p"] as const,
 };
 
 export interface IGensuInput {
@@ -20,5 +21,7 @@ export const gensuValidationSchema = z.object({
     .array(z.string().url())
     .min(1)
     .max(GENSU_MAX_IMAGES),
-  resolution: z.enum(GensuInputConst.resolution).optional(),
+  resolution: z
+    .preprocess((v) => (v === "480p" ? "720p" : v), z.enum(GensuInputConst.resolution))
+    .optional(),
 }) as z.ZodType<IGensuInput>;

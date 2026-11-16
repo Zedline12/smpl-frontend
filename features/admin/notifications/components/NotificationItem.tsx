@@ -2,8 +2,14 @@
 
 import { format, formatDistanceToNow } from "date-fns";
 import {
+  Activity,
   AlertTriangle,
   Ban,
+  Bug,
+  Hourglass,
+  Layers,
+  Rocket,
+  Zap,
   CreditCard,
   LifeBuoy,
   RotateCcw,
@@ -25,6 +31,12 @@ const KIND_ICONS: Record<NotificationKind, LucideIcon> = {
   payment_disputed: AlertTriangle,
   payment_failed: CreditCard,
   support_ticket: LifeBuoy,
+  server_error: Bug,
+  error_spike: Zap,
+  stuck_jobs: Hourglass,
+  queue_backlog: Layers,
+  model_failing: Activity,
+  deploy_failed: Rocket,
 };
 
 export function NotificationItem({

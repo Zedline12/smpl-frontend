@@ -10,7 +10,13 @@ export type NotificationKind =
   | "refund"
   | "payment_disputed"
   | "payment_failed"
-  | "support_ticket";
+  | "support_ticket"
+  | "server_error"
+  | "error_spike"
+  | "stuck_jobs"
+  | "queue_backlog"
+  | "model_failing"
+  | "deploy_failed";
 
 export interface AdminNotification {
   id: string;
@@ -115,7 +121,7 @@ export function markAllNotificationsRead(): Promise<{ updated: number }> {
 
 export interface AdminDevice {
   id: string;
-  platform: "web" | "ios" | "android";
+  platform: "web" | "ios" | "android" | "desktop";
   deviceName: string | null;
   userAgent: string | null;
   email: string | null;

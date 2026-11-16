@@ -64,6 +64,9 @@ import {
   Seedance25RefLimits,
 } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
 import { Seedance25RefPanel } from "@/components/Seedance25RefPanel";
+import { Kling40RefPanel } from "@/components/Kling40RefPanel";
+import { MediaThumb } from "@/components/MediaThumb";
+import { Kling40FlashInputConst, Kling40InputConst } from "@/features/generation/types/models/kling-4-0.type";
 import {
   AdsStudioInputConst,
   type IAdsStudioInput,
@@ -99,6 +102,8 @@ const EDIT_IMAGE_MODELS: Model[] = IMAGE_MODELS.filter((m) => isEditTool(m.id));
 const ALL_MODELS = [...VIDEO_MODELS, ...CREATE_IMAGE_MODELS, ...EDIT_IMAGE_MODELS, ...AUDIO_MODELS];
 
 const CREATE_VIDEO_MODEL_IDS = new Set([
+  AiModelsEnum.KLING_4_0,
+  AiModelsEnum.KLING_4_0_FLASH,
   AiModelsEnum.VEO_3,
   AiModelsEnum.KLING_V3_TEXT_TO_VIDEO,
   AiModelsEnum.SEEDANCE_2_0,
@@ -119,6 +124,9 @@ const OPTIONAL_PROMPT_MODELS = new Set([
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
 ]);
+
+// models whose prompt is optional once a reference image or video is added
+const OPTIONAL_WITH_REFERENCES = new Set([AiModelsEnum.KLING_4_0, AiModelsEnum.KLING_4_0_FLASH]);
 
 // models with no prompt field at all
 const NO_PROMPT_MODELS = new Set([
@@ -150,13 +158,18 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
   const { states, setField } = useAiModelStore();
   const styleId = useAiGenerationControlStore((st) => st.styleId);
   const s = states[model] as any;
-  const isOptional = OPTIONAL_PROMPT_MODELS.has(model);
+  const alwaysOptional = OPTIONAL_PROMPT_MODELS.has(model);
   const hasNoPrompt = NO_PROMPT_MODELS.has(model);
   // A picked style describes the look, so a required prompt becomes optional.
   // A picked style plus reference images/videos makes a required prompt optional.
   const styled = !!styleId && STYLE_MODEL_IDS.has(model) && !!s && hasReferences(s);
   const styleNoRefs = !!styleId && STYLE_MODEL_IDS.has(model) && !styled;
   const [enabled, setEnabled] = useState(!!s?.prompt);
+  // Optional for these models, or because a style / reference covers it.
+  const isOptional =
+    alwaysOptional || styled || (OPTIONAL_WITH_REFERENCES.has(model) && !!s && hasReferences(s));
+  // A prompt already written stays visible (e.g. it became optional after typing).
+  const showInput = !isOptional || enabled || !!s?.prompt;
 
   if (hasNoPrompt) return null;
 
@@ -172,44 +185,44 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
       <div className="flex items-center justify-between px-0.5">
         <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
           {copy?.label ?? "Prompt"}
-          {styled && !isOptional && (
-            <span className="ml-1.5 normal-case tracking-normal font-medium text-white/40">optional with a style</span>
-          )}
-          {styleNoRefs && !isOptional && (
+          {styleNoRefs && !alwaysOptional && (
             <span className="ml-1.5 normal-case tracking-normal font-medium text-white/40">
               required, or add a reference
             </span>
           )}
         </span>
         {isOptional && (
+          <span className="flex items-center gap-2">
+          {/* Same tag as the other cards (images, videos…). */}
+          <span className="rounded-md bg-white/[0.07] px-2 py-0.5 text-[10px] font-medium text-white/50">Optional</span>
           <button
             type="button"
             onClick={() => {
-              const next = !enabled;
+              const next = !showInput;
               setEnabled(next);
               if (!next) setField(model, "prompt", "");
             }}
-            className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
-            style={{ color: enabled ? "var(--text)" : "var(--text-muted)" }}
-            aria-pressed={enabled}
+            className="flex cursor-pointer items-center"
+            aria-pressed={showInput}
+            aria-label={showInput ? "Remove the prompt" : "Add a prompt"}
           >
             {/* pill toggle */}
             <span
               className="relative inline-flex w-7 h-4 rounded-full transition-colors duration-200 flex-shrink-0"
-              style={{ backgroundColor: enabled ? "var(--primary)" : "var(--border)" }}
+              style={{ backgroundColor: showInput ? "var(--primary)" : "var(--border)" }}
             >
               <span
                 className="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform duration-200"
-                style={{ transform: enabled ? "translateX(12px)" : "translateX(0)" }}
+                style={{ transform: showInput ? "translateX(12px)" : "translateX(0)" }}
               />
             </span>
-            Optional
           </button>
+          </span>
         )}
       </div>
 
-      {/* Textarea — always shown for required prompts, conditionally for optional */}
-      {(!isOptional || enabled) && (
+      {/* Required prompts always show the input; optional ones when the toggle is on. */}
+      {showInput && (
         <textarea
           value={s?.prompt ?? ""}
           onChange={(e) => setField(model, "prompt", e.target.value)}
@@ -337,6 +350,25 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
+
+  if (model === AiModelsEnum.KLING_4_0 || model === AiModelsEnum.KLING_4_0_FLASH) {
+    const c = model === AiModelsEnum.KLING_4_0 ? Kling40InputConst : Kling40FlashInputConst;
+    const hasVideo = (s.videos ?? []).length > 0;
+    return (
+      <>
+        <SelectRow label="Resolution" options={c.resolution} value={(c.resolution as readonly string[]).includes(s.resolution) ? s.resolution : c.resolution[c.resolution.length - 1]} onChange={(v) => set("resolution", v)} />
+        <SelectRow label="Aspect Ratio" options={c.aspectRatio} value={(c.aspectRatio as readonly string[]).includes(s.aspectRatio) ? s.aspectRatio : "16:9"} onChange={(v) => set("aspectRatio", v)} />
+        <SelectRow label="Duration (s)" options={c.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SelectRow
+          label="Sound"
+          options={hasVideo ? c.audio : ["native"]}
+          labels={{ native: "Generated", original: "Original (from @Video1)" }}
+          value={hasVideo ? s.audio : "native"}
+          onChange={(v) => set("audio", v)}
+        />
+      </>
+    );
+  }
 
   if (model === AiModelsEnum.SMPL_AD_MULTIPLIER)
     return <SelectRow label="Quality" options={AdsMultiplierOptionsConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />;
@@ -506,12 +538,8 @@ export function SingleMediaSlot({
   }
 
   return (
-    <div className={`${slotCard} h-36 cursor-pointer border-solid`} onClick={onOpenPicker}>
-      {type === "video" ? (
-        <video src={url} className="absolute inset-0 h-full w-full object-cover" muted loop autoPlay playsInline />
-      ) : (
-        <img src={url} alt={title} className="absolute inset-0 h-full w-full object-cover" />
-      )}
+    <div className={`${slotCard} h-44 cursor-pointer border-solid`} onClick={onOpenPicker}>
+      <MediaThumb url={url} type={type} alt={title} play />
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/30" />
       <RequirementTag optional={optional} />
       <span className="absolute bottom-2.5 left-3 z-[1] text-[12px] font-semibold text-white">{title}</span>
@@ -576,10 +604,10 @@ function MultiImageSlots({
       <p className="mb-2.5 pr-16 text-[13px] font-bold text-white">
         {title} <span className="font-normal text-white/40">{images.length}/{maxImages}</span>
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {images.map((url, i) => (
-          <div key={url + i} className="group/img relative size-[64px] shrink-0 overflow-hidden rounded-xl border border-white/10">
-            <img src={url} alt="" className="h-full w-full object-cover" />
+          <div key={url + i} className="group/img relative aspect-square w-full overflow-hidden rounded-xl border border-white/10">
+            <MediaThumb url={url} />
             <button
               type="button"
               onClick={() => onRemove(url)}
@@ -595,7 +623,7 @@ function MultiImageSlots({
             type="button"
             onClick={onOpenPicker}
             aria-label="Add image"
-            className="flex size-[64px] shrink-0 items-center justify-center rounded-xl border border-dashed border-white/20 text-white/50 transition-colors hover:border-white/40 hover:text-white"
+            className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-white/20 text-white/50 transition-colors hover:border-white/40 hover:text-white"
           >
             <Plus className="size-5" />
           </button>
@@ -667,6 +695,9 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
   // ── SEEDANCE 2.5 (references: images, videos, audio) ──────────────────────
   if (model === AiModelsEnum.SEEDANCE_2_5) return <Seedance25RefPanel model={model} />;
   if (model === AiModelsEnum.FAL_SEEDANCE_2_5) return <Seedance25RefPanel model={model} />;
+
+  // ── KLING 4.0 / 4.0 FLASH (reference images and videos) ───────────────────
+  if (model === AiModelsEnum.KLING_4_0 || model === AiModelsEnum.KLING_4_0_FLASH) return <Kling40RefPanel model={model} />;
 
   // ── GROK ───────────────────────────────────────────────────────────────────
   if (model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5) {
@@ -1605,21 +1636,14 @@ function GenerateButton() {
   const valid = isValid();
 
   return (
-    <div className="relative group/btn">
-      <div
-        className={`absolute -inset-1.5 rounded-xl blur-lg pointer-events-none transition-opacity duration-500 ${valid ? "opacity-40 group-hover/btn:opacity-70" : "opacity-[0.05]"}`}
-        style={{ background: "var(--gradient-create)" }}
-      />
-      <div
-        className={`relative rounded-xl p-px`}
-        style={{ background: valid ? "var(--gradient-create)" : "var(--border)" }}
-      >
+    <div className="relative">
+      <div className="relative">
         <button
           type="button"
           onClick={handleGenerate}
           disabled={!valid || generation.isPending}
-          className={`w-full flex items-center justify-center gap-2 rounded-xl backdrop-blur-md px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
-            valid ? "bg-black/50 text-white hover:bg-black/30" : "bg-black/60 text-white/40"
+          className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
+            valid ? "bg-primary text-white hover:bg-primary/90" : "bg-primary/40 text-white/60"
           }`}
         >
           {generation.isPending ? (
@@ -1631,19 +1655,12 @@ function GenerateButton() {
             <>
               <span>Generate</span>
               <span className="text-white/40">|</span>
-              <span className="flex items-center gap-1 opacity-60 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-3.5">
+              <span className="flex items-center gap-1 opacity-80 text-base font-bold tabular-nums">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
                   <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clipRule="evenodd" />
                 </svg>
                 {costData?.creditsCost ?? 0}
               </span>
-              {costData?.estimatedSeconds ? (
-                <span className="text-xs opacity-50" title="Estimated time">
-                  ~{costData.estimatedSeconds < 90
-                    ? `${Math.max(5, Math.round(costData.estimatedSeconds / 5) * 5)}s`
-                    : `${Math.round(costData.estimatedSeconds / 60)} min`}
-                </span>
-              ) : null}
             </>
           )}
         </button>
@@ -1713,7 +1730,7 @@ export function CreateSidebar() {
 
   return (
     // The panel sits one shade above the page, so its controls move one shade up too.
-    <aside className="h-full border-r border-border bg-white/[0.025] flex flex-col overflow-hidden [--card:var(--background-light)] [--bg-card:var(--background-light)] [--bg-elevated:var(--background-lighter)]">
+    <aside className="h-full border-r border-border bg-white/[0.025] flex flex-col overflow-hidden [&_button:not(:disabled)]:cursor-pointer [&_a]:cursor-pointer [&_label]:cursor-pointer [&_[role=button]]:cursor-pointer [&_[role=option]]:cursor-pointer [--card:var(--background-light)] [--bg-card:var(--background-light)] [--bg-elevated:var(--background-lighter)]">
       {/* Create / Edit sub-tabs (video and image pages) */}
       {hasModes && (
         <div className="flex flex-col border-b border-border flex-shrink-0">
@@ -1755,7 +1772,8 @@ export function CreateSidebar() {
       )}
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Scrolls vertically; cards keep their size instead of being squeezed to fit. */}
+      <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 flex flex-col gap-3 [&>*]:shrink-0">
         {/* Hero card — always visible */}
         <ModelHeroCard model={model} onChangePicker={() => setPickerOpen((o) => !o)} />
 
@@ -1784,7 +1802,11 @@ export function CreateSidebar() {
                 <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                   Settings
                 </span>
-                <ModelSettingsPanel model={model} />
+                <div className="@container">
+                  <div className="grid grid-cols-2 gap-2 @[520px]:grid-cols-4">
+                    <ModelSettingsPanel model={model} />
+                  </div>
+                </div>
               </div>
             )}
           </>

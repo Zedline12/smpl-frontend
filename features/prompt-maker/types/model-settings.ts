@@ -17,6 +17,7 @@ import { Seedance20InputConst } from "@/features/generation/types/models/seedanc
 import { Seedance25InputConst } from "@/features/generation/types/models/seedance-2.5.type";
 import { GrokImagineVideo15InputConst } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
 import { GensuInputConst } from "@/features/generation/types/models/gensu.type";
+import { Kling40FlashInputConst, Kling40InputConst } from "@/features/generation/types/models/kling-4-0.type";
 import { ModelDefaults } from "@/stores/aiGenerationStore.type";
 import { PromptMakerSettings } from "./prompt-maker";
 
@@ -84,6 +85,16 @@ export const MODEL_SETTINGS: Partial<Record<AiModelsEnum, ModelSettingsSpec>> = 
   },
   [AiModelsEnum.SMPL_GENSU]: {
     resolution: GensuInputConst.resolution,
+  },
+  [AiModelsEnum.KLING_4_0]: {
+    aspectRatio: Kling40InputConst.aspectRatio,
+    resolution: Kling40InputConst.resolution,
+    duration: { key: "duration", options: Kling40InputConst.duration },
+  },
+  [AiModelsEnum.KLING_4_0_FLASH]: {
+    aspectRatio: Kling40FlashInputConst.aspectRatio,
+    resolution: Kling40FlashInputConst.resolution,
+    duration: { key: "duration", options: Kling40FlashInputConst.duration },
   },
   // KLING_V3_PRO_MOTION_CONTROL and ELEVEN_LABS_V3_TTS expose no common settings.
 };

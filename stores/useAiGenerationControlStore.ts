@@ -68,6 +68,8 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
     [AiModelsEnum.SMPL_VIDEO_REFRAME]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_REFRAME],
     [AiModelsEnum.SMPL_VIDEO_FPS_BOOST]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_FPS_BOOST],
     [AiModelsEnum.SMPL_VIDEO_UPSCALE]: ModelDefaults[AiModelsEnum.SMPL_VIDEO_UPSCALE],
+    [AiModelsEnum.KLING_4_0]: ModelDefaults[AiModelsEnum.KLING_4_0],
+    [AiModelsEnum.KLING_4_0_FLASH]: ModelDefaults[AiModelsEnum.KLING_4_0_FLASH],
   },
   setField: (model: AiModelsEnum, key: any, value: any) => {
     const { states } = get();

@@ -14,7 +14,11 @@ export async function proxyToBackend(path: string, init: ProxyInit = {}) {
     if (response.status === 204) return new NextResponse(null, { status: 204 });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return NextResponse.json({ error: data?.message || "Failed" }, { status: response.status });
+      // requestId: the backend's id for this failure (find it in the maintenance app).
+      return NextResponse.json(
+        { error: data?.message || "Failed", ...(data?.requestId ? { requestId: data.requestId } : {}) },
+        { status: response.status },
+      );
     }
     return NextResponse.json(data);
   } catch (error) {

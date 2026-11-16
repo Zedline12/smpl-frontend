@@ -7,6 +7,7 @@ import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { Seedance25Limits as Seedance25RefLimits } from "@/features/generation/types/models/seedance-2.5.type";
 import { uploadReferenceAudio } from "@/features/artist/api/reference-audio";
+import { MediaThumb } from "@/components/MediaThumb";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
 
 type RefModel = AiModelsEnum.SEEDANCE_2_5 | AiModelsEnum.FAL_SEEDANCE_2_5;
@@ -155,15 +156,15 @@ export function Seedance25RefPanel({ model = AiModelsEnum.SEEDANCE_2_5 }: { mode
                 {items.length}/{max}
               </span>
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {items.map((url, i) => {
                 const label = refTag(model, tag, i + 1);
                 return (
                   <div
                     key={url + i}
-                    className="group/ref relative size-[64px] shrink-0 overflow-hidden rounded-xl border border-white/10"
+                    className="group/ref relative aspect-square w-full overflow-hidden rounded-xl border border-white/10"
                   >
-                    <Thumb kind={kind} url={url} />
+                    {kind === "audios" ? <Thumb kind={kind} url={url} /> : <MediaThumb url={url} type={kind === "videos" ? "video" : "image"} />}
                     <button
                       type="button"
                       onClick={() => addTag(label)}
@@ -189,7 +190,7 @@ export function Seedance25RefPanel({ model = AiModelsEnum.SEEDANCE_2_5 }: { mode
                   onClick={() => open(kind)}
                   disabled={busy}
                   aria-label={`Add ${tag.toLowerCase()}`}
-                  className="flex size-[64px] shrink-0 cursor-pointer items-center justify-center rounded-xl border border-dashed border-white/20 text-white/50 transition-colors hover:border-white/40 hover:text-white"
+                  className="flex aspect-square w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-white/20 text-white/50 transition-colors hover:border-white/40 hover:text-white"
                 >
                   {busy ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
                 </button>

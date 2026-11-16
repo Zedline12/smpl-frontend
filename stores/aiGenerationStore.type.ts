@@ -20,6 +20,7 @@ import { IAdsStudioInput } from "@/features/generation/types/models/higgsfield-a
 import { IMusicV25Input } from "@/features/generation/types/models/elevenlabs-music-v2-5.type";
 import { createMusicInput } from "@/features/artist/utils/composition-plan";
 import { ISeedance25RefToVideoInput } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
+import { IKling40Input } from "@/features/generation/types/models/kling-4-0.type";
 import { IAdsMultiplierInput } from "@/features/generation/types/models/ads-multiplier.type";
 import { IVoiceChangerInput } from "@/features/generation/types/models/voice-changer.type";
 import {
@@ -51,6 +52,8 @@ export type ModelStateMap = {
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
   [AiModelsEnum.FAL_SEEDANCE_2_5]: ISeedance25RefToVideoInput;
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: IAdsMultiplierInput;
+  [AiModelsEnum.KLING_4_0]: IKling40Input;
+  [AiModelsEnum.KLING_4_0_FLASH]: IKling40Input;
   [AiModelsEnum.SMPL_VOICE_CHANGER]: IVoiceChangerInput;
   [AiModelsEnum.SMPL_IMAGE_REFRAME]: IImageReframeInput;
   [AiModelsEnum.SMPL_IMAGE_UPSCALE]: IImageUpscaleInput;
@@ -203,6 +206,24 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     duration: 10,
     aspectRatio: "auto",
     generateAudio: true,
+  },
+  [AiModelsEnum.KLING_4_0]: {
+    prompt: "",
+    images: [],
+    videos: [],
+    resolution: "1080p",
+    duration: 5,
+    aspectRatio: "16:9",
+    audio: "native",
+  },
+  [AiModelsEnum.KLING_4_0_FLASH]: {
+    prompt: "",
+    images: [],
+    videos: [],
+    resolution: "720p",
+    duration: 5,
+    aspectRatio: "16:9",
+    audio: "native",
   },
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: {
     prompt: "",
