@@ -27,6 +27,8 @@ interface StyleMenuButtonProps<Id extends string> {
   /** Text shown when nothing is picked. */
   emptyLabel?: string;
   disabled?: boolean;
+  /** "bottom": the menu drops down at the button's width (a select). */
+  menuSide?: "right" | "bottom";
   /** Extra classes for the row button (e.g. a transparent background). */
   triggerClassName?: string;
 }
@@ -42,6 +44,7 @@ export function StyleMenuButton<Id extends string>({
   emptyLabel = "Any",
   disabled,
   triggerClassName,
+  menuSide = "right",
 }: StyleMenuButtonProps<Id>) {
   const single = max === 1;
   const full = max !== undefined && !single && selected.length >= max;
@@ -75,14 +78,18 @@ export function StyleMenuButton<Id extends string>({
           >
             {summary}
           </span>
-          <ChevronRight className="size-4 shrink-0 text-white/40 transition-transform group-data-[state=open]:translate-x-0.5" />
+          <ChevronRight
+            className={`size-4 shrink-0 text-white/40 transition-transform ${
+              menuSide === "bottom" ? "rotate-90 group-data-[state=open]:-rotate-90" : "group-data-[state=open]:translate-x-0.5"
+            }`}
+          />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        side="right"
+        side={menuSide}
         align="start"
-        sideOffset={10}
-        className={`${MENU_CONTENT_CLASS} max-h-[70vh] w-56 overflow-y-auto p-1.5`}
+        sideOffset={menuSide === "bottom" ? 6 : 10}
+        className={`${MENU_CONTENT_CLASS} max-h-[70vh] overflow-y-auto p-1.5 ${menuSide === "bottom" ? "w-[var(--radix-dropdown-menu-trigger-width)]" : "w-56"}`}
       >
         <DropdownMenuLabel className="flex items-center justify-between px-2 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
           {label}

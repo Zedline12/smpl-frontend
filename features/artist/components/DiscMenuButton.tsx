@@ -23,6 +23,8 @@ interface DiscMenuButtonProps<Id extends string> {
   /** Most options that can be picked at once. */
   max: number;
   disabled?: boolean;
+  /** "row": a sidebar row (menu to the right); "knob": a DJ knob showing the pick (menu below). */
+  variant?: "row" | "knob";
 }
 
 const DISC = 320; // disc diameter, px
@@ -38,6 +40,7 @@ export function DiscMenuButton<Id extends string>({
   onChange,
   max,
   disabled,
+  variant = "row",
 }: DiscMenuButtonProps<Id>) {
   const [hovered, setHovered] = useState<Id | null>(null);
   const full = selected.length >= max;
@@ -52,25 +55,113 @@ export function DiscMenuButton<Id extends string>({
   return (
     <DropdownMenu onOpenChange={(open) => !open && setHovered(null)}>
       <DropdownMenuTrigger asChild disabled={disabled}>
-        <button
-          type="button"
-          className="group flex h-11 w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-left transition-colors hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-40 data-[state=open]:border-white/25 data-[state=open]:bg-white/[0.07]"
-        >
-          <Icon className={`size-4 shrink-0 ${picked.length ? "text-primary" : "text-white/50"}`} />
-          <span className="shrink-0 text-sm font-medium text-white">{label}</span>
-          <span
-            className={`ml-auto min-w-0 truncate text-xs ${picked.length ? "font-medium text-secondary" : "text-white/35"}`}
+        {variant === "knob" ? (
+          <button
+            type="button"
+            aria-label={`${label}: ${picked.length ? picked.map((o) => o.label).join(", ") : "Any"}`}
+            className="group flex flex-col items-center gap-2 rounded-2xl outline-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {picked.length
-              ? picked.map((o) => `${o.emoji ?? ""} ${o.label}`.trim()).join(", ")
-              : "Any"}
-          </span>
-          <ChevronRight className="size-4 shrink-0 text-white/40 transition-transform group-data-[state=open]:translate-x-0.5" />
-        </button>
+            <span className="relative block size-24 rounded-full transition-transform group-hover:scale-[1.03] group-focus-visible:ring-2 group-focus-visible:ring-primary/60 group-data-[state=open]:scale-[1.03]">
+              {/* Level ring: fills with each pick, like a volume knob. */}
+              <svg
+                viewBox="0 0 100 100"
+                className="absolute inset-0 size-full -rotate-[135deg]"
+                aria-hidden
+              >
+                <defs>
+                  <linearGradient
+                    id={`disc-${label}`}
+                    x1="0"
+                    x2="1"
+                    y1="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="var(--color-primary)" />
+                    <stop offset="100%" stopColor="var(--color-secondary)" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.08)"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  pathLength={360}
+                  strokeDasharray="270 360"
+                />
+                {picked.length > 0 && (
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke={`url(#disc-${label})`}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    pathLength={360}
+                    strokeDasharray={`${(270 * picked.length) / max} 360`}
+                  />
+                )}
+              </svg>
+              {/* The knob face, with the chosen value in the middle. */}
+              <span
+                className="absolute inset-[13%] flex flex-col items-center justify-center rounded-full border border-white/[0.06] px-1 text-center shadow-[inset_0_2px_6px_rgba(255,255,255,0.06),0_6px_16px_-6px_rgba(0,0,0,0.9)]"
+                style={{
+                  background:
+                    "radial-gradient(circle at 40% 30%, #3a3a48, #111118 75%)",
+                }}
+              >
+                {picked.length ? (
+                  <>
+                    <span className="text-base leading-none">
+                      {picked.map((o) => o.emoji).join("")}
+                    </span>
+                    <span className="mt-1 w-full truncate text-[10px] font-semibold text-white">
+                      {picked.length === 1
+                        ? picked[0].label
+                        : `${picked.length} picked`}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs font-semibold text-white/50">
+                    Any
+                  </span>
+                )}
+              </span>
+            </span>
+            <span className="text-[11px] font-semibold tracking-[0.18em] text-white/55 uppercase">
+              {label}
+            </span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="group flex h-11 w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-left transition-colors hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-40 data-[state=open]:border-white/25 data-[state=open]:bg-white/[0.07]"
+          >
+            <Icon
+              className={`size-4 shrink-0 ${picked.length ? "text-primary" : "text-white/50"}`}
+            />
+            <span className="shrink-0 text-sm font-medium text-white">
+              {label}
+            </span>
+            <span
+              className={`ml-auto min-w-0 truncate text-xs ${picked.length ? "font-medium text-secondary" : "text-white/35"}`}
+            >
+              {picked.length
+                ? picked
+                    .map((o) => `${o.emoji ?? ""} ${o.label}`.trim())
+                    .join(", ")
+                : "Any"}
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-white/40 transition-transform group-data-[state=open]:translate-x-0.5" />
+          </button>
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side="right"
+        side={variant === "knob" ? "bottom" : "right"}
         align="center"
         sideOffset={14}
         onPointerLeave={() => setHovered(null)}
@@ -104,11 +195,15 @@ export function DiscMenuButton<Id extends string>({
             {focus ? (
               <>
                 <span className="text-lg">{focus.emoji}</span>
-                <span className="truncate text-xs font-bold text-white">{focus.label}</span>
+                <span className="truncate text-xs font-bold text-white">
+                  {focus.label}
+                </span>
               </>
             ) : (
               <span className="text-xs font-semibold text-white/90">
-                {picked.length ? `${picked.length}/${max} picked` : `Pick up to ${max}`}
+                {picked.length
+                  ? `${picked.length}/${max} picked`
+                  : `Pick up to ${max}`}
               </span>
             )}
           </span>

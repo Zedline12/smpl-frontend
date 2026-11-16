@@ -12,15 +12,18 @@ export function QueuedGenerationTile({
   queue,
   height,
   variant = "default",
+  fill = false,
 }: {
   queue: GenerationQueue;
   /** Pixel height of the media cards beside it; without it the tile is 16:9. */
   height?: number;
   /** "music" shows the DJ animation (Artist page); "remix" the film strip (Remix page). */
   variant?: MediaDisplayVariant;
+  /** Fill the parent's height instead of being 16:9 (when no height is given). */
+  fill?: boolean;
 }) {
   const sizeStyle = height ? { height } : undefined;
-  const sizeClass = height ? "" : "aspect-video";
+  const sizeClass = height ? "" : fill ? "h-full" : "aspect-video";
   const refund = useRefundGenerationMutation();
   const isProcessing = queue.status === "processing";
   const isEarlyPreview = queue.status === "success" && !!queue.providerUrl && !queue.mediaId;

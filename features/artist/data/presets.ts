@@ -60,17 +60,17 @@ export const VOCALS: StyleOption<Vocals>[] = [
 export const NO_VOCAL_STYLES = ["vocals", "lyrics", "singing"];
 
 export const INSTRUMENTS: StyleOption[] = [
-  { id: "piano", label: "Piano", styles: ["piano"] },
-  { id: "808", label: "808s", styles: ["808 bass"] },
-  { id: "acoustic-guitar", label: "Acoustic guitar", styles: ["acoustic guitar"] },
-  { id: "electric-guitar", label: "Electric guitar", styles: ["electric guitar"] },
-  { id: "strings", label: "Strings", styles: ["string section"] },
-  { id: "synth-pads", label: "Synth pads", styles: ["synth pads"] },
-  { id: "live-drums", label: "Live drums", styles: ["live drums"] },
-  { id: "bass", label: "Bass", styles: ["bass guitar"] },
-  { id: "brass", label: "Brass", styles: ["brass section"] },
-  { id: "vinyl", label: "Vinyl crackle", styles: ["vinyl crackle"] },
-  { id: "rain", label: "Rain ambience", styles: ["rain ambience"] },
+  { id: "piano", label: "Piano", emoji: "🎹", styles: ["piano"] },
+  { id: "808", label: "808s", emoji: "🔊", styles: ["808 bass"] },
+  { id: "acoustic-guitar", label: "Acoustic guitar", emoji: "🪕", styles: ["acoustic guitar"] },
+  { id: "electric-guitar", label: "Electric guitar", emoji: "🎸", styles: ["electric guitar"] },
+  { id: "strings", label: "Strings", emoji: "🎻", styles: ["string section"] },
+  { id: "synth-pads", label: "Synth pads", emoji: "🎛️", styles: ["synth pads"] },
+  { id: "live-drums", label: "Live drums", emoji: "🥁", styles: ["live drums"] },
+  { id: "bass", label: "Bass", emoji: "🎚️", styles: ["bass guitar"] },
+  { id: "brass", label: "Brass", emoji: "🎺", styles: ["brass section"] },
+  { id: "vinyl", label: "Vinyl crackle", emoji: "💿", styles: ["vinyl crackle"] },
+  { id: "rain", label: "Rain ambience", emoji: "🌧️", styles: ["rain ambience"] },
 ];
 
 export interface SectionType {
