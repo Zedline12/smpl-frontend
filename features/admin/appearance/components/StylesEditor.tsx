@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   Film,
+  ImageIcon,
   Loader2,
   Plus,
   Save,
@@ -27,7 +28,7 @@ import {
 
 const ADMIN_KEY = ["styles", "admin"];
 
-type Draft = Pick<AdminStyle, "name" | "prompt" | "videoUrl" | "isActive">;
+type Draft = Pick<AdminStyle, "name" | "prompt" | "videoUrl" | "isActive"> & { imageUrl: string };
 
 function StyleRow({
   style,
@@ -46,22 +47,24 @@ function StyleRow({
     name: style.name,
     prompt: style.prompt,
     videoUrl: style.videoUrl,
+    imageUrl: style.imageUrl ?? "",
     isActive: style.isActive,
   });
   const [showPrompt, setShowPrompt] = useState(false);
-  const [picker, setPicker] = useState(false);
+  const [picker, setPicker] = useState<"video" | "image" | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Fresh data from the server replaces the draft (e.g. after saving).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDraft({ name: style.name, prompt: style.prompt, videoUrl: style.videoUrl, isActive: style.isActive });
-  }, [style.name, style.prompt, style.videoUrl, style.isActive]);
+    setDraft({ name: style.name, prompt: style.prompt, videoUrl: style.videoUrl, imageUrl: style.imageUrl ?? "", isActive: style.isActive });
+  }, [style.name, style.prompt, style.videoUrl, style.imageUrl, style.isActive]);
 
   const dirty =
     draft.name !== style.name ||
     draft.prompt !== style.prompt ||
     draft.videoUrl !== style.videoUrl ||
+    draft.imageUrl !== (style.imageUrl ?? "") ||
     draft.isActive !== style.isActive;
 
   const save = async (next: Partial<Draft> = {}) => {
@@ -99,20 +102,32 @@ function StyleRow({
         draft.isActive ? "border-white/10 bg-white/[0.03]" : "border-white/5 bg-white/[0.01] opacity-70"
       }`}
     >
-      {/* Thumbnail video */}
+      {/* Thumbnail: a looping video or a still image */}
       <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-black sm:w-56">
         {draft.videoUrl ? (
           <video key={draft.videoUrl} src={draft.videoUrl} autoPlay muted loop playsInline className="h-full w-full object-cover" />
+        ) : draft.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={draft.imageUrl} src={draft.imageUrl} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-white/30">No video yet</div>
+          <div className="flex h-full w-full items-center justify-center text-xs text-white/30">No video or image yet</div>
         )}
-        <button
-          type="button"
-          onClick={() => setPicker(true)}
-          className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 text-[11px] font-medium text-white backdrop-blur hover:bg-black/90"
-        >
-          <Film className="size-3.5" /> {draft.videoUrl ? "Change video" : "Add video"}
-        </button>
+        <div className="absolute bottom-2 left-2 flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => setPicker("video")}
+            className="flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 text-[11px] font-medium text-white backdrop-blur hover:bg-black/90"
+          >
+            <Film className="size-3.5" /> {draft.videoUrl ? "Change video" : "Video"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPicker("image")}
+            className="flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 text-[11px] font-medium text-white backdrop-blur hover:bg-black/90"
+          >
+            <ImageIcon className="size-3.5" /> {draft.imageUrl ? "Change image" : "Image"}
+          </button>
+        </div>
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -137,7 +152,7 @@ function StyleRow({
 
         <p className="truncate text-[11px] text-white/35">
           slug: {style.slug}
-          {draft.videoUrl ? ` · ${draft.videoUrl}` : ""}
+          {draft.videoUrl || draft.imageUrl ? ` · ${draft.videoUrl || draft.imageUrl}` : ""}
         </p>
 
         <button
@@ -201,15 +216,18 @@ function StyleRow({
       </div>
 
       <MediaManagerDialog
-        open={picker}
-        onOpenChange={setPicker}
-        mediaType="video"
+        key={picker ?? "closed"}
+        open={picker !== null}
+        onOpenChange={(open) => !open && setPicker(null)}
+        mediaType={picker ?? "video"}
         maxSelections={1}
-        selectedImage={draft.videoUrl || undefined}
+        selectedImage={(picker === "image" ? draft.imageUrl : draft.videoUrl) || undefined}
         onSelect={(urls) => {
-          setPicker(false);
-          // A new video is saved right away (the name/prompt drafts go with it).
-          if (urls[0]) void save({ videoUrl: urls[0] });
+          const kind = picker;
+          setPicker(null);
+          // Saved right away (the name/prompt drafts go with it); a style has a video or an image, not both.
+          if (!urls[0]) return;
+          void save(kind === "image" ? { imageUrl: urls[0], videoUrl: "" } : { videoUrl: urls[0], imageUrl: "" });
         }}
       />
     </div>

@@ -32,7 +32,7 @@ export async function fetchAdminStyles(): Promise<AdminStyle[]> {
   return readJson<AdminStyle[]>(await fetch("/api/admin/styles"), "Couldn't load styles");
 }
 
-export async function createStyle(body: { name: string; prompt?: string; videoUrl?: string }) {
+export async function createStyle(body: { name: string; prompt?: string; videoUrl?: string; imageUrl?: string }) {
   return readJson<AdminStyle>(
     await fetch("/api/admin/styles", {
       method: "POST",
@@ -45,7 +45,7 @@ export async function createStyle(body: { name: string; prompt?: string; videoUr
 
 export async function updateStyle(
   id: string,
-  body: Partial<Pick<AdminStyle, "name" | "prompt" | "videoUrl" | "isActive">>,
+  body: Partial<Pick<AdminStyle, "name" | "prompt" | "videoUrl" | "imageUrl" | "isActive">>,
 ) {
   return readJson<AdminStyle>(
     await fetch(`/api/admin/styles/${encodeURIComponent(id)}`, {

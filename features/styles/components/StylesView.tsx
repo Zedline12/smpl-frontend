@@ -75,6 +75,13 @@ function StyleCard({
           preload="metadata"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
+      ) : style.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={style.imageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
       ) : (
         <div
           className={cn(

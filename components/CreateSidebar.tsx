@@ -974,7 +974,7 @@ function ToggleField({
 
 // ─── ad multiplier ────────────────────────────────────────────────────────────
 
-const { minReferenceSec, maxReferenceSec, minDurationSec, maxDurationSec } = Seedance25RefLimits;
+const { minReferenceSec, maxReferenceSec } = AdsMultiplierLimits;
 
 function AdsMultiplierPanel() {
   const model = AiModelsEnum.SMPL_AD_MULTIPLIER;
@@ -986,7 +986,7 @@ function AdsMultiplierPanel() {
   const [dlg, setDlg] = useState<"video" | "images" | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
 
-  // The new ad is as long as the reference; duration drives the price.
+  // The new ad is as long as the reference (Gensu keeps its motion and audio).
   const pickVideo = async (url: string | undefined) => {
     setDlg(null);
     if (!url) return;
@@ -999,7 +999,7 @@ function AdsMultiplierPanel() {
       return;
     }
     set("videoUrl", url);
-    set("duration", Math.min(Math.max(Math.round(seconds ?? 10), minDurationSec), maxDurationSec));
+    set("duration", Math.min(Math.max(Math.floor(seconds ?? 10), minReferenceSec), maxReferenceSec));
   };
 
   return (
@@ -1019,7 +1019,7 @@ function AdsMultiplierPanel() {
           <p className="px-0.5 text-[11px] leading-snug text-red-400">{videoError}</p>
         ) : (
           <p className="px-0.5 text-[11px] text-muted-foreground">
-            {s.videoUrl ? `New ad will be ${s.duration}s, like the original.` : "The ad to multiply, 2–30 seconds."}
+            {s.videoUrl ? `New ad will be ${s.duration}s, like the original.` : `The ad to multiply, ${minReferenceSec}–${maxReferenceSec} seconds.`}
           </p>
         )}
       </div>
@@ -1526,9 +1526,12 @@ function ModelPickerPanel({
 
 // ─── style card ───────────────────────────────────────────────────────────────
 
-function StyleThumb({ index, videoUrl }: { index: number; videoUrl?: string }) {
+function StyleThumb({ index, videoUrl, imageUrl }: { index: number; videoUrl?: string; imageUrl?: string }) {
   return videoUrl ? (
     <video src={videoUrl} autoPlay muted loop playsInline className="h-full w-full object-cover" />
+  ) : imageUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={imageUrl} alt="" className="h-full w-full object-cover" />
   ) : (
     <span
       className={`block h-full w-full bg-gradient-to-br ${STYLE_FALLBACK_GRADIENTS[index % STYLE_FALLBACK_GRADIENTS.length]}`}
@@ -1566,7 +1569,7 @@ function StyleCard() {
                 className={`absolute top-0 h-9 w-7 overflow-hidden rounded-md border border-white/25 shadow-md shadow-black/50 ${TILT[i]}`}
                 style={{ left: i * 8, zIndex: 3 - i }}
               >
-                <StyleThumb index={styles.indexOf(s)} videoUrl={s.videoUrl} />
+                <StyleThumb index={styles.indexOf(s)} videoUrl={s.videoUrl} imageUrl={s.imageUrl} />
               </span>
             ))}
         </span>

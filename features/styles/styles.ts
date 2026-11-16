@@ -10,6 +10,8 @@ export interface Style {
   slug: string;
   name: string;
   videoUrl: string;
+  /** Still thumbnail, shown when there is no video. */
+  imageUrl?: string;
 }
 
 /** A style by id; also matches the slug that older inputs stored. */

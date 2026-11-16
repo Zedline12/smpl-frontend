@@ -19,7 +19,7 @@ export enum AiModelsEnum {
   HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
   HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
   ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
-  /** The fal version (Artist, Ad Multiplier). Was "seedance-2.5-ref-to-video". */
+  /** The fal version (Artist). Was "seedance-2.5-ref-to-video". */
   FAL_SEEDANCE_2_5 = "fal-seedance-2.5",
   SMPL_AD_MULTIPLIER = "smpl-ad-multiplier",
   SMPL_VOICE_CHANGER = "smpl-voice-changer",
