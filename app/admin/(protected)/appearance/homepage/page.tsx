@@ -1,5 +1,5 @@
-import { HomepageSectionsEditor } from "@/features/admin/appearance/components/HomepageSectionsEditor";
+import { HomeSectionsEditor } from "@/features/admin/appearance/components/home-sections/HomeSectionsEditor";
 
 export default function HomepageSectionsPage() {
-  return <HomepageSectionsEditor />;
+  return <HomeSectionsEditor />;
 }

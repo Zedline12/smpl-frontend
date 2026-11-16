@@ -7,6 +7,8 @@ import { fetchWithToken } from "@/lib/fetcher";
 import { redirect } from "next/navigation";
 import { FeaturedCarousel, type FeaturedItem } from "@/components/FeaturedCarousel";
 import { FeatureGrid, type FeatureItem } from "@/components/FeatureGrid";
+import { HomeSections } from "@/features/home-sections/components/HomeSections";
+import { getHomeSections } from "@/features/home-sections/server";
 
 // ─── hero data ────────────────────────────────────────────────────────────────
 
@@ -103,6 +105,7 @@ export default async function WorkspacePage() {
   if (!isAuthRes.ok) {
     redirect("/onboard");
   }
+  const sections = await getHomeSections();
 
   const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
   const media: Media[] = Array.from({ length: 13 }).map((_, i) => {
@@ -124,7 +127,9 @@ export default async function WorkspacePage() {
   });
 
   return (
-    <div className="w-full py-6 px-1 sm:px-0 flex flex-col gap-10 sm:mt-4">
+    // The main layout caps pages at 90% width (sm+); home breaks out of it to the full
+    // width minus 1rem each side: 100%/0.9 = the layout's width, then centered back.
+    <div className="w-full py-6 px-3 sm:px-0 sm:w-[calc(100%/0.9-2rem)] sm:ml-[calc((100%-100%/0.9)/2+1rem)] flex flex-col gap-10 sm:mt-4">
       <HomeTour />
 
       {/* ── hero ── */}
@@ -132,6 +137,10 @@ export default async function WorkspacePage() {
         <FeaturedCarousel items={featured} />
         <FeatureGrid promo={promo} features={features} />
       </section>
+
+      {/* ── custom sections (App Appearance → Homepage Sections) ── */}
+      {/* mt-6 + the page's gap-10 = the sections' own gap-16 */}
+      <HomeSections sections={sections} className="mt-6" />
 
       <section className="sm:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
         <PromptComposer />
