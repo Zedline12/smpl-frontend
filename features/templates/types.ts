@@ -25,6 +25,13 @@ export interface TemplatePage {
   limit: number;
 }
 
+/** True for a taller-than-wide ratio ("9:16"), false for others, null when unknown. */
+export function isPortraitRatio(ratio: string | null | undefined): boolean | null {
+  const m = ratio?.match(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/);
+  if (!m) return null;
+  return Number(m[2]) > Number(m[1]);
+}
+
 export type TemplateLayout = "before_after" | "photos" | "video" | "empty";
 
 /** How a template is displayed, from what it holds. */

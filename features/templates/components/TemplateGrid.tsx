@@ -3,23 +3,34 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useRecreateMedia } from "@/features/media/hooks/useMediaActions";
-import { Template } from "../types";
+import { Template, isPortraitRatio } from "../types";
+import { cn } from "@/lib/utils";
 import { templateAsMedia } from "../recreate";
 import { TemplateMedia } from "./TemplateMedia";
 import { TemplatePreviewDialog } from "./TemplatePreviewDialog";
 
-/** One template: its media, with Recreate on hover. Click opens the preview. */
+/**
+ * One template: its media, with Recreate on hover. Click opens the preview.
+ * The card takes the template's shape: 9:16 for portrait media, 16:9 otherwise. The stored
+ * aspect ratio decides; without one, the media's real size once it loads.
+ */
 export function TemplateCard({ template, onOpen }: { template: Template; onOpen: () => void }) {
   const recreate = useRecreateMedia();
+  const [measured, setMeasured] = useState<boolean | null>(null);
+  const portrait = isPortraitRatio(template.aspectRatio) ?? measured ?? false;
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      className="group relative aspect-video cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-black"
+      // self-start: in a grid row with a taller portrait card, keep this card its own height.
+      className={cn(
+        "group relative cursor-pointer self-start overflow-hidden rounded-xl border border-white/10 bg-black",
+        portrait ? "aspect-[9/16]" : "aspect-video",
+      )}
     >
-      <TemplateMedia template={template} />
+      <TemplateMedia template={template} onPortrait={setMeasured} />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       {template.model && (
         <button

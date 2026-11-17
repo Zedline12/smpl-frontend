@@ -35,28 +35,13 @@ const videoProps = {
   className: "absolute inset-0 h-full w-full object-contain",
 };
 
-/** True once the video's metadata shows it's taller than wide (e.g. 9:16). */
-const isPortrait = (e: React.SyntheticEvent<HTMLVideoElement>) =>
-  e.currentTarget.videoHeight > e.currentTarget.videoWidth;
-
-/**
- * Behind a portrait video: a blurred, darkened copy filling the card, so the sides aren't
- * plain black. Only rendered for portrait videos, so 16:9 cards don't decode a second video.
- */
-function BlurBackdrop({ src }: { src: string }) {
-  return (
-    <video
-      src={src}
-      muted
-      loop
-      playsInline
-      autoPlay
-      preload="metadata"
-      aria-hidden
-      className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-2xl"
-    />
-  );
-}
+/** Reports whether a loaded video is taller than wide. */
+type OnPortrait = (portrait: boolean) => void;
+const reportVideo = (onPortrait?: OnPortrait) =>
+  onPortrait
+    ? (e: React.SyntheticEvent<HTMLVideoElement>) =>
+        onPortrait(e.currentTarget.videoHeight > e.currentTarget.videoWidth)
+    : undefined;
 
 /** One loop of the before/after sweep, in ms. */
 const SWEEP = {
@@ -85,13 +70,22 @@ function sweepPosition(ms: number): number {
  * sweeps back to the left revealing the "before". Driven frame by frame from JS (no CSS
  * animation), so it runs everywhere; paused while off screen.
  */
-function BeforeAfterLoop({ before, after, labels }: { before: string; after: string; labels: boolean }) {
+function BeforeAfterLoop({
+  before,
+  after,
+  labels,
+  onPortrait,
+}: {
+  before: string;
+  after: string;
+  labels: boolean;
+  onPortrait?: OnPortrait;
+}) {
   const ref = usePlayWhenVisible<HTMLDivElement>();
   const beforeRef = useRef<HTMLVideoElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
   const beforeLabelRef = useRef<HTMLSpanElement>(null);
   const afterLabelRef = useRef<HTMLSpanElement>(null);
-  const [portrait, setPortrait] = useState(false);
 
   useEffect(() => {
     const root = ref.current;
@@ -143,8 +137,7 @@ function BeforeAfterLoop({ before, after, labels }: { before: string; after: str
 
   return (
     <div ref={ref} className="absolute inset-0 overflow-hidden">
-      {portrait && <BlurBackdrop src={after} />}
-      <video src={after} {...videoProps} onLoadedMetadata={(e) => setPortrait(isPortrait(e))} />
+      <video src={after} {...videoProps} onLoadedMetadata={reportVideo(onPortrait)} />
       <video ref={beforeRef} src={before} {...videoProps} style={{ clipPath: "inset(0 0 0 0%)", willChange: "clip-path" }} />
       <span
         ref={barRef}
@@ -171,7 +164,15 @@ function BeforeAfterLoop({ before, after, labels }: { before: string; after: str
 }
 
 /** Photos: crossfade between them with a slow pan. */
-function PhotoGallery({ images, interval = 3500 }: { images: string[]; interval?: number }) {
+function PhotoGallery({
+  images,
+  interval = 3500,
+  onPortrait,
+}: {
+  images: string[];
+  interval?: number;
+  onPortrait?: OnPortrait;
+}) {
   const [index, setIndex] = useState(0);
   useEffect(() => {
     if (images.length < 2) return;
@@ -187,6 +188,11 @@ function PhotoGallery({ images, interval = 3500 }: { images: string[]; interval?
           src={src}
           alt=""
           loading="lazy"
+          onLoad={
+            i === 0 && onPortrait
+              ? (e) => onPortrait(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth)
+              : undefined
+          }
           className={cn(
             "template-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-1000",
             i === index ? "opacity-100" : "opacity-0",
@@ -197,13 +203,11 @@ function PhotoGallery({ images, interval = 3500 }: { images: string[]; interval?
   );
 }
 
-function SingleVideo({ src }: { src: string }) {
+function SingleVideo({ src, onPortrait }: { src: string; onPortrait?: OnPortrait }) {
   const ref = usePlayWhenVisible<HTMLDivElement>();
-  const [portrait, setPortrait] = useState(false);
   return (
     <div ref={ref} className="absolute inset-0 overflow-hidden">
-      {portrait && <BlurBackdrop src={src} />}
-      <video src={src} {...videoProps} onLoadedMetadata={(e) => setPortrait(isPortrait(e))} />
+      <video src={src} {...videoProps} onLoadedMetadata={reportVideo(onPortrait)} />
     </div>
   );
 }
@@ -213,20 +217,23 @@ export function TemplateMedia({
   template,
   className,
   labels = true,
+  onPortrait,
 }: {
   template: Pick<Template, "images" | "videos">;
   className?: string;
   /** "Before"/"After" chips on before/after loops. */
   labels?: boolean;
+  /** Called once the media loads: is it taller than wide? */
+  onPortrait?: OnPortrait;
 }) {
   const layout = templateLayout(template);
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-black", className)}>
       {layout === "before_after" && (
-        <BeforeAfterLoop before={template.videos[0]} after={template.videos[1]} labels={labels} />
+        <BeforeAfterLoop before={template.videos[0]} after={template.videos[1]} labels={labels} onPortrait={onPortrait} />
       )}
-      {layout === "video" && <SingleVideo src={template.videos[0]} />}
-      {layout === "photos" && <PhotoGallery images={template.images} />}
+      {layout === "video" && <SingleVideo src={template.videos[0]} onPortrait={onPortrait} />}
+      {layout === "photos" && <PhotoGallery images={template.images} onPortrait={onPortrait} />}
       {layout === "empty" && (
         <div className="absolute inset-0 flex items-center justify-center text-xs text-white/30">No media</div>
       )}
