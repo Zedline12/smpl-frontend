@@ -1,7 +1,5 @@
-import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { HomeTour } from "@/components/HomeTour";
 import { HomeWelcome } from "@/features/landing/components/HomeWelcome";
-import { Media } from "@/features/media/types/media";
 import { fetchWithToken } from "@/lib/fetcher";
 import { redirect } from "next/navigation";
 import { FeaturedCarousel, type FeaturedItem } from "@/components/FeaturedCarousel";
@@ -110,25 +108,6 @@ export default async function WorkspacePage() {
   }
   const sections = await getHomeSections();
 
-  const aspectRatios = ["16:9", "4:3", "1:1", "3:4", "9:16", "5:4"] as const;
-  const media: Media[] = Array.from({ length: 13 }).map((_, i) => {
-    const randomRatio =
-      aspectRatios[Math.floor(Math.random() * aspectRatios.length)];
-    return {
-      id: `mock-${i + 1}`,
-      url: `/assets/background-media/${i + 1}.webp`,
-      type: "image",
-      aspectRatio: randomRatio as any,
-      width: 1080,
-      height: 1080,
-      input: {},
-      model: "s",
-      format: "webp",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-  });
-
   return (
     // The main layout caps pages at 90% width (sm+); home breaks out of it to the full
     // width minus 1rem each side: 100%/0.9 = the layout's width, then centered back.
@@ -145,11 +124,6 @@ export default async function WorkspacePage() {
       {/* mt-6 + the page's gap-10 = the sections' own gap-16 */}
       <HomeSections sections={sections} className="mt-6" />
 
-      <MediaGrid
-        imagesWidth={250}
-        media={media}
-        breakpointCols={{ default: 3, 1600: 4, 1450: 4, 1200: 3, 940: 2 }}
-      />
     </div>
   );
 }

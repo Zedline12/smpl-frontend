@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { fetchTemplates } from "@/features/templates/api";
 import type { Template } from "@/features/templates/types";
 import { HomeSectionLimits as L, SECTION_COLUMNS, type TemplatesBody } from "@/features/home-sections/types";
-import { Field, ItemControls, Segmented, moveItem } from "../fields";
+import { Field, ItemControls, Segmented, TextInput, moveItem } from "../fields";
 
 /** Published templates to pick from (shared with the section preview). */
 export function usePublishedTemplates() {
@@ -82,6 +82,36 @@ export function TemplatesBodyEditor({ body, onChange }: { body: TemplatesBody; o
           </div>
         )}
       </Field>
+
+      {/* Link: makes the title a link and adds a faded "View all" button under the grid. */}
+      <div className="flex flex-col gap-2 rounded-lg border border-white/10 p-3">
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            checked={!!body.link}
+            onChange={(e) => onChange({ ...body, link: e.target.checked ? { href: "", label: "" } : null })}
+          />
+          Link to more
+        </label>
+        {body.link && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Link" hint="/create/video?model=… or https://…">
+              <TextInput
+                value={body.link.href}
+                onChange={(href) => onChange({ ...body, link: { ...body.link!, href } })}
+                maxLength={L.maxUrlLength}
+              />
+            </Field>
+            <Field label="Button text" hint='Empty shows "View all"'>
+              <TextInput
+                value={body.link.label}
+                onChange={(label) => onChange({ ...body, link: { ...body.link!, label } })}
+                maxLength={L.maxCtaLabelLength}
+              />
+            </Field>
+          </div>
+        )}
+      </div>
 
       {/* Library */}
       <Field label="Published templates">

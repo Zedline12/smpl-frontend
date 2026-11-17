@@ -83,10 +83,19 @@ export interface MediaBody {
   items: MediaItem[];
 }
 
+/** "See more" link of a templates section: the title links to it and a button opens it. */
+export interface SectionLink {
+  href: string;
+  /** Button text; empty shows "View all". */
+  label: string;
+}
+
 export interface TemplatesBody {
   type: "templates";
   columns: number;
   templateIds: string[];
+  /** Missing on older sections. */
+  link?: SectionLink | null;
 }
 
 export interface CardsBody {
@@ -126,6 +135,7 @@ export interface TemplatesBodyResolved {
   type: "templates";
   columns: number;
   templates: Template[];
+  link?: SectionLink | null;
 }
 
 export type PublicHomeSectionBody = Exclude<HomeSectionBody, TemplatesBody> | TemplatesBodyResolved;
@@ -143,7 +153,7 @@ export function blankBody(type: HomeSectionType): HomeSectionBody {
     case "media":
       return { type, columns: 3, aspectRatio: "16:9", items: [] };
     case "templates":
-      return { type, columns: 3, templateIds: [] };
+      return { type, columns: 3, templateIds: [], link: null };
     case "cards":
       return {
         type,

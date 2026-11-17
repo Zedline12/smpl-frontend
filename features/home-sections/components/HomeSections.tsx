@@ -7,7 +7,10 @@ import { SectionHeader } from "./SectionHeader";
 export function HomeSectionView({ section }: { section: Pick<PublicHomeSection, "header" | "body"> }) {
   return (
     <section className="flex flex-col gap-5">
-      <SectionHeader header={section.header} />
+      <SectionHeader
+        header={section.header}
+        href={section.body.type === "templates" ? section.body.link?.href || undefined : undefined}
+      />
       <HomeSectionBody body={section.body} />
     </section>
   );

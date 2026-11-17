@@ -7,6 +7,7 @@ import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStor
 
 export const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   { label: "Mcp Integration", href: "/me/settings/mcp", isNew: true },
+  { label: "Gensu", href: "/create/video?model=smpl-gensu", isNew: true },
   { label: "Clipping Studio", href: "/clipping-studio", isNew: true },
   { label: "AI Influencer Studio", href: "/ai-influencer-studio", isNew: true },
   { label: "Ads Studio", href: "/ads-studio", isNew: true },
