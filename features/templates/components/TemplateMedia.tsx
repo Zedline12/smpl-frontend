@@ -30,8 +30,33 @@ const videoProps = {
   loop: true,
   playsInline: true,
   preload: "metadata" as const,
-  className: "absolute inset-0 h-full w-full object-cover",
+  // contain, not cover: the whole frame shows (any aspect ratio) inside the card's fixed box,
+  // with the card's black filling the leftover edges, instead of the edges being cropped.
+  className: "absolute inset-0 h-full w-full object-contain",
 };
+
+/** True once the video's metadata shows it's taller than wide (e.g. 9:16). */
+const isPortrait = (e: React.SyntheticEvent<HTMLVideoElement>) =>
+  e.currentTarget.videoHeight > e.currentTarget.videoWidth;
+
+/**
+ * Behind a portrait video: a blurred, darkened copy filling the card, so the sides aren't
+ * plain black. Only rendered for portrait videos, so 16:9 cards don't decode a second video.
+ */
+function BlurBackdrop({ src }: { src: string }) {
+  return (
+    <video
+      src={src}
+      muted
+      loop
+      playsInline
+      autoPlay
+      preload="metadata"
+      aria-hidden
+      className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-2xl"
+    />
+  );
+}
 
 /** One loop of the before/after sweep, in ms. */
 const SWEEP = {
@@ -66,6 +91,7 @@ function BeforeAfterLoop({ before, after, labels }: { before: string; after: str
   const barRef = useRef<HTMLSpanElement>(null);
   const beforeLabelRef = useRef<HTMLSpanElement>(null);
   const afterLabelRef = useRef<HTMLSpanElement>(null);
+  const [portrait, setPortrait] = useState(false);
 
   useEffect(() => {
     const root = ref.current;
@@ -117,7 +143,8 @@ function BeforeAfterLoop({ before, after, labels }: { before: string; after: str
 
   return (
     <div ref={ref} className="absolute inset-0 overflow-hidden">
-      <video src={after} {...videoProps} />
+      {portrait && <BlurBackdrop src={after} />}
+      <video src={after} {...videoProps} onLoadedMetadata={(e) => setPortrait(isPortrait(e))} />
       <video ref={beforeRef} src={before} {...videoProps} style={{ clipPath: "inset(0 0 0 0%)", willChange: "clip-path" }} />
       <span
         ref={barRef}
@@ -172,9 +199,11 @@ function PhotoGallery({ images, interval = 3500 }: { images: string[]; interval?
 
 function SingleVideo({ src }: { src: string }) {
   const ref = usePlayWhenVisible<HTMLDivElement>();
+  const [portrait, setPortrait] = useState(false);
   return (
-    <div ref={ref} className="absolute inset-0">
-      <video src={src} {...videoProps} />
+    <div ref={ref} className="absolute inset-0 overflow-hidden">
+      {portrait && <BlurBackdrop src={src} />}
+      <video src={src} {...videoProps} onLoadedMetadata={(e) => setPortrait(isPortrait(e))} />
     </div>
   );
 }
