@@ -1,105 +1,36 @@
 "use client";
 import { useRef, useState } from "react";
-import {
-  Dices,
-  Eye,
-  Glasses,
-  Globe,
-  Hourglass,
-  Layers,
-  Palette,
-  Ruler,
-  Scissors,
-  Shirt,
-  Shuffle,
-  Smile,
-  Sparkles,
-  Upload,
-  User,
-  X,
-} from "lucide-react";
+import { Dices, Shuffle, Upload, User, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/providers/AuthProvider";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
-import ProjectSelector from "@/features/generation/components/prompt/selectors/ProjectSelector";
-import { AiModelsEnum } from "@/features/generation/enums/models.enum";
-import {
-  GenerationTypeEnum,
-  ModelsValidatorSchemaMap,
-} from "@/features/generation/types/generation";
 import {
   AiInfluencerInputConst,
   AiInfluencerTier,
-  IAiInfluencerInput,
   isHumanTier,
-  TIER_LABELS,
 } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
-import {
-  useGenerateMutation,
-  useGenerationCostQuery,
-} from "@/features/generation/hooks/generation";
-import {
-  useAiGenerationControlStore,
-  useAiModelStore,
-} from "@/stores/useAiGenerationControlStore";
 import AppearanceCategory from "./AppearanceCategory";
-import { useGenerateTemplateMutation } from "@/features/media/hooks/useTemplates";
+import { toggleOption } from "../hooks/useAiInfluencerOptions";
 import {
-  AiInfluencerOption,
-  categoriesForTier,
-  pruneSelectionForTier,
-  toggleOption,
-  useAiInfluencerOptions,
-} from "../hooks/useAiInfluencerOptions";
-import type { ComponentType } from "react";
-
-const MODEL = AiModelsEnum.HIGGSFIELD_AI_INFLUENCER;
-
-const mkOpt = (key: string, label: string): AiInfluencerOption => ({
-  key, label, img: null, color: null, tiers: null, slot: null, exclusive: false,
-});
-
-const CHARACTER_OPTIONS: AiInfluencerOption[] = AiInfluencerInputConst.tier.map(
-  (tier) => mkOpt(tier, TIER_LABELS[tier]),
-);
-
-// Catalog category key → icon
-const CATEGORY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  gender: User,
-  ethnicity_origin_base: Globe,
-  age: Hourglass,
-  skin_tone: Palette,
-  height: Ruler,
-  body_type: Layers,
-  proportions: Layers,
-  eye_color: Eye,
-  eye_shape: Eye,
-  freak_head: Smile,
-  freak_face: Smile,
-  freak_neck: User,
-  hair: Scissors,
-  hair_colour: Palette,
-  facial_hair: Scissors,
-  distinctive: Sparkles,
-  aesthetic: Shirt,
-  accessory: Glasses,
-};
-
-const randomSeed = () =>
-  Math.floor(Math.random() * AiInfluencerInputConst.maxSeed) + 1;
+  CHARACTER_CATEGORY,
+  categoryIcon,
+  randomSeed,
+  useInfluencerBuilder,
+} from "../hooks/useInfluencerBuilder";
 
 export default function InfluencerBuilder() {
-  const { user } = useAuth();
-  const { projectId, templateMode } = useAiGenerationControlStore();
-  const templateGeneration = useGenerateTemplateMutation();
-  const { states, setField: setModelField } = useAiModelStore();
-  const state = states[MODEL] as IAiInfluencerInput;
-  const setField = (key: keyof IAiInfluencerInput, value: unknown) =>
-    setModelField(MODEL, key, value);
-
-  const { data: catalog, isLoading, isError } = useAiInfluencerOptions();
-  const { data: cost } = useGenerationCostQuery();
-  const generation = useGenerateMutation();
+  const {
+    state,
+    setField,
+    catalogQuery: { isLoading, isError },
+    categories,
+    cost,
+    templateMode,
+    isPending,
+    canGenerate,
+    changeTier,
+    generate: handleGenerate,
+    randomize,
+  } = useInfluencerBuilder();
 
   // Multi-open accordion: set of open section ids
   const [openSections, setOpenSections] = useState<Set<string>>(
@@ -108,7 +39,8 @@ export default function InfluencerBuilder() {
   const toggleSection = (id: string) =>
     setOpenSections((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
 
@@ -129,33 +61,6 @@ export default function InfluencerBuilder() {
     resolution,
   } = state;
   const human = isHumanTier(tier);
-  const categories = categoriesForTier(catalog, tier);
-  const isValid = ModelsValidatorSchemaMap[MODEL].safeParse(state).success;
-
-  const changeTier = (next: AiInfluencerTier) => {
-    if (next === tier) return;
-    setField("tier", next);
-    setField("selection", pruneSelectionForTier(selection, catalog, next));
-    setField("variationIndex", 0);
-    if (isHumanTier(next)) setField("bodyColor", "");
-  };
-
-  const handleGenerate = () => {
-    if (templateMode) {
-      templateGeneration.mutate({
-        model: MODEL,
-        mediaType: GenerationTypeEnum.IMAGE,
-        input: state,
-      });
-      return;
-    }
-    generation.mutate({
-      model: MODEL,
-      projectId,
-      mediaType: GenerationTypeEnum.IMAGE,
-      input: state,
-    });
-  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -217,13 +122,7 @@ export default function InfluencerBuilder() {
       <div className="flex flex-col gap-2">
         {/* Character type — always first, always has a value */}
         <AppearanceCategory
-          category={{
-            key: "characterType",
-            label: "Character type",
-            max: 1,
-            options: CHARACTER_OPTIONS,
-            tiers: [],
-          }}
+          category={CHARACTER_CATEGORY}
           icon={User}
           selected={[tier]}
           open={openSections.has("characterType")}
@@ -247,7 +146,7 @@ export default function InfluencerBuilder() {
             <AppearanceCategory
               key={id}
               category={category}
-              icon={CATEGORY_ICONS[category.key] ?? Sparkles}
+              icon={categoryIcon(category.key)}
               selected={selection[category.key] ?? []}
               open={openSections.has(id)}
               onToggleOpen={() => toggleSection(id)}
@@ -406,35 +305,42 @@ export default function InfluencerBuilder() {
       </section>
 
       {/* Footer */}
-      <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-background/90 px-4 py-4 backdrop-blur">
-        <div className="flex items-center gap-2">
-          {user && !templateMode && <ProjectSelector />}
-          <button
-            type="button"
-            onClick={() => {
-              setField("selection", {});
-              setField("seed", null);
-            }}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <Shuffle className="size-4" /> Randomize
-          </button>
-        </div>
+      <div className="sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-white/10 bg-background/90 px-4 py-4 backdrop-blur">
+        <button
+          type="button"
+          onClick={randomize}
+          aria-label="Randomize"
+          title="Randomize"
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-muted-foreground hover:text-foreground"
+        >
+          <Shuffle className="size-4" />
+        </button>
+        {/* Same look as the create pages' Generate (CreateSidebar). */}
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={
-            !isValid ||
-            (!templateMode && !projectId) ||
-            generation.isPending ||
-            templateGeneration.isPending
-          }
-          className="rounded-full px-5 py-2 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-          style={{ background: "var(--gradient-create)" }}
+          disabled={!canGenerate}
+          className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
+            canGenerate || isPending ? "bg-primary text-white hover:bg-primary/90" : "bg-primary/40 text-white/60"
+          }`}
         >
-          {generation.isPending || templateGeneration.isPending
-            ? "Starting…"
-            : `${templateMode ? "Create template" : "Generate"} · ${cost?.creditsCost ?? 0} credits`}
+          {isPending ? (
+            <>
+              <div className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              Generating…
+            </>
+          ) : (
+            <>
+              <span>{templateMode ? "Create template" : "Generate"}</span>
+              <span className="text-white/40">|</span>
+              <span className="flex items-center gap-1 text-base font-bold tabular-nums opacity-80">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                  <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clipRule="evenodd" />
+                </svg>
+                {cost}
+              </span>
+            </>
+          )}
         </button>
       </div>
 

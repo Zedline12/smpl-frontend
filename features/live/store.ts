@@ -31,13 +31,15 @@ export const useLiveStore = create<LiveState>((set, get) => ({
       const old = items[key];
       previous[key] = old;
       // Out-of-order events: never go back to an older version.
-      if (old && Date.parse(old.updatedAt) > Date.parse(item.updatedAt)) continue;
+      if (old && Date.parse(old.updatedAt) > Date.parse(item.updatedAt))
+        continue;
       if (item.status === "removed") delete items[key];
       else items[key] = item;
     }
     const cutoff = Date.now() - KEEP_FINISHED_MS;
     for (const [key, item] of Object.entries(items)) {
-      if (!isActive(item.status) && Date.parse(item.updatedAt) < cutoff) delete items[key];
+      if (!isActive(item.status) && Date.parse(item.updatedAt) < cutoff)
+        delete items[key];
     }
     set({ items });
     return previous;

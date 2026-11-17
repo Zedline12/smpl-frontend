@@ -22,7 +22,7 @@ const AVATAR_GRADIENT =
 
 const DOT_COUNT = 20;
 
-const NAV_ROWS: {
+export const NAV_ROWS: {
   href: string;
   label: string;
   icon: typeof User;

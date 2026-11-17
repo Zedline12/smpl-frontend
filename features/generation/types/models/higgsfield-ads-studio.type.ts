@@ -21,10 +21,38 @@ export const AdsStudioInputConst = {
   maxNicheLength: 1000,
   maxTargetAudienceLength: 2000,
   maxLanguageLength: 80,
+  /** Limits for the brand kit sent with an ad (same as the backend's). */
+  brand: {
+    text: 120,
+    tagline: 200,
+    description: 1500,
+    audience: 1000,
+    item: 200,
+    list: 12,
+    colors: 12,
+  },
 };
 
-export type AdsStudioAspectRatio = (typeof AdsStudioInputConst.aspectRatio)[number];
-export type AdsStudioResolution = (typeof AdsStudioInputConst.resolution)[number];
+export type AdsStudioAspectRatio =
+  (typeof AdsStudioInputConst.aspectRatio)[number];
+export type AdsStudioResolution =
+  (typeof AdsStudioInputConst.resolution)[number];
+
+/** The brand kit an ad is for (picked in Ads Studio); the logo goes in `images`. */
+export interface AdsStudioBrand {
+  name?: string;
+  tagline?: string;
+  description?: string;
+  primaryColor?: string;
+  /** The palette, main colour first. */
+  colors?: string[];
+  headerFont?: string;
+  bodyFont?: string;
+  sellingPoints?: string[];
+  audience?: string;
+  aesthetics?: string[];
+  toneOfVoice?: string[];
+}
 
 export interface IAdsStudioInput {
   prompt: string;
@@ -35,9 +63,12 @@ export interface IAdsStudioInput {
   aspectRatio: AdsStudioAspectRatio;
   resolution: AdsStudioResolution;
   batchSize: number;
+  brand?: AdsStudioBrand;
 }
 
 const c = AdsStudioInputConst;
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const brandList = z.array(z.string().max(c.brand.item)).max(c.brand.list);
 export const adsStudioValidationSchema = z.object({
   prompt: z.string().trim().min(1).max(c.maxPromptLength),
   images: z.array(z.string().url()).max(c.maxImages),
@@ -47,4 +78,19 @@ export const adsStudioValidationSchema = z.object({
   aspectRatio: z.enum(c.aspectRatio),
   resolution: z.enum(c.resolution),
   batchSize: z.number().int().min(1).max(8),
+  brand: z
+    .object({
+      name: z.string().max(c.brand.text).optional(),
+      tagline: z.string().max(c.brand.tagline).optional(),
+      description: z.string().max(c.brand.description).optional(),
+      primaryColor: hexColor.optional(),
+      colors: z.array(hexColor).max(c.brand.colors).optional(),
+      headerFont: z.string().max(c.brand.text).optional(),
+      bodyFont: z.string().max(c.brand.text).optional(),
+      sellingPoints: brandList.optional(),
+      audience: z.string().max(c.brand.audience).optional(),
+      aesthetics: brandList.optional(),
+      toneOfVoice: brandList.optional(),
+    })
+    .optional(),
 }) as z.ZodType<IAdsStudioInput>;

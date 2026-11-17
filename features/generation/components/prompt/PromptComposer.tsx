@@ -6,7 +6,11 @@ import {
   GenerateVideoRequest,
 } from "@/features/generation/types/api";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
-import { AiModelsEnum } from "@/features/generation/enums/models.enum";
+import {
+  AiModelsEnum,
+  getModel,
+} from "@/features/generation/enums/models.enum";
+import { MediaTypeDefaultModel } from "@/stores/aiGenerationStore.type";
 import GeminiFlashImageComposer from "./composers/gemini-flash-image.composer";
 import KlingO3ImageComposer from "./composers/kling-03-image.composer";
 import Veo3Composer from "./composers/veo-3.composer";
@@ -21,21 +25,40 @@ import GptImage2Composer from "./composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
 import GensuComposer from "./composers/gensu.composer";
 import Kling40Composer from "./composers/kling-4-0.composer";
+/** Models this composer can drive; the rest (Ad Multiplier, edit tools) only exist in the sidebar. */
+const HAS_COMPOSER: ReadonlySet<AiModelsEnum> = new Set([
+  AiModelsEnum.GEMINI_FLASH_IMAGE,
+  AiModelsEnum.KLING_O3_IMAGE,
+  AiModelsEnum.VEO_3,
+  AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
+  AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
+  AiModelsEnum.KLING_V3_TEXT_TO_VIDEO,
+  AiModelsEnum.ELEVEN_LABS_V3_TTS,
+  AiModelsEnum.SEEDREAM_V4_5,
+  AiModelsEnum.SEEDANCE_2_0,
+  AiModelsEnum.SEEDANCE_2_5,
+  AiModelsEnum.FAL_SEEDANCE_2_5,
+  AiModelsEnum.GPT_IMAGE_2,
+  AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
+  AiModelsEnum.SMPL_GENSU,
+  AiModelsEnum.KLING_4_0,
+  AiModelsEnum.KLING_4_0_FLASH,
+]);
+
 export interface MediaComposerHandle {
   isValid: boolean;
   getPayload(): GenerateImageRequest | GenerateVideoRequest;
   reset(): void;
 }
 
-
 export default function PromptComposer() {
-  const { model } = useAiGenerationControlStore();
+  const { model, mediaType, setMediaType, templateMode } =
+    useAiGenerationControlStore();
 
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    console.log(model);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
@@ -70,6 +93,29 @@ export default function PromptComposer() {
       </div>
 
       <div className="p-2 ">
+        {!HAS_COMPOSER.has(model) && (
+          <div className="flex flex-wrap items-center justify-between gap-3 px-2 py-3">
+            <p className="text-foreground/70 text-sm">
+              <span className="text-foreground font-semibold">
+                {getModel(model)?.name ?? "This tool"}
+              </span>{" "}
+              isn't available in this prompt box.
+            </p>
+            {/* Not in the admin templates editor, where the model is picked on purpose. */}
+            {!templateMode && (
+              <button
+                type="button"
+                // setMediaType switches back to that type's default model.
+                onClick={() => setMediaType(mediaType)}
+                className="bg-primary cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                Use{" "}
+                {getModel(MediaTypeDefaultModel[mediaType])?.name ??
+                  "the default model"}
+              </button>
+            )}
+          </div>
+        )}
         {model === AiModelsEnum.GEMINI_FLASH_IMAGE && (
           <GeminiFlashImageComposer isFocused={isFocused} />
         )}
@@ -95,7 +141,8 @@ export default function PromptComposer() {
         {model === AiModelsEnum.SEEDANCE_2_0 && (
           <Seedance20Composer isFocused={isFocused} />
         )}
-        {(model === AiModelsEnum.SEEDANCE_2_5 || model === AiModelsEnum.FAL_SEEDANCE_2_5) && (
+        {(model === AiModelsEnum.SEEDANCE_2_5 ||
+          model === AiModelsEnum.FAL_SEEDANCE_2_5) && (
           <Seedance25RefComposer isFocused={isFocused} model={model} />
         )}
         {model === AiModelsEnum.GPT_IMAGE_2 && (
@@ -107,7 +154,8 @@ export default function PromptComposer() {
         {model === AiModelsEnum.SMPL_GENSU && (
           <GensuComposer isFocused={isFocused} />
         )}
-        {(model === AiModelsEnum.KLING_4_0 || model === AiModelsEnum.KLING_4_0_FLASH) && (
+        {(model === AiModelsEnum.KLING_4_0 ||
+          model === AiModelsEnum.KLING_4_0_FLASH) && (
           <Kling40Composer isFocused={isFocused} model={model} />
         )}
       </div>

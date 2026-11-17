@@ -1,6 +1,13 @@
 import { toast } from "sonner";
-import { installAudioUnlock, playNotificationSound } from "@/features/admin/notifications/sound";
-import { readPrefs, systemNotificationsSupported, writePrefs } from "./settings";
+import {
+  installAudioUnlock,
+  playNotificationSound,
+} from "@/features/admin/notifications/sound";
+import {
+  readPrefs,
+  systemNotificationsSupported,
+  writePrefs,
+} from "./settings";
 import { LiveItem, liveItemLabel, liveItemLink } from "./types";
 
 const CLAIM_PREFIX = "smpl:notified:";
@@ -27,7 +34,10 @@ export function pruneClaims() {
     const now = Date.now();
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
-      if (key?.startsWith(CLAIM_PREFIX) && now - Number(localStorage.getItem(key)) > CLAIM_TTL_MS) {
+      if (
+        key?.startsWith(CLAIM_PREFIX) &&
+        now - Number(localStorage.getItem(key)) > CLAIM_TTL_MS
+      ) {
         localStorage.removeItem(key);
       }
     }
@@ -45,7 +55,10 @@ function capitalize(s: string) {
 }
 
 /** Toast + sound, and a system notification when the tab is in the background. */
-export function notifyFinished(item: LiveItem, navigate: (href: string) => void) {
+export function notifyFinished(
+  item: LiveItem,
+  navigate: (href: string) => void,
+) {
   // Clipping is tracked by its project, not its internal job row.
   if (item.kind === "job" && item.domain === "clipping-studio") return;
   if (!claim(item)) return;
@@ -61,7 +74,12 @@ export function notifyFinished(item: LiveItem, navigate: (href: string) => void)
     : `${capitalize(what)} failed`;
   const body = ok
     ? (item.title ?? undefined)
-    : [item.failedMessage, item.refunded && !/refund/i.test(item.failedMessage ?? "") ? "Credits refunded." : null]
+    : [
+        item.failedMessage,
+        item.refunded && !/refund/i.test(item.failedMessage ?? "")
+          ? "Credits refunded."
+          : null,
+      ]
         .filter(Boolean)
         .join(" ") || undefined;
 
@@ -78,7 +96,11 @@ export function notifyFinished(item: LiveItem, navigate: (href: string) => void)
     document.visibilityState === "hidden"
   ) {
     try {
-      const n = new Notification(title, { body, tag: `${item.kind}:${item.id}`, icon: "/logo.png" });
+      const n = new Notification(title, {
+        body,
+        tag: `${item.kind}:${item.id}`,
+        icon: "/logo.png",
+      });
       n.onclick = () => {
         window.focus();
         navigate(href);
@@ -94,7 +116,8 @@ export function notifyFinished(item: LiveItem, navigate: (href: string) => void)
  * After the user's first job, offer system notifications once (never on page load).
  */
 export function maybeAskForPermission() {
-  if (!systemNotificationsSupported() || Notification.permission !== "default") return;
+  if (!systemNotificationsSupported() || Notification.permission !== "default")
+    return;
   const prefs = readPrefs();
   if (prefs.promptDismissed || !prefs.system) return;
   writePrefs({ promptDismissed: true });

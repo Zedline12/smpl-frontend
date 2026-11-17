@@ -1,5 +1,4 @@
 import { MediaGrid } from "@/features/media/components/MediaGrid";
-import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { HomeTour } from "@/components/HomeTour";
 import { HomeWelcome } from "@/features/landing/components/HomeWelcome";
 import { Media } from "@/features/media/types/media";
@@ -45,42 +44,46 @@ const featured: FeaturedItem[] = [
 
 const features: FeatureItem[] = [
   {
-    icon: "Sparkles",
-    title: "AI Generation",
-    description: "Create videos, images and audio from text or reference media.",
-    badge: "FREE",
-    href: "/create/video",
-  },
-  {
-    icon: "BarChart",
-    title: "Analytics",
-    description: "Track your usage, credits and generation history at a glance.",
-    href: "/",
-  },
-  {
-    icon: "Cpu",
-    title: "Latest Models",
-    description: "Access Veo 3, Kling, Seedance, Grok and more as they launch.",
-    href: "/create/video",
-  },
-  {
     icon: "Film",
-    title: "Motion Transfer",
-    description: "Transplant motion from any clip onto your own subjects.",
+    title: "Smpl Gensu",
+    description: "Transfer motion from any video onto your own subjects.",
     highlighted: true,
-    href: "/create/video",
+    href: "/create/video?model=smpl-gensu",
   },
   {
-    icon: "Asterisk",
-    title: "Media Library",
-    description: "All your generated assets stored and ready to reuse.",
-    href: "/media",
+    icon: "Megaphone",
+    title: "Ads Studio",
+    description: "Ready-to-use ads from a brief, your brand and your products.",
+    badge: "NEW",
+    href: "/ads-studio",
   },
   {
-    icon: "Wand",
-    title: "Smart Prompts",
-    description: "Prompt suggestions powered by your previous generations.",
-    href: "/create/video",
+    icon: "UserRound",
+    title: "AI Influencer Studio",
+    description: "Create and manage a photoreal AI influencer.",
+    badge: "NEW",
+    href: "/ai-influencer-studio",
+  },
+  {
+    icon: "Music",
+    title: "Artist",
+    description: "Full songs, and your character performing them.",
+    badge: "NEW",
+    href: "/artist",
+  },
+  {
+    icon: "Repeat",
+    title: "Remix",
+    description: "Drop your character into any video edit.",
+    badge: "NEW",
+    href: "/remix",
+  },
+  {
+    icon: "Scissors",
+    title: "Clipping Studio",
+    description: "Turn long videos into short social clips.",
+    badge: "NEW",
+    href: "/clipping-studio",
   },
 ];
 
@@ -141,10 +144,6 @@ export default async function WorkspacePage() {
       {/* ── custom sections (App Appearance → Homepage Sections) ── */}
       {/* mt-6 + the page's gap-10 = the sections' own gap-16 */}
       <HomeSections sections={sections} className="mt-6" />
-
-      <section className="sm:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-        <PromptComposer />
-      </section>
 
       <MediaGrid
         imagesWidth={250}

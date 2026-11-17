@@ -3,13 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Home, LayoutTemplate, ChevronLeft, WandSparkles } from "lucide-react";
+import { BookOpen, Home, LayoutTemplate, ChevronLeft, WandSparkles, CircleUserRound } from "lucide-react";
 
 const links = [
   { icon: BookOpen, label: "How It Works", href: "/admin/appearance/how-it-works" },
   { icon: LayoutTemplate, label: "Templates", href: "/admin/appearance/templates" },
   { icon: Home, label: "Homepage Sections", href: "/admin/appearance/homepage" },
   { icon: WandSparkles, label: "Styles", href: "/admin/appearance/styles" },
+  { icon: CircleUserRound, label: "Avatars", href: "/admin/appearance/avatars" },
 ];
 
 export const AppearanceSidebar = () => {

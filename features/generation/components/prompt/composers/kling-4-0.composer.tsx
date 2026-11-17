@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Plus, Video, X } from "lucide-react";
+import { PromptTools } from "../PromptTools";
 import { Textarea } from "@/components/ui/textarea";
 import { Menu, MenuItem } from "@/components/menu";
 import { cn } from "@/lib/utils";
@@ -147,14 +148,17 @@ export default function Kling40Composer({
           {consts.duration[consts.duration.length - 1]}s).
         </p>
 
-        <Textarea
-          ref={promptRef}
-          value={prompt}
-          onChange={(e) => setField("prompt", e.target.value)}
-          maxLength={KlingOmniLimits.maxPromptLength}
-          placeholder="Describe the video, mentioning references like @Image1 or @Video1..."
-          className="placeholder:text-foreground/70 text-foreground min-h-[100px] flex-1 resize-none border-none bg-transparent pt-2 text-lg outline-none focus:ring-0"
-        />
+        <div className="relative flex min-w-0 flex-1 self-stretch">
+          <Textarea
+            ref={promptRef}
+            value={prompt}
+            onChange={(e) => setField("prompt", e.target.value)}
+            maxLength={KlingOmniLimits.maxPromptLength}
+            placeholder="Describe the video, mentioning references like @Image1 or @Video1..."
+            className="placeholder:text-foreground/70 text-foreground min-h-[100px] resize-none border-none bg-transparent pt-2 text-lg outline-none focus:ring-0 w-full pb-12"
+          />
+          <PromptTools className="absolute right-1 bottom-1" />
+        </div>
       </div>
 
       <MediaManagerDialog

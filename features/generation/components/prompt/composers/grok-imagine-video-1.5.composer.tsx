@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { PromptTools } from "../PromptTools";
 import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
 import { Menu, MenuItem } from "@/components/menu";
 import DurationSelector from "@/features/generation/components/selectors/DurationSelector";
@@ -68,12 +69,15 @@ export default function GrokImagineVideo15Composer({
           )}
         </div>
 
-        <Textarea
-          value={prompt || ""}
-          onChange={(e) => setField("prompt", e.target.value)}
-          placeholder="Describe the video you want to generate..."
-          className="flex-1 min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
-        />
+        <div className="relative flex min-w-0 flex-1 self-stretch">
+          <Textarea
+            value={prompt || ""}
+            onChange={(e) => setField("prompt", e.target.value)}
+            placeholder="Describe the video you want to generate..."
+            className="min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2 w-full pb-12"
+          />
+          <PromptTools className="absolute right-1 bottom-1" />
+        </div>
       </div>
 
       <MediaManagerDialog

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { PromptTools } from "../PromptTools";
 import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
 import { Menu, MenuItem } from "@/components/menu";
 import DurationSelector from "@/features/generation/components/selectors/DurationSelector";
@@ -118,13 +119,16 @@ export default function KlingV3ImageToVideoComposer({
           </div>
         </div>
 
-        <Textarea
-          value={prompt || ""}
-          onChange={(e) => setField("prompt", e.target.value)}
-          disabled={hasMultiPrompt}
-          placeholder={hasMultiPrompt ? "Prompt disabled (using Multi Prompt)" : `Describe the motion and scene details...`}
-          className="flex-1 min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
+        <div className="relative flex min-w-0 flex-1 self-stretch">
+          <Textarea
+            value={prompt || ""}
+            onChange={(e) => setField("prompt", e.target.value)}
+            disabled={hasMultiPrompt}
+            placeholder={hasMultiPrompt ? "Prompt disabled (using Multi Prompt)" : `Describe the motion and scene details...`}
+            className="min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2 disabled:opacity-50 disabled:cursor-not-allowed w-full pb-12"
+          />
+          <PromptTools className="absolute right-1 bottom-1" />
+        </div>
       </div>
 
       <MediaManagerDialog

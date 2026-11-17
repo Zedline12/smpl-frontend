@@ -1,9 +1,5 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
 
-import ProjectSelector from "./selectors/ProjectSelector";
-import { useAuth } from "@/providers/AuthProvider";
 import ModelSelector from "./selectors/ModelSelector";
 import {
   IMAGE_MODELS,
@@ -25,9 +21,9 @@ import {
 } from "../../hooks/generation";
 import { useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import SpeechToText from "./SpeechToText";
+import { useAuth } from "@/providers/AuthProvider";
+import { useDefaultProject } from "@/features/projects/hooks/use-default-project";
 import { useGenerateTemplateMutation } from "@/features/media/hooks/useTemplates";
-import { isFreePlan as isUserOnFreePlan } from "@/lib/subscription";
 
 interface PromptComposerFooterProps {
   children: React.ReactNode;
@@ -45,32 +41,13 @@ export default function PromptComposerFooter({
   const { data } = useGenerationCostQuery();
   const generation = useGenerateMutation();
   const templateGeneration = useGenerateTemplateMutation();
-  const { states, setField } = useAiModelStore();
-  const { prompt } = states[model]!;
-  const { user } = useAuth();
+  const { states } = useAiModelStore();
   const router = useRouter();
   const pathname = usePathname();
-  const [isEnhancing, setIsEnhancing] = useState(false);
-   const queryClient = useQueryClient();
-  const handleEnhancePrompt = async () => {
-    setIsEnhancing(true);
-    try {
-      const res = await fetch("/api/generation/prompt-enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt,mediaType }),
-      });
-      const json = await res.json();
-      if (json.data?.prompt) {
-        setField(model, "prompt", json.data.prompt);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsEnhancing(false);
-    }
-  };
-  const isFreePlan = isUserOnFreePlan(user);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  // No project picker: generations go to the first project.
+  useDefaultProject(!!user && !templateMode);
   const isFormValid = () => {
     const validator = ModelsValidatorSchemaMap[model];
     return validator.safeParse(states[model]).success;
@@ -113,8 +90,11 @@ export default function PromptComposerFooter({
         isFocused ? "max-h-[300px] opacity-100 " : "max-h-0 opacity-0 "
       }`}
     >
-      <div className="flex items-center justify-between  xs:flex-row flex-col ">
-        <div className="flex items-center flex-wrap xs:w-auto w-full justify-start gap-2 xs:order-1 order-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Phones: the model picker on its own full-width row, then the settings filling a
+            two-column grid. From sm: one packed row. Menu triggers carry their own p-2; drop it. */}
+        <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="w-full sm:w-auto [&>div]:w-full [&>div>button]:w-full [&>div>button]:p-0 [&>div>button>div]:w-full sm:[&>div]:w-auto sm:[&>div>button]:w-auto sm:[&>div>button>div]:w-auto">
           {mediaType && (
             <ModelSelector
               models={
@@ -127,36 +107,16 @@ export default function PromptComposerFooter({
               }
             />
           )}
-          {children}
-        </div>
-        <div className="flex items-center xs:w-auto w-full justify-between xs:justify-start xs:gap-2 xs:order-2 order-1">
-          {user && !editMode && !templateMode && <ProjectSelector />}
-
-          <SpeechToText />
-
-          {/* Enhance prompt */}
-          <div className="relative group">
-            <button
-              type="button"
-              onClick={handleEnhancePrompt}
-              disabled={isFreePlan || (prompt ?? "").length < 10 || isEnhancing}
-              className="flex cursor-pointer items-center justify-center w-9 h-9 rounded-lg border border-white/10 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-white/10"
-            >
-              <Image
-                src="/robot.png"
-                alt={isFreePlan ? "Enhance prompt (unlocked for paid users)" : "Enhance prompt"}
-                width={16}
-                height={16}
-                className={`w-4 h-4 ${isEnhancing ? "animate-robot-glow" : "opacity-50 group-hover:opacity-100 transition-opacity"}`}
-              />
-            </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[11px] font-medium whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/80 text-white/80 border border-white/10">
-              {isFreePlan ? "Enhance prompt (unlocked for paid users)" : isEnhancing ? "Enhancing…" : "Enhance prompt"}
-            </div>
           </div>
+          <div className="composer-settings flex flex-wrap items-center gap-1.5 [&_[data-menu-trigger]]:p-0">
+            {children}
+          </div>
+        </div>
+        {/* Full-width Create on phones. */}
+        <div className="flex w-full items-center sm:w-auto">
 
           {/* Glassy glow Create button */}
-          {!editMode && <div className="relative group/btn ">
+          {!editMode && <div className="relative group/btn w-full sm:w-auto">
             {/* Wide outer glow */}
             <div
               className={`absolute -inset-2 rounded-full blur-xl pointer-events-none transition-opacity duration-500 ${
@@ -177,7 +137,7 @@ export default function PromptComposerFooter({
             />
             {/* Gradient border */}
             <div
-              className={`relative rounded-full p-px transition-transform duration-200 ${
+              className={`relative w-full rounded-full p-px transition-transform duration-200 ${
                 isFormValid() ? "group-hover/btn:scale-[1.03]" : ""
               }`}
               style={{ background: "var(--gradient-create)" }}
@@ -186,7 +146,7 @@ export default function PromptComposerFooter({
                 type="button"
                 onClick={handleGeneration}
                 disabled={!isFormValid()}
-                className={`cursor-pointer relative flex items-center rounded-full backdrop-blur-md px-4 py-2 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed ${
+                className={`cursor-pointer relative flex w-full items-center justify-center rounded-full backdrop-blur-md px-4 py-2 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed ${
                   isFormValid()
                     ? "bg-black/65 text-white group-hover/btn:bg-black/45"
                     : "bg-black/80 text-white/30"

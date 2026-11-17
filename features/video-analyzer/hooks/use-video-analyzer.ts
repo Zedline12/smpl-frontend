@@ -42,7 +42,7 @@ export function useVideoAnalysesQuery() {
 
 /**
  * Polls the extraction-style jobs once a second while any is running, then
- * stops. Mirrors `useBrandThemeQueuesQuery`.
+ * stops. Mirrors `useBrandQueuesQuery`.
  */
 export function useVideoAnalysisQueuesQuery() {
   const queryClient = useQueryClient();

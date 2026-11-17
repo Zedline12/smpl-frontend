@@ -10,6 +10,8 @@ import { NavbarUserMenu } from "@/components/NavbarUserMenu";
 import { NavbarGuestActions } from "@/components/NavbarGuestActions";
 import { cn } from "@/lib/utils";
 import { JobsIndicator } from "@/features/live/JobsIndicator";
+import { NavbarSearch } from "@/features/search/components/NavbarSearch";
+import { MobileNavActions } from "@/components/MobileNavMenu";
 
 export function Navbar() {
   const { user, isAuthenticated } = useCurrentUser();
@@ -33,8 +35,9 @@ export function Navbar() {
         />
       </Link>
 
-      {/* Scrolls sideways when the links don't fit (phones, narrow windows). */}
-      <nav className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden">
+      {/* Signed in on phones: everything here moves into the menu button. */}
+      <nav className={cn("min-w-0 flex-1 items-center", isAuthenticated ? "hidden sm:flex" : "flex")} aria-label="Main">
+      <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden">
         <MediaTypeLauncher />
 
         {/* bg-foreground/20 rather than bg-border: reads lighter on the dark
@@ -42,9 +45,19 @@ export function Navbar() {
         <span className="bg-foreground/20 h-5 w-px shrink-0" />
 
         <StudioLinks />
+      </div>
       </nav>
 
-      <div className="flex shrink-0 items-center gap-3 sm:gap-6">
+      {/* Phones, signed in: logo · Pricing (free) · credits/plan · menu button. */}
+      {isAuthenticated && (
+        <div className="ml-auto flex min-w-0 sm:hidden">
+          <MobileNavActions user={user} />
+        </div>
+      )}
+
+      <div className={cn("shrink-0 items-center gap-3 sm:gap-6", isAuthenticated ? "hidden sm:flex" : "flex")}>
+        {isAuthenticated && <NavbarSearch />}
+
         {isAuthenticated && (
           <Link
             href="/assets"

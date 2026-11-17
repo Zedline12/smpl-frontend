@@ -60,7 +60,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.69-.03-1.38-.04-2.09-.04H7.5a4.5 4.5 0 1 1 0-9h.75c.71 0 1.4-.01 2.09-.04m0 9.08c.25.97.58 1.91.99 2.81.25.56.06 1.24-.48 1.55l-.65.38a1.14 1.14 0 0 1-1.6-.49 22.6 22.6 0 0 1-1.48-3.56m3.22-.69a24 24 0 0 1 0-9.08m0 9.08c3.52.16 6.82 1.1 9.75 2.65A24 24 0 0 0 21 12c0-1.69-.18-3.33-.51-4.92a23.7 23.7 0 0 1-9.75 2.68" />
           </svg>
         ),
-        url: "/create/image?model=higgsfield-ads-studio",
+        url: "/ads-studio",
       },
       {
         label: "Artist",

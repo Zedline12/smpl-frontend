@@ -22,26 +22,26 @@ export default function ModelSelector({ models }: ModelSelectorProps) {
       align="left"
       className="pointer "
       trigger={
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
+        <div className="flex min-w-0 items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20">
           {mediaType === GenerationTypeEnum.VIDEO ? (
             <Video size={20} />
           ) : (
             <Image size={20} />
           )}
-          <span>
+          <span className="truncate">
             {models.find((m) => m.id === currentModel)?.name || "Select Model"}
           </span>
         </div>
       }
     >
-      <div className="bg-popover min-w-[250px] w-[500px] p-1">
+      <div className="bg-popover custom-scrollbar max-h-[60vh] w-[min(500px,calc(100vw-40px))] overflow-y-auto p-1">
         {models.map((m) => (
           <MenuItem
             className=" w-full"
             key={m.id}
             onClick={() => setModel(m.id)}
           >
-            <ModelRow model={m} isActive={m.id === currentModel} />
+            <ModelRow model={m} isActive={m.id === currentModel} compact />
           </MenuItem>
         ))}
       </div>

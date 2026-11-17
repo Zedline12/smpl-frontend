@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { SettingsDuration } from "@/components/SettingsDuration";
 import { SettingsSelect } from "@/components/SettingsSelect";
 import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload, ChevronRight } from "lucide-react";
 import {
@@ -22,7 +23,6 @@ import {
   IMAGE_MODELS,
   VIDEO_MODELS,
   AUDIO_MODELS,
-  STUDIO_MODELS,
   AiModelsEnum,
   type Model,
   isEditTool,
@@ -33,6 +33,7 @@ import {
   useGenerationCostQuery,
 } from "@/features/generation/hooks/generation";
 import { useAuth } from "@/providers/AuthProvider";
+import { useDefaultProject } from "@/features/projects/hooks/use-default-project";
 import {
   VEO3_ASPECT_RATIOS,
   VEO3_RESOLUTIONS,
@@ -67,10 +68,6 @@ import { Seedance25RefPanel } from "@/components/Seedance25RefPanel";
 import { Kling40RefPanel } from "@/components/Kling40RefPanel";
 import { MediaThumb } from "@/components/MediaThumb";
 import { Kling40FlashInputConst, Kling40InputConst } from "@/features/generation/types/models/kling-4-0.type";
-import {
-  AdsStudioInputConst,
-  type IAdsStudioInput,
-} from "@/features/generation/types/models/higgsfield-ads-studio.type";
 import { readVideoDuration } from "@/features/artist/utils/audio-clip";
 import { VoicePickerButton } from "@/features/voice-changer/components/VoicePicker";
 import {
@@ -91,11 +88,8 @@ import {
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
-/** Ads Studio sits in the image list on /create/image, right after Nano Banana Pro. */
-const ADS_STUDIO_MODEL = STUDIO_MODELS.find((m) => m.id === AiModelsEnum.HIGGSFIELD_ADS_STUDIO);
-const CREATE_IMAGE_MODELS: Model[] = (
-  ADS_STUDIO_MODEL ? [IMAGE_MODELS[0], ADS_STUDIO_MODEL, ...IMAGE_MODELS.slice(1)] : IMAGE_MODELS
-).filter((m) => !isEditTool(m.id));
+/** Ads Studio has its own page (/ads-studio), so it isn't in this list. */
+const CREATE_IMAGE_MODELS: Model[] = IMAGE_MODELS.filter((m) => !isEditTool(m.id));
 /** Edit Image: the ffmpeg tools (reframe, upscale). */
 const EDIT_IMAGE_MODELS: Model[] = IMAGE_MODELS.filter((m) => isEditTool(m.id));
 
@@ -145,11 +139,6 @@ const NO_PROMPT_MODELS = new Set([
 
 // per-model prompt label/placeholder (default: "Prompt")
 const PROMPT_COPY: Partial<Record<AiModelsEnum, { label: string; placeholder: string }>> = {
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: {
-    label: "Brief",
-    placeholder:
-      "Describe the ad: your product, the offer, the vibe… e.g. Summer sale on our iced coffee, bright and playful, 20% off this week.",
-  },
 };
 
 // ─── prompt section ───────────────────────────────────────────────────────────
@@ -307,7 +296,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={VEO3_RESOLUTIONS} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={VEO3_ASPECT_RATIOS} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={VEO3_DURATION_SECONDS} value={s.durationSeconds} onChange={(v) => set("durationSeconds", v)} />
+        <SettingsDuration options={VEO3_DURATION_SECONDS} value={s.durationSeconds} onChange={(v) => set("durationSeconds", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -316,7 +305,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
     return (
       <>
         <SelectRow label="Aspect Ratio" options={KlingV3TextToVideoInputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={KlingV3TextToVideoInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={KlingV3TextToVideoInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -326,7 +315,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={Seedance20InputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={Seedance20InputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={Seedance20InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={Seedance20InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -336,7 +325,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={Seedance25InputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={Seedance25InputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={Seedance25InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={Seedance25InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -346,7 +335,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={Seedance25RefInputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={Seedance25RefInputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={Seedance25RefInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={Seedance25RefInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -358,7 +347,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={c.resolution} value={(c.resolution as readonly string[]).includes(s.resolution) ? s.resolution : c.resolution[c.resolution.length - 1]} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={c.aspectRatio} value={(c.aspectRatio as readonly string[]).includes(s.aspectRatio) ? s.aspectRatio : "16:9"} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={c.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={c.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow
           label="Sound"
           options={hasVideo ? c.audio : ["native"]}
@@ -373,28 +362,20 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
   if (model === AiModelsEnum.SMPL_AD_MULTIPLIER)
     return <SelectRow label="Quality" options={AdsMultiplierOptionsConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />;
 
-  if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO)
-    return (
-      <>
-        <SelectRow label="Aspect Ratio" options={AdsStudioInputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Resolution" options={AdsStudioInputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
-        <SelectRow label="Number of ads" options={AdsStudioInputConst.batchSize} value={s.batchSize} onChange={(v) => set("batchSize", v)} />
-      </>
-    );
 
   if (model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5)
     return (
       <>
         <SelectRow label="Resolution" options={GrokImagineVideo15InputConst.resolution} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={GrokImagineVideo15InputConst.aspectRatio} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SelectRow label="Duration (s)" options={GrokImagineVideo15InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={GrokImagineVideo15InputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
       </>
     );
 
   if (model === AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO)
     return (
       <>
-        <SelectRow label="Duration (s)" options={KlingV3ImageToVideoInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
+        <SettingsDuration options={KlingV3ImageToVideoInputConst.duration} value={s.duration} onChange={(v) => set("duration", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );
@@ -872,7 +853,6 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
   if (model === AiModelsEnum.SMPL_VOICE_CHANGER) return <VoiceChangerPanel />;
 
   // ── ADS STUDIO ─────────────────────────────────────────────────────────────
-  if (model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO) return <AdsStudioPanel />;
 
   // ── EDIT TOOLS (ffmpeg: reframe, upscale, FPS boost) ──────────────────────
   if (isEditTool(model)) return <EditToolPanel key={model} model={model} />;
@@ -1304,65 +1284,6 @@ function EditToolPanel({ model }: { model: AiModelsEnum }) {
   );
 }
 
-// ─── ads studio ───────────────────────────────────────────────────────────────
-
-function AdsStudioPanel() {
-  const model = AiModelsEnum.HIGGSFIELD_ADS_STUDIO;
-  const { states, setField: raw } = useAiModelStore();
-  const set = (k: keyof IAdsStudioInput, v: unknown) => raw(model, k, v);
-  const s = states[model] as IAdsStudioInput;
-  const images = s.images ?? [];
-  const c = AdsStudioInputConst;
-  const [pickerOpen, setPickerOpen] = useState(false);
-
-  return (
-    <>
-      <MultiImageSlots
-        label="Product & reference images"
-        images={images}
-        maxImages={c.maxImages}
-        onOpenPicker={() => setPickerOpen(true)}
-        onRemove={(url) => set("images", images.filter((u) => u !== url))}
-      />
-
-      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/40 p-3">
-        <ToggleField
-          label="Niche"
-          value={s.niche}
-          onChange={(v) => set("niche", v)}
-          placeholder="e.g. Specialty coffee"
-          maxLength={c.maxNicheLength}
-        />
-        <ToggleField
-          label="Target audience"
-          value={s.targetAudience}
-          onChange={(v) => set("targetAudience", v)}
-          placeholder="e.g. Students and young professionals, 18–30"
-          maxLength={c.maxTargetAudienceLength}
-        />
-        <ToggleField
-          label="Language"
-          value={s.language}
-          onChange={(v) => set("language", v)}
-          placeholder="Language of the ad text, e.g. English"
-          maxLength={c.maxLanguageLength}
-        />
-      </div>
-
-      <MediaManagerDialog
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        selectedImages={images}
-        onSelect={(u) => {
-          set("images", u.slice(0, c.maxImages));
-          setPickerOpen(false);
-        }}
-        maxSelections={c.maxImages}
-      />
-    </>
-  );
-}
-
 // ─── model hero card ──────────────────────────────────────────────────────────
 
 // Hero card media, in R2 bucket smpl-ui / "Models Selection Thumbnail Videos".
@@ -1604,6 +1525,9 @@ function StyleCard() {
 
 function GenerateButton() {
   const { model, projectId, mediaType, styleId } = useAiGenerationControlStore();
+  const { user } = useAuth();
+  // Generations need a project; there is no picker here, so use the first one.
+  useDefaultProject(!!user);
   const { states } = useAiModelStore();
   const { data: costData } = useGenerationCostQuery();
   // The picked style rides along for models that take one (and makes the prompt optional).

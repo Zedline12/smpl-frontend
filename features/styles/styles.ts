@@ -39,6 +39,7 @@ export const STYLE_MODEL_IDS: ReadonlySet<string> = new Set<string>([
   AiModelsEnum.KLING_O3_IMAGE,
   AiModelsEnum.SEEDREAM_V4_5,
   AiModelsEnum.GPT_IMAGE_2,
+  AiModelsEnum.HIGGSFIELD_ADS_STUDIO,
 ]);
 
 /** Each style's tile color when it has no preview video yet. */

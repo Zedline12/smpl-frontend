@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AspectRatioSelectorComponent from "@/features/generation/components/selectors/AspectRatioSelector";
+import { PromptTools } from "../PromptTools";
 import QualitySelector from "@/features/generation/components/selectors/QualitySelector";
 import { Textarea } from "@/components/ui/textarea";
 import { useAiModelStore } from "@/stores/useAiGenerationControlStore";
@@ -63,12 +64,15 @@ export default function GptImage2Composer({
           )}
         </div>
 
-        <Textarea
-          value={prompt}
-          onChange={(e) => setField("prompt", e.target.value)}
-          placeholder="Describe what image you want to create..."
-          className="flex-1 min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2"
-        />
+        <div className="relative flex min-w-0 flex-1 self-stretch">
+          <Textarea
+            value={prompt}
+            onChange={(e) => setField("prompt", e.target.value)}
+            placeholder="Describe what image you want to create..."
+            className="min-h-[100px] text-lg text-foreground placeholder:text-foreground/70 bg-transparent border-none focus:ring-0 resize-none outline-none pt-2 w-full pb-12"
+          />
+          <PromptTools className="absolute right-1 bottom-1" />
+        </div>
       </div>
 
       <MediaManagerDialog

@@ -4,7 +4,7 @@ import { Image as ImageIcon, Plus, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/providers/AuthProvider";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
-import ProjectSelector from "@/features/generation/components/prompt/selectors/ProjectSelector";
+import { useDefaultProject } from "@/features/projects/hooks/use-default-project";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import {
   GenerationTypeEnum,
@@ -48,6 +48,8 @@ function RatioShape({ ratio }: { ratio: AdsStudioAspectRatio }) {
 export default function AdsBuilder() {
   const { user } = useAuth();
   const { projectId, templateMode } = useAiGenerationControlStore();
+  // No project picker: generations go to the first project.
+  useDefaultProject(!!user && !templateMode);
   const { states, setField: setModelField } = useAiModelStore();
   const state = states[MODEL] as IAdsStudioInput;
   const setField = (key: keyof IAdsStudioInput, value: unknown) =>
@@ -58,13 +60,25 @@ export default function AdsBuilder() {
   const templateGeneration = useGenerateTemplateMutation();
   const [imagesOpen, setImagesOpen] = useState(false);
 
-  const { prompt, images, niche, targetAudience, language, aspectRatio, resolution, batchSize } =
-    state;
+  const {
+    prompt,
+    images,
+    niche,
+    targetAudience,
+    language,
+    aspectRatio,
+    resolution,
+    batchSize,
+  } = state;
   const isValid = ModelsValidatorSchemaMap[MODEL].safeParse(state).success;
   const pending = generation.isPending || templateGeneration.isPending;
 
   const handleGenerate = () => {
-    const payload = { model: MODEL, mediaType: GenerationTypeEnum.IMAGE, input: state };
+    const payload = {
+      model: MODEL,
+      mediaType: GenerationTypeEnum.IMAGE,
+      input: state,
+    };
     if (templateMode) templateGeneration.mutate(payload);
     else generation.mutate({ ...payload, projectId });
   };
@@ -77,8 +91,8 @@ export default function AdsBuilder() {
       <div>
         <h1 className="text-xl font-semibold text-foreground">Ads Studio</h1>
         <p className="text-sm text-muted-foreground">
-          From a simple brief to ready-to-use ads. Bring your product, describe your
-          vision, and let Ads Studio handle the creative.
+          From a simple brief to ready-to-use ads. Bring your product, describe
+          your vision, and let Ads Studio handle the creative.
         </p>
       </div>
 
@@ -110,10 +124,19 @@ export default function AdsBuilder() {
               key={url + i}
               className="group relative h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-white/5"
             >
-              <img src={url} alt="Product" className="h-full w-full object-cover" />
+              <img
+                src={url}
+                alt="Product"
+                className="h-full w-full object-cover"
+              />
               <button
                 type="button"
-                onClick={() => setField("images", images.filter((u) => u !== url))}
+                onClick={() =>
+                  setField(
+                    "images",
+                    images.filter((u) => u !== url),
+                  )
+                }
                 className="absolute top-1 right-1 rounded-full bg-black/60 p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
               >
                 <X className="h-3 w-3 text-white" />
@@ -202,7 +225,8 @@ export default function AdsBuilder() {
       {/* Details */}
       <section className="flex flex-col gap-3">
         <p className="text-sm font-medium text-foreground">
-          Details <span className="font-normal text-muted-foreground">(optional)</span>
+          Details{" "}
+          <span className="font-normal text-muted-foreground">(optional)</span>
         </p>
         <div className="flex flex-col gap-1">
           <label className="text-xs text-muted-foreground">Niche</label>
@@ -215,7 +239,9 @@ export default function AdsBuilder() {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-muted-foreground">Target audience</label>
+          <label className="text-xs text-muted-foreground">
+            Target audience
+          </label>
           <input
             value={targetAudience}
             maxLength={c.maxTargetAudienceLength}
@@ -238,7 +264,6 @@ export default function AdsBuilder() {
 
       {/* Footer */}
       <div className="sticky bottom-0 -mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-background/90 px-5 py-4 backdrop-blur">
-        <div>{user && !templateMode && <ProjectSelector />}</div>
         <button
           type="button"
           onClick={handleGenerate}

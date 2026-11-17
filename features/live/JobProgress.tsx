@@ -50,20 +50,47 @@ export function useJobProgress(job: ProgressInput): JobProgressState {
   const now = useNow(active) + offset;
 
   if (job.status === "success" || job.saving) {
-    return { fraction: job.saving ? 0.97 : 1, label: job.saving ? "Saving…" : "Done", remainingSeconds: 0, overdue: false, queued: false };
+    return {
+      fraction: job.saving ? 0.97 : 1,
+      label: job.saving ? "Saving…" : "Done",
+      remainingSeconds: 0,
+      overdue: false,
+      queued: false,
+    };
   }
   if (job.status === "failure") {
-    return { fraction: 1, label: "Failed", remainingSeconds: null, overdue: false, queued: false };
+    return {
+      fraction: 1,
+      label: "Failed",
+      remainingSeconds: null,
+      overdue: false,
+      queued: false,
+    };
   }
   if (job.status === "pending" || !job.startedAt) {
-    return { fraction: 0.02, label: "In queue", remainingSeconds: null, overdue: false, queued: true };
+    return {
+      fraction: 0.02,
+      label: "In queue",
+      remainingSeconds: null,
+      overdue: false,
+      queued: true,
+    };
   }
 
   const elapsed = Math.max(0, (now - new Date(job.startedAt).getTime()) / 1000);
-  const estimate = job.estimatedSeconds && job.estimatedSeconds > 0 ? job.estimatedSeconds : null;
+  const estimate =
+    job.estimatedSeconds && job.estimatedSeconds > 0
+      ? job.estimatedSeconds
+      : null;
   if (!estimate) {
     // No estimate: slow approach to 90% so it still feels alive.
-    return { fraction: 0.9 * (1 - Math.exp(-elapsed / 60)), label: "Generating…", remainingSeconds: null, overdue: false, queued: false };
+    return {
+      fraction: 0.9 * (1 - Math.exp(-elapsed / 60)),
+      label: "Generating…",
+      remainingSeconds: null,
+      overdue: false,
+      queued: false,
+    };
   }
   const ratio = elapsed / estimate;
   if (ratio < 1) {
@@ -106,18 +133,32 @@ export function JobProgress({
         aria-valuemax={100}
         aria-valuenow={Math.round(p.fraction * 100)}
         aria-label={p.label}
-        className={cn("w-full overflow-hidden rounded-full bg-white/10", size === "sm" ? "h-1" : "h-1.5")}
+        className={cn(
+          "w-full overflow-hidden rounded-full bg-white/10",
+          size === "sm" ? "h-1" : "h-1.5",
+        )}
       >
         <div
           className={cn(
             "h-full rounded-full transition-[width] duration-500 ease-out",
-            job.status === "failure" ? "bg-red-400" : p.queued ? "animate-pulse bg-white/30" : "bg-primary",
+            job.status === "failure"
+              ? "bg-red-400"
+              : p.queued
+                ? "animate-pulse bg-white/30"
+                : "bg-primary",
           )}
           style={{ width: `${Math.round(p.fraction * 100)}%` }}
         />
       </div>
       {showLabel && (
-        <p className={cn("mt-1.5 text-[11px]", p.overdue ? "text-amber-300/80" : "text-white/50")}>{p.label}</p>
+        <p
+          className={cn(
+            "mt-1.5 text-[11px]",
+            p.overdue ? "text-amber-300/80" : "text-white/50",
+          )}
+        >
+          {p.label}
+        </p>
       )}
     </div>
   );

@@ -13,6 +13,11 @@ import {
   Clock,
   ImageIcon,
   Zap,
+  Megaphone,
+  UserRound,
+  Music,
+  Repeat,
+  Scissors,
   LucideIcon,
 } from "lucide-react";
 
@@ -23,6 +28,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Film,
   Asterisk,
   Wand: Wand2,
+  Megaphone,
+  UserRound,
+  Music,
+  Repeat,
+  Scissors,
 };
 
 export interface FeatureItem {

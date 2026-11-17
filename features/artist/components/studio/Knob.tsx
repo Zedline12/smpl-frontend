@@ -30,10 +30,23 @@ interface KnobProps {
   valueText: string;
   disabled?: boolean;
   hint?: string;
+  /** "md": the panel knob with a slider; "sm": a small dial for the mobile dock. */
+  size?: "md" | "sm";
 }
 
 /** A studio knob (drag up/down or arrow keys) with its value and a slider under it. */
-export function Knob({ label, steps, index, onChange, display, valueText, disabled, hint }: KnobProps) {
+export function Knob({
+  label,
+  steps,
+  index,
+  onChange,
+  display,
+  valueText,
+  disabled,
+  hint,
+  size = "md",
+}: KnobProps) {
+  const small = size === "sm";
   const gradientId = `knob${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const drag = useRef<{ y: number; index: number } | null>(null);
   const last = steps - 1;
@@ -47,7 +60,13 @@ export function Knob({ label, steps, index, onChange, display, valueText, disabl
   };
 
   return (
-    <div className={cn("flex flex-col items-center gap-2", disabled && "opacity-45")}>
+    <div
+      className={cn(
+        "flex flex-col items-center",
+        small ? "shrink-0 gap-1" : "w-full gap-2",
+        disabled && "opacity-45",
+      )}
+    >
       <div
         role="slider"
         tabIndex={disabled ? -1 : 0}
@@ -64,13 +83,21 @@ export function Knob({ label, steps, index, onChange, display, valueText, disabl
         }}
         onPointerMove={(e) => {
           if (!drag.current) return;
-          set(drag.current.index + Math.round((drag.current.y - e.clientY) / stepPx));
+          set(
+            drag.current.index +
+              Math.round((drag.current.y - e.clientY) / stepPx),
+          );
         }}
         onPointerUp={() => (drag.current = null)}
         onPointerCancel={() => (drag.current = null)}
         onKeyDown={(e) => {
           if (disabled) return;
-          const delta = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key];
+          const delta = {
+            ArrowUp: 1,
+            ArrowRight: 1,
+            ArrowDown: -1,
+            ArrowLeft: -1,
+          }[e.key];
           if (delta) set(index + delta);
           else if (e.key === "Home") set(0);
           else if (e.key === "End") set(last);
@@ -78,7 +105,8 @@ export function Knob({ label, steps, index, onChange, display, valueText, disabl
           e.preventDefault();
         }}
         className={cn(
-          "size-20 touch-none rounded-full select-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none",
+          small ? "size-12" : "aspect-square w-full max-w-20",
+          "touch-none rounded-full select-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none",
           disabled ? "cursor-not-allowed" : "cursor-ns-resize",
         )}
       >
@@ -93,11 +121,29 @@ export function Knob({ label, steps, index, onChange, display, valueText, disabl
               <stop offset="100%" stopColor="#111118" />
             </radialGradient>
           </defs>
-          <path d={arc(46, START, START + SWEEP)} stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" strokeLinecap="round" />
+          <path
+            d={arc(46, START, START + SWEEP)}
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="6"
+            fill="none"
+            strokeLinecap="round"
+          />
           {fraction > 0 && (
-            <path d={arc(46, START, angle)} stroke={`url(#${gradientId})`} strokeWidth="6" fill="none" strokeLinecap="round" />
+            <path
+              d={arc(46, START, angle)}
+              stroke={`url(#${gradientId})`}
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+            />
           )}
-          <circle cx="50" cy="50" r="37" fill={`url(#${gradientId}k)`} stroke="rgba(255,255,255,0.06)" />
+          <circle
+            cx="50"
+            cy="50"
+            r="37"
+            fill={`url(#${gradientId}k)`}
+            stroke="rgba(255,255,255,0.06)"
+          />
           <line
             x1={point(17, angle)[0]}
             y1={point(17, angle)[1]}
@@ -109,22 +155,37 @@ export function Knob({ label, steps, index, onChange, display, valueText, disabl
           />
         </svg>
       </div>
-      <span className={studioLabel}>{label}</span>
-      <span className="min-w-20 rounded-md border border-white/10 bg-black/40 px-2.5 py-1 text-center text-xs font-semibold tabular-nums text-white">
-        {display}
-      </span>
-      <input
-        type="range"
-        min={0}
-        max={last}
-        step={1}
-        value={index}
-        disabled={disabled}
-        onChange={(e) => set(Number(e.target.value))}
-        aria-label={`${label} slider`}
-        className="accent-primary w-full cursor-pointer disabled:cursor-not-allowed"
-      />
-      {hint && <span className="-mt-1 text-[11px] text-white/40">{hint}</span>}
+      {small ? (
+        <span className="flex flex-col items-center leading-tight">
+          <span className="text-[9px] font-semibold tracking-[0.12em] text-white/55 uppercase">
+            {label}
+          </span>
+          <span className="text-[10px] font-semibold tabular-nums text-white">
+            {display}
+          </span>
+        </span>
+      ) : (
+        <>
+          <span className={studioLabel}>{label}</span>
+          <span className="min-w-20 rounded-md border border-white/10 bg-black/40 px-2.5 py-1 text-center text-xs font-semibold tabular-nums text-white">
+            {display}
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={last}
+            step={1}
+            value={index}
+            disabled={disabled}
+            onChange={(e) => set(Number(e.target.value))}
+            aria-label={`${label} slider`}
+            className="accent-primary w-full cursor-pointer disabled:cursor-not-allowed"
+          />
+          {hint && (
+            <span className="-mt-1 text-[11px] text-white/40">{hint}</span>
+          )}
+        </>
+      )}
     </div>
   );
 }

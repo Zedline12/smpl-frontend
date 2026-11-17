@@ -82,7 +82,7 @@ export default function AppearanceCategory({
   );
 }
 
-function OptionTile({
+export function OptionTile({
   option,
   active,
   onClick,

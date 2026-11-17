@@ -83,9 +83,7 @@ export default function MediaExplorer({
   // With Styles the tab lives in the store (the sidebar opens it); elsewhere it's local.
   const view: ExplorerView = styles ? storeView : localView;
   const setView = styles ? setStoreView : setLocalView;
-  const isExplore = explore && view === "explore";
   const isStyles = styles && view === "styles";
-  const isHistory = !isExplore && !isStyles;
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<MediaFilters>(() =>
     createMediaFilters(defaultModel),
@@ -101,11 +99,6 @@ export default function MediaExplorer({
   // Tracks jobs where we've already shown the toast
   // Tracks jobs where we've already invalidated the media query (CDN URL ready)
   const [mediaInvalidatedQueues, setMediaInvalidatedQueues] = useState<Set<string>>(new Set());
-  const historyQuery = useInfiniteMediaQuery({
-    projectId: defaultProjectId,
-    filters,
-    enabled: isHistory,
-  });
   // Explore shows the templates of one model: the page's own model (studios), else the
   // ?model= in the URL (set when a model is picked), else the model selected right now.
   const searchParams = useSearchParams();
@@ -116,7 +109,20 @@ export default function MediaExplorer({
     (urlModel && (Object.values(AiModelsEnum) as string[]).includes(urlModel)
       ? (urlModel as AiModelsEnum)
       : selectedModel);
-  const templatesQuery = useInfiniteTemplatesQuery(undefined, templateModel, isExplore);
+  // Fetched whenever Explore could show, so an empty model can hide the tab.
+  const templatesQuery = useInfiniteTemplatesQuery(undefined, templateModel, explore);
+  const noTemplates =
+    templatesQuery.isFetched && (templatesQuery.data?.pages[0]?.totalCount ?? 0) === 0;
+  const hasExplore = explore && !noTemplates;
+  const isExplore = hasExplore && view === "explore";
+  const isHistory = !isExplore && !isStyles;
+  // The tab actually showing (Explore falls back to History when there are no templates).
+  const shownView: ExplorerView = isExplore ? "explore" : isStyles ? "styles" : "history";
+  const historyQuery = useInfiniteMediaQuery({
+    projectId: defaultProjectId,
+    filters,
+    enabled: isHistory,
+  });
   const active = isExplore ? templatesQuery : historyQuery;
   const {
     isFetching: isMediaFetching,
@@ -202,13 +208,15 @@ export default function MediaExplorer({
       <div className="flex items-center justify-between gap-3 w-full py-2">
         <div className="flex items-center gap-1">
           {explore &&
-            VIEW_TABS.filter((t) => t.value !== "styles" || styles).map(({ value, label, icon: Icon, isNew }) => (
+            VIEW_TABS.filter(
+              (t) => (t.value !== "styles" || styles) && (t.value !== "explore" || hasExplore),
+            ).map(({ value, label, icon: Icon, isNew }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setView(value)}
                 className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                  view === value
+                  shownView === value
                     ? "bg-white/10 text-white"
                     : "text-white/50 hover:bg-white/10 hover:text-white"
                 }`}
@@ -300,8 +308,8 @@ export default function MediaExplorer({
           updatingMediaIds={isExplore ? undefined : updatingMediaIds}
           actions={!isExplore}
           template={isExplore}
-          // No templates: show nothing rather than an empty message.
-          emptyMessage={isExplore ? null : "Start Generating !"}
+          // Nothing to show: leave it empty rather than show a message.
+          emptyMessage={null}
         />
       )}
 

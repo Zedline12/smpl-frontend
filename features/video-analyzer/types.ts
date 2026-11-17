@@ -1,9 +1,6 @@
-/** Same union as brand-themes/generation — "success"/"failure", not clipping's "completed"/"failed". */
+/** Same union as brands/generation — "success"/"failure", not clipping's "completed"/"failed". */
 export type VideoAnalysisProjectStatus =
-  | "pending"
-  | "processing"
-  | "success"
-  | "failure";
+  "pending" | "processing" | "success" | "failure";
 
 export const ACTIVE_STATUSES: VideoAnalysisProjectStatus[] = [
   "pending",

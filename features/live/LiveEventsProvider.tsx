@@ -5,13 +5,23 @@ import { useRouter } from "next/navigation";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useLiveStore } from "./store";
-import { maybeAskForPermission, notifyFinished, prepareSound, pruneClaims } from "./notifier";
+import {
+  maybeAskForPermission,
+  notifyFinished,
+  prepareSound,
+  pruneClaims,
+} from "./notifier";
 import { LiveItem, isFinished, liveKey } from "./types";
 
 type WithId = { id: string };
 
 /** Puts the item's own object into a cached list (by id), or removes it. */
-function mergeInto(queryClient: QueryClient, key: readonly unknown[], data: WithId | undefined, remove = false) {
+function mergeInto(
+  queryClient: QueryClient,
+  key: readonly unknown[],
+  data: WithId | undefined,
+  remove = false,
+) {
   if (!data?.id) return;
   queryClient.setQueryData<WithId[]>(key, (old) => {
     const list = Array.isArray(old) ? old : [];
@@ -21,14 +31,17 @@ function mergeInto(queryClient: QueryClient, key: readonly unknown[], data: With
 }
 
 /** Updates the screens that list this kind of job, then refreshes what it produced. */
-function applyToCaches(queryClient: QueryClient, item: LiveItem, finishedNow: boolean) {
+function applyToCaches(
+  queryClient: QueryClient,
+  item: LiveItem,
+  finishedNow: boolean,
+) {
   const data = item.data as WithId | undefined;
   const removed = item.status === "removed";
 
   if (item.kind === "job") {
     if (item.domain === "clipping-studio") return;
-    const queueKey =
-      item.domain === "marketing-studio" ? ["marketing-studio", "queues"] : ["generation-queues", item.domain ?? "media-generation"];
+    const queueKey = ["generation-queues", item.domain ?? "media-generation"];
     mergeInto(queryClient, queueKey, data, removed);
     if (finishedNow) {
       queryClient.invalidateQueries({ queryKey: ["current-user"] }); // credits (used or refunded)
@@ -36,11 +49,11 @@ function applyToCaches(queryClient: QueryClient, item: LiveItem, finishedNow: bo
         queryClient.invalidateQueries({ queryKey: ["media"] });
         queryClient.invalidateQueries({ queryKey: ["templates"] });
         queryClient.invalidateQueries({ queryKey: ["user-models"] });
-        if (item.domain === "marketing-studio") queryClient.invalidateQueries({ queryKey: ["marketing-studio"] });
       }
     }
     // The saved media arrives a moment after the provider finishes.
-    if (item.status === "success" && item.mediaId) queryClient.invalidateQueries({ queryKey: ["media"] });
+    if (item.status === "success" && item.mediaId)
+      queryClient.invalidateQueries({ queryKey: ["media"] });
     return;
   }
 
@@ -53,13 +66,15 @@ function applyToCaches(queryClient: QueryClient, item: LiveItem, finishedNow: bo
           : [data, ...old]
         : old,
     );
-    if (finishedNow) queryClient.invalidateQueries({ queryKey: ["current-user"] });
+    if (finishedNow)
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
     return;
   }
 
-  if (item.kind === "brand-theme") {
-    mergeInto(queryClient, ["brand-themes", "queues"], data, removed);
-    if (finishedNow) queryClient.invalidateQueries({ queryKey: ["brand-themes"] });
+  if (item.kind === "brand") {
+    mergeInto(queryClient, ["brands", "queues"], data, removed);
+    // Refreshes the list and the open brand (["brands", id]).
+    if (finishedNow) queryClient.invalidateQueries({ queryKey: ["brands"] });
     return;
   }
 
@@ -89,7 +104,12 @@ export function LiveEventsProvider() {
   }, [router]);
 
   useEffect(() => {
-    if (!isAuthenticated || typeof window === "undefined" || !("EventSource" in window)) return;
+    if (
+      !isAuthenticated ||
+      typeof window === "undefined" ||
+      !("EventSource" in window)
+    )
+      return;
     prepareSound();
     pruneClaims();
 
@@ -104,15 +124,20 @@ export function LiveEventsProvider() {
       const previous = store().upsert(items);
       for (const item of items) {
         const before = previous[liveKey(item)];
-        const finishedNow = isFinished(item.status) && (!before || !isFinished(before.status));
+        const finishedNow =
+          isFinished(item.status) && (!before || !isFinished(before.status));
         applyToCaches(queryClient, item, finishedNow);
         // New job started in this session: offer system notifications once.
-        if (!fromSnapshot && item.status === "pending" && !before) maybeAskForPermission();
+        if (!fromSnapshot && item.status === "pending" && !before)
+          maybeAskForPermission();
         // Notify on the change to done. On the very first snapshot, only for things
         // that finished in the last few minutes (claims stop repeats across tabs/reloads).
         if (finishedNow) {
           const recent =
-            !fromSnapshot || !firstSnapshot || Date.now() - Date.parse(item.finishedAt ?? item.updatedAt) < 5 * 60 * 1000;
+            !fromSnapshot ||
+            !firstSnapshot ||
+            Date.now() - Date.parse(item.finishedAt ?? item.updatedAt) <
+              5 * 60 * 1000;
           if (recent) notifyFinished(item, (href) => navigate.current(href));
         }
       }
@@ -127,7 +152,9 @@ export function LiveEventsProvider() {
       });
       source.addEventListener("snapshot", (e) => {
         try {
-          const { items, serverTime } = JSON.parse((e as MessageEvent).data) as { items: LiveItem[]; serverTime: number };
+          const { items, serverTime } = JSON.parse(
+            (e as MessageEvent).data,
+          ) as { items: LiveItem[]; serverTime: number };
           if (serverTime) store().setClockOffset(serverTime - Date.now());
           handle(items ?? [], true);
           firstSnapshot = false;
@@ -146,7 +173,12 @@ export function LiveEventsProvider() {
         if (store().connected) {
           store().setConnected(false);
           // Wake the polling fallbacks (they stand down while connected).
-          for (const key of [["generation-queues"], ["marketing-studio"], ["brand-themes"], ["video-analyzer"], ["video-clipping"]]) {
+          for (const key of [
+            ["generation-queues"],
+            ["brands"],
+            ["video-analyzer"],
+            ["video-clipping"],
+          ]) {
             queryClient.invalidateQueries({ queryKey: key });
           }
         }

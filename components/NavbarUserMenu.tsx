@@ -78,55 +78,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
   return (
     <>
       <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
-      <Link
-        className="hidden sm:block"
-        href={isFreePlan(user) ? "/pricing" : "/me/settings/subscription"}
-      >
-        {/* Tri-color gradient border pill */}
-        <div
-          className="animate-tri-glow p-[1.5px] rounded-full transition-all duration-300 hover:scale-[1.03]"
-          style={{ background: TRI_GRADIENT, backgroundSize: "200% 200%" }}
-        >
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-            style={{ background: "#080808" }}
-          >
-            {/* Lightning in tri-color gradient circle */}
-            <div
-              className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
-              style={{ background: TRI_GRADIENT }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-3 h-3 text-white"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-
-            <span className="text-sm font-bold text-white leading-none">
-              {user?.creditsBalance}
-            </span>
-
-            <div
-              className="w-px h-4 rounded-full"
-              style={{ background: "rgba(255,255,255,0.2)" }}
-            />
-
-            <span
-              className="text-sm font-medium leading-none"
-              style={{ color: "rgba(255,255,255,0.75)" }}
-            >
-              {user?.subscription?.name}
-            </span>
-          </div>
-        </div>
-      </Link>
+      <CreditsPill user={user} className="hidden sm:block" />
 
       {/* The panel lives inside this wrapper, so moving onto it never fires
           onMouseLeave and the mt-2 gap needs no bridging element. */}
@@ -145,16 +97,6 @@ export function NavbarUserMenu({ user }: { user: any }) {
           aria-haspopup="menu"
           className="group/avatar relative block cursor-pointer"
         >
-          {/* Wide outer glow */}
-          <div
-            className="absolute -inset-4 rounded-full blur-2xl opacity-70 group-hover/avatar:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{ background: AVATAR_GRADIENT }}
-          />
-          {/* Tight inner glow */}
-          <div
-            className="absolute -inset-1 rounded-full blur-md opacity-90 group-hover/avatar:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{ background: AVATAR_GRADIENT }}
-          />
           {/* Thick gradient border ring */}
           <div
             className="relative rounded-full p-[2px]"
@@ -163,11 +105,7 @@ export function NavbarUserMenu({ user }: { user: any }) {
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-neutral-900">
               <User
                 className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                style={{
-                  color: "#ea4bff",
-                  filter:
-                    "drop-shadow(0 0 5px #ea4bff) drop-shadow(0 0 10px #2fcefd)",
-                }}
+                style={{ color: "#ea4bff" }}
               />
             </div>
           </div>
@@ -186,5 +124,93 @@ export function NavbarUserMenu({ user }: { user: any }) {
         )}
       </div>
     </>
+  );
+}
+
+/**
+ * Credits + plan pill, linking to pricing (free) or the subscription page.
+ * `compact` (phones): credits only, a plain border instead of the glow, a primary icon.
+ */
+export function CreditsPill({
+  user,
+  className,
+  compact = false,
+}: {
+  user: any;
+  className?: string;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <Link
+        className={className}
+        href={isFreePlan(user) ? "/pricing" : "/me/settings/subscription"}
+        aria-label={`${user?.creditsBalance ?? 0} credits`}
+      >
+        <div className="flex items-center gap-2 rounded-full border border-white/15 bg-[#080808] py-1.5 pr-3.5 pl-1.5">
+          <div className="bg-primary flex size-5 shrink-0 items-center justify-center rounded-full">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="size-3 text-white">
+              <path
+                fillRule="evenodd"
+                d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <span className="text-sm leading-none font-bold text-white tabular-nums">{user?.creditsBalance}</span>
+        </div>
+      </Link>
+    );
+  }
+  return (
+    <Link
+      className={className}
+      href={isFreePlan(user) ? "/pricing" : "/me/settings/subscription"}
+    >
+      {/* Tri-color gradient border pill */}
+      <div
+        className="p-[1.5px] rounded-full transition-transform duration-300 hover:scale-[1.03]"
+        style={{ background: TRI_GRADIENT, backgroundSize: "200% 200%" }}
+      >
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+          style={{ background: "#080808" }}
+        >
+          {/* Lightning in tri-color gradient circle */}
+          <div
+            className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+            style={{ background: TRI_GRADIENT }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-3 h-3 text-white"
+            >
+              <path
+                fillRule="evenodd"
+                d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+
+          <span className="text-sm font-bold text-white leading-none">
+            {user?.creditsBalance}
+          </span>
+
+          <div
+            className="w-px h-4 rounded-full"
+            style={{ background: "rgba(255,255,255,0.2)" }}
+          />
+
+          <span
+            className="text-sm font-medium leading-none"
+            style={{ color: "rgba(255,255,255,0.75)" }}
+          >
+            {user?.subscription?.name}
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }

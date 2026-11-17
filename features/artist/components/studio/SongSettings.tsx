@@ -38,21 +38,21 @@ import { GenerateButton, StudioCard } from "./StudioCard";
 /** The Advanced (section-by-section) switch is hidden for now; flip to bring it back. */
 const SHOW_ADVANCED_SWITCH = false;
 
-const TEMPO_STEPS: (Tempo | null)[] = [null, ...TEMPOS.map((t) => t.id)];
-const VOCAL_OPTIONS: { id: Vocals | "any"; label: string }[] = [
+export const TEMPO_STEPS: (Tempo | null)[] = [null, ...TEMPOS.map((t) => t.id)];
+export const VOCAL_OPTIONS: { id: Vocals | "any"; label: string }[] = [
   { id: "any", label: "Any" },
   ...VOCALS,
 ];
 
 /** "70-85 bpm" → "70–85 BPM" (the tempo preset's range). */
-const bpmOf = (tempo: Tempo) => {
+export const bpmOf = (tempo: Tempo) => {
   const range = TEMPOS.find((t) => t.id === tempo)?.styles.find((s) =>
     s.includes("bpm"),
   );
   return range ? range.replace("-", "–").replace("bpm", "BPM") : "";
 };
 
-const nearestLength = (sec: number) =>
+export const nearestLength = (sec: number) =>
   LENGTH_PRESETS.reduce(
     (best, s, i) =>
       Math.abs(s - sec) < Math.abs(LENGTH_PRESETS[best] - sec) ? i : best,
@@ -68,10 +68,11 @@ export function SongSettings() {
   const lengthIndex = nearestLength(state.musicLengthMs / 1000);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-[1fr_1.35fr_1fr]">
+    // Phones get the compact dock (MobileDjDock) instead.
+    <div className="hidden flex-col gap-4 md:flex">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr]">
         {/* Describe */}
-        <StudioCard className="gap-4">
+        <StudioCard className="gap-4 md:col-span-2 xl:col-span-1">
           <div
             className={`flex flex-1 flex-col gap-2.5 transition-opacity ${advanced ? "opacity-40" : ""}`}
           >
@@ -123,7 +124,7 @@ export function SongSettings() {
 
         {/* Style */}
         <StudioCard className="gap-5">
-          <div className="flex flex-wrap items-start justify-center gap-6 py-2 sm:gap-8">
+          <div className="grid grid-cols-3 justify-items-center gap-3 py-2 sm:gap-5">
             <DiscMenuButton
               variant="knob"
               icon={Music2}
@@ -162,7 +163,7 @@ export function SongSettings() {
 
         {/* Knobs + Generate */}
         <StudioCard className="gap-5">
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 justify-items-center gap-5">
             <Knob
               label="Tempo"
               steps={TEMPO_STEPS.length}

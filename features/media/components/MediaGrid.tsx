@@ -29,7 +29,7 @@ export function MediaGrid({
   updatingMediaIds,
   actions = false,
   template = false,
-  emptyMessage = "Start Generating !",
+  emptyMessage = null,
   variant = "default",
 }: MediaGridProps) {
   if (!media.length) {

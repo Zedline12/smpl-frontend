@@ -629,6 +629,24 @@ select {
   /* transition: border-color var(--duration-fast); */
 }
 
+/*
+ * Opt-out of the base field style above: inside .tw-fields, inputs/textareas/selects
+ * follow their own Tailwind classes. The rule above isn't in a layer, so it beats
+ * every utility; `revert-layer` hands these properties back to the layered styles.
+ * (More specific than the base rule, so it wins between the two.)
+ */
+.tw-fields input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.tw-fields textarea,
+.tw-fields select {
+  background: revert-layer;
+  border: revert-layer;
+  border-radius: revert-layer;
+  color: revert-layer;
+  font-family: revert-layer;
+  font-size: revert-layer;
+  padding: revert-layer;
+}
+
 /* input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 textarea:focus,
 select:focus {
@@ -1289,5 +1307,34 @@ body[data-media-selecting] #tour-prompt-composer {
 @media (prefers-reduced-motion: reduce) {
   .artist-spectrum-bar {
     animation: none;
+  }
+}
+
+/* Prompt composer settings on phones: every setting fills a two-column grid, however the
+   composer wrapped them (its own wrapper divs are flattened with display: contents). */
+@media (max-width: 639.98px) {
+  .composer-settings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .composer-settings div:not([data-menu]):not([data-menu] div):has([data-menu]) {
+    display: contents;
+  }
+  .composer-settings [data-menu]:not([data-menu] [data-menu]) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .composer-settings [data-menu]:not([data-menu] [data-menu]) > [data-menu-trigger] {
+    display: flex !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  /* The grey pill showing the value: stretch it across the cell. */
+  .composer-settings [data-menu]:not([data-menu] [data-menu]) > [data-menu-trigger] > * {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
   }
 }

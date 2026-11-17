@@ -15,7 +15,8 @@ export function ChatFab({ isOpen, onClick }: ChatFabProps) {
   return (
     // The wrapper owns the positioning so the button's hover scale can't
     // interfere with the centring translate.
-    <div className="fixed top-1/2 right-4 z-[110] -translate-y-1/2 sm:right-6">
+    // Phones open the assistant from the navbar menu instead.
+    <div className="fixed top-1/2 right-4 z-[110] hidden -translate-y-1/2 sm:right-6 sm:block">
       <button
         type="button"
         onClick={onClick}
@@ -25,7 +26,7 @@ export function ChatFab({ isOpen, onClick }: ChatFabProps) {
           background: TRI_GRADIENT,
           backgroundSize: "200% 200%",
         }}
-        className="animate-tri-glow block cursor-pointer rounded-full p-[1.5px] transition-transform duration-300 hover:scale-105 active:scale-95"
+        className="block cursor-pointer rounded-full p-[1.5px] transition-transform duration-300 hover:scale-105 active:scale-95"
       >
         <span
           className="flex size-14 items-center justify-center rounded-full leading-none"
@@ -42,7 +43,7 @@ export function ChatFab({ isOpen, onClick }: ChatFabProps) {
               alt=""
               width={56}
               height={56}
-              className="animate-robot-glow block size-7 object-contain"
+              className="block size-7 object-contain"
             />
           )}
         </span>

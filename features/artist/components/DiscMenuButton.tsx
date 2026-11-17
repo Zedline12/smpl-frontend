@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronRight, LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,8 +23,11 @@ interface DiscMenuButtonProps<Id extends string> {
   /** Most options that can be picked at once. */
   max: number;
   disabled?: boolean;
-  /** "row": a sidebar row (menu to the right); "knob": a DJ knob showing the pick (menu below). */
-  variant?: "row" | "knob";
+  /**
+   * "row": a sidebar row (menu to the right); "knob": a DJ knob showing the pick (menu below);
+   * "mini": a small knob for the mobile dock (menu above).
+   */
+  variant?: "row" | "knob" | "mini";
 }
 
 const DISC = 320; // disc diameter, px
@@ -43,6 +46,9 @@ export function DiscMenuButton<Id extends string>({
   variant = "row",
 }: DiscMenuButtonProps<Id>) {
   const [hovered, setHovered] = useState<Id | null>(null);
+  // Unique per instance: the page renders both the desktop panel and the mobile dock.
+  const gradientId = `disc${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const mini = variant === "mini";
   const full = selected.length >= max;
   const picked = options.filter((o) => selected.includes(o.id));
   const focus = options.find((o) => o.id === hovered);
@@ -55,13 +61,19 @@ export function DiscMenuButton<Id extends string>({
   return (
     <DropdownMenu onOpenChange={(open) => !open && setHovered(null)}>
       <DropdownMenuTrigger asChild disabled={disabled}>
-        {variant === "knob" ? (
+        {variant !== "row" ? (
           <button
             type="button"
             aria-label={`${label}: ${picked.length ? picked.map((o) => o.label).join(", ") : "Any"}`}
-            className="group flex flex-col items-center gap-2 rounded-2xl outline-none disabled:cursor-not-allowed disabled:opacity-40"
+            className={`group flex flex-col items-center rounded-2xl outline-none disabled:cursor-not-allowed disabled:opacity-40 ${
+              mini ? "shrink-0 gap-1" : "w-full gap-2"
+            }`}
           >
-            <span className="relative block size-24 rounded-full transition-transform group-hover:scale-[1.03] group-focus-visible:ring-2 group-focus-visible:ring-primary/60 group-data-[state=open]:scale-[1.03]">
+            <span
+              className={`relative block aspect-square rounded-full transition-transform group-hover:scale-[1.03] group-focus-visible:ring-2 group-focus-visible:ring-primary/60 group-data-[state=open]:scale-[1.03] ${
+                mini ? "size-12" : "w-full max-w-24"
+              }`}
+            >
               {/* Level ring: fills with each pick, like a volume knob. */}
               <svg
                 viewBox="0 0 100 100"
@@ -69,13 +81,7 @@ export function DiscMenuButton<Id extends string>({
                 aria-hidden
               >
                 <defs>
-                  <linearGradient
-                    id={`disc-${label}`}
-                    x1="0"
-                    x2="1"
-                    y1="0"
-                    y2="1"
-                  >
+                  <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stopColor="var(--color-primary)" />
                     <stop offset="100%" stopColor="var(--color-secondary)" />
                   </linearGradient>
@@ -86,7 +92,7 @@ export function DiscMenuButton<Id extends string>({
                   r="45"
                   fill="none"
                   stroke="rgba(255,255,255,0.08)"
-                  strokeWidth="6"
+                  strokeWidth={mini ? 8 : 6}
                   strokeLinecap="round"
                   pathLength={360}
                   strokeDasharray="270 360"
@@ -97,8 +103,8 @@ export function DiscMenuButton<Id extends string>({
                     cy="50"
                     r="45"
                     fill="none"
-                    stroke={`url(#disc-${label})`}
-                    strokeWidth="6"
+                    stroke={`url(#${gradientId})`}
+                    strokeWidth={mini ? 8 : 6}
                     strokeLinecap="round"
                     pathLength={360}
                     strokeDasharray={`${(270 * picked.length) / max} 360`}
@@ -113,7 +119,17 @@ export function DiscMenuButton<Id extends string>({
                     "radial-gradient(circle at 40% 30%, #3a3a48, #111118 75%)",
                 }}
               >
-                {picked.length ? (
+                {mini ? (
+                  <span
+                    className={`truncate leading-none ${picked.length ? "text-sm" : "text-[10px] font-semibold text-white/50"}`}
+                  >
+                    {picked.length
+                      ? picked.length === 1
+                        ? picked[0].emoji
+                        : picked.length
+                      : "Any"}
+                  </span>
+                ) : picked.length ? (
                   <>
                     <span className="text-base leading-none">
                       {picked.map((o) => o.emoji).join("")}
@@ -131,7 +147,13 @@ export function DiscMenuButton<Id extends string>({
                 )}
               </span>
             </span>
-            <span className="text-[11px] font-semibold tracking-[0.18em] text-white/55 uppercase">
+            <span
+              className={`font-semibold text-white/55 uppercase ${
+                mini
+                  ? "text-[9px] tracking-[0.12em]"
+                  : "text-[11px] tracking-[0.18em]"
+              }`}
+            >
               {label}
             </span>
           </button>
@@ -161,7 +183,8 @@ export function DiscMenuButton<Id extends string>({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side={variant === "knob" ? "bottom" : "right"}
+        side={mini ? "top" : variant === "knob" ? "bottom" : "right"}
+        collisionPadding={8}
         align="center"
         sideOffset={14}
         onPointerLeave={() => setHovered(null)}

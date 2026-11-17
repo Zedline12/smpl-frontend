@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { SingleMediaSlot } from "@/components/CreateSidebar";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
-import ProjectSelector from "@/features/generation/components/prompt/selectors/ProjectSelector";
+import { useDefaultProject } from "@/features/projects/hooks/use-default-project";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import {
@@ -36,6 +36,8 @@ const sectionLabel =
 export default function RemixBuilder() {
   const { user } = useAuth();
   const { projectId, templateMode } = useAiGenerationControlStore();
+  // No project picker: generations go to the first project.
+  useDefaultProject(!!user && !templateMode);
   const { states, setField } = useAiModelStore();
   const state = states[MODEL] as IRemixInput;
   // Kept in the shared store so the cost preview sees the video.
@@ -124,7 +126,6 @@ export default function RemixBuilder() {
       <div className="flex flex-shrink-0 flex-col gap-2 border-t border-border p-3">
         {missing && <p className="text-[11px] text-white/45">{missing}</p>}
         <div className="flex items-center gap-2">
-          {user && !templateMode && <ProjectSelector />}
           <button
             type="button"
             onClick={handleGenerate}

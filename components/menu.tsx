@@ -48,8 +48,10 @@ export function Menu({
       <div
         className={cn("relative inline-block text-left", className)}
         ref={menuRef}
+        data-menu=""
       >
         <button
+          data-menu-trigger=""
           onClick={(e) => {
             e.stopPropagation();
             setIsOpen(!isOpen);

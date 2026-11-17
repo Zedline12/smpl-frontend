@@ -8,7 +8,11 @@ export interface NotificationPrefs {
 }
 
 const KEY = "smpl:notification-prefs";
-const DEFAULTS: NotificationPrefs = { sound: true, system: true, promptDismissed: false };
+const DEFAULTS: NotificationPrefs = {
+  sound: true,
+  system: true,
+  promptDismissed: false,
+};
 
 export function readPrefs(): NotificationPrefs {
   try {
@@ -19,7 +23,9 @@ export function readPrefs(): NotificationPrefs {
   }
 }
 
-export function writePrefs(patch: Partial<NotificationPrefs>): NotificationPrefs {
+export function writePrefs(
+  patch: Partial<NotificationPrefs>,
+): NotificationPrefs {
   const next = { ...readPrefs(), ...patch };
   try {
     localStorage.setItem(KEY, JSON.stringify(next));

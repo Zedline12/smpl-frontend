@@ -34,12 +34,17 @@ const nextConfig: NextConfig = {
       { source: "/settings/billing", destination: "/me/settings/subscription", permanent: true },
       { source: "/me/settings/billing", destination: "/me/settings/subscription", permanent: true },
       { source: "/settings/:path*", destination: "/me/settings/:path*", permanent: true },
-      // Ads Studio now lives in the Create page's image models.
+      // Ads Studio moved from the Create page's image models to its own page.
       {
-        source: "/ads-studio",
-        destination: "/create/image?model=higgsfield-ads-studio",
-        permanent: true,
+        source: "/create/image",
+        has: [{ type: "query", key: "model", value: "higgsfield-ads-studio" }],
+        destination: "/ads-studio",
+        permanent: false,
       },
+      // Marketing Studio was replaced by Ads Studio (brands moved with it).
+      { source: "/marketing-studio/brand-themes/:path*", destination: "/ads-studio/brands/:path*", permanent: true },
+      { source: "/marketing-studio/my-creations/:path*", destination: "/ads-studio/media", permanent: true },
+      { source: "/marketing-studio/:path*", destination: "/ads-studio", permanent: true },
     ];
   },
 };

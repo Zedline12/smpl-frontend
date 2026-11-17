@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 import MediaExplorer from "@/features/media/components/MediaExplorer";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import PromptComposer from "@/features/generation/components/prompt/PromptComposer";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { AiModelsEnum,  normalizeModelId } from "@/features/generation/enums/models.enum";
@@ -23,24 +21,11 @@ export default function CreateImagePage() {
 
   return (
     <>
-      {/* Desktop */}
-      <div className="md:flex hidden w-full h-full flex-col text-foreground">
-        <div className="flex-1 overflow-hidden">
+      {/* The prompt and settings live in the layout's sidebar (above this on phones). */}
+      <div className="flex h-full w-full flex-1 flex-col text-foreground">
+        <div className="flex min-h-0 flex-1 flex-col sm:overflow-hidden">
           <MediaExplorer explore styles />
         </div>
-        <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-          {/* <PromptComposer /> */}
-        </section>
-      </div>
-
-      {/* Mobile */}
-      <div className="p-5 md:hidden block h-full text-foreground">
-        <div className="h-[600px]">
-          <MediaExplorer explore styles />
-        </div>
-        <section className="lg:w-1/2 w-full fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-          {/* <PromptComposer /> */}
-        </section>
       </div>
     </>
   );

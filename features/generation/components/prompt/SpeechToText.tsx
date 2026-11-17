@@ -7,7 +7,8 @@ import {
   useAiModelStore,
 } from "@/stores/useAiGenerationControlStore";
 
-export default function SpeechToText() {
+/** Records speech and puts the transcript in the model's prompt, or hands it to `onText`. */
+export default function SpeechToText({ onText }: { onText?: (text: string) => void } = {}) {
   const { model } = useAiGenerationControlStore();
   const { setField } = useAiModelStore();
 
@@ -84,7 +85,8 @@ export default function SpeechToText() {
       const json = await res.json();
       const transcription = json.data?.prompt;
       if (transcription) {
-        setField(model, "prompt", transcription);
+        if (onText) onText(transcription);
+        else setField(model, "prompt", transcription);
         toast.success("Transcription complete");
       } else {
         toast.error("No transcription returned");

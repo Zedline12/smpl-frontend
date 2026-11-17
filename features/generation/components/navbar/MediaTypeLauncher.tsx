@@ -17,7 +17,7 @@ import { ModelCard } from "./ModelCard";
 
 const CLOSE_DELAY = 120;
 
-const MEDIA_TYPES: {
+export const MEDIA_TYPES: {
   value: GenerationTypeEnum;
   label: string;
   models: Model[];
@@ -40,7 +40,6 @@ export function MediaTypeLauncher() {
 
   const [openType, setOpenType] = useState<GenerationTypeEnum | null>(null);
   const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(null);
-  const currentModel = useAiGenerationControlStore((state) => state.model);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearCloseTimer = () => {
@@ -113,10 +112,7 @@ export function MediaTypeLauncher() {
     >
       {MEDIA_TYPES.map((type) => {
         const isOpen = openType === type.value;
-        // Ads Studio lives on the image page but has its own navbar link.
-        const isCurrent =
-          pathname.startsWith(`/create/${type.value}`) &&
-          !(type.value === GenerationTypeEnum.IMAGE && currentModel === "higgsfield-ads-studio");
+        const isCurrent = pathname.startsWith(`/create/${type.value}`);
 
         return (
           <button

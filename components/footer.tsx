@@ -20,8 +20,7 @@ const create: FooterLink[] = [
 
 const studios: FooterLink[] = [
   { href: "/clipping-studio", label: "Clipping Studio" },
-  { href: "/marketing-studio", label: "Marketing Studio" },
-  { href: "/create/image?model=higgsfield-ads-studio", label: "Ads Studio" },
+  { href: "/ads-studio", label: "Ads Studio" },
   { href: "/ai-influencer-studio", label: "AI Influencer" },
   { href: "/artist", label: "Artist" },
   { href: "/remix", label: "Remix" },
@@ -75,7 +74,7 @@ function Column({ title, links }: { title: string; links: FooterLink[] }) {
 const NO_FOOTER = [
   "/create",
   "/clipping-studio",
-  "/marketing-studio",
+  "/ads-studio",
   "/ai-influencer-studio",
   "/artist",
   "/remix",

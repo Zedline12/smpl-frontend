@@ -31,9 +31,9 @@ export const LANDING_FEATURES: LandingFeature[] = [
     icon: Wand2,
   },
   {
-    href: "/marketing-studio/brand-themes",
-    title: "Marketing Studio",
-    subtitle: "Pull a brand's colours, fonts and logo.",
+    href: "/ads-studio",
+    title: "Ads Studio",
+    subtitle: "Brief it, add your brand and product, get ready-made ads.",
     icon: Palette,
     isNew: true,
   },

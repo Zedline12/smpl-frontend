@@ -4,10 +4,14 @@ import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStor
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { ArtistStudioPanel } from "@/features/artist/components/studio/ArtistStudioPanel";
 import { ArtistLibrary } from "@/features/artist/components/studio/ArtistLibrary";
+import { MobileDjDock } from "@/features/artist/components/studio/MobileDjDock";
 import { PlayerBar } from "@/features/artist/components/studio/PlayerBar";
 import { SpectrumBackdrop } from "@/features/artist/components/studio/SpectrumBackdrop";
 import { SONG_MODEL } from "@/features/artist/hooks/useSongBuilder";
-import { useArtistPlayerStore, useCurrentTrack } from "@/features/artist/stores/useArtistPlayerStore";
+import {
+  useArtistPlayerStore,
+  useCurrentTrack,
+} from "@/features/artist/stores/useArtistPlayerStore";
 
 /** The Artist page: music creation only. */
 export default function ArtistPage() {
@@ -35,13 +39,16 @@ export default function ArtistPage() {
       <SpectrumBackdrop />
       <div
         className={`relative z-10 mx-auto flex w-full max-w-[1800px] flex-col gap-8 px-3 pt-1 sm:px-6 lg:px-10 ${
-          hasTrack ? "pb-28" : "pb-10"
+          // Phones: clear the docked DJ (and the player bar under it).
+          hasTrack ? "pb-80 md:pb-28" : "pb-56 md:pb-10"
         }`}
       >
         {/* The settings read the song model's state; wait until it's selected (it drives the cost). */}
         {model === SONG_MODEL && <ArtistStudioPanel />}
         <ArtistLibrary />
       </div>
+
+      {model === SONG_MODEL && <MobileDjDock />}
 
       <PlayerBar />
     </div>

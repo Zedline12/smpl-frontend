@@ -46,7 +46,7 @@ const PER_MINUTE = new Set(["video-clipping", "video-analyzer"]);
 function modelName(id: string) {
   if (id === "video-clipping") return "Clipping Studio";
   if (id === "video-analyzer") return "Video Analyzer";
-  if (id === "brand-theme") return "Brand theme extraction";
+  if (id === "brand-theme") return "Brand kit extraction";
   return getModel(id)?.name ?? id;
 }
 
@@ -71,13 +71,18 @@ function parseDuration(text: string): number | null {
 
 function settingsLabel(params: Record<string, unknown>) {
   const entries = Object.entries(params ?? {});
-  return entries.length ? entries.map(([k, v]) => `${k}: ${String(v)}`).join(" · ") : "Any settings (model default)";
+  return entries.length
+    ? entries.map(([k, v]) => `${k}: ${String(v)}`).join(" · ")
+    : "Any settings (model default)";
 }
 
 const sameParams = (a: Record<string, unknown>, b: Record<string, unknown>) => {
   const ka = Object.keys(a ?? {}).sort();
   const kb = Object.keys(b ?? {}).sort();
-  return ka.length === kb.length && ka.every((k, i) => k === kb[i] && String(a[k]) === String(b[k]));
+  return (
+    ka.length === kb.length &&
+    ka.every((k, i) => k === kb[i] && String(a[k]) === String(b[k]))
+  );
 };
 
 const input =
@@ -85,14 +90,27 @@ const input =
 
 export function GenerationTimesManager() {
   const queryClient = useQueryClient();
-  const schemaQ = useQuery({ queryKey: ["gen-times", "models"], queryFn: () => api<Schema>("/models") });
-  const rulesQ = useQuery({ queryKey: ["gen-times", "rules"], queryFn: () => api<Rule[]>("") });
-  const statsQ = useQuery({ queryKey: ["gen-times", "stats"], queryFn: () => api<StatRow[]>("/stats") });
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["gen-times"] });
+  const schemaQ = useQuery({
+    queryKey: ["gen-times", "models"],
+    queryFn: () => api<Schema>("/models"),
+  });
+  const rulesQ = useQuery({
+    queryKey: ["gen-times", "rules"],
+    queryFn: () => api<Rule[]>(""),
+  });
+  const statsQ = useQuery({
+    queryKey: ["gen-times", "stats"],
+    queryFn: () => api<StatRow[]>("/stats"),
+  });
+  const refresh = () =>
+    queryClient.invalidateQueries({ queryKey: ["gen-times"] });
 
   const save = useMutation({
-    mutationFn: (rule: { model: string; parameters: Record<string, unknown>; seconds: number }) =>
-      api<Rule>("", { method: "POST", body: JSON.stringify(rule) }),
+    mutationFn: (rule: {
+      model: string;
+      parameters: Record<string, unknown>;
+      seconds: number;
+    }) => api<Rule>("", { method: "POST", body: JSON.stringify(rule) }),
     onSuccess: () => {
       toast.success("Time saved");
       refresh();
@@ -101,7 +119,10 @@ export function GenerationTimesManager() {
   });
   const update = useMutation({
     mutationFn: ({ id, seconds }: { id: string; seconds: number }) =>
-      api<Rule>(`/${id}`, { method: "PATCH", body: JSON.stringify({ seconds }) }),
+      api<Rule>(`/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ seconds }),
+      }),
     onSuccess: refresh,
     onError: (e) => toast.error(e.message),
   });
@@ -116,7 +137,9 @@ export function GenerationTimesManager() {
   const [model, setModel] = useState("");
   const [params, setParams] = useState<Record<string, string>>({});
   const [time, setTime] = useState("");
-  const modelParams = Object.entries(schema[model] ?? {}).filter(([k]) => !NON_TIME_PARAMS.has(k));
+  const modelParams = Object.entries(schema[model] ?? {}).filter(
+    ([k]) => !NON_TIME_PARAMS.has(k),
+  );
 
   const submit = () => {
     const seconds = parseDuration(time);
@@ -128,26 +151,42 @@ export function GenerationTimesManager() {
     for (const [k, v] of Object.entries(params)) {
       if (v === "") continue;
       const sample = schema[model]?.[k]?.[0];
-      parameters[k] = typeof sample === "number" ? Number(v) : typeof sample === "boolean" ? v === "true" : v;
+      parameters[k] =
+        typeof sample === "number"
+          ? Number(v)
+          : typeof sample === "boolean"
+            ? v === "true"
+            : v;
     }
-    save.mutate({ model, parameters, seconds }, { onSuccess: () => setTime("") });
+    save.mutate(
+      { model, parameters, seconds },
+      { onSuccess: () => setTime("") },
+    );
   };
 
   // One section per model that has a rule or has run.
   const sections = useMemo(() => {
     const rules = rulesQ.data ?? [];
     const stats = statsQ.data ?? [];
-    const models = [...new Set([...rules.map((r) => r.model), ...stats.map((s) => s.model)])].sort((a, b) =>
-      modelName(a).localeCompare(modelName(b)),
-    );
+    const models = [
+      ...new Set([...rules.map((r) => r.model), ...stats.map((s) => s.model)]),
+    ].sort((a, b) => modelName(a).localeCompare(modelName(b)));
     return models.map((m) => {
       const mRules = rules.filter((r) => r.model === m);
       const mStats = stats.filter((s) => s.model === m);
       // Measured rows whose settings match a rule exactly sit on that rule's row.
       const ruleRows = mRules
-        .sort((a, b) => Object.keys(a.parameters).length - Object.keys(b.parameters).length)
-        .map((r) => ({ rule: r, stat: mStats.find((s) => sameParams(s.parameters, r.parameters)) }));
-      const unmatched = mStats.filter((s) => !mRules.some((r) => sameParams(s.parameters, r.parameters)));
+        .sort(
+          (a, b) =>
+            Object.keys(a.parameters).length - Object.keys(b.parameters).length,
+        )
+        .map((r) => ({
+          rule: r,
+          stat: mStats.find((s) => sameParams(s.parameters, r.parameters)),
+        }));
+      const unmatched = mStats.filter(
+        (s) => !mRules.some((r) => sameParams(s.parameters, r.parameters)),
+      );
       return { model: m, ruleRows, unmatched };
     });
   }, [rulesQ.data, statsQ.data]);
@@ -185,18 +224,27 @@ export function GenerationTimesManager() {
             </select>
           </label>
           {modelParams.map(([key, values]) => (
-            <label key={key} className="flex flex-col gap-1 text-xs text-white/50">
+            <label
+              key={key}
+              className="flex flex-col gap-1 text-xs text-white/50"
+            >
               {key}
               <select
                 value={params[key] ?? ""}
-                onChange={(e) => setParams((p) => ({ ...p, [key]: e.target.value }))}
+                onChange={(e) =>
+                  setParams((p) => ({ ...p, [key]: e.target.value }))
+                }
                 className={input}
               >
                 <option value="" className="bg-neutral-900">
                   Any
                 </option>
                 {values.map((v) => (
-                  <option key={String(v)} value={String(v)} className="bg-neutral-900">
+                  <option
+                    key={String(v)}
+                    value={String(v)}
+                    className="bg-neutral-900"
+                  >
                     {String(v)}
                   </option>
                 ))}
@@ -205,7 +253,12 @@ export function GenerationTimesManager() {
           ))}
           <label className="flex flex-col gap-1 text-xs text-white/50">
             {PER_MINUTE.has(model) ? "Time per source minute" : "Time (m:ss)"}
-            <input value={time} onChange={(e) => setTime(e.target.value)} placeholder="2:00" className={cn(input, "w-24")} />
+            <input
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              placeholder="2:00"
+              className={cn(input, "w-24")}
+            />
           </label>
           <button
             type="button"
@@ -218,23 +271,34 @@ export function GenerationTimesManager() {
           </button>
         </div>
         <p className="mt-3 text-xs text-white/40">
-          Leave a setting on “Any” to cover all its values. Users see this time blended with real jobs:
-          (base × 5 + recent job times) ÷ (5 + jobs), so it adjusts as people generate. Jobs that take over 4× the base
-          are ignored.
+          Leave a setting on “Any” to cover all its values. Users see this time
+          blended with real jobs: (base × 5 + recent job times) ÷ (5 + jobs), so
+          it adjusts as people generate. Jobs that take over 4× the base are
+          ignored.
         </p>
       </div>
 
       {loading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-white/[0.04]" />
       ) : sections.length === 0 ? (
-        <p className="text-sm text-white/50">No times yet. Set a base above; real job times show up here as people generate.</p>
+        <p className="text-sm text-white/50">
+          No times yet. Set a base above; real job times show up here as people
+          generate.
+        </p>
       ) : (
         sections.map(({ model: m, ruleRows, unmatched }) => (
-          <div key={m} className="overflow-hidden rounded-2xl border border-white/10">
+          <div
+            key={m}
+            className="overflow-hidden rounded-2xl border border-white/10"
+          >
             <div className="flex items-center gap-2 bg-white/[0.04] px-4 py-3">
               <Timer className="size-4 text-white/60" />
               <span className="font-semibold text-white">{modelName(m)}</span>
-              {PER_MINUTE.has(m) && <span className="text-xs text-white/40">(times per source minute)</span>}
+              {PER_MINUTE.has(m) && (
+                <span className="text-xs text-white/40">
+                  (times per source minute)
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-[2fr_1fr_1.6fr_1fr_auto] gap-3 border-b border-white/[0.06] px-4 py-2 text-[11px] font-semibold tracking-wider text-white/35 uppercase">
               <span>Settings</span>
@@ -257,19 +321,31 @@ export function GenerationTimesManager() {
                 key={s.paramsKey}
                 className="grid grid-cols-[2fr_1fr_1.6fr_1fr_auto] items-center gap-3 border-b border-white/[0.04] px-4 py-2.5 text-sm"
               >
-                <span className="text-white/70">{settingsLabel(s.parameters)}</span>
+                <span className="text-white/70">
+                  {settingsLabel(s.parameters)}
+                </span>
                 <span className="text-white/45">
                   {formatDuration(s.baseSeconds)}{" "}
-                  <span className="text-[10px]">({s.baseSource === "rule" ? "from a broader rule" : "default"})</span>
+                  <span className="text-[10px]">
+                    (
+                    {s.baseSource === "rule"
+                      ? "from a broader rule"
+                      : "default"}
+                    )
+                  </span>
                 </span>
                 <Measured stat={s} />
-                <span className="font-semibold text-white">{formatDuration(s.effectiveSeconds)}</span>
+                <span className="font-semibold text-white">
+                  {formatDuration(s.effectiveSeconds)}
+                </span>
                 <button
                   type="button"
                   onClick={() => {
                     setModel(m);
                     setParams(s.parameters);
-                    setTime(formatDuration(s.medianSeconds ?? s.effectiveSeconds));
+                    setTime(
+                      formatDuration(s.medianSeconds ?? s.effectiveSeconds),
+                    );
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                   className="w-16 text-left text-xs text-white/50 hover:text-white"
@@ -286,10 +362,12 @@ export function GenerationTimesManager() {
 }
 
 function Measured({ stat }: { stat?: StatRow }) {
-  if (!stat || !stat.count) return <span className="text-white/35">No jobs yet</span>;
+  if (!stat || !stat.count)
+    return <span className="text-white/35">No jobs yet</span>;
   return (
     <span className="text-white/75">
-      avg {formatDuration(stat.avgSeconds)} · median {formatDuration(stat.medianSeconds)}
+      avg {formatDuration(stat.avgSeconds)} · median{" "}
+      {formatDuration(stat.medianSeconds)}
       <span className="text-white/40">
         {" "}
         · {stat.count} job{stat.count === 1 ? "" : "s"}
@@ -317,7 +395,12 @@ function RuleRow({
       <span className="text-white">{settingsLabel(rule.parameters)}</span>
       {editing ? (
         <span className="flex items-center gap-1">
-          <input value={text} onChange={(e) => setText(e.target.value)} className={cn(input, "w-20 py-1")} autoFocus />
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className={cn(input, "w-20 py-1")}
+            autoFocus
+          />
           <button
             type="button"
             aria-label="Save"
@@ -331,15 +414,24 @@ function RuleRow({
           >
             <Check className="size-4" />
           </button>
-          <button type="button" aria-label="Cancel" onClick={() => setEditing(false)} className="text-white/40 hover:text-white">
+          <button
+            type="button"
+            aria-label="Cancel"
+            onClick={() => setEditing(false)}
+            className="text-white/40 hover:text-white"
+          >
             <X className="size-4" />
           </button>
         </span>
       ) : (
-        <span className="font-semibold text-white">{formatDuration(rule.seconds)}</span>
+        <span className="font-semibold text-white">
+          {formatDuration(rule.seconds)}
+        </span>
       )}
       <Measured stat={stat} />
-      <span className="font-semibold text-white">{formatDuration(stat?.effectiveSeconds ?? rule.seconds)}</span>
+      <span className="font-semibold text-white">
+        {formatDuration(stat?.effectiveSeconds ?? rule.seconds)}
+      </span>
       <span className="flex w-16 items-center gap-2">
         <button
           type="button"
@@ -352,7 +444,12 @@ function RuleRow({
         >
           <Pencil className="size-3.5" />
         </button>
-        <button type="button" aria-label="Delete" onClick={onDelete} className="text-white/45 hover:text-red-300">
+        <button
+          type="button"
+          aria-label="Delete"
+          onClick={onDelete}
+          className="text-white/45 hover:text-red-300"
+        >
           <Trash2 className="size-3.5" />
         </button>
       </span>
