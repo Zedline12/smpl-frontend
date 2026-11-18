@@ -57,6 +57,9 @@ export const STYLE_FALLBACK_GRADIENTS = [
  * the prompt is still required. Validation then gets a stand-in prompt.
  * Keep in sync with the backend's findStyleInputError.
  */
+/** Models where a picked style is enough on its own, without a prompt or references. */
+const STYLE_REPLACES_PROMPT: ReadonlySet<string> = new Set<string>([AiModelsEnum.SEEDANCE_2_5]);
+
 export function withStyle<T extends object>(
   model: string,
   input: T,
@@ -66,7 +69,8 @@ export function withStyle<T extends object>(
   const styled = { ...input, styleId } as T;
   const prompt = (input as { prompt?: unknown }).prompt;
   const hasPrompt = typeof prompt === "string" && prompt.trim().length > 0;
-  const promptOptional = hasPrompt || hasReferences(input);
+  const promptOptional =
+    hasPrompt || hasReferences(input) || STYLE_REPLACES_PROMPT.has(model);
   return { input: styled, forValidation: promptOptional && !hasPrompt ? ({ ...styled, prompt: "styled" } as T) : styled };
 }
 

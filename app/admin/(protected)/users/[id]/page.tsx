@@ -4,6 +4,7 @@ import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
 import { CreditLedgerCard } from "@/features/admin/users/components/CreditLedgerCard";
+import { GenerationEconomicsCard } from "@/features/admin/users/components/GenerationEconomicsCard";
 import UserActionsBar from "@/features/admin/users/components/UserActionsBar";
 import {
   CreditsUsageCard,
@@ -368,6 +369,8 @@ export default async function UserDetailPage({
       </section>
 
       <CreditLedgerCard userId={user.id} />
+
+      <GenerationEconomicsCard userId={user.id} />
 
       {/* Media */}
       <section className="space-y-4">

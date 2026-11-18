@@ -54,11 +54,5 @@ export const seedance25ValidationSchema = z
     videos: z.array(z.string()).max(Seedance25Limits.maxVideos).optional(),
     audios: z.array(z.string()).max(Seedance25Limits.maxAudios).optional(),
   })
-  .refine(
-    (v) =>
-      !!v.prompt?.trim() ||
-      !!v.imageUrl ||
-      !!v.videoUrl ||
-      (v.images?.length ?? 0) + (v.videos?.length ?? 0) + (v.audios?.length ?? 0) > 0,
-    { message: "Add a prompt or at least one reference" },
-  ) as unknown as z.ZodType<ISeedance25Input>;
+  // The prompt is required; a picked style stands in for it (see withStyle).
+  .refine((v) => !!v.prompt?.trim(), { message: "Add a prompt" }) as unknown as z.ZodType<ISeedance25Input>;
