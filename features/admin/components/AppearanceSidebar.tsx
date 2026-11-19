@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Home, LayoutTemplate, ChevronLeft, WandSparkles, CircleUserRound } from "lucide-react";
+import { BookOpen, Home, LayoutTemplate, ChevronLeft, WandSparkles, CircleUserRound, Film } from "lucide-react";
 
 const links = [
   { icon: BookOpen, label: "How It Works", href: "/admin/appearance/how-it-works" },
@@ -11,6 +11,7 @@ const links = [
   { icon: Home, label: "Homepage Sections", href: "/admin/appearance/homepage" },
   { icon: WandSparkles, label: "Styles", href: "/admin/appearance/styles" },
   { icon: CircleUserRound, label: "Avatars", href: "/admin/appearance/avatars" },
+  { icon: Film, label: "Model Thumbnails", href: "/admin/appearance/thumbnails" },
 ];
 
 export const AppearanceSidebar = () => {

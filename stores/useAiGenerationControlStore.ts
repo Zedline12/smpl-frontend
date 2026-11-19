@@ -53,6 +53,8 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.SMPL_GENSU],
     [AiModelsEnum.SMPL_REMIX]:
       ModelDefaults[AiModelsEnum.SMPL_REMIX],
+    [AiModelsEnum.SMPL_RIPPER]:
+      ModelDefaults[AiModelsEnum.SMPL_RIPPER],
     [AiModelsEnum.SMPL_ARTIST]:
       ModelDefaults[AiModelsEnum.SMPL_ARTIST],
     [AiModelsEnum.SMPL_AI_INFLUENCER]:

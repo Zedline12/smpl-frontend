@@ -86,6 +86,9 @@ export const MODEL_SETTINGS: Partial<Record<AiModelsEnum, ModelSettingsSpec>> = 
   [AiModelsEnum.SMPL_GENSU]: {
     resolution: GensuInputConst.resolution,
   },
+  [AiModelsEnum.SMPL_RIPPER]: {
+    resolution: GensuInputConst.resolution,
+  },
   [AiModelsEnum.KLING_4_0]: {
     aspectRatio: Kling40InputConst.aspectRatio,
     resolution: Kling40InputConst.resolution,

@@ -16,6 +16,7 @@ export enum AiModelsEnum {
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
   SMPL_GENSU = "smpl-gensu",
   SMPL_REMIX = "smpl-remix",
+  SMPL_RIPPER = "smpl-ripper",
   SMPL_ARTIST = "smpl-artist",
   SMPL_AI_INFLUENCER = "smpl-ai-influencer",
   SMPL_ADS_STUDIO = "smpl-ads-studio",
@@ -290,6 +291,17 @@ export const VIDEO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_RIPPER,
+    name: "Ripper",
+    description: "Recreate any social video with your character, watermark-free.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12" />
       </svg>
     ),
   },

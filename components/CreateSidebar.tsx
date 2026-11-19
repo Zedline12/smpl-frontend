@@ -27,7 +27,7 @@ import {
   type Model,
   isEditTool,
  normalizeModelId } from "@/features/generation/enums/models.enum";
-import { offeringDescription, offeringName, useCatalog } from "@/features/catalog/catalog";
+import { offeringDescription, offeringName, offeringThumbnail, useCatalog } from "@/features/catalog/catalog";
 import { ModelsValidatorSchemaMap } from "@/features/generation/types/generation";
 import {
   useGenerateMutation,
@@ -116,6 +116,7 @@ type EditMode = "create" | "edit";
 // models where prompt is optional (toggle to show)
 const OPTIONAL_PROMPT_MODELS = new Set([
   AiModelsEnum.SMPL_GENSU,
+  AiModelsEnum.SMPL_RIPPER,
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
 ]);
@@ -775,6 +776,32 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
+  // ── Ripper (social video + character, watermarks removed) ──────────────────
+  if (model === AiModelsEnum.SMPL_RIPPER) {
+    return (
+      <>
+        <SingleMediaSlot
+          label="Social Video (4–30s)"
+          type="video"
+          url={s.videoUrl}
+          description="Upload a TikTok, Instagram or YouTube video. Watermarks are removed."
+          onOpenPicker={() => setDlg("video")}
+          onClear={() => set("videoUrl", "")}
+        />
+        <SingleMediaSlot
+          label="Your Character"
+          url={s.image}
+          onOpenPicker={() => setDlg("img")}
+          onClear={() => set("image", "")}
+        />
+        <MediaManagerDialog open={dlg === "video"} onOpenChange={(o) => !o && setDlg(null)}
+          selectedImage={s.videoUrl} onSelect={(u) => { set("videoUrl", u[0]); setDlg(null); }} maxSelections={1} mediaType="video" />
+        <MediaManagerDialog open={dlg === "img"} onOpenChange={(o) => !o && setDlg(null)}
+          selectedImage={s.image} onSelect={(u) => { set("image", u[0]); setDlg(null); }} maxSelections={1} />
+      </>
+    );
+  }
+
   // ── GEMINI Flash Image ─────────────────────────────────────────────────────
   if (model === AiModelsEnum.GEMINI_FLASH_IMAGE) {
     const images: string[] = s.images ?? [];
@@ -1287,28 +1314,7 @@ function EditToolPanel({ model }: { model: AiModelsEnum }) {
 
 // ─── model hero card ──────────────────────────────────────────────────────────
 
-// Hero card media, in R2 bucket smpl-ui / "Models Selection Thumbnail Videos".
-const THUMBS = "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/";
-const thumb = (file: string) => THUMBS + encodeURIComponent(file);
-
-const MODEL_PREVIEWS: Partial<Record<AiModelsEnum, { video?: string; image?: string }>> = {
-  // Video models
-  [AiModelsEnum.SMPL_GENSU]: { video: thumb("Smpl Riven.mp4") },
-  [AiModelsEnum.SMPL_AD_MULTIPLIER]: { video: thumb("ads-multiplier.mp4") },
-  [AiModelsEnum.SMPL_ARTIST]: { video: thumb("ARTIST.mp4") },
-  [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: { video: thumb("GROK.mp4") },
-  [AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO]: { video: thumb("KLING IMAGE TO VIDEO.mp4") },
-  [AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL]: { video: thumb("Kling Motion Control.mp4") },
-  [AiModelsEnum.SEEDANCE_2_5]: { video: thumb("SEEDANCE 2.5.mp4") },
-  [AiModelsEnum.FAL_SEEDANCE_2_5]: { video: thumb("SEEDANCE 2.5.mp4") },
-  [AiModelsEnum.SEEDANCE_2_0]: { video: thumb("SEEDDANCE 2.0.mp4") },
-  [AiModelsEnum.VEO_3]: { video: thumb("VEO 3.mp4") },
-  // Image models
-  [AiModelsEnum.GPT_IMAGE_2]: { image: thumb("CHAT GPT IMAGE.png") },
-  [AiModelsEnum.KLING_O3_IMAGE]: { image: thumb("KLING 03 IMAGE.png") },
-  [AiModelsEnum.GEMINI_FLASH_IMAGE]: { image: thumb("Nano Bananna.png") },
-  [AiModelsEnum.SEEDREAM_V4_5]: { image: thumb("SEEDREAM.jpeg") },
-};
+// Hero card media: set in App Appearance → Model Thumbnails (catalog), else bundled defaults.
 
 function ModelHeroCard({
   model,
@@ -1323,25 +1329,25 @@ function ModelHeroCard({
   const title = offeringName(model, modelDef?.name ?? model);
   const subtitle = isGensu ? "Reality Manipulation" : offeringDescription(model, modelDef?.description ?? "");
 
-  const preview = MODEL_PREVIEWS[model];
+  const thumbnail = offeringThumbnail(model);
 
   return (
     <div className="relative rounded-2xl overflow-hidden h-44 flex-shrink-0 bg-muted">
-      {preview?.video ? (
+      {thumbnail?.type === "video" ? (
         <video
-          key={preview.video}
+          key={thumbnail.url}
           autoPlay
           muted
           loop
           playsInline
-          src={preview.video}
+          src={thumbnail.url}
           className="absolute inset-0 w-full h-full object-cover"
         />
-      ) : preview?.image ? (
+      ) : thumbnail ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          key={preview.image}
-          src={preview.image}
+          key={thumbnail.url}
+          src={thumbnail.url}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -1671,6 +1677,7 @@ export function CreateSidebar() {
   const showSettings =
     !pickerOpen &&
     model !== AiModelsEnum.SMPL_GENSU &&
+    model !== AiModelsEnum.SMPL_RIPPER &&
     // Its only setting sits in its own panel.
     model !== AiModelsEnum.SMPL_VOICE_CHANGER;
 

@@ -33,6 +33,7 @@ export const STYLE_MODEL_IDS: ReadonlySet<string> = new Set<string>([
   AiModelsEnum.SEEDANCE_2_5,
   AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
   AiModelsEnum.SMPL_GENSU,
+  AiModelsEnum.SMPL_RIPPER,
   AiModelsEnum.KLING_4_0,
   AiModelsEnum.KLING_4_0_FLASH,
   AiModelsEnum.GEMINI_FLASH_IMAGE,

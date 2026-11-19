@@ -14,6 +14,7 @@ import { IGptImage2Input } from "@/features/generation/types/models/gpt-image-2.
 import { IGrokImagineVideo15Input } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
 import { IGensuInput } from "@/features/generation/types/models/gensu.type";
 import { IRemixInput } from "@/features/generation/types/models/remix.type";
+import { IRipperInput } from "@/features/generation/types/models/ripper.type";
 import { IArtistInput } from "@/features/generation/types/models/artist.type";
 import { IAiInfluencerInput } from "@/features/generation/types/models/ai-influencer.type";
 import { IAdsStudioInput } from "@/features/generation/types/models/ads-studio.type";
@@ -46,6 +47,7 @@ export type ModelStateMap = {
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: IGrokImagineVideo15Input;
   [AiModelsEnum.SMPL_GENSU]: IGensuInput;
   [AiModelsEnum.SMPL_REMIX]: IRemixInput;
+  [AiModelsEnum.SMPL_RIPPER]: IRipperInput;
   [AiModelsEnum.SMPL_ARTIST]: IArtistInput;
   [AiModelsEnum.SMPL_AI_INFLUENCER]: IAiInfluencerInput;
   [AiModelsEnum.SMPL_ADS_STUDIO]: IAdsStudioInput;
@@ -160,6 +162,12 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
   },
   [AiModelsEnum.SMPL_REMIX]: {
+    prompt: "",
+    videoUrl: "",
+    image: "",
+    resolution: "720p",
+  },
+  [AiModelsEnum.SMPL_RIPPER]: {
     prompt: "",
     videoUrl: "",
     image: "",

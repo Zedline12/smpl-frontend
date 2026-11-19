@@ -10,6 +10,12 @@ import { create } from "zustand";
  */
 export type OfferingKind = "model" | "generator" | "compute";
 
+/** The looping video or still on a model's card in Create. */
+export interface Thumbnail {
+  type: "video" | "image";
+  url: string;
+}
+
 export interface Offering {
   id: string;
   kind: OfferingKind;
@@ -21,6 +27,8 @@ export interface Offering {
   provider: string | null;
   /** Turned off by an admin: hidden from pickers, refused by the backend. */
   enabled: boolean;
+  /** Set in App Appearance; null: the bundled default below. */
+  thumbnail?: Thumbnail | null;
 }
 
 export interface Studio {
@@ -48,6 +56,7 @@ export const KIND_SECTIONS: { kind: OfferingKind; label: string }[] = [
 const DEFAULT_GENERATORS = new Set([
   "smpl-gensu",
   "smpl-remix",
+  "smpl-ripper",
   "smpl-ad-multiplier",
   "smpl-artist",
   "smpl-voice-changer",
@@ -63,6 +72,28 @@ const DEFAULT_COMPUTE = new Set([
   "smpl-video-fps-boost",
   "smpl-video-upscale",
 ]);
+
+// Bundled card media (R2 bucket smpl-ui / "Models Selection Thumbnail Videos"), shown
+// until an admin sets one in App Appearance → Model Thumbnails.
+const THUMBS = "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/";
+const video = (file: string): Thumbnail => ({ type: "video", url: THUMBS + encodeURIComponent(file) });
+const image = (file: string): Thumbnail => ({ type: "image", url: THUMBS + encodeURIComponent(file) });
+export const DEFAULT_THUMBNAILS: Record<string, Thumbnail> = {
+  "smpl-gensu": video("Smpl Riven.mp4"),
+  "smpl-ad-multiplier": video("ads-multiplier.mp4"),
+  "smpl-artist": video("ARTIST.mp4"),
+  "grok-imagine-video-1.5": video("GROK.mp4"),
+  "kling-v3-image-to-video": video("KLING IMAGE TO VIDEO.mp4"),
+  "kling-v3-pro-motion-control": video("Kling Motion Control.mp4"),
+  "seedance-2.5": video("SEEDANCE 2.5.mp4"),
+  "fal-seedance-2.5": video("SEEDANCE 2.5.mp4"),
+  "seedance-2-0": video("SEEDDANCE 2.0.mp4"),
+  "veo-3": video("VEO 3.mp4"),
+  "gpt-image-2": image("CHAT GPT IMAGE.png"),
+  "kling-o3-image": image("KLING 03 IMAGE.png"),
+  "gemini-flash-image": image("Nano Bananna.png"),
+  "seedream-v4-5": image("SEEDREAM.jpeg"),
+};
 
 const STORAGE_KEY = "smpl:catalog:v1";
 
@@ -124,6 +155,11 @@ export function offeringProvider(id: string): string | null {
   return current(id)?.provider ?? null;
 }
 
+/** The card media: the admin's choice, else the bundled default, else none. */
+export function offeringThumbnail(id: string): Thumbnail | null {
+  return current(id)?.thumbnail ?? DEFAULT_THUMBNAILS[id] ?? null;
+}
+
 /** False when an admin turned it off (hide it; the backend refuses it). */
 export function isOfferingEnabled(id: string): boolean {
   return current(id)?.enabled !== false;
@@ -162,6 +198,7 @@ export function useCatalog() {
     offeringKind,
     offeringProvider,
     isOfferingEnabled,
+    offeringThumbnail,
     withCatalog,
     groupByKind,
     studios: useCatalogStore.getState().studios,
