@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { MediaTypeDefaultModel, ModelDefaults, ModelStateMap } from "./aiGenerationStore.type";
+import type { RecreatedFrom } from "@/features/generation/lib/origin";
 
 type AiGenerationControlStore = {
   model: AiModelsEnum;
@@ -22,6 +23,9 @@ type AiGenerationControlStore = {
   /** The create pages' explorer tab, shared so the sidebar's Style card can open Styles. */
   explorerView: "explore" | "history" | "styles";
   setExplorerView: (view: "explore" | "history" | "styles") => void;
+  /** What Recreate loaded (sent with the next generation for analytics). */
+  recreatedFrom: RecreatedFrom | null;
+  setRecreatedFrom: (recreatedFrom: RecreatedFrom | null) => void;
 };
 type AiModelStore = {
   states: Partial<{
@@ -51,10 +55,10 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
       ModelDefaults[AiModelsEnum.SMPL_REMIX],
     [AiModelsEnum.SMPL_ARTIST]:
       ModelDefaults[AiModelsEnum.SMPL_ARTIST],
-    [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]:
-      ModelDefaults[AiModelsEnum.HIGGSFIELD_AI_INFLUENCER],
-    [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]:
-      ModelDefaults[AiModelsEnum.HIGGSFIELD_ADS_STUDIO],
+    [AiModelsEnum.SMPL_AI_INFLUENCER]:
+      ModelDefaults[AiModelsEnum.SMPL_AI_INFLUENCER],
+    [AiModelsEnum.SMPL_ADS_STUDIO]:
+      ModelDefaults[AiModelsEnum.SMPL_ADS_STUDIO],
     [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]:
       ModelDefaults[AiModelsEnum.ELEVENLABS_MUSIC_V2_5],
     [AiModelsEnum.FAL_SEEDANCE_2_5]:
@@ -91,7 +95,13 @@ export const useAiGenerationControlStore = create<AiGenerationControlStore>(
     model: AiModelsEnum.GEMINI_FLASH_IMAGE,
     projectId: "",
     mediaType: GenerationTypeEnum.IMAGE,
-    setModel: (model) => set({ model, sidebarView: "default" }),
+    setModel: (model) =>
+      set((s) => ({
+        model,
+        sidebarView: "default",
+        // Another model: not a remake any more.
+        recreatedFrom: s.recreatedFrom?.model === model ? s.recreatedFrom : null,
+      })),
     setProjectId: (projectId: string) => set({ projectId }),
     setMediaType: (mediaType) => set({ mediaType, model: MediaTypeDefaultModel[mediaType] }),
     templateMode: false,
@@ -102,5 +112,7 @@ export const useAiGenerationControlStore = create<AiGenerationControlStore>(
     setStyleId: (styleId) => set({ styleId }),
     explorerView: "explore",
     setExplorerView: (explorerView) => set({ explorerView }),
+    recreatedFrom: null,
+    setRecreatedFrom: (recreatedFrom) => set({ recreatedFrom }),
   }),
 );

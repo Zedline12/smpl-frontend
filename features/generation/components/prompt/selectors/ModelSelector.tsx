@@ -4,6 +4,7 @@ import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStor
 import { Image, Video } from "lucide-react";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { ModelRow } from "@/features/generation/components/ModelRow";
+import { useCatalog } from "@/features/catalog/catalog";
 
 interface ModelSelectorProps {
   models: Model[];
@@ -15,6 +16,10 @@ export default function ModelSelector({ models }: ModelSelectorProps) {
     setModel,
     mediaType,
   } = useAiGenerationControlStore();
+  // Current names, hidden ones out, in Smpl / Models / Tools sections.
+  const { withCatalog, groupByKind } = useCatalog();
+  const list = withCatalog(models);
+  const sections = groupByKind(list);
 
   return (
     <Menu
@@ -29,20 +34,25 @@ export default function ModelSelector({ models }: ModelSelectorProps) {
             <Image size={20} />
           )}
           <span className="truncate">
-            {models.find((m) => m.id === currentModel)?.name || "Select Model"}
+            {list.find((m) => m.id === currentModel)?.name || "Select Model"}
           </span>
         </div>
       }
     >
       <div className="bg-popover custom-scrollbar max-h-[60vh] w-[min(500px,calc(100vw-40px))] overflow-y-auto p-1">
-        {models.map((m) => (
-          <MenuItem
-            className=" w-full"
-            key={m.id}
-            onClick={() => setModel(m.id)}
-          >
-            <ModelRow model={m} isActive={m.id === currentModel} compact />
-          </MenuItem>
+        {sections.map((section) => (
+          <div key={section.kind}>
+            {sections.length > 1 && (
+              <p className="px-2 pt-2 pb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                {section.label}
+              </p>
+            )}
+            {section.items.map((m) => (
+              <MenuItem className=" w-full" key={m.id} onClick={() => setModel(m.id)}>
+                <ModelRow model={m} isActive={m.id === currentModel} compact />
+              </MenuItem>
+            ))}
+          </div>
         ))}
       </div>
     </Menu>

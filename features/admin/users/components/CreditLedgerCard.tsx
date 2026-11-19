@@ -12,6 +12,7 @@ import {
   modelName,
   signedCredits,
 } from "@/features/credits/ledger";
+import { useCatalog } from "@/features/catalog/catalog";
 import { LedgerThumb } from "@/features/credits/components/LedgerThumb";
 
 const PAGE_SIZE = 25;
@@ -70,6 +71,8 @@ function CopyId({ label, value }: { label: string; value: string }) {
  * paid for (job, generation, output), the payment behind it, and who made it.
  */
 export function CreditLedgerCard({ userId }: { userId: string }) {
+  // Model names follow the catalog (admin renames).
+  useCatalog();
   const [type, setType] = useState("");
   const [offset, setOffset] = useState(0);
   const { data, isLoading, isError, isFetching } = useQuery({

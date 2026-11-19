@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Pencil, Plus, Timer, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { getModel } from "@/features/generation/enums/models.enum";
+import { offeringName, useCatalog } from "@/features/catalog/catalog";
 import { cn } from "@/lib/utils";
 
 type Schema = Record<string, Record<string, (string | number | boolean)[]>>;
@@ -44,10 +45,9 @@ const NON_TIME_PARAMS = new Set(["prompt", "units", "durationMinutes"]);
 const PER_MINUTE = new Set(["video-clipping", "video-analyzer"]);
 
 function modelName(id: string) {
-  if (id === "video-clipping") return "Clipping Studio";
-  if (id === "video-analyzer") return "Video Analyzer";
   if (id === "brand-theme") return "Brand kit extraction";
-  return getModel(id)?.name ?? id;
+  // Catalog names (admin renames), including the clipping and analyzer services.
+  return offeringName(id, getModel(id)?.name ?? id);
 }
 
 export function formatDuration(seconds: number | null | undefined) {
@@ -89,6 +89,7 @@ const input =
   "rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-sm text-white focus:border-white/30 focus:outline-none";
 
 export function GenerationTimesManager() {
+  useCatalog();
   const queryClient = useQueryClient();
   const schemaQ = useQuery({
     queryKey: ["gen-times", "models"],

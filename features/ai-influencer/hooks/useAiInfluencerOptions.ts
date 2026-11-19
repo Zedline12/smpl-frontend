@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AiInfluencerTier } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+import { AiInfluencerTier } from "@/features/generation/types/models/ai-influencer.type";
 
 export interface AiInfluencerOption {
   key: string;

@@ -7,6 +7,7 @@ import { ArrowUpRight, LayoutGrid, Search, Settings, Sparkles, Wand2, X } from "
 import { cn } from "@/lib/utils";
 import type { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
+import { useCatalog } from "@/features/catalog/catalog";
 import {
   KIND_LABELS,
   POPULAR,
@@ -17,6 +18,7 @@ import {
   readRecents,
   rememberRecent,
   searchItems,
+  withCatalogNames,
 } from "@/features/search/search-index";
 
 type Tab = "all" | SearchKind;
@@ -78,26 +80,34 @@ function SearchBody({ onClose }: { onClose: () => void }) {
 
   const trimmed = query.trim();
 
+  // Current names; models and studios an admin turned off are left out.
+  const { version: catalogVersion } = useCatalog();
+  const [allItems, trending, popular] = useMemo(
+    () => [withCatalogNames(SEARCH_ITEMS), withCatalogNames(TRENDING), withCatalogNames(POPULAR.map((p) => p.item))],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [catalogVersion],
+  );
+
   const sections = useMemo<Section[]>(() => {
     const kinds = tab === "all" ? KIND_ORDER : [tab];
     if (trimmed) {
       return kinds
         .map((kind) => ({
           title: KIND_LABELS[kind],
-          items: searchItems(SEARCH_ITEMS.filter((i) => i.kind === kind), trimmed),
+          items: searchItems(allItems.filter((i) => i.kind === kind), trimmed),
           layout: "list" as const,
         }))
         .filter((s) => s.items.length);
     }
     if (tab !== "all") {
-      return [{ title: KIND_LABELS[tab], items: SEARCH_ITEMS.filter((i) => i.kind === tab), layout: "list" }];
+      return [{ title: KIND_LABELS[tab], items: allItems.filter((i) => i.kind === tab), layout: "list" }];
     }
     const browse: Section[] = [];
     if (recents.length) browse.push({ title: "Recents", items: recents, layout: "list" });
-    browse.push({ title: "Popular", items: POPULAR.map((p) => p.item), layout: "cards", seeAll: "page" });
-    browse.push({ title: "Trending", items: TRENDING, layout: "grid" });
+    browse.push({ title: "Popular", items: popular, layout: "cards", seeAll: "page" });
+    browse.push({ title: "Trending", items: trending, layout: "grid" });
     return browse;
-  }, [tab, trimmed, recents]);
+  }, [tab, trimmed, recents, allItems, trending, popular]);
 
   // Every option in display order: what the arrow keys walk through.
   const options = useMemo(() => sections.flatMap((s) => s.items), [sections]);
@@ -230,18 +240,21 @@ function SearchBody({ onClose }: { onClose: () => void }) {
 
               {section.layout === "cards" ? (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {POPULAR.map((card, i) => (
+                  {section.items.map((item, i) => {
+                    const card = POPULAR.find((p) => p.item.id === item.id)!;
+                    return (
                     <PopularCardButton
-                      key={card.item.id}
+                      key={item.id}
                       index={start + i}
                       label={card.label}
                       gradient={card.gradient}
-                      item={card.item}
+                      item={item}
                       active={active === start + i}
                       onHover={setActive}
                       onOpen={openItem}
                     />
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className={cn("grid gap-0.5", section.layout === "grid" && "sm:grid-cols-2 sm:gap-x-3")}>

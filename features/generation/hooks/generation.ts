@@ -79,6 +79,8 @@ const { prompt, ...stateWithoutPrompt } = state;
     queryFn: () =>
       fetchGenerationCost({ model,input:state }),
     staleTime: 1000 * 60,
+    // A model without a price stays that way: don't hammer the endpoint.
+    retry: false,
   });
 }
 

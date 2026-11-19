@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { modelName } from "@/features/credits/ledger";
+import { useCatalog } from "@/features/catalog/catalog";
 
 const PAGE_SIZE = 25;
 
@@ -13,12 +14,33 @@ interface Totals {
   credits: number;
   costUsd: number;
   paidUsd: number;
+  /** Gross: paid − cost. */
   profitUsd: number;
+  stripeFeeUsd?: number;
+  /** Gross − Stripe fees. */
+  netProfitUsd?: number;
 }
 
 interface Summary {
   totals: Totals & { withoutEconomics: number };
   byModel: (Totals & { model: string })[];
+}
+
+/** The user's plan when they generated. */
+interface PlanSnapshot {
+  id: string | null;
+  name: string | null;
+  billingPeriod: string | null;
+  isFree: boolean;
+  status: string | null;
+}
+
+/** Where a generation was started. */
+interface Origin {
+  source: "web" | "assistant" | "mcp" | "admin";
+  surface: string | null;
+  device: "desktop" | "mobile" | "tablet" | null;
+  recreatedFrom: { kind: "template" | "generation"; id: string } | null;
 }
 
 interface GenerationRow {
@@ -32,7 +54,30 @@ interface GenerationRow {
   paidUsd: number | null;
   profitUsd: number | null;
   dollarValuePerCredit: number | null;
+  stripeFeeUsd?: number | null;
+  netProfitUsd?: number | null;
+  grossMarginPct?: number | null;
+  netMarginPct?: number | null;
+  plan?: PlanSnapshot | null;
+  origin?: Origin | null;
+  costChain?: string[] | null;
 }
+
+const SOURCE_LABEL: Record<Origin["source"], string> = {
+  web: "Web",
+  assistant: "Assistant",
+  mcp: "MCP",
+  admin: "Admin",
+};
+
+function planText(p: PlanSnapshot | null | undefined): string {
+  if (!p) return "—";
+  if (p.isFree) return "Free";
+  const name = (p.name ?? "Paid").replace(/ plan$/i, "");
+  return p.billingPeriod === "YEARLY" ? `${name} · yearly` : name;
+}
+
+const pct = (n: number | null | undefined) => (n === null || n === undefined ? "—" : `${n}%`);
 
 async function getJson<T>(url: string, fallback: string): Promise<T> {
   const res = await fetch(url);
@@ -70,10 +115,13 @@ function Stat({ label, value, className }: { label: string; value: string; class
 
 /**
  * The user's generations in money terms: what they cost us (provider), what the user
- * paid (credits × their plan's $/credit; 0 on free) and the profit. Totals, a per-model
- * breakdown, and every generation.
+ * paid (credits × their plan's $/credit; 0 on free), gross profit and net profit after
+ * Stripe's fees. Totals, a per-model breakdown, and every generation with the plan the
+ * user was on and where it was started.
  */
 export function GenerationEconomicsCard({ userId }: { userId: string }) {
+  // Model names follow the catalog (admin renames).
+  useCatalog();
   const [offset, setOffset] = useState(0);
   const summary = useQuery({
     queryKey: ["admin", "user-generation-economics", userId],
@@ -105,13 +153,15 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
         <p className="text-sm text-red-400">Couldn&apos;t load the totals.</p>
       ) : t ? (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <Stat label="Generations" value={t.generations.toLocaleString()} />
             <Stat label="Credits charged" value={t.credits.toLocaleString()} />
             <Stat label="Cost to us" value={usd(t.costUsd)} />
             <Stat label="User paid" value={usd(t.paidUsd)} />
-            <Stat label="Profit" value={usd(t.profitUsd)} className={profitClass(t.profitUsd)} />
+            <Stat label="Gross profit" value={usd(t.profitUsd)} className={profitClass(t.profitUsd)} />
+            <Stat label="Net profit" value={usd(t.netProfitUsd)} className={profitClass(t.netProfitUsd)} />
           </div>
+          <p className="text-xs text-white/40">Net is after Stripe&apos;s fees ({usd(t.stripeFeeUsd)}).</p>
           {t.withoutEconomics > 0 && (
             <p className="text-xs text-white/40">
               {t.withoutEconomics.toLocaleString()} older generation{t.withoutEconomics === 1 ? "" : "s"} from before
@@ -128,7 +178,7 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
       {/* Per model */}
       {!!summary.data?.byModel.length && (
         <div className="overflow-x-auto rounded-xl border" style={CARD_STYLE}>
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="text-left text-[11px] tracking-wide text-white/40 uppercase">
                 <th className="px-4 py-2.5 font-medium">Model</th>
@@ -136,7 +186,8 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
                 <th className="px-4 py-2.5 text-right font-medium">Credits</th>
                 <th className="px-4 py-2.5 text-right font-medium">Cost</th>
                 <th className="px-4 py-2.5 text-right font-medium">Paid</th>
-                <th className="px-4 py-2.5 text-right font-medium">Profit</th>
+                <th className="px-4 py-2.5 text-right font-medium">Gross</th>
+                <th className="px-4 py-2.5 text-right font-medium">Net</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.05]">
@@ -147,8 +198,9 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
                   <td className="px-4 py-2.5 text-right tabular-nums text-white/70">{m.credits.toLocaleString()}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-white/70">{usd(m.costUsd)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-white/70">{usd(m.paidUsd)}</td>
-                  <td className={cn("px-4 py-2.5 text-right font-medium tabular-nums", profitClass(m.profitUsd))}>
-                    {usd(m.profitUsd)}
+                  <td className={cn("px-4 py-2.5 text-right tabular-nums", profitClass(m.profitUsd))}>{usd(m.profitUsd)}</td>
+                  <td className={cn("px-4 py-2.5 text-right font-medium tabular-nums", profitClass(m.netProfitUsd))}>
+                    {usd(m.netProfitUsd)}
                   </td>
                 </tr>
               ))}
@@ -168,16 +220,19 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
         ) : !rows.length ? (
           <p className="px-6 py-10 text-center text-sm text-white/35">No generations yet.</p>
         ) : (
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[980px] text-sm">
             <thead>
               <tr className="text-left text-[11px] tracking-wide text-white/40 uppercase">
                 <th className="px-4 py-2.5 font-medium">Date</th>
                 <th className="px-4 py-2.5 font-medium">Model</th>
                 <th className="px-4 py-2.5 font-medium">Status</th>
+                <th className="px-4 py-2.5 font-medium">Plan</th>
+                <th className="px-4 py-2.5 font-medium">Source</th>
                 <th className="px-4 py-2.5 text-right font-medium">Credits</th>
                 <th className="px-4 py-2.5 text-right font-medium">Cost</th>
                 <th className="px-4 py-2.5 text-right font-medium">Paid</th>
-                <th className="px-4 py-2.5 text-right font-medium">Profit</th>
+                <th className="px-4 py-2.5 text-right font-medium">Gross</th>
+                <th className="px-4 py-2.5 text-right font-medium">Net</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.05]">
@@ -197,8 +252,34 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
                     <span className="ml-1.5 text-[11px] text-white/35 capitalize">{g.type}</span>
                   </td>
                   <td className="px-4 py-2.5 text-xs text-white/50 capitalize">{g.status.toLowerCase()}</td>
+                  <td
+                    className="px-4 py-2.5 text-xs whitespace-nowrap text-white/60"
+                    title={g.plan?.status ? `Subscription ${g.plan.status.replace(/_/g, " ")}` : undefined}
+                  >
+                    {planText(g.plan)}
+                  </td>
+                  <td className="px-4 py-2.5 text-xs whitespace-nowrap text-white/60" title={g.origin?.surface ?? undefined}>
+                    {g.origin ? (
+                      <>
+                        {SOURCE_LABEL[g.origin.source] ?? g.origin.source}
+                        {g.origin.device && <span className="ml-1 text-white/35 capitalize">· {g.origin.device}</span>}
+                        {g.origin.recreatedFrom && (
+                          <span className="ml-1.5 rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/50">
+                            Recreated {g.origin.recreatedFrom.kind}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-white/30">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-white/70">{g.creditsUsed.toLocaleString()}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-white/70">{usd(g.costUsd)}</td>
+                  <td
+                    className="px-4 py-2.5 text-right tabular-nums text-white/70"
+                    title={g.costChain && g.costChain.length > 1 ? `Cost via ${g.costChain.slice(1).map((m) => modelName(m)).join(" → ")}` : undefined}
+                  >
+                    {usd(g.costUsd)}
+                  </td>
                   <td
                     className="px-4 py-2.5 text-right tabular-nums text-white/70"
                     title={
@@ -209,8 +290,17 @@ export function GenerationEconomicsCard({ userId }: { userId: string }) {
                   >
                     {usd(g.paidUsd)}
                   </td>
-                  <td className={cn("px-4 py-2.5 text-right font-medium tabular-nums", profitClass(g.profitUsd))}>
+                  <td
+                    className={cn("px-4 py-2.5 text-right tabular-nums", profitClass(g.profitUsd))}
+                    title={`Gross margin ${pct(g.grossMarginPct)}`}
+                  >
                     {usd(g.profitUsd)}
+                  </td>
+                  <td
+                    className={cn("px-4 py-2.5 text-right font-medium tabular-nums", profitClass(g.netProfitUsd))}
+                    title={`After ${usd(g.stripeFeeUsd)} Stripe fee · net margin ${pct(g.netMarginPct)}`}
+                  >
+                    {usd(g.netProfitUsd)}
                   </td>
                 </tr>
               ))}

@@ -112,7 +112,7 @@ export function MediaParams({ media }: { media: Media }) {
   const input = (media.input ?? {}) as Record<string, unknown>;
   const { data: styles } = useStylesQuery();
 
-  if (media.model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER) {
+  if (media.model === AiModelsEnum.SMPL_AI_INFLUENCER) {
     return <InfluencerParams input={input} />;
   }
 

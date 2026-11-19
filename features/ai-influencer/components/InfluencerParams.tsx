@@ -4,7 +4,7 @@ import {
   AiInfluencerInputConst,
   AiInfluencerTier,
   TIER_LABELS,
-} from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+} from "@/features/generation/types/models/ai-influencer.type";
 import {
   ParamRows,
   ParamsSection,

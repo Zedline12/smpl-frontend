@@ -1,18 +1,12 @@
 import { Suspense } from "react";
-import { fetchWithToken } from "@/lib/fetcher";
-import { CreditPricingStudio } from "@/features/admin/credit-pricing/components/CreditPricingStudio";
+import { PricingStudio } from "@/features/admin/pricing/PricingStudio";
 
-export default async function CreditPricingPage() {
-  // Allowed params and saved rules feed the "edit individual options" table.
-  const [modelsRes, rulesRes] = await Promise.all([
-    fetchWithToken("/credit-pricing/models").then((res) => res.json()),
-    fetchWithToken("/credit-pricing").then((res) => res.json()),
-  ]);
-
+/** Pricing: costs, credit prices and what every plan earns on each model. */
+export default function CreditPricingPage() {
   return (
     <div className="p-6">
       <Suspense>
-        <CreditPricingStudio schema={modelsRes?.data || {}} rules={rulesRes?.data || []} />
+        <PricingStudio />
       </Suspense>
     </div>
   );

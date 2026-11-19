@@ -5,6 +5,7 @@ import { Media } from "@/features/media/types/media";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAiGenerationControlStore, useAiModelStore } from "@/stores/useAiGenerationControlStore";
 import { AiModelsEnum, AUDIO_MODELS, IMAGE_MODELS, VIDEO_MODELS } from "@/features/generation/enums/models.enum";
+import { useCatalog } from "@/features/catalog/catalog";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { useEditGenerationMutation } from "@/features/generation/hooks/generation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ interface MediaEditDialogProps {
 export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) {
   const { model, mediaType, setModel, setMediaType } = useAiGenerationControlStore();
   const { states, setField } = useAiModelStore();
+  const { withCatalog } = useCatalog();
   const editMutation = useEditGenerationMutation();
   const queryClient = useQueryClient();
 
@@ -64,12 +66,14 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
     }
   };
 
-  const modelList =
+  // Current names; ones an admin turned off are left out.
+  const modelList = withCatalog(
     mediaType === GenerationTypeEnum.VIDEO
       ? VIDEO_MODELS
       : mediaType === GenerationTypeEnum.AUDIO
       ? AUDIO_MODELS
-      : IMAGE_MODELS;
+      : IMAGE_MODELS,
+  );
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>

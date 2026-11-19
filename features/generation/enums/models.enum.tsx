@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { offeringDescription, offeringName } from "@/features/catalog/catalog";
 
 export enum AiModelsEnum {
   VEO_3 = "veo-3",
@@ -16,8 +17,8 @@ export enum AiModelsEnum {
   SMPL_GENSU = "smpl-gensu",
   SMPL_REMIX = "smpl-remix",
   SMPL_ARTIST = "smpl-artist",
-  HIGGSFIELD_AI_INFLUENCER = "higgsfield-ai-influencer",
-  HIGGSFIELD_ADS_STUDIO = "higgsfield-ads-studio",
+  SMPL_AI_INFLUENCER = "smpl-ai-influencer",
+  SMPL_ADS_STUDIO = "smpl-ads-studio",
   ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
   /** The fal version (Artist). Was "seedance-2.5-ref-to-video". */
   FAL_SEEDANCE_2_5 = "fal-seedance-2.5",
@@ -54,6 +55,9 @@ export const LEGACY_MODEL_IDS: Record<string, AiModelsEnum> = {
   "ads-multiplier": AiModelsEnum.SMPL_AD_MULTIPLIER,
   "elevenlabs-voice-changer": AiModelsEnum.SMPL_VOICE_CHANGER,
   "seedance-2.5-ref-to-video": AiModelsEnum.FAL_SEEDANCE_2_5,
+  // Named after Higgsfield, which no longer runs them.
+  "higgsfield-ai-influencer": AiModelsEnum.SMPL_AI_INFLUENCER,
+  "higgsfield-ads-studio": AiModelsEnum.SMPL_ADS_STUDIO,
 };
 
 /** The current id for a model id that may be an old one. */
@@ -62,6 +66,11 @@ export function normalizeModelId(id: string | null | undefined): string | null |
 export function normalizeModelId(id: string | null | undefined) {
   return id && id in LEGACY_MODEL_IDS ? LEGACY_MODEL_IDS[id] : id;
 }
+/**
+ * A model, Smpl generator or Smpl tool as the UI draws it. `name` and `description` here
+ * are the bundled defaults; the catalog (admin-editable) overrides them: read names with
+ * getModel / withCatalog, or offeringName.
+ */
 export interface Model {
   id: AiModelsEnum;
   description: string;
@@ -402,8 +411,8 @@ export const AUDIO_MODELS: Model[] = [
 export const STUDIO_MODELS: Model[] = [
   {
     id: AiModelsEnum.FAL_SEEDANCE_2_5,
-    name: "Seedance 2.5 (fal)",
-    description: "Seedance 2.5 on fal: powers Artist clips and Ad Multiplier.",
+    name: "Seedance 2.5 (reference)",
+    description: "Seedance 2.5 from reference images and videos.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -412,9 +421,9 @@ export const STUDIO_MODELS: Model[] = [
     ),
   },
   {
-    id: AiModelsEnum.HIGGSFIELD_ADS_STUDIO,
+    id: AiModelsEnum.SMPL_ADS_STUDIO,
     name: "Ads Studio",
-    description: "Ready-to-use ads from a brief and your product photos, powered by Nano Banana Pro.",
+    description: "Ready-to-use ads from a brief and your product photos.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -424,7 +433,7 @@ export const STUDIO_MODELS: Model[] = [
   },
   {
     id: AiModelsEnum.ELEVENLABS_MUSIC_V2_5,
-    name: "Artist",
+    name: "ElevenLabs Music",
     description: "Full songs from a genre, a mood and your own lyrics.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
@@ -456,9 +465,9 @@ export const STUDIO_MODELS: Model[] = [
     ),
   },
   {
-    id: AiModelsEnum.HIGGSFIELD_AI_INFLUENCER,
+    id: AiModelsEnum.SMPL_AI_INFLUENCER,
     name: "AI Influencer",
-    description: "Photoreal human or animal influencer: close-up and full-body shot, powered by Nano Banana Pro.",
+    description: "Photoreal human or animal influencer: a close-up and a full-body shot.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -476,7 +485,12 @@ export function isAiModel(value: string): value is AiModelsEnum {
   return (Object.values(AiModelsEnum) as string[]).includes(value);
 }
 
-/** The model definition for an id, or null when the id isn't a known model. */
+/**
+ * The definition for an id with its current (catalog) name and description, or null when
+ * the id isn't known. Call useCatalog() in the component so it re-renders on renames.
+ */
 export function getModel(id: string): Model | null {
-  return MODEL_BY_ID.get(normalizeModelId(id)) ?? null;
+  const m = MODEL_BY_ID.get(normalizeModelId(id));
+  if (!m) return null;
+  return { ...m, name: offeringName(m.id, m.name), description: offeringDescription(m.id, m.description) };
 }

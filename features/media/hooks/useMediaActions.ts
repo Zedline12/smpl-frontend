@@ -108,8 +108,8 @@ export function useMoveMediaMutation() {
 const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.SMPL_GENSU]: "/create/motion-transfer",
   [AiModelsEnum.SMPL_REMIX]: "/remix",
-  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: "/ai-influencer-studio",
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: "/ads-studio",
+  [AiModelsEnum.SMPL_AI_INFLUENCER]: "/ai-influencer-studio",
+  [AiModelsEnum.SMPL_ADS_STUDIO]: "/ads-studio",
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: "/artist",
   [AiModelsEnum.FAL_SEEDANCE_2_5]: "/artist?tab=clip",
   [AiModelsEnum.SEEDANCE_2_5]: "/create/video",
@@ -124,7 +124,7 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
 export function useRecreateMedia() {
   const router = useRouter();
   const pathname = usePathname();
-  const { setModel, setMediaType, setProjectId, setStyleId } = useAiGenerationControlStore();
+  const { setModel, setMediaType, setProjectId, setStyleId, setRecreatedFrom } = useAiGenerationControlStore();
   const { setField } = useAiModelStore();
 
   return (media: Media) => {
@@ -149,6 +149,13 @@ export function useRecreateMedia() {
     }
     setMediaType(media.type as GenerationTypeEnum);
     setModel(model);
+    // After setModel (which clears it): the next generation is a remake of this one.
+    const sourceId = media.isTemplate ? media.id : media.generationId;
+    setRecreatedFrom(
+      sourceId
+        ? { kind: media.isTemplate ? "template" : "generation", id: sourceId, model }
+        : null,
+    );
     Object.entries(input).forEach(([key, value]) => setField(model, key, value));
     // The style isn't part of the model's settings; it lives in the control store.
     setStyleId(typeof input.styleId === "string" ? input.styleId : null);

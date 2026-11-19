@@ -14,7 +14,7 @@ import {
   AdsStudioAspectRatio,
   AdsStudioInputConst,
   IAdsStudioInput,
-} from "@/features/generation/types/models/higgsfield-ads-studio.type";
+} from "@/features/generation/types/models/ads-studio.type";
 import {
   useGenerateMutation,
   useGenerationCostQuery,
@@ -25,7 +25,7 @@ import {
   useAiModelStore,
 } from "@/stores/useAiGenerationControlStore";
 
-const MODEL = AiModelsEnum.HIGGSFIELD_ADS_STUDIO;
+const MODEL = AiModelsEnum.SMPL_ADS_STUDIO;
 const c = AdsStudioInputConst;
 
 /**

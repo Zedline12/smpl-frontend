@@ -4,16 +4,22 @@ import {
 } from "@/features/media/types/api";
 import { EditGenerateRequest, GenerateImageRequest, GenerateRequest, GenerateVideoRequest } from "../types/api";
 import { GenerationQueue } from "../types/generation";
+import { clearRecreatedFrom, clientOrigin } from "../lib/origin";
 export async function fetchGenerationCost(
   data: CalculateMediaCostRequest,
 ): Promise<CalculateMediaCostResponse> {
-  const { model,input } = data;
-  const res = await fetch("/api/generation/calculate-cost", {
+  const { model, input } = data;
+  const res = await fetch(`/api/credits/estimate/${encodeURIComponent(model)}`, {
     method: "POST",
-    body: JSON.stringify({ model,input }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ input }),
   });
-  const json = await res.json();
-  return json.data as CalculateMediaCostResponse;
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    // e.g. "This model's price isn't set up yet": shown under Generate, which is disabled.
+    throw new Error(json?.message ?? "Couldn't price this generation");
+  }
+  return (json?.data ?? json) as CalculateMediaCostResponse;
 }
 /** Models the current user has completed at least one generation with. */
 export async function fetchUserModels(): Promise<string[]> {
@@ -57,22 +63,24 @@ export async function generate(data: GenerateRequest) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, origin: clientOrigin(data.model) }),
   });
   const json = await res.json();
   if (!json.success) {
     throw new Error(json.message);
   }
+  clearRecreatedFrom();
   return json.data;
 }
 export async function editGeneration(data: EditGenerateRequest) {
   const res = await fetch("/api/generation/edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, origin: clientOrigin(data.model) }),
   });
   const json = await res.json();
   if (!json.success) throw new Error(json.message);
+  clearRecreatedFrom();
   return json.data;
 }
 export async function videoGeneration(data: GenerateRequest) {

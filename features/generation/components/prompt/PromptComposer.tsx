@@ -18,6 +18,7 @@ import KlingV3ProMotionControlComposer from "./composers/kling-v3-pro-motion-con
 import KlingV3ImageToVideoComposer from "./composers/kling-v3-image-to-video.composer";
 import KlingV3TextToVideoComposer from "./composers/kling-v3-text-to-video.composer";
 import ElevenLabsV3Composer from "./composers/eleven-labs-v3.composer";
+import { useCatalog } from "@/features/catalog/catalog";
 import SeedreamV45Composer from "./composers/seedream-v4-5.composer";
 import Seedance20Composer from "./composers/seedance-2.0.composer";
 import Seedance25RefComposer from "./composers/seedance-2.5-ref.composer";
@@ -54,6 +55,8 @@ export interface MediaComposerHandle {
 export default function PromptComposer() {
   const { model, mediaType, setMediaType, templateMode } =
     useAiGenerationControlStore();
+  // getModel() names below follow the catalog.
+  useCatalog();
 
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);

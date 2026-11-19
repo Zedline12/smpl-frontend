@@ -3,7 +3,9 @@ import {
   IMAGE_MODELS,
   STUDIO_MODELS,
   VIDEO_MODELS,
+  normalizeModelId,
 } from "@/features/generation/enums/models.enum";
+import { offeringName } from "@/features/catalog/catalog";
 
 /** One credit ledger row, as the usage page gets it. */
 export interface LedgerRow {
@@ -91,13 +93,22 @@ const MODEL_NAMES = new Map(
   ]),
 );
 
-/** A model id as people read it ("veo-3" → "Veo 3"). */
-export const modelName = (model: string) =>
-  MODEL_NAMES.get(model) ??
-  model
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+/**
+ * What people call an id: the catalog's (admin-editable) name, else the bundled one,
+ * else the id made readable ("veo-3" → "Veo 3"). Components showing it should call
+ * useCatalog() so they re-render when names load.
+ */
+export const modelName = (model: string) => {
+  const id = normalizeModelId(model);
+  return offeringName(
+    id,
+    MODEL_NAMES.get(id) ??
+      id
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
+  );
+};
 
 /** Where a project-linked row opens (clipping and video analysis). */
 export function subjectHref(subject: LedgerRow["subject"]): string | null {

@@ -21,7 +21,7 @@ import {
   AdsStudioAspectRatio,
   AdsStudioInputConst,
   IAdsStudioInput,
-} from "@/features/generation/types/models/higgsfield-ads-studio.type";
+} from "@/features/generation/types/models/ads-studio.type";
 import { useStylesQuery } from "@/features/styles/api";
 import { findStyle } from "@/features/styles/styles";
 import { cn } from "@/lib/utils";

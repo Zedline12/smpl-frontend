@@ -112,7 +112,7 @@ export function MediaManagerDialog({
     setIsLoadingAiInfluencer(true);
     try {
       const res = await fetch(
-        "/api/media/me?model=higgsfield-ai-influencer&type=image&limit=50",
+        "/api/media/me?model=smpl-ai-influencer&type=image&limit=50",
       );
       const json = await res.json();
       setAiInfluencerMedia(json.data?.data ?? []);

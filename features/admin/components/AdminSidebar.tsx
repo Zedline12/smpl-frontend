@@ -9,7 +9,6 @@ import {
   BarChart3,
   Image,
   ShieldAlert,
-  DollarSign,
   TrendingUp,
   Paintbrush,
   Zap,
@@ -21,6 +20,7 @@ import {
   Tag,
   Rocket,
   LineChart,
+  Boxes,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 import { useQuery } from "@tanstack/react-query";
@@ -34,6 +34,7 @@ const SECTIONS = [
       { icon: ShieldAlert, label: "Security", href: "/admin/security" },
       { icon: Bell, label: "Notifications", href: "/admin/notifications" },
       { icon: Image, label: "Media", href: "/admin/media" },
+      { icon: Boxes, label: "Catalog", href: "/admin/catalog" },
       { icon: BarChart3, label: "Generations", href: "/admin/generations" },
       { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
       { icon: LifeBuoy, label: "Support", href: "/admin/support" },
@@ -48,8 +49,7 @@ const SECTIONS = [
       { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
       { icon: Package, label: "Credit Packs", href: "/admin/credit-packs" },
       { icon: Tag, label: "Discounts", href: "/admin/discounts" },
-      { icon: Zap, label: "Credit Pricing", href: "/admin/credit-pricing" },
-      { icon: DollarSign, label: "Model Costs", href: "/admin/model-costs" },
+      { icon: Zap, label: "Pricing", href: "/admin/credit-pricing" },
       { icon: Timer, label: "Generation Times", href: "/admin/generation-times" },
       { icon: TrendingUp, label: "Profit", href: "/admin/profit" },
     ],

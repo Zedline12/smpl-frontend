@@ -2,14 +2,14 @@ import { unstable_rethrow } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWithToken } from "@/lib/fetcher";
 
-type Method = "GET" | "POST" | "PATCH" | "DELETE";
+type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 /** Proxies /api/admin/credit-pricing/* to the backend's admin credit pricing API with the admin token. */
 async function proxy(req: NextRequest, path: string[] | undefined, method: Method) {
   try {
     const query = req.nextUrl.searchParams.toString();
     const suffix = path?.length ? `/${path.map(encodeURIComponent).join("/")}` : "";
-    const body = method === "POST" || method === "PATCH" ? await req.text() : undefined;
+    const body = method === "POST" || method === "PATCH" || method === "PUT" ? await req.text() : undefined;
     const response = await fetchWithToken(`/admin/credit-pricing${suffix}${query ? `?${query}` : ""}`, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -47,6 +47,10 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   return proxy(req, (await params).path, "PATCH");
+}
+
+export async function PUT(req: NextRequest, { params }: Ctx) {
+  return proxy(req, (await params).path, "PUT");
 }
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {

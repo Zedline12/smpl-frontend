@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
+import { catalogStudios, isOfferingEnabled, offeringName, useCatalog } from "@/features/catalog/catalog";
 
 export const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   { label: "Mcp Integration", href: "/me/settings/mcp", isNew: true },
@@ -16,8 +17,30 @@ export const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   // { label: "Video Analyzer", href: "/video-analyzer", isNew: true },
 ];
 
+/**
+ * The links with the catalog's (admin-editable) names; studios and offerings an admin
+ * turned off are left out.
+ */
+export function studioLinks(): typeof STUDIOS {
+  const studios = catalogStudios();
+  return STUDIOS.flatMap((s) => {
+    const model = new URLSearchParams(s.href.split("?")[1] ?? "").get("model");
+    if (model) return isOfferingEnabled(model) ? [{ ...s, label: offeringName(model, s.label) }] : [];
+    const studio = studios?.find((c) => c.route === s.href);
+    if (!studio) return [s];
+    return studio.enabled ? [{ ...s, label: studio.name }] : [];
+  });
+}
+
+/** studioLinks(), re-rendering when the catalog loads. */
+export function useStudioLinks() {
+  useCatalog();
+  return studioLinks();
+}
+
 export function StudioLinks() {
   const pathname = usePathname();
+  const links = useStudioLinks();
   const model = useAiGenerationControlStore((s) => s.model);
 
   const isCurrent = (href: string) => {
@@ -31,7 +54,7 @@ export function StudioLinks() {
 
   return (
     <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-      {STUDIOS.map((studio) => {
+      {links.map((studio) => {
         const current = isCurrent(studio.href);
         return (
           <Link

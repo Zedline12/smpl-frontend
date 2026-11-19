@@ -26,7 +26,7 @@ import {
   IAiInfluencerInput,
   isHumanTier,
   TIER_LABELS,
-} from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+} from "@/features/generation/types/models/ai-influencer.type";
 import {
   useGenerateMutation,
   useGenerationCostQuery,
@@ -46,7 +46,7 @@ import {
   useAiInfluencerOptions,
 } from "./useAiInfluencerOptions";
 
-export const INFLUENCER_MODEL = AiModelsEnum.HIGGSFIELD_AI_INFLUENCER;
+export const INFLUENCER_MODEL = AiModelsEnum.SMPL_AI_INFLUENCER;
 
 const mkOpt = (key: string, label: string): AiInfluencerOption => ({
   key, label, img: null, color: null, tiers: null, slot: null, exclusive: false,
@@ -100,14 +100,15 @@ export function useInfluencerBuilder() {
     setModelField(INFLUENCER_MODEL, key, value);
 
   const catalogQuery = useAiInfluencerOptions();
-  const { data: cost } = useGenerationCostQuery();
+  const { data: cost, error: costError } = useGenerationCostQuery();
   const generation = useGenerateMutation();
   const templateGeneration = useGenerateTemplateMutation();
 
   const categories = categoriesForTier(catalogQuery.data, state.tier);
   const isValid = ModelsValidatorSchemaMap[INFLUENCER_MODEL].safeParse(state).success;
   const isPending = generation.isPending || templateGeneration.isPending;
-  const canGenerate = isValid && (templateMode || !!projectId) && !isPending;
+  // No price for the model yet (estimate error): nothing can be charged.
+  const canGenerate = isValid && !costError && (templateMode || !!projectId) && !isPending;
 
   const changeTier = (next: AiInfluencerTier) => {
     if (next === state.tier) return;

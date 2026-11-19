@@ -49,10 +49,10 @@ function useCreditCosts(): Record<ContentId, number> {
     Promise.all(
       Object.values(CONTENT).map(async (c) => {
         try {
-          const res = await fetch("/api/generation/calculate-cost", {
+          const res = await fetch(`/api/credits/estimate/${encodeURIComponent(c.model)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: c.model, input: c.input }),
+            body: JSON.stringify({ input: c.input }),
           });
           const json = await res.json().catch(() => null);
           const credits = Number((json?.data ?? json)?.creditsCost);

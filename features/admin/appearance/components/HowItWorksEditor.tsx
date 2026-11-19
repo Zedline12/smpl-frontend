@@ -17,6 +17,7 @@ import {
   AUDIO_MODELS,
   STUDIO_MODELS,
 } from "@/features/generation/enums/models.enum";
+import { offeringName, useCatalog } from "@/features/catalog/catalog";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -261,6 +262,8 @@ function SlideCard({
 // ─── HowItWorksEditor ────────────────────────────────────────────────────────
 
 export function HowItWorksEditor() {
+  // Names follow the catalog (admin renames).
+  useCatalog();
   const [config, setConfig] = useState<HowItWorksConfig>({ models: {} });
   const [selectedModel, setSelectedModel] = useState<string>(
     AiModelsEnum.SMPL_GENSU
@@ -319,7 +322,7 @@ export function HowItWorksEditor() {
     }
   };
 
-  const modelName = ALL_MODELS.find((m) => m.id === selectedModel)?.name ?? selectedModel;
+  const modelName = offeringName(selectedModel, ALL_MODELS.find((m) => m.id === selectedModel)?.name ?? selectedModel);
 
   return (
     <div className="flex gap-6 h-full">
@@ -342,7 +345,7 @@ export function HowItWorksEditor() {
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
-              <span className="truncate">{m.name}</span>
+              <span className="truncate">{offeringName(m.id, m.name)}</span>
               <span
                 className={`text-[10px] font-bold ml-2 flex-shrink-0 ${
                   count > 0 ? "text-blue-400" : "text-white/20"

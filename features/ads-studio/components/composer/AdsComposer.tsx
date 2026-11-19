@@ -18,7 +18,7 @@ import {
 import {
   AdsStudioInputConst,
   IAdsStudioInput,
-} from "@/features/generation/types/models/higgsfield-ads-studio.type";
+} from "@/features/generation/types/models/ads-studio.type";
 import { useDefaultProject } from "@/features/projects/hooks/use-default-project";
 import { withStyle } from "@/features/styles/styles";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ import {
   useReadyBrands,
 } from "./Pickers";
 
-export const ADS_MODEL = AiModelsEnum.HIGGSFIELD_ADS_STUDIO;
+export const ADS_MODEL = AiModelsEnum.SMPL_ADS_STUDIO;
 const c = AdsStudioInputConst;
 
 /**

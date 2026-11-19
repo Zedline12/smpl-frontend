@@ -35,6 +35,7 @@ import {
   signedCredits,
   subjectHref,
 } from "@/features/credits/ledger";
+import { useCatalog } from "@/features/catalog/catalog";
 import { LedgerThumb } from "@/features/credits/components/LedgerThumb";
 import { cn } from "@/lib/utils";
 import {
@@ -88,6 +89,8 @@ const shortDate = (iso: string) =>
   });
 
 export default function UsagePage() {
+  // Model names follow the catalog (admin renames).
+  useCatalog();
   const [range, setRange] = useState<Range>("7d");
 
   const { data, isLoading, isError, isFetching, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =

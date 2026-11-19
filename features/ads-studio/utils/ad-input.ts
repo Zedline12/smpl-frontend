@@ -3,7 +3,7 @@ import { brandPalette } from "@/features/brands/color";
 import {
   AdsStudioBrand,
   AdsStudioInputConst,
-} from "@/features/generation/types/models/higgsfield-ads-studio.type";
+} from "@/features/generation/types/models/ads-studio.type";
 
 const L = AdsStudioInputConst.brand;
 const HEX = /^#[0-9a-fA-F]{6}$/;

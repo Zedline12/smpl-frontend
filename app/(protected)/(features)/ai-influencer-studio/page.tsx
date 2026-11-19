@@ -13,13 +13,13 @@ export default function AiInfluencerStudioPage() {
   useEffect(() => {
     // setMediaType resets the model to the media type's default, so set the model after it.
     setMediaType(GenerationTypeEnum.IMAGE);
-    setModel(AiModelsEnum.HIGGSFIELD_AI_INFLUENCER);
+    setModel(AiModelsEnum.SMPL_AI_INFLUENCER);
     // /create has no composer for this model, so hand back the default image model on leave.
     return () => setMediaType(GenerationTypeEnum.IMAGE);
   }, [setMediaType, setModel]);
 
   // The builder reads the model's state from the shared store; wait until it's selected.
-  const ready = model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER;
+  const ready = model === AiModelsEnum.SMPL_AI_INFLUENCER;
 
   return (
     // Phones: the builder takes 80% of the screen and Explore/History follows; the page scrolls.
@@ -29,7 +29,7 @@ export default function AiInfluencerStudioPage() {
       </aside>
 
       <section className="custom-scrollbar flex min-h-[70dvh] min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:p-5">
-        <MediaExplorer explore defaultModel={AiModelsEnum.HIGGSFIELD_AI_INFLUENCER}>
+        <MediaExplorer explore defaultModel={AiModelsEnum.SMPL_AI_INFLUENCER}>
           <InfluencerHero />
         </MediaExplorer>
       </section>

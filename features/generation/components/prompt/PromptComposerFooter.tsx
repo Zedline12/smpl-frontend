@@ -38,7 +38,8 @@ export default function PromptComposerFooter({
 }: PromptComposerFooterProps) {
   const { model, projectId, mediaType, templateMode } =
     useAiGenerationControlStore();
-  const { data } = useGenerationCostQuery();
+  // An error means the model has no price yet: nothing can be charged.
+  const { data, error: costError } = useGenerationCostQuery();
   const generation = useGenerateMutation();
   const templateGeneration = useGenerateTemplateMutation();
   const { states } = useAiModelStore();
@@ -50,7 +51,7 @@ export default function PromptComposerFooter({
   useDefaultProject(!!user && !templateMode);
   const isFormValid = () => {
     const validator = ModelsValidatorSchemaMap[model];
-    return validator.safeParse(states[model]).success;
+    return !costError && validator.safeParse(states[model]).success;
   };
   const handleGeneration = async () => {
     try {

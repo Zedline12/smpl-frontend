@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AUDIO_MODELS, IMAGE_MODELS, VIDEO_MODELS } from "@/features/generation/enums/models.enum";
+import { useCatalog, withCatalog } from "@/features/catalog/catalog";
 
 type FooterLink = { href: string; label: string; external?: boolean };
 
-const modelLinks = (models: { id: string; name: string }[], page: string): FooterLink[] =>
-  models.map((m) => ({ href: `/create/${page}?model=${m.id}`, label: m.name }));
+/** Links with the catalog's names; ones an admin turned off are left out. */
+const modelLinks = (models: { id: string; name: string; description: string }[], page: string): FooterLink[] =>
+  withCatalog(models).map((m) => ({ href: `/create/${page}?model=${m.id}`, label: m.name }));
 
 const create: FooterLink[] = [
   { href: "/create/image", label: "AI Image" },
@@ -84,6 +86,8 @@ const NO_FOOTER = [
 
 export default function Footer() {
   const pathname = usePathname();
+  // Model names below follow the catalog.
+  useCatalog();
   if (NO_FOOTER.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return null;
   return (
     <footer className="bg-primary z-100 w-full shrink-0 px-5 pt-10 pb-6 text-white sm:px-6 sm:pt-12">

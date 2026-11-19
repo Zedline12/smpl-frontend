@@ -7,7 +7,7 @@ import {
   AiInfluencerInputConst,
   AiInfluencerTier,
   isHumanTier,
-} from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+} from "@/features/generation/types/models/ai-influencer.type";
 import AppearanceCategory from "./AppearanceCategory";
 import { toggleOption } from "../hooks/useAiInfluencerOptions";
 import {

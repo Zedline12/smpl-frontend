@@ -12,11 +12,11 @@ import {
   AiInfluencerTier,
   IAiInfluencerInput,
   TIER_LABELS,
-} from "@/features/generation/types/models/higgsfield-ai-influencer.type";
+} from "@/features/generation/types/models/ai-influencer.type";
 import { useAiInfluencerOptions } from "@/features/ai-influencer/hooks/useAiInfluencerOptions";
 import { buildBulkInfluencerInputs } from "@/features/ai-influencer/utils/random-influencer";
 
-const MODEL = AiModelsEnum.HIGGSFIELD_AI_INFLUENCER;
+const MODEL = AiModelsEnum.SMPL_AI_INFLUENCER;
 const MAX_COUNT = 50;
 /** Requests sent at once; the queue still applies the account's concurrency limit. */
 const PARALLEL = 3;

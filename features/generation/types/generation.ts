@@ -63,11 +63,11 @@ import { IArtistInput, artistValidationSchema } from "./models/artist.type";
 import {
   IAiInfluencerInput,
   aiInfluencerValidationSchema,
-} from "./models/higgsfield-ai-influencer.type";
+} from "./models/ai-influencer.type";
 import {
   IAdsStudioInput,
   adsStudioValidationSchema,
-} from "./models/higgsfield-ads-studio.type";
+} from "./models/ads-studio.type";
 import { IMusicV25Input, musicV25ValidationSchema } from "./models/elevenlabs-music-v2-5.type";
 import {
   IAdsMultiplierInput,
@@ -155,8 +155,8 @@ export const ModelsValidatorSchemaMap = {
     gensuValidationSchema,
   [AiModelsEnum.SMPL_REMIX]: remixValidationSchema,
   [AiModelsEnum.SMPL_ARTIST]: artistValidationSchema,
-  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: aiInfluencerValidationSchema,
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: adsStudioValidationSchema,
+  [AiModelsEnum.SMPL_AI_INFLUENCER]: aiInfluencerValidationSchema,
+  [AiModelsEnum.SMPL_ADS_STUDIO]: adsStudioValidationSchema,
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: musicV25ValidationSchema,
   [AiModelsEnum.FAL_SEEDANCE_2_5]: seedance25RefValidationSchema,
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: adsMultiplierValidationSchema,

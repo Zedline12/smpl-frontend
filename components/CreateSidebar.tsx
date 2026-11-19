@@ -27,6 +27,7 @@ import {
   type Model,
   isEditTool,
  normalizeModelId } from "@/features/generation/enums/models.enum";
+import { offeringDescription, offeringName, useCatalog } from "@/features/catalog/catalog";
 import { ModelsValidatorSchemaMap } from "@/features/generation/types/generation";
 import {
   useGenerateMutation,
@@ -1316,10 +1317,11 @@ function ModelHeroCard({
   model: AiModelsEnum;
   onChangePicker: () => void;
 }) {
+  useCatalog();
   const isGensu = model === AiModelsEnum.SMPL_GENSU;
   const modelDef = ALL_MODELS.find((m) => m.id === model);
-  const title = isGensu ? "Gensu" : (modelDef?.name ?? model);
-  const subtitle = isGensu ? "Reality Manipulation" : (modelDef?.description ?? "");
+  const title = offeringName(model, modelDef?.name ?? model);
+  const subtitle = isGensu ? "Reality Manipulation" : offeringDescription(model, modelDef?.description ?? "");
 
   const preview = MODEL_PREVIEWS[model];
 
@@ -1390,6 +1392,8 @@ function ModelPickerPanel({
   onSelect: (id: AiModelsEnum) => void;
   onClose: () => void;
 }) {
+  const { groupByKind } = useCatalog();
+  const sections = groupByKind(modelsToShow);
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between pb-2 mb-1 border-b border-border flex-shrink-0">
@@ -1407,7 +1411,14 @@ function ModelPickerPanel({
         </button>
       </div>
 
-      {modelsToShow.map((m) => {
+      {sections.map((section) => (
+        <div key={section.kind} className="flex flex-col gap-1">
+          {sections.length > 1 && (
+            <p className="px-1 pt-2 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+              {section.label}
+            </p>
+          )}
+      {section.items.map((m) => {
         const isActive = m.id === activeModel;
         return (
           <button
@@ -1441,6 +1452,8 @@ function ModelPickerPanel({
           </button>
         );
       })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -1529,7 +1542,7 @@ function GenerateButton() {
   // Generations need a project; there is no picker here, so use the first one.
   useDefaultProject(!!user);
   const { states } = useAiModelStore();
-  const { data: costData } = useGenerationCostQuery();
+  const { data: costData, error: costError } = useGenerationCostQuery();
   // The picked style rides along for models that take one (and makes the prompt optional).
   const styled = withStyle(model, (states[model] ?? {}) as object, styleId);
   const generation = useGenerateMutation();
@@ -1560,7 +1573,8 @@ function GenerateButton() {
     }
   };
 
-  const valid = isValid();
+  // No price for this model (or the estimate failed): nothing can be charged.
+  const valid = isValid() && !costError;
 
   return (
     <div className="relative">
@@ -1592,6 +1606,9 @@ function GenerateButton() {
           )}
         </button>
       </div>
+      {costError && (
+        <p className="mt-2 text-center text-xs text-red-400">{(costError as Error).message}</p>
+      )}
     </div>
   );
 }
@@ -1604,6 +1621,7 @@ export function CreateSidebar() {
   const searchParams = useSearchParams();
   const { model, setModel, sidebarView, setSidebarView } = useAiGenerationControlStore();
   const [mode, setMode] = useState<EditMode>("create");
+  const { withCatalog } = useCatalog();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   // Sync model from ?model= URL param on mount
@@ -1638,7 +1656,8 @@ export function CreateSidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model, isImage, hasModes]);
 
-  const modelsToShow: Model[] = isAudio ? AUDIO_MODELS : mode === "create" ? createList : editList;
+  // Current names; offerings an admin turned off are left out.
+  const modelsToShow: Model[] = withCatalog(isAudio ? AUDIO_MODELS : mode === "create" ? createList : editList);
 
   const handleModeChange = (next: EditMode) => {
     setMode(next);

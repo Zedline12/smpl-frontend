@@ -18,6 +18,7 @@ import {
   VIDEO_MODELS,
   isEditTool,
 } from "@/features/generation/enums/models.enum";
+import { useCatalog } from "@/features/catalog/catalog";
 import {
   useDownloadMedia,
   useRecreateMedia,
@@ -56,6 +57,7 @@ export function MediaPreviewDialog({
   const toggleLike = useToggleLikeMutation();
   const download = useDownloadMedia();
   const liked = !!media.liked;
+  const { offeringName } = useCatalog();
   const modelInfo = ALL_MODELS.find((m) => m.id === media.model);
 
   const handleRecreate = () => {
@@ -125,7 +127,7 @@ export function MediaPreviewDialog({
               )}
               <div>
                 <p className="text-sm font-semibold text-white">
-                  {modelInfo?.name ?? media.model ?? "Upload"}
+                  {media.model ? offeringName(media.model, modelInfo?.name ?? media.model) : "Upload"}
                 </p>
                 {template ? (
                   <p className="text-xs text-white/40">Template</p>
@@ -141,7 +143,7 @@ export function MediaPreviewDialog({
             {!template &&
               media.model &&
               onEditOpen &&
-              media.model !== AiModelsEnum.HIGGSFIELD_ADS_STUDIO &&
+              media.model !== AiModelsEnum.SMPL_ADS_STUDIO &&
               // Edit-tool results are re-made from the Create sidebar, not edited in place.
               !isEditTool(media.model) && (
                 <button

@@ -14,7 +14,8 @@ import { MEDIA_TYPES } from "@/features/generation/components/navbar/MediaTypeLa
 import { ModelRow } from "@/features/generation/components/ModelRow";
 import { useAiGenerationControlStore } from "@/stores/useAiGenerationControlStore";
 import { SearchDialog } from "@/features/search/components/SearchDialog";
-import { STUDIOS } from "@/components/StudioLinks";
+import { useStudioLinks } from "@/components/StudioLinks";
+import { useCatalog } from "@/features/catalog/catalog";
 import { NAV_ROWS } from "@/components/AccountMenuPanel";
 import { CreditsPill } from "@/components/NavbarUserMenu";
 import { useChatStore } from "@/stores/useChatStore";
@@ -83,6 +84,8 @@ function MobileNavSheet({
   const setModel = useAiGenerationControlStore((s) => s.setModel);
   const [expanded, setExpanded] = useState<GenerationTypeEnum | null>(null);
   const openChat = useChatStore((s) => s.open);
+  const { withCatalog, groupByKind } = useCatalog();
+  const studios = useStudioLinks();
 
   // Close on any navigation the sheet didn't start itself (back/forward).
   const [lastPath, setLastPath] = useState(pathname);
@@ -189,14 +192,21 @@ function MobileNavSheet({
                     </div>
                     {isOpen && (
                       <div className="mb-1 ml-2 flex flex-col gap-0.5 border-l border-white/10 pl-2">
-                        {type.models.map((model) => (
-                          <ModelRow
-                            key={model.id}
-                            model={model}
-                            asButton
-                            compact
-                            onSelect={() => pickModel(type.value, model)}
-                          />
+                        {groupByKind(withCatalog(type.models)).map((section) => (
+                          <div key={section.kind} className="flex flex-col gap-0.5">
+                            <p className="px-2 pt-1.5 pb-0.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                              {section.label}
+                            </p>
+                            {section.items.map((model) => (
+                              <ModelRow
+                                key={model.id}
+                                model={model}
+                                asButton
+                                compact
+                                onSelect={() => pickModel(type.value, model)}
+                              />
+                            ))}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -208,7 +218,7 @@ function MobileNavSheet({
             {/* Studios */}
             <p className={SECTION_TITLE}>Studios</p>
             <div className="mb-4 flex flex-col">
-              {STUDIOS.map((studio) => (
+              {studios.map((studio) => (
                 <button
                   key={studio.href}
                   type="button"

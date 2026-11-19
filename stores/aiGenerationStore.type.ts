@@ -15,8 +15,8 @@ import { IGrokImagineVideo15Input } from "@/features/generation/types/models/gro
 import { IGensuInput } from "@/features/generation/types/models/gensu.type";
 import { IRemixInput } from "@/features/generation/types/models/remix.type";
 import { IArtistInput } from "@/features/generation/types/models/artist.type";
-import { IAiInfluencerInput } from "@/features/generation/types/models/higgsfield-ai-influencer.type";
-import { IAdsStudioInput } from "@/features/generation/types/models/higgsfield-ads-studio.type";
+import { IAiInfluencerInput } from "@/features/generation/types/models/ai-influencer.type";
+import { IAdsStudioInput } from "@/features/generation/types/models/ads-studio.type";
 import { IMusicV25Input } from "@/features/generation/types/models/elevenlabs-music-v2-5.type";
 import { createMusicInput } from "@/features/artist/utils/composition-plan";
 import { ISeedance25RefToVideoInput } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
@@ -47,8 +47,8 @@ export type ModelStateMap = {
   [AiModelsEnum.SMPL_GENSU]: IGensuInput;
   [AiModelsEnum.SMPL_REMIX]: IRemixInput;
   [AiModelsEnum.SMPL_ARTIST]: IArtistInput;
-  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: IAiInfluencerInput;
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: IAdsStudioInput;
+  [AiModelsEnum.SMPL_AI_INFLUENCER]: IAiInfluencerInput;
+  [AiModelsEnum.SMPL_ADS_STUDIO]: IAdsStudioInput;
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
   [AiModelsEnum.FAL_SEEDANCE_2_5]: ISeedance25RefToVideoInput;
   [AiModelsEnum.SMPL_AD_MULTIPLIER]: IAdsMultiplierInput;
@@ -174,7 +174,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
     aspectRatio: "auto",
   },
-  [AiModelsEnum.HIGGSFIELD_AI_INFLUENCER]: {
+  [AiModelsEnum.SMPL_AI_INFLUENCER]: {
     prompt: "",
     tier: "normal",
     selection: {},
@@ -186,7 +186,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     bodyColor: "",
     resolution: "2K",
   },
-  [AiModelsEnum.HIGGSFIELD_ADS_STUDIO]: {
+  [AiModelsEnum.SMPL_ADS_STUDIO]: {
     prompt: "",
     images: [],
     niche: "",

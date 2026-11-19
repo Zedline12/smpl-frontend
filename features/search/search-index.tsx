@@ -33,6 +33,7 @@ import {
 } from "@/features/generation/enums/models.enum";
 import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { STUDIOS } from "@/components/StudioLinks";
+import { catalogStudios, isOfferingEnabled, offeringDescription, offeringName } from "@/features/catalog/catalog";
 import { NAV_ROWS } from "@/components/AccountMenuPanel";
 
 export type SearchKind = "model" | "page" | "feature" | "setting";
@@ -168,6 +169,23 @@ export const SEARCH_ITEMS: SearchItem[] = [
   ...featureItems,
   ...settingItems,
 ];
+
+/**
+ * Items with the catalog's (admin-editable) names; models and studios an admin turned
+ * off are left out. Call from a component that uses useCatalog().
+ */
+export function withCatalogNames(items: SearchItem[]): SearchItem[] {
+  const studios = catalogStudios();
+  return items.flatMap((i) => {
+    if (i.modelId) {
+      if (!isOfferingEnabled(i.modelId)) return [];
+      return [{ ...i, title: offeringName(i.modelId, i.title), subtitle: offeringDescription(i.modelId, i.subtitle) }];
+    }
+    const studio = i.kind === "page" ? studios?.find((s) => s.route === i.href) : undefined;
+    if (studio) return studio.enabled ? [{ ...i, title: studio.name }] : [];
+    return [i];
+  });
+}
 
 const BY_ID = new Map(SEARCH_ITEMS.map((i) => [i.id, i]));
 const pick = (ids: string[]) => ids.map((id) => BY_ID.get(id)).filter((i): i is SearchItem => !!i);

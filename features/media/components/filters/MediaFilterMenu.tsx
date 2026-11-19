@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AiModelsEnum, getModel, isAiModel } from "@/features/generation/enums/models.enum";
+import { useCatalog } from "@/features/catalog/catalog";
 import { useUserModelsQuery } from "@/features/generation/hooks/generation";
 import {
   countActiveFilters,
@@ -36,6 +37,8 @@ const ITEM = "gap-2.5 text-[13px] text-white/80 focus:bg-white/10 focus:text-whi
 
 export function MediaFilterMenu({ value, onChange, defaultModel }: MediaFilterMenuProps) {
   const { data: usedModels = [] } = useUserModelsQuery();
+  // Names follow the catalog (admin renames).
+  const { version: catalogVersion } = useCatalog();
 
   const modelOptions = useMemo(() => {
     const ids = new Set(usedModels.filter(isAiModel));
@@ -44,7 +47,8 @@ export function MediaFilterMenu({ value, onChange, defaultModel }: MediaFilterMe
     return [...ids]
       .map((id) => ({ id, name: getModel(id)?.name ?? id }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [usedModels, defaultModel, value.model]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usedModels, defaultModel, value.model, catalogVersion]);
 
   const activeCount = countActiveFilters(value, defaultModel);
   const modelLabel = value.model ? (getModel(value.model)?.name ?? value.model) : "All Models";

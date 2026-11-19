@@ -22,11 +22,16 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
     maxConcurrentJobs: plan.maxConcurrentJobs ?? 1,
   });
   const [isSaving, setIsSaving] = useState(false);
+  // Set when the save was refused because some models would fall under their minimum markup.
+  const [belowMin, setBelowMin] = useState<{
+    message: string;
+    models: { model: string; marginPct: number; minMarginPct: number }[];
+  } | null>(null);
   
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSave = async () => {
+  const handleSave = async (allowBelowMinMargin = false) => {
     setIsSaving(true);
     try {
       const response = await fetch(`/api/subscription-plans/${plan.id}`, {
@@ -34,12 +39,20 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, ...(allowBelowMinMargin ? { allowBelowMinMargin: true } : {}) }),
       });
 
+      if (response.status === 409) {
+        const json = await response.json().catch(() => null);
+        if (json?.code === "MARGIN_BELOW_MIN" && Array.isArray(json.models)) {
+          setBelowMin({ message: json.error, models: json.models });
+          return;
+        }
+      }
       if (!response.ok) {
         throw new Error("Failed to update plan");
       }
+      setBelowMin(null);
 
       toast({
         title: "Success",
@@ -178,9 +191,39 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
         </button>
       </div>
 
+      {belowMin && (
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
+          <p className="font-medium text-amber-200">{belowMin.message}</p>
+          <ul className="mt-2 space-y-0.5 text-xs text-amber-100/80">
+            {belowMin.models.map((m) => (
+              <li key={m.model}>
+                {m.model}: {m.marginPct}% margin (minimum {m.minMarginPct}%)
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleSave(true)}
+              disabled={isSaving}
+              className="h-8 rounded-md bg-amber-500 px-3 text-xs font-semibold text-black disabled:opacity-50"
+            >
+              Save anyway
+            </button>
+            <button
+              type="button"
+              onClick={() => setBelowMin(null)}
+              className="h-8 rounded-md border border-white/15 px-3 text-xs text-white/80"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end mt-4">
         <button
-          onClick={handleSave}
+          onClick={() => handleSave()}
           disabled={isSaving}
           className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium disabled:opacity-50 transition-colors"
         >

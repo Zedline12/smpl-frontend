@@ -9,7 +9,6 @@ export async function PATCH(
   try {
     const id = (await params).id;
     const body = await req.json();
-    console.log(body);
     const response = await fetchWithToken(`/subscription-plans/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
@@ -20,8 +19,14 @@ export async function PATCH(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
+      // 409 MARGIN_BELOW_MIN carries the models that would earn under their minimum markup.
+      const details = errorData?.error?.details?.details;
       return NextResponse.json(
-        { error: errorData?.message || "Failed to update subscription plan" },
+        {
+          error: errorData?.message || "Failed to update subscription plan",
+          code: errorData?.error?.code ?? null,
+          models: Array.isArray(details) ? details : undefined,
+        },
         { status: response.status },
       );
     }

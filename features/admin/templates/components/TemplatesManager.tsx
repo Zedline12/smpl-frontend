@@ -37,6 +37,7 @@ import { TemplateMedia } from "@/features/templates/components/TemplateMedia";
 import { TemplatePreviewDialog } from "@/features/templates/components/TemplatePreviewDialog";
 import { TemplateEditDialog } from "./TemplateEditDialog";
 import { LegacyTemplatesImport } from "./LegacyTemplatesImport";
+import { offeringName, useCatalog } from "@/features/catalog/catalog";
 
 const MODEL_GROUPS: { label: string; type: GenerationTypeEnum; models: Model[] }[] = [
   { label: "Image", type: GenerationTypeEnum.IMAGE, models: IMAGE_MODELS.filter((m) => !isEditTool(m.id)) },
@@ -46,6 +47,8 @@ const MODEL_GROUPS: { label: string; type: GenerationTypeEnum; models: Model[] }
 
 export function TemplatesManager() {
   const queryClient = useQueryClient();
+  // Names follow the catalog (admin renames); hidden ones stay listed for templates.
+  useCatalog();
   const { model, setModel, setMediaType, setTemplateMode } =
     useAiGenerationControlStore();
   const [preview, setPreview] = useState<Template | null>(null);
@@ -115,9 +118,10 @@ export function TemplatesManager() {
     if (finished) queryClient.invalidateQueries({ queryKey: ["templates"] });
   }, [queues, queryClient]);
 
-  const modelName =
-    [...IMAGE_MODELS, ...VIDEO_MODELS, ...STUDIO_MODELS].find((m) => m.id === model)
-      ?.name ?? model;
+  const modelName = offeringName(
+    model,
+    [...IMAGE_MODELS, ...VIDEO_MODELS, ...STUDIO_MODELS].find((m) => m.id === model)?.name ?? model,
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -148,7 +152,7 @@ export function TemplatesManager() {
                       : "border-white/10 text-white/70 hover:border-white/30 hover:text-white"
                   }`}
                 >
-                  {m.name}
+                  {offeringName(m.id, m.name)}
                 </button>
               ))}
             </div>
@@ -161,11 +165,11 @@ export function TemplatesManager() {
         <p className="mb-3 text-sm font-medium text-white/80">
           New template · {modelName}
         </p>
-        {model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER ? (
+        {model === AiModelsEnum.SMPL_AI_INFLUENCER ? (
           <div className="max-w-xl">
             <InfluencerBuilder />
           </div>
-        ) : model === AiModelsEnum.HIGGSFIELD_ADS_STUDIO ? (
+        ) : model === AiModelsEnum.SMPL_ADS_STUDIO ? (
           <div className="max-w-xl">
             <AdsBuilder />
           </div>
@@ -174,7 +178,7 @@ export function TemplatesManager() {
         )}
       </section>
 
-      {model === AiModelsEnum.HIGGSFIELD_AI_INFLUENCER && <InfluencerBulkGenerator />}
+      {model === AiModelsEnum.SMPL_AI_INFLUENCER && <InfluencerBulkGenerator />}
 
       <LegacyTemplatesImport />
 
