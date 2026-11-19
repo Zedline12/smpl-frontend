@@ -19,7 +19,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { IMAGE_MODELS, VIDEO_MODELS, AUDIO_MODELS, STUDIO_MODELS } from "@/features/generation/enums/models.enum";
+import {
+  IMAGE_MODELS,
+  VIDEO_MODELS,
+  AUDIO_MODELS,
+  STUDIO_MODELS,
+} from "@/features/generation/enums/models.enum";
 import { offeringName, useCatalog } from "@/features/catalog/catalog";
 
 // ─── types ─────────────────────────────────────────────────────────────────────
@@ -30,6 +35,8 @@ type Params = Record<string, unknown>;
 type CostFrom = { model: string; note: string } | null;
 /** What it is: a third-party model, our white-label generator, or our compute. */
 type Kind = "model" | "generator" | "compute";
+/** How credit prices are set on the cheapest plan: $ profit per unit, margin or markup. */
+type Method = "profit" | "margin" | "markup";
 
 interface PlanRate {
   id: string;
@@ -48,15 +55,14 @@ interface ModelItem {
   unit: Unit;
   costFrom: CostFrom;
   note: string;
-  minMarginPct: number;
-  maxMarginPct: number | null;
+  method: Method;
+  value: number;
   missingCosts: number;
   missingPrices: number;
   setUp: boolean;
   lowestMarginPct: number | null;
   highestMarginPct: number | null;
-  belowMin: boolean;
-  aboveMax: boolean;
+  belowTarget: boolean;
 }
 
 interface PlanMoney {
@@ -68,8 +74,11 @@ interface PlanMoney {
   grossMarginPct: number | null;
   netProfitUsd: number;
   netMarginPct: number | null;
-  belowMin: boolean;
-  aboveMax: boolean;
+  /** Gross profit ÷ cost, in %. */
+  markupPct: number | null;
+  /** Gross profit per second / item. */
+  profitPerUnitUsd: number;
+  belowTarget: boolean;
 }
 
 interface Summary {
@@ -102,8 +111,8 @@ interface Overview {
   unit: Unit;
   costFrom: CostFrom;
   note: string;
-  minMarginPct: number;
-  maxMarginPct: number | null;
+  method: Method;
+  value: number;
   priceVersion: number;
   plans: PlanRate[];
   rows: RateRow[];
@@ -112,8 +121,8 @@ interface Overview {
 }
 
 interface Preview {
-  minMarginPct: number;
-  maxMarginPct: number | null;
+  method: Method;
+  value: number;
   current: { summary: Summary; byPlan: PlanMoney[] };
   rows: RateRow[];
   byPlan: PlanMoney[];
@@ -135,7 +144,8 @@ const EXTRA_NAMES: Record<string, string> = {
 };
 const modelDef = (id: string) => ALL_MODELS.find((m) => m.id === id);
 /** The catalog name (admin-editable), else the bundled one. */
-const modelName = (id: string) => offeringName(id, modelDef(id)?.name ?? EXTRA_NAMES[id] ?? id);
+const modelName = (id: string) =>
+  offeringName(id, modelDef(id)?.name ?? EXTRA_NAMES[id] ?? id);
 
 /** The picker's categories: what each model is. */
 const KIND_GROUPS: { kind: Kind; label: string }[] = [
@@ -150,7 +160,8 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
   const json = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(json?.error || json?.message || "Request failed");
+  if (!res.ok)
+    throw new Error(json?.error || json?.message || "Request failed");
   return (json?.data ?? json) as T;
 }
 
@@ -166,6 +177,11 @@ const usd = (n: number | null | undefined) => {
 const num = (n: number | null | undefined, digits = 1) =>
   n == null ? "—" : Number.isInteger(n) ? String(n) : n.toFixed(digits);
 const pct = (n: number | null | undefined) => (n == null ? "—" : `${num(n)}%`);
+/** "$0.02 profit / second", "30% margin", "50% markup" */
+const targetText = (method: Method, value: number, unit: Unit) =>
+  method === "profit"
+    ? `${usd(value)} profit / ${unit}`
+    : `${num(value)}% ${method}`;
 
 const humanKey = (k: string) =>
   k
@@ -176,12 +192,20 @@ const humanKey = (k: string) =>
 /** {resolution: "720p", generateAudio: true} -> "720p · audio" */
 const paramLabel = (p: Params) =>
   Object.entries(p)
-    .map(([k, v]) => (typeof v === "boolean" ? (v ? humanKey(k) : `no ${humanKey(k)}`) : String(v)))
+    .map(([k, v]) =>
+      typeof v === "boolean"
+        ? v
+          ? humanKey(k)
+          : `no ${humanKey(k)}`
+        : String(v),
+    )
     .join(" · ") || "Any input";
 
 const planLabel = (p: PlanRate) => p.name.replace(/ plan$/i, "");
-const periodLabel = (p: PlanRate) => (p.billingPeriod === "YEARLY" ? "Yearly" : "Monthly");
-const perUseLabel = (unit: Unit, units: number) => (unit === "second" ? `${units}s` : units === 1 ? "1 use" : `${units} uses`);
+const periodLabel = (p: PlanRate) =>
+  p.billingPeriod === "YEARLY" ? "Yearly" : "Monthly";
+const perUseLabel = (unit: Unit, units: number) =>
+  unit === "second" ? `${units}s` : units === 1 ? "1 use" : `${units} uses`;
 
 /** Only profit carries a color: red when we lose money, green otherwise. */
 const profitTone = (m: number | null | undefined) =>
@@ -193,8 +217,9 @@ const card = "rounded-2xl border border-white/[0.08] bg-[#161616]";
 
 /**
  * Admin pricing. Pick a model: see what it costs us and what every plan earns on it
- * (gross = revenue − provider cost, net = after Stripe fees). Set a minimum and maximum
- * margin, watch every plan's numbers change, then save the new credit prices — or not.
+ * (gross = revenue − provider cost, net = after Stripe fees). Set a target ($ profit per
+ * unit, margin or markup), watch every plan's numbers change, then save the new credit
+ * prices — or not.
  */
 export function PricingStudio() {
   // Names follow the catalog (admin renames).
@@ -205,11 +230,21 @@ export function PricingStudio() {
 
   const list = useQuery({
     queryKey: ["admin", "pricing", "models"],
-    queryFn: () => api<{ priceVersion: number; plans: PlanRate[]; models: ModelItem[] }>("/models"),
+    queryFn: () =>
+      api<{ priceVersion: number; plans: PlanRate[]; models: ModelItem[] }>(
+        "/models",
+      ),
   });
   const models = list.data?.models ?? [];
-  const selected = searchParams.get("model") ?? models.find((m) => m.belowMin || !m.setUp)?.model ?? models[0]?.model ?? null;
-  const select = (model: string) => router.replace(`${pathname}?model=${encodeURIComponent(model)}`, { scroll: false });
+  const selected =
+    searchParams.get("model") ??
+    models.find((m) => m.belowTarget || !m.setUp)?.model ??
+    models[0]?.model ??
+    null;
+  const select = (model: string) =>
+    router.replace(`${pathname}?model=${encodeURIComponent(model)}`, {
+      scroll: false,
+    });
 
   const overview = useQuery({
     queryKey: ["admin", "pricing", "model", selected],
@@ -217,8 +252,14 @@ export function PricingStudio() {
     enabled: !!selected,
   });
 
-  if (list.isError) return <p className="text-[13px] text-red-400">{(list.error as Error).message}</p>;
-  const o = overview.data && overview.data.model === selected ? overview.data : null;
+  if (list.isError)
+    return (
+      <p className="text-[13px] text-red-400">
+        {(list.error as Error).message}
+      </p>
+    );
+  const o =
+    overview.data && overview.data.model === selected ? overview.data : null;
 
   return (
     <div className="space-y-10">
@@ -226,20 +267,39 @@ export function PricingStudio() {
         <>
           <ModelHeader
             overview={o}
-            picker={<ModelSelect list={list.data?.models ?? null} selected={selected} onSelect={select} />}
+            picker={
+              <ModelSelect
+                list={list.data?.models ?? null}
+                selected={selected}
+                onSelect={select}
+              />
+            }
           />
           <AlertsBar models={models} onOpen={select} />
-          <Section title="Overview" description={`On an average ${perUseLabel(o.unit, o.summary.typicalUnits)} across every option.`}>
+          <Section
+            title="Overview"
+            description={`On an average ${perUseLabel(o.unit, o.summary.typicalUnits)} across every option.`}
+          >
             <KpiGrid overview={o} />
           </Section>
-          <Section title="Profit by plan" description="What each plan earns on this model today. Net is after Stripe's fees.">
-            <PlanCards plans={o.plans} byPlan={o.byPlan} minMarginPct={o.minMarginPct} maxMarginPct={o.maxMarginPct} />
+          <Section
+            title="Profit by plan"
+            description="What each plan earns on this model today. Net is after Stripe's fees."
+          >
+            <PlanCards
+              plans={o.plans}
+              byPlan={o.byPlan}
+              target={targetText(o.method, o.value, o.unit)}
+            />
           </Section>
           <Section
             title="Edit pricing"
-            description="Set the margin range. The cheapest plan earns the minimum; plans above the maximum are flagged. Nothing changes until you save."
+            description="Choose how to price it: a dollar profit per unit, a margin or a markup. The cheapest plan earns exactly that; pricier plans earn more. Nothing changes until you save."
           >
-            <MarginEditor key={`${o.model}:${o.priceVersion}:${o.minMarginPct}:${o.maxMarginPct}`} overview={o} />
+            <PricingEditor
+              key={`${o.model}:${o.priceVersion}:${o.method}:${o.value}`}
+              overview={o}
+            />
           </Section>
           <Section
             title="Provider costs"
@@ -254,8 +314,14 @@ export function PricingStudio() {
           <RepriceAll />
         </>
       ) : (
-        <div className={cn(card, "flex h-48 items-center justify-center gap-2 text-sm text-white/40")}>
-          <Loader2 className="size-4 animate-spin" /> Loading{selected ? ` ${modelName(selected)}` : ""}…
+        <div
+          className={cn(
+            card,
+            "flex h-48 items-center justify-center gap-2 text-sm text-white/40",
+          )}
+        >
+          <Loader2 className="size-4 animate-spin" /> Loading
+          {selected ? ` ${modelName(selected)}` : ""}…
         </div>
       )}
     </div>
@@ -265,7 +331,11 @@ export function PricingStudio() {
 // ─── model select ──────────────────────────────────────────────────────────────
 
 const rangeText = (m: ModelItem) =>
-  m.lowestMarginPct == null ? null : m.highestMarginPct == null ? pct(m.lowestMarginPct) : `${num(m.lowestMarginPct, 0)}–${pct(m.highestMarginPct)}`;
+  m.lowestMarginPct == null
+    ? null
+    : m.highestMarginPct == null
+      ? pct(m.lowestMarginPct)
+      : `${num(m.lowestMarginPct, 0)}–${pct(m.highestMarginPct)}`;
 
 /** Button + menu: categories on the left, that category's models on the right. */
 function ModelSelect({
@@ -287,11 +357,16 @@ function ModelSelect({
       items: list.filter((i) => !i.internal && i.kind === g.kind),
     }));
     // Models we only use ourselves (not sold directly).
-    out.push({ label: "Internal", items: list.filter((i) => i.internal || !i.kind) });
+    out.push({
+      label: "Internal",
+      items: list.filter((i) => i.internal || !i.kind),
+    });
     return out.filter((g) => g.items.length);
   }, [list]);
 
-  const selectedGroup = groups.find((g) => g.items.some((i) => i.model === selected))?.label;
+  const selectedGroup = groups.find((g) =>
+    g.items.some((i) => i.model === selected),
+  )?.label;
   const [category, setCategory] = useState<string | null>(null);
   const activeCategory = category ?? selectedGroup ?? groups[0]?.label;
   const items = groups.find((g) => g.label === activeCategory)?.items ?? [];
@@ -323,10 +398,14 @@ function ModelSelect({
         title="Change model"
         className={cn(
           "flex size-11 items-center justify-center rounded-xl transition-colors disabled:opacity-50",
-          open ? "bg-white/[0.1] text-white" : "text-white/55 hover:bg-white/[0.06] hover:text-white",
+          open
+            ? "bg-white/[0.1] text-white"
+            : "text-white/55 hover:bg-white/[0.06] hover:text-white",
         )}
       >
-        <ChevronDown className={cn("size-6 transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          className={cn("size-6 transition-transform", open && "rotate-180")}
+        />
       </button>
 
       {open && (
@@ -340,11 +419,15 @@ function ModelSelect({
                 onClick={() => setCategory(g.label)}
                 className={cn(
                   "flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] transition-colors",
-                  g.label === activeCategory ? "bg-white/[0.07] font-semibold text-white" : "text-white/55 hover:text-white",
+                  g.label === activeCategory
+                    ? "bg-white/[0.07] font-semibold text-white"
+                    : "text-white/55 hover:text-white",
                 )}
               >
                 {g.label}
-                <span className="text-[11px] font-normal text-white/30">{g.items.length}</span>
+                <span className="text-[11px] font-normal text-white/30">
+                  {g.items.length}
+                </span>
               </button>
             ))}
           </div>
@@ -364,21 +447,29 @@ function ModelSelect({
                     active ? "bg-white/[0.07]" : "hover:bg-white/[0.04]",
                   )}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center [&>svg]:size-5">{modelDef(item.model)?.svg}</span>
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-white">{modelName(item.model)}</span>
+                  <span className="flex size-6 shrink-0 items-center justify-center [&>svg]:size-5">
+                    {modelDef(item.model)?.svg}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-white">
+                    {modelName(item.model)}
+                  </span>
                   {!item.setUp ? (
-                    <span className="text-[11px] font-semibold text-red-300">Not priced</span>
+                    <span className="text-[11px] font-semibold text-red-300">
+                      Not priced
+                    </span>
                   ) : (
                     <span
                       className={cn(
                         "text-[12px] font-semibold tabular-nums",
-                        item.belowMin ? "text-red-400" : item.aboveMax ? "text-amber-300" : "text-emerald-400",
+                        item.belowTarget ? "text-red-400" : "text-emerald-400",
                       )}
                     >
                       {rangeText(item)}
                     </span>
                   )}
-                  {active && <Check className="size-4 shrink-0 text-white/60" />}
+                  {active && (
+                    <Check className="size-4 shrink-0 text-white/60" />
+                  )}
                 </button>
               );
             })}
@@ -391,7 +482,13 @@ function ModelSelect({
 
 // ─── header, alerts, KPIs ──────────────────────────────────────────────────────
 
-function ModelHeader({ overview, picker }: { overview: Overview; picker: React.ReactNode }) {
+function ModelHeader({
+  overview,
+  picker,
+}: {
+  overview: Overview;
+  picker: React.ReactNode;
+}) {
   const def = modelDef(overview.model);
   const s = overview.summary;
   return (
@@ -408,13 +505,16 @@ function ModelHeader({ overview, picker }: { overview: Overview; picker: React.R
             {modelName(overview.model)}
           </h1>
           <p className="mt-3 text-[13px] text-white/45">
-            Priced <span className="font-semibold text-white/75">per {overview.unit}</span>
-            {" · "}
-            <span className="font-semibold text-white/75">{s.rates}</span> option{s.rates === 1 ? "" : "s"}
-            {" · margin "}
+            Priced{" "}
             <span className="font-semibold text-white/75">
-              {pct(overview.minMarginPct)}
-              {overview.maxMarginPct != null ? ` – ${pct(overview.maxMarginPct)}` : "+"}
+              per {overview.unit}
+            </span>
+            {" · "}
+            <span className="font-semibold text-white/75">{s.rates}</span>{" "}
+            option{s.rates === 1 ? "" : "s"}
+            {" · target "}
+            <span className="font-semibold text-white/75">
+              {targetText(overview.method, overview.value, overview.unit)}
             </span>
           </p>
         </div>
@@ -424,8 +524,14 @@ function ModelHeader({ overview, picker }: { overview: Overview; picker: React.R
   );
 }
 
-function AlertsBar({ models, onOpen }: { models: ModelItem[]; onOpen: (m: string) => void }) {
-  const below = models.filter((m) => m.belowMin);
+function AlertsBar({
+  models,
+  onOpen,
+}: {
+  models: ModelItem[];
+  onOpen: (m: string) => void;
+}) {
+  const below = models.filter((m) => m.belowTarget);
   const unpriced = models.filter((m) => !m.setUp);
   if (!below.length && !unpriced.length) return null;
   const chip = "rounded-lg px-2 py-1 text-[12px] font-medium transition-colors";
@@ -434,10 +540,18 @@ function AlertsBar({ models, onOpen }: { models: ModelItem[]; onOpen: (m: string
       {below.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="flex items-center gap-1.5 text-[13px] font-semibold text-red-300">
-            <AlertTriangle className="size-4" /> Below minimum margin:
+            <AlertTriangle className="size-4" /> Below their target:
           </span>
           {below.map((m) => (
-            <button key={m.model} type="button" onClick={() => onOpen(m.model)} className={cn(chip, "bg-red-500/10 text-red-200 hover:bg-red-500/20")}>
+            <button
+              key={m.model}
+              type="button"
+              onClick={() => onOpen(m.model)}
+              className={cn(
+                chip,
+                "bg-red-500/10 text-red-200 hover:bg-red-500/20",
+              )}
+            >
               {modelName(m.model)}
             </button>
           ))}
@@ -446,10 +560,19 @@ function AlertsBar({ models, onOpen }: { models: ModelItem[]; onOpen: (m: string
       {unpriced.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-300">
-            <AlertTriangle className="size-4" /> Not priced (can&apos;t be generated):
+            <AlertTriangle className="size-4" /> Not priced (can&apos;t be
+            generated):
           </span>
           {unpriced.map((m) => (
-            <button key={m.model} type="button" onClick={() => onOpen(m.model)} className={cn(chip, "bg-amber-500/10 text-amber-100 hover:bg-amber-500/20")}>
+            <button
+              key={m.model}
+              type="button"
+              onClick={() => onOpen(m.model)}
+              className={cn(
+                chip,
+                "bg-amber-500/10 text-amber-100 hover:bg-amber-500/20",
+              )}
+            >
               {modelName(m.model)}
             </button>
           ))}
@@ -459,12 +582,22 @@ function AlertsBar({ models, onOpen }: { models: ModelItem[]; onOpen: (m: string
   );
 }
 
-function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-4">
       <div>
         <h2 className="text-[17px] font-bold text-white">{title}</h2>
-        {description && <p className="mt-0.5 text-[13px] text-white/40">{description}</p>}
+        {description && (
+          <p className="mt-0.5 text-[13px] text-white/40">{description}</p>
+        )}
       </div>
       {children}
     </section>
@@ -474,12 +607,30 @@ function Section({ title, description, children }: { title: string; description?
 type Accent = "orange" | "blue" | "violet" | "emerald" | "red" | "cyan";
 // Full class names so Tailwind keeps them.
 const ACCENTS: Record<Accent, { card: string; icon: string }> = {
-  orange: { card: "bg-orange-500/[0.06] border-orange-500/15", icon: "bg-orange-500/15 text-orange-400" },
-  blue: { card: "bg-sky-500/[0.06] border-sky-500/15", icon: "bg-sky-500/15 text-sky-400" },
-  violet: { card: "bg-violet-500/[0.07] border-violet-500/15", icon: "bg-violet-500/15 text-violet-400" },
-  emerald: { card: "bg-emerald-500/[0.06] border-emerald-500/15", icon: "bg-emerald-500/15 text-emerald-400" },
-  red: { card: "bg-red-500/[0.06] border-red-500/15", icon: "bg-red-500/15 text-red-400" },
-  cyan: { card: "bg-cyan-500/[0.06] border-cyan-500/15", icon: "bg-cyan-500/15 text-cyan-400" },
+  orange: {
+    card: "bg-orange-500/[0.06] border-orange-500/15",
+    icon: "bg-orange-500/15 text-orange-400",
+  },
+  blue: {
+    card: "bg-sky-500/[0.06] border-sky-500/15",
+    icon: "bg-sky-500/15 text-sky-400",
+  },
+  violet: {
+    card: "bg-violet-500/[0.07] border-violet-500/15",
+    icon: "bg-violet-500/15 text-violet-400",
+  },
+  emerald: {
+    card: "bg-emerald-500/[0.06] border-emerald-500/15",
+    icon: "bg-emerald-500/15 text-emerald-400",
+  },
+  red: {
+    card: "bg-red-500/[0.06] border-red-500/15",
+    icon: "bg-red-500/15 text-red-400",
+  },
+  cyan: {
+    card: "bg-cyan-500/[0.06] border-cyan-500/15",
+    icon: "bg-cyan-500/15 text-cyan-400",
+  },
 };
 
 function Kpi({
@@ -499,20 +650,43 @@ function Kpi({
 }) {
   const a = ACCENTS[accent];
   return (
-    <div className={cn("flex min-w-0 items-center gap-3 rounded-2xl border p-5", a.card)}>
+    <div
+      className={cn(
+        "flex min-w-0 items-center gap-3 rounded-2xl border p-5",
+        a.card,
+      )}
+    >
       <div className="min-w-0 flex-1">
         <p className="text-[12px] font-medium text-white/55">{label}</p>
-        <p className={cn("mt-2.5 truncate text-[30px] leading-none font-bold tabular-nums", tone ?? "text-white")}>{value}</p>
-        {children && <p className="mt-3 text-[12px] leading-snug text-white/40">{children}</p>}
+        <p
+          className={cn(
+            "mt-2.5 truncate text-[30px] leading-none font-bold tabular-nums",
+            tone ?? "text-white",
+          )}
+        >
+          {value}
+        </p>
+        {children && (
+          <p className="mt-3 text-[12px] leading-snug text-white/40">
+            {children}
+          </p>
+        )}
       </div>
-      <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", a.icon)}>
+      <div
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl",
+          a.icon,
+        )}
+      >
         <Icon className="size-5" />
       </div>
     </div>
   );
 }
 
-const B = ({ children }: { children: React.ReactNode }) => <span className="font-semibold text-white/70 tabular-nums">{children}</span>;
+const B = ({ children }: { children: React.ReactNode }) => (
+  <span className="font-semibold text-white/70 tabular-nums">{children}</span>
+);
 
 function KpiGrid({ overview }: { overview: Overview }) {
   const s = overview.summary;
@@ -522,16 +696,32 @@ function KpiGrid({ overview }: { overview: Overview }) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <Kpi label="Costs us" value={usd(s.avgCostUsd)} accent="orange" icon={Receipt}>
+        <Kpi
+          label="Costs us"
+          value={usd(s.avgCostUsd)}
+          accent="orange"
+          icon={Receipt}
+        >
           Provider cost per {perUseLabel(overview.unit, s.typicalUnits)}
         </Kpi>
-        <Kpi label="Credits" value={s.avgCredits != null ? `${num(s.avgCredits)} cr` : "—"} accent="violet" icon={Coins}>
+        <Kpi
+          label="Credits"
+          value={s.avgCredits != null ? `${num(s.avgCredits)} cr` : "—"}
+          accent="violet"
+          icon={Coins}
+        >
           What users are charged
         </Kpi>
-        <Kpi label="User pays" value={first ? usd(first.userPaysUsd) : "—"} accent="blue" icon={DollarSign}>
+        <Kpi
+          label="User pays"
+          value={first ? usd(first.userPaysUsd) : "—"}
+          accent="blue"
+          icon={DollarSign}
+        >
           {first && last ? (
             <>
-              <B>{usd(first.userPaysUsd)}</B> – <B>{usd(last.userPaysUsd)}</B> by plan
+              <B>{usd(first.userPaysUsd)}</B> – <B>{usd(last.userPaysUsd)}</B>{" "}
+              by plan
             </>
           ) : (
             "No credit price yet"
@@ -561,7 +751,8 @@ function KpiGrid({ overview }: { overview: Overview }) {
         >
           {first && last ? (
             <>
-              <B>{pct(first.netMarginPct)}</B> – <B>{pct(last.netMarginPct)}</B> across plans
+              <B>{pct(first.netMarginPct)}</B> – <B>{pct(last.netMarginPct)}</B>{" "}
+              across plans
             </>
           ) : (
             "Needs a cost and a credit price"
@@ -574,12 +765,14 @@ function KpiGrid({ overview }: { overview: Overview }) {
           <span>
             {s.missingCosts > 0 && (
               <>
-                <B>{s.missingCosts}</B> of {s.rates} options have no provider cost.{" "}
+                <B>{s.missingCosts}</B> of {s.rates} options have no provider
+                cost.{" "}
               </>
             )}
             {s.missingPrices > 0 && (
               <>
-                <B>{s.missingPrices}</B> have no credit price (save pricing to set them).{" "}
+                <B>{s.missingPrices}</B> have no credit price (save pricing to
+                set them).{" "}
               </>
             )}
             Averages only count options that have both.
@@ -595,16 +788,18 @@ function KpiGrid({ overview }: { overview: Overview }) {
 function PlanCards({
   plans,
   byPlan,
-  minMarginPct,
-  maxMarginPct,
+  target,
 }: {
   plans: PlanRate[];
   byPlan: PlanMoney[];
-  minMarginPct: number;
-  maxMarginPct: number | null;
+  target: string;
 }) {
   if (!byPlan.length)
-    return <div className={cn(card, "p-6 text-[13px] text-white/45")}>Needs a provider cost and a credit price.</div>;
+    return (
+      <div className={cn(card, "p-6 text-[13px] text-white/45")}>
+        Needs a provider cost and a credit price.
+      </div>
+    );
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {plans.map((p) => {
@@ -616,37 +811,61 @@ function PlanCards({
             className={cn(
               card,
               "space-y-4 p-5",
-              m.belowMin && "border-red-500/30",
-              m.aboveMax && "border-amber-500/30",
+              m.belowTarget && "border-red-500/30",
             )}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[15px] font-semibold text-white">{planLabel(p)}</p>
+                <p className="text-[15px] font-semibold text-white">
+                  {planLabel(p)}
+                </p>
                 <p className="text-[12px] text-white/40">
                   {periodLabel(p)} · {usd(p.perCredit)} / credit
                 </p>
               </div>
-              {m.belowMin ? (
-                <span className="rounded-md bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold text-red-300">Below {pct(minMarginPct)}</span>
-              ) : m.aboveMax ? (
-                <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300">Above {pct(maxMarginPct)}</span>
-              ) : null}
+              {m.belowTarget && (
+                <span className="rounded-md bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold text-red-300">
+                  Below {target}
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-white/[0.03] p-3">
-                <p className="text-[11px] font-medium text-white/45">Gross profit</p>
-                <p className={cn("mt-1 text-[20px] font-bold tabular-nums", profitTone(m.grossProfitUsd))}>{usd(m.grossProfitUsd)}</p>
-                <p className="text-[11px] text-white/40 tabular-nums">{pct(m.grossMarginPct)} margin</p>
+                <p className="text-[11px] font-medium text-white/45">
+                  Gross profit
+                </p>
+                <p
+                  className={cn(
+                    "mt-1 text-[20px] font-bold tabular-nums",
+                    profitTone(m.grossProfitUsd),
+                  )}
+                >
+                  {usd(m.grossProfitUsd)}
+                </p>
+                <p className="text-[11px] text-white/40 tabular-nums">
+                  {pct(m.grossMarginPct)} margin · {pct(m.markupPct)} markup
+                </p>
               </div>
               <div className="rounded-xl bg-white/[0.03] p-3">
-                <p className="text-[11px] font-medium text-white/45">Net profit</p>
-                <p className={cn("mt-1 text-[20px] font-bold tabular-nums", profitTone(m.netProfitUsd))}>{usd(m.netProfitUsd)}</p>
-                <p className="text-[11px] text-white/40 tabular-nums">{pct(m.netMarginPct)} margin</p>
+                <p className="text-[11px] font-medium text-white/45">
+                  Net profit
+                </p>
+                <p
+                  className={cn(
+                    "mt-1 text-[20px] font-bold tabular-nums",
+                    profitTone(m.netProfitUsd),
+                  )}
+                >
+                  {usd(m.netProfitUsd)}
+                </p>
+                <p className="text-[11px] text-white/40 tabular-nums">
+                  {pct(m.netMarginPct)} margin
+                </p>
               </div>
             </div>
             <p className="text-[12px] text-white/40">
-              User pays <B>{usd(m.userPaysUsd)}</B> · cost <B>{usd(m.costUsd)}</B> · Stripe <B>{usd(m.feeUsd)}</B>
+              User pays <B>{usd(m.userPaysUsd)}</B> · cost{" "}
+              <B>{usd(m.costUsd)}</B> · Stripe <B>{usd(m.feeUsd)}</B>
             </p>
           </div>
         );
@@ -655,36 +874,104 @@ function PlanCards({
   );
 }
 
-// ─── margin editor ─────────────────────────────────────────────────────────────
+// ─── pricing editor ────────────────────────────────────────────────────────────
 
-function MarginEditor({ overview }: { overview: Overview }) {
+const METHODS: {
+  id: Method;
+  label: (unit: Unit) => string;
+  hint: (unit: Unit) => string;
+}[] = [
+  {
+    id: "profit",
+    label: (unit) => `$ profit / ${unit}`,
+    hint: (unit) =>
+      `Dollars the cheapest plan earns on every ${unit}, after the provider cost.`,
+  },
+  {
+    id: "margin",
+    label: () => "Margin %",
+    hint: () => "Profit as a share of what the user pays.",
+  },
+  {
+    id: "markup",
+    label: () => "Markup %",
+    hint: () => "Profit as a share of what it costs us.",
+  },
+];
+
+/** What a plan earns, in a method's terms (to carry the value over when switching). */
+function inTermsOf(method: Method, m: PlanMoney | undefined): number | null {
+  if (!m) return null;
+  if (method === "profit") return m.profitPerUnitUsd;
+  return method === "margin" ? m.grossMarginPct : m.markupPct;
+}
+const roundFor = (method: Method, n: number) =>
+  method === "profit"
+    ? Number(n.toFixed(Math.abs(n) < 0.01 ? 6 : 4))
+    : Math.round(n * 10) / 10;
+
+/** "now → next" with the next value emphasized when it changed. */
+function Change({
+  label,
+  now,
+  next,
+}: {
+  label: string;
+  now: string;
+  next: string;
+}) {
+  return (
+    <div className="rounded-xl bg-white/[0.03] px-4 py-3">
+      <p className="text-[11px] font-medium text-white/45">{label}</p>
+      <p className="mt-1 text-[13px] text-white/45 tabular-nums">
+        {now === next ? (
+          <span className="text-[17px] font-semibold text-white">{next}</span>
+        ) : (
+          <>
+            {now} →{" "}
+            <span className="text-[17px] font-semibold text-white">{next}</span>
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
+
+function PricingEditor({ overview }: { overview: Overview }) {
   const queryClient = useQueryClient();
-  const [min, setMin] = useState(String(overview.minMarginPct));
-  const [max, setMax] = useState(overview.maxMarginPct == null ? "" : String(overview.maxMarginPct));
+  const [method, setMethod] = useState<Method>(overview.method);
+  const [value, setValue] = useState(String(overview.value));
 
   // Debounced so typing doesn't fire a request per keystroke.
-  const [debounced, setDebounced] = useState({ min, max });
+  const [debounced, setDebounced] = useState({ method, value });
   useEffect(() => {
-    const t = setTimeout(() => setDebounced({ min, max }), 300);
+    const t = setTimeout(() => setDebounced({ method, value }), 300);
     return () => clearTimeout(t);
-  }, [min, max]);
+  }, [method, value]);
 
-  const minN = Number(debounced.min);
-  const maxN = debounced.max.trim() === "" ? null : Number(debounced.max);
+  const v = Number(debounced.value);
   const invalid =
-    debounced.min.trim() === "" ||
-    !Number.isFinite(minN) ||
-    minN < 0 ||
-    minN >= 100 ||
-    (maxN !== null && (!Number.isFinite(maxN) || maxN >= 100 || maxN < minN));
-  const changed = minN !== overview.minMarginPct || maxN !== overview.maxMarginPct;
+    debounced.value.trim() === "" ||
+    !Number.isFinite(v) ||
+    v < 0 ||
+    (debounced.method === "margin" && v >= 100);
+  const changed = debounced.method !== overview.method || v !== overview.value;
+  const body = JSON.stringify({ method: debounced.method, value: v });
 
   const preview = useQuery({
-    queryKey: ["admin", "pricing", "preview", overview.model, overview.priceVersion, minN, maxN],
+    queryKey: [
+      "admin",
+      "pricing",
+      "preview",
+      overview.model,
+      overview.priceVersion,
+      debounced.method,
+      v,
+    ],
     queryFn: () =>
       api<Preview>(`/models/${encodeURIComponent(overview.model)}/preview`, {
         method: "POST",
-        body: JSON.stringify({ minMarginPct: minN, maxMarginPct: maxN }),
+        body,
       }),
     enabled: !invalid,
     placeholderData: (prev) => prev,
@@ -692,66 +979,112 @@ function MarginEditor({ overview }: { overview: Overview }) {
 
   const save = useMutation({
     mutationFn: () =>
-      api<{ version: number }>(`/models/${encodeURIComponent(overview.model)}/pricing`, {
-        method: "POST",
-        body: JSON.stringify({ minMarginPct: minN, maxMarginPct: maxN }),
-      }),
+      api<{ version: number }>(
+        `/models/${encodeURIComponent(overview.model)}/pricing`,
+        { method: "POST", body },
+      ),
     onSuccess: (r) => {
-      toast.success(`${modelName(overview.model)} repriced (price list v${r.version})`);
+      toast.success(
+        `${modelName(overview.model)} repriced (price list v${r.version})`,
+      );
       void queryClient.invalidateQueries({ queryKey: ["admin", "pricing"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const p = preview.data;
-  const pricesChange = !!p && p.rows.some((r, i) => r.creditsPerUnit !== overview.rows[i]?.creditsPerUnit);
-  const input =
-    "h-12 w-32 rounded-xl border border-white/10 bg-neutral-900 px-4 text-[18px] font-semibold text-white tabular-nums focus:border-white/30 focus:outline-none";
+  const pricesChange =
+    !!p &&
+    p.rows.some(
+      (r, i) => r.creditsPerUnit !== overview.rows[i]?.creditsPerUnit,
+    );
+  const pending =
+    method !== debounced.method ||
+    value !== debounced.value ||
+    preview.isFetching;
+
+  /** Switching method keeps the price: the new field starts at what the cheapest plan earns now. */
+  const switchTo = (next: Method) => {
+    if (next === method) return;
+    const eq = inTermsOf(next, (p ?? overview).byPlan[0]);
+    setMethod(next);
+    setValue(eq == null ? "" : String(roundFor(next, Math.max(0, eq))));
+  };
+  const reset = () => {
+    setMethod(overview.method);
+    setValue(String(overview.value));
+  };
+
+  const def = METHODS.find((m) => m.id === method)!;
+  const unit = overview.unit;
+  const now = p?.current.byPlan[0] ?? overview.byPlan[0];
+  const next = p?.byPlan[0];
+  const units = overview.summary.typicalUnits;
 
   return (
     <div className={cn(card, "space-y-5 p-5")}>
       <div className="flex flex-wrap items-end gap-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[12px] font-medium text-white/55">Minimum margin</span>
-          <div className="flex items-center gap-2">
-            <input type="number" min={0} max={99} step={0.5} value={min} onChange={(e) => setMin(e.target.value)} className={input} />
-            <span className="text-white/50">%</span>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12px] font-medium text-white/55">
+            Price by
+          </span>
+          <div className="flex h-12 rounded-xl border border-white/10 bg-neutral-900 p-1">
+            {METHODS.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => switchTo(m.id)}
+                className={cn(
+                  "rounded-lg px-4 text-[13px] font-medium whitespace-nowrap transition-colors",
+                  method === m.id
+                    ? "bg-white text-black"
+                    : "text-white/60 hover:text-white",
+                )}
+              >
+                {m.label(unit)}
+              </button>
+            ))}
           </div>
-          <span className="text-[11px] text-white/35">The cheapest plan earns this</span>
-        </label>
+        </div>
         <label className="flex flex-col gap-1.5">
-          <span className="text-[12px] font-medium text-white/55">Maximum margin</span>
-          <div className="flex items-center gap-2">
+          <span className="text-[12px] font-medium text-white/55">
+            {method === "profit" ? `Profit per ${unit}` : def.label(unit)}
+          </span>
+          <div className="flex h-12 items-center gap-2 rounded-xl border border-white/10 bg-neutral-900 px-4 focus-within:border-white/30">
+            {method === "profit" && <span className="text-white/50">$</span>}
             <input
               type="number"
               min={0}
-              max={99}
-              step={0.5}
-              value={max}
-              placeholder="None"
-              onChange={(e) => setMax(e.target.value)}
-              className={input}
+              max={method === "margin" ? 99.9 : undefined}
+              step={method === "profit" ? "any" : 0.5}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="w-28 bg-transparent text-[18px] font-semibold text-white tabular-nums focus:outline-none"
             />
-            <span className="text-white/50">%</span>
+            {method !== "profit" && <span className="text-white/50">%</span>}
           </div>
-          <span className="text-[11px] text-white/35">Plans above it are flagged</span>
         </label>
         <div className="ml-auto flex items-center gap-2">
-          {preview.isFetching && <Loader2 className="size-4 animate-spin text-white/40" />}
+          {pending && <Loader2 className="size-4 animate-spin text-white/40" />}
           <button
             type="button"
-            disabled={!changed && !pricesChange}
-            onClick={() => {
-              setMin(String(overview.minMarginPct));
-              setMax(overview.maxMarginPct == null ? "" : String(overview.maxMarginPct));
-            }}
+            disabled={
+              method === overview.method && value === String(overview.value)
+            }
+            onClick={reset}
             className="h-11 rounded-xl border border-white/15 px-4 text-[13px] font-medium text-white/80 disabled:opacity-40"
           >
             Reset
           </button>
           <button
             type="button"
-            disabled={invalid || !p || (!changed && !pricesChange) || save.isPending}
+            disabled={
+              invalid ||
+              !p ||
+              pending ||
+              (!changed && !pricesChange) ||
+              save.isPending
+            }
             onClick={() => save.mutate()}
             className="h-11 rounded-xl bg-white px-5 text-[13px] font-semibold text-black hover:bg-white/90 disabled:opacity-40"
           >
@@ -759,59 +1092,159 @@ function MarginEditor({ overview }: { overview: Overview }) {
           </button>
         </div>
       </div>
+      <p className="-mt-2 text-[12px] text-white/40">
+        {def.hint(unit)} Pricier plans earn more.
+      </p>
 
       {invalid ? (
-        <p className="text-[13px] text-amber-300">Enter a minimum from 0 to 99%, and a maximum at least that high (or leave it empty).</p>
+        <p className="text-[13px] text-amber-300">
+          {method === "margin"
+            ? "Enter a margin from 0 to under 100%."
+            : "Enter a number of 0 or more."}
+        </p>
       ) : preview.isError ? (
-        <p className="text-[13px] text-red-400">{(preview.error as Error).message}</p>
-      ) : !p ? (
+        <p className="text-[13px] text-red-400">
+          {(preview.error as Error).message}
+        </p>
+      ) : !p || !next ? (
         <div className="flex items-center gap-2 text-[13px] text-white/40">
-          <Loader2 className="size-4 animate-spin" /> Working out every plan…
+          {p ? (
+            "Needs a provider cost first."
+          ) : (
+            <>
+              <Loader2 className="size-4 animate-spin" /> Working out every
+              plan…
+            </>
+          )}
         </div>
       ) : (
-        <>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-[13px] text-white/55">
-            <span>
-              Credits per {perUseLabel(overview.unit, p.summary.typicalUnits)}:{" "}
-              <B>{num(p.current.summary.avgCredits)}</B> →{" "}
-              <span className="font-semibold text-white tabular-nums">{num(p.summary.avgCredits)}</span>
-            </span>
-            <span>
-              Cost: <B>{usd(p.summary.avgCostUsd)}</B>
-            </span>
+        <div
+          className={cn(
+            "space-y-4 transition-opacity",
+            pending && "opacity-60",
+          )}
+        >
+          <div>
+            <p className="mb-2 text-[12px] font-medium text-white/55">
+              On the cheapest plan ({planLabel(overview.plans[0])}{" "}
+              {periodLabel(overview.plans[0]).toLowerCase()}), per average{" "}
+              {perUseLabel(unit, units)}
+            </p>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+              <Change
+                label="Credits"
+                now={num(p.current.summary.avgCredits)}
+                next={num(p.summary.avgCredits)}
+              />
+              <Change
+                label="User pays"
+                now={usd(now?.userPaysUsd)}
+                next={usd(next.userPaysUsd)}
+              />
+              <Change
+                label={`Profit / ${unit}`}
+                now={usd(now?.profitPerUnitUsd)}
+                next={usd(next.profitPerUnitUsd)}
+              />
+              <Change
+                label="Margin"
+                now={pct(now?.grossMarginPct)}
+                next={pct(next.grossMarginPct)}
+              />
+              <Change
+                label="Markup"
+                now={pct(now?.markupPct)}
+                next={pct(next.markupPct)}
+              />
+              <Change
+                label="Net profit"
+                now={usd(now?.netProfitUsd)}
+                next={usd(next.netProfitUsd)}
+              />
+            </div>
           </div>
           <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
-            <table className="w-full min-w-[760px] text-[13px]">
+            <table className="w-full min-w-[860px] text-[13px]">
               <thead>
                 <tr className="text-left text-[11px] tracking-wide text-white/40 uppercase">
                   <th className="px-4 py-2.5 font-medium">Plan</th>
-                  <th className="px-4 py-2.5 text-right font-medium">User pays</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Gross profit</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Gross margin</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Net profit</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Net margin</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Now</th>
+                  <th className="px-4 py-2.5 text-right font-medium">
+                    User pays
+                  </th>
+                  <th className="px-4 py-2.5 text-right font-medium">
+                    Gross profit
+                  </th>
+                  <th className="px-4 py-2.5 text-right font-medium">
+                    Profit / {unit}
+                  </th>
+                  <th className="px-4 py-2.5 text-right font-medium">Margin</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Markup</th>
+                  <th className="px-4 py-2.5 text-right font-medium">
+                    Net profit
+                  </th>
+                  <th className="px-4 py-2.5 text-right font-medium">
+                    Net margin
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
                 {overview.plans.map((plan) => {
                   const m = p.byPlan.find((b) => b.planId === plan.id);
-                  const now = p.current.byPlan.find((b) => b.planId === plan.id);
                   if (!m) return null;
                   return (
-                    <tr key={plan.id} className={cn(m.belowMin && "bg-red-500/[0.06]", m.aboveMax && "bg-amber-500/[0.06]")}>
+                    <tr
+                      key={plan.id}
+                      className={cn(m.belowTarget && "bg-red-500/[0.06]")}
+                    >
                       <td className="px-4 py-3">
-                        <span className="font-medium text-white">{planLabel(plan)}</span>
-                        <span className="ml-2 text-white/40">{periodLabel(plan)}</span>
-                        {m.belowMin && <span className="ml-2 text-[11px] font-semibold text-red-300">below min</span>}
-                        {m.aboveMax && <span className="ml-2 text-[11px] font-semibold text-amber-300">above max</span>}
+                        <span className="font-medium text-white">
+                          {planLabel(plan)}
+                        </span>
+                        <span className="ml-2 text-white/40">
+                          {periodLabel(plan)}
+                        </span>
+                        {m.belowTarget && (
+                          <span className="ml-2 text-[11px] font-semibold text-red-300">
+                            below target
+                          </span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 text-right text-white/70 tabular-nums">{usd(m.userPaysUsd)}</td>
-                      <td className={cn("px-4 py-3 text-right tabular-nums", profitTone(m.grossProfitUsd))}>{usd(m.grossProfitUsd)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-white tabular-nums">{pct(m.grossMarginPct)}</td>
-                      <td className={cn("px-4 py-3 text-right tabular-nums", profitTone(m.netProfitUsd))}>{usd(m.netProfitUsd)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-white tabular-nums">{pct(m.netMarginPct)}</td>
-                      <td className="px-4 py-3 text-right text-white/40 tabular-nums">{now ? pct(now.grossMarginPct) : "—"}</td>
+                      <td className="px-4 py-3 text-right text-white/70 tabular-nums">
+                        {usd(m.userPaysUsd)}
+                      </td>
+                      <td
+                        className={cn(
+                          "px-4 py-3 text-right tabular-nums",
+                          profitTone(m.grossProfitUsd),
+                        )}
+                      >
+                        {usd(m.grossProfitUsd)}
+                      </td>
+                      <td
+                        className={cn(
+                          "px-4 py-3 text-right tabular-nums",
+                          profitTone(m.profitPerUnitUsd),
+                        )}
+                      >
+                        {usd(m.profitPerUnitUsd)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-white tabular-nums">
+                        {pct(m.grossMarginPct)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-white tabular-nums">
+                        {pct(m.markupPct)}
+                      </td>
+                      <td
+                        className={cn(
+                          "px-4 py-3 text-right tabular-nums",
+                          profitTone(m.netProfitUsd),
+                        )}
+                      >
+                        {usd(m.netProfitUsd)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-white/70 tabular-nums">
+                        {pct(m.netMarginPct)}
+                      </td>
                     </tr>
                   );
                 })}
@@ -819,9 +1252,11 @@ function MarginEditor({ overview }: { overview: Overview }) {
             </table>
           </div>
           <p className="text-[12px] text-white/35">
-            Money per average {perUseLabel(overview.unit, p.summary.typicalUnits)}. &quot;Now&quot; is today&apos;s gross margin on that plan.
+            Money per average {perUseLabel(unit, units)} at the new prices.
+            Margin is profit ÷ what the user pays; markup is profit ÷ our cost;
+            net is after Stripe&apos;s fees.
           </p>
-        </>
+        </div>
       )}
     </div>
   );
@@ -829,7 +1264,13 @@ function MarginEditor({ overview }: { overview: Overview }) {
 
 // ─── provider costs ────────────────────────────────────────────────────────────
 
-function CostTable({ overview, onOpen }: { overview: Overview; onOpen: (model: string) => void }) {
+function CostTable({
+  overview,
+  onOpen,
+}: {
+  overview: Overview;
+  onOpen: (model: string) => void;
+}) {
   const from = overview.costFrom;
   return (
     <div className={cn(card, "overflow-x-auto")}>
@@ -837,7 +1278,8 @@ function CostTable({ overview, onOpen }: { overview: Overview; onOpen: (model: s
       {from && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
           <p className="text-[13px] text-white/60">
-            Costs per {overview.unit} of {modelName(overview.model)}, derived from {modelName(from.model)}&apos;s. They update when its costs
+            Costs per {overview.unit} of {modelName(overview.model)}, derived
+            from {modelName(from.model)}&apos;s. They update when its costs
             change.
           </p>
           <button
@@ -855,8 +1297,12 @@ function CostTable({ overview, onOpen }: { overview: Overview; onOpen: (model: s
           <tr className="text-left text-[11px] tracking-wide text-white/40 uppercase">
             <th className="px-4 py-2.5 font-medium">Option</th>
             <th className="px-4 py-2.5 font-medium">Cost / {overview.unit}</th>
-            <th className="px-4 py-2.5 text-right font-medium">Credits / {overview.unit}</th>
-            <th className="px-4 py-2.5 text-right font-medium">{perUseLabel(overview.unit, overview.summary.typicalUnits)}</th>
+            <th className="px-4 py-2.5 text-right font-medium">
+              Credits / {overview.unit}
+            </th>
+            <th className="px-4 py-2.5 text-right font-medium">
+              {perUseLabel(overview.unit, overview.summary.typicalUnits)}
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.05]">
@@ -883,10 +1329,13 @@ function ExtraCost({ overview }: { overview: Overview }) {
   const shown = value ?? (current > 0 ? String(current) : "");
   const save = useMutation({
     mutationFn: (pricePerUnit: number | null) =>
-      api<Overview>(`/models/${encodeURIComponent(overview.model)}/extra-cost`, {
-        method: "PUT",
-        body: JSON.stringify({ pricePerUnit }),
-      }),
+      api<Overview>(
+        `/models/${encodeURIComponent(overview.model)}/extra-cost`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ pricePerUnit }),
+        },
+      ),
     onSuccess: () => {
       toast.success("Extra cost saved. Save pricing to update credit prices.");
       setValue(null);
@@ -895,12 +1344,17 @@ function ExtraCost({ overview }: { overview: Overview }) {
     onError: (e) => toast.error((e as Error).message),
   });
   const next = shown.trim() === "" ? 0 : Number(shown);
-  const dirty = value !== null && Number.isFinite(next) && next >= 0 && next !== current;
+  const dirty =
+    value !== null && Number.isFinite(next) && next >= 0 && next !== current;
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
       <div>
-        <p className="text-[13px] font-medium text-white/80">Extra cost per {overview.unit}</p>
-        <p className="text-[12px] text-white/45">Our own costs on top (compute, storage). Added to every option below.</p>
+        <p className="text-[13px] font-medium text-white/80">
+          Extra cost per {overview.unit}
+        </p>
+        <p className="text-[12px] text-white/45">
+          Our own costs on top (compute, storage). Added to every option below.
+        </p>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-white/40">$</span>
@@ -921,7 +1375,11 @@ function ExtraCost({ overview }: { overview: Overview }) {
             aria-label="Save extra cost"
             className="flex size-9 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/15"
           >
-            {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+            {save.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
+            )}
           </button>
         )}
       </div>
@@ -929,10 +1387,21 @@ function ExtraCost({ overview }: { overview: Overview }) {
   );
 }
 
-function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow; readOnly: boolean; extra: number }) {
+function CostRow({
+  model,
+  row,
+  readOnly,
+  extra,
+}: {
+  model: string;
+  row: RateRow;
+  readOnly: boolean;
+  extra: number;
+}) {
   const queryClient = useQueryClient();
   const [price, setPrice] = useState<string | null>(null);
-  const value = price ?? (row.pricePerUnit === null ? "" : String(row.pricePerUnit));
+  const value =
+    price ?? (row.pricePerUnit === null ? "" : String(row.pricePerUnit));
   const save = useMutation({
     mutationFn: async (next: number) => {
       const init = (method: string, body: object) => ({
@@ -941,8 +1410,14 @@ function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow;
         body: JSON.stringify(body),
       });
       const res = row.ruleId
-        ? await fetch(`/api/model-costs/${row.ruleId}`, init("PATCH", { price: next }))
-        : await fetch("/api/model-costs", init("POST", { model, parameters: row.parameters, price: next }));
+        ? await fetch(
+            `/api/model-costs/${row.ruleId}`,
+            init("PATCH", { price: next }),
+          )
+        : await fetch(
+            "/api/model-costs",
+            init("POST", { model, parameters: row.parameters, price: next }),
+          );
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Couldn't save the cost");
     },
@@ -953,15 +1428,25 @@ function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow;
     },
     onError: (e) => toast.error((e as Error).message),
   });
-  const dirty = price !== null && price !== "" && Number(price) !== row.pricePerUnit;
+  const dirty =
+    price !== null && price !== "" && Number(price) !== row.pricePerUnit;
 
   return (
     <tr>
-      <td className="px-4 py-2.5 text-white/80">{paramLabel(row.parameters)}</td>
+      <td className="px-4 py-2.5 text-white/80">
+        {paramLabel(row.parameters)}
+      </td>
       <td className="px-4 py-2">
         {readOnly ? (
-          <span className={cn("tabular-nums", row.pricePerUnit === null ? "text-red-300" : "text-white/70")}>
-            {row.pricePerUnit === null ? "Missing upstream cost" : `${Number(row.pricePerUnit.toFixed(6))}`}
+          <span
+            className={cn(
+              "tabular-nums",
+              row.pricePerUnit === null ? "text-red-300" : "text-white/70",
+            )}
+          >
+            {row.pricePerUnit === null
+              ? "Missing upstream cost"
+              : `${Number(row.pricePerUnit.toFixed(6))}`}
           </span>
         ) : (
           <div className="flex items-center gap-2">
@@ -975,7 +1460,9 @@ function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow;
               placeholder="Missing"
               className={cn(
                 "h-9 w-28 rounded-lg border bg-neutral-900 px-3 text-white tabular-nums focus:outline-none",
-                row.pricePerUnit === null ? "border-red-500/40" : "border-white/10",
+                row.pricePerUnit === null
+                  ? "border-red-500/40"
+                  : "border-white/10",
               )}
             />
             {dirty && (
@@ -986,20 +1473,32 @@ function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow;
                 aria-label="Save cost"
                 className="flex size-9 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/15"
               >
-                {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                {save.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Check className="size-4" />
+                )}
               </button>
             )}
           </div>
         )}
         {extra > 0 && row.pricePerUnit !== null && (
-          <p className="mt-0.5 text-[11px] text-white/40 tabular-nums">+ ${Number(extra.toFixed(6))} extra</p>
+          <p className="mt-0.5 text-[11px] text-white/40 tabular-nums">
+            + ${Number(extra.toFixed(6))} extra
+          </p>
         )}
       </td>
       <td className="px-4 py-2.5 text-right tabular-nums">
-        {row.creditsPerUnit === null ? <span className="text-red-300">No price</span> : <span className="text-white">{row.creditsPerUnit}</span>}
+        {row.creditsPerUnit === null ? (
+          <span className="text-red-300">No price</span>
+        ) : (
+          <span className="text-white">{row.creditsPerUnit}</span>
+        )}
       </td>
       <td className="px-4 py-2.5 text-right text-white/60 tabular-nums">
-        {row.example ? `${usd(row.example.costUsd)} → ${row.example.credits} cr` : "—"}
+        {row.example
+          ? `${usd(row.example.costUsd)} → ${row.example.credits} cr`
+          : "—"}
       </td>
     </tr>
   );
@@ -1009,24 +1508,39 @@ function CostRow({ model, row, readOnly, extra }: { model: string; row: RateRow;
 
 interface RepriceAllResult {
   version?: number;
-  changes: { model: string; parameters: Params; from: number | null; to: number }[];
+  changes: {
+    model: string;
+    parameters: Params;
+    from: number | null;
+    to: number;
+  }[];
   skipped: { model: string; reason: string }[];
 }
 
-/** After a plan or cost change: every model back to its saved minimum margin, after a review. */
+/** After a plan or cost change: every model back to its saved target, after a review. */
 function RepriceAll() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const preview = useQuery({
     queryKey: ["admin", "pricing", "reprice-all"],
-    queryFn: () => api<RepriceAllResult>("/reprice", { method: "POST", body: JSON.stringify({ dryRun: true }) }),
+    queryFn: () =>
+      api<RepriceAllResult>("/reprice", {
+        method: "POST",
+        body: JSON.stringify({ dryRun: true }),
+      }),
     enabled: open,
     staleTime: 0,
   });
   const apply = useMutation({
-    mutationFn: () => api<RepriceAllResult>("/reprice", { method: "POST", body: JSON.stringify({}) }),
+    mutationFn: () =>
+      api<RepriceAllResult>("/reprice", {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
     onSuccess: (r) => {
-      toast.success(`Every model repriced (price list v${r.version}, ${r.changes.length} prices changed)`);
+      toast.success(
+        `Every model repriced (price list v${r.version}, ${r.changes.length} prices changed)`,
+      );
       setOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["admin", "pricing"] });
     },
@@ -1035,7 +1549,10 @@ function RepriceAll() {
   const changes = preview.data?.changes ?? [];
 
   return (
-    <Section title="All models" description="After a plan or provider cost changes, bring every model back to its saved minimum margin.">
+    <Section
+      title="All models"
+      description="After a plan or provider cost changes, bring every model back to its saved target."
+    >
       {!open ? (
         <button
           type="button"
@@ -1048,22 +1565,33 @@ function RepriceAll() {
         <div className={cn(card, "space-y-4 p-5")}>
           {preview.isLoading ? (
             <div className="flex items-center gap-2 text-[13px] text-white/40">
-              <Loader2 className="size-4 animate-spin" /> Working out the changes…
+              <Loader2 className="size-4 animate-spin" /> Working out the
+              changes…
             </div>
           ) : preview.isError ? (
-            <p className="text-[13px] text-red-400">{(preview.error as Error).message}</p>
+            <p className="text-[13px] text-red-400">
+              {(preview.error as Error).message}
+            </p>
           ) : !changes.length ? (
-            <p className="text-[13px] text-white/55">Every model is already at its minimum margin. Nothing would change.</p>
+            <p className="text-[13px] text-white/55">
+              Every model is already at its target. Nothing would change.
+            </p>
           ) : (
             <div className="max-h-72 overflow-y-auto">
               <table className="w-full text-[13px]">
                 <tbody className="divide-y divide-white/[0.05]">
                   {changes.map((c) => (
                     <tr key={c.model + JSON.stringify(c.parameters)}>
-                      <td className="py-1.5 pr-3 text-white/80">{modelName(c.model)}</td>
-                      <td className="py-1.5 pr-3 text-white/45">{paramLabel(c.parameters)}</td>
+                      <td className="py-1.5 pr-3 text-white/80">
+                        {modelName(c.model)}
+                      </td>
+                      <td className="py-1.5 pr-3 text-white/45">
+                        {paramLabel(c.parameters)}
+                      </td>
                       <td className="py-1.5 text-right text-white/60 tabular-nums">
-                        {c.from ?? "—"} → <span className="font-semibold text-white">{c.to}</span> cr
+                        {c.from ?? "—"} →{" "}
+                        <span className="font-semibold text-white">{c.to}</span>{" "}
+                        cr
                       </td>
                     </tr>
                   ))}
@@ -1072,7 +1600,11 @@ function RepriceAll() {
             </div>
           )}
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-xl border border-white/15 px-4 text-[13px] text-white/80">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="h-10 rounded-xl border border-white/15 px-4 text-[13px] text-white/80"
+            >
               Cancel
             </button>
             <button
@@ -1081,7 +1613,9 @@ function RepriceAll() {
               disabled={!changes.length || apply.isPending}
               className="h-10 rounded-xl bg-white px-4 text-[13px] font-semibold text-black disabled:opacity-40"
             >
-              {apply.isPending ? "Repricing…" : `Apply ${changes.length} changes`}
+              {apply.isPending
+                ? "Repricing…"
+                : `Apply ${changes.length} changes`}
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { offeringName } from "@/features/catalog/catalog";
 import { useRouter } from "next/navigation";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { useToast } from "@/hooks/use-toast";
@@ -22,10 +23,10 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
     maxConcurrentJobs: plan.maxConcurrentJobs ?? 1,
   });
   const [isSaving, setIsSaving] = useState(false);
-  // Set when the save was refused because some models would fall under their minimum markup.
+  // Set when the save was refused because some models would fall under their pricing target.
   const [belowMin, setBelowMin] = useState<{
     message: string;
-    models: { model: string; marginPct: number; minMarginPct: number }[];
+    models: { model: string; marginPct: number | null; target: string }[];
   } | null>(null);
   
   const router = useRouter();
@@ -197,7 +198,7 @@ export function EditSubscriptionPlanForm({ plan, onSuccess }: EditSubscriptionPl
           <ul className="mt-2 space-y-0.5 text-xs text-amber-100/80">
             {belowMin.models.map((m) => (
               <li key={m.model}>
-                {m.model}: {m.marginPct}% margin (minimum {m.minMarginPct}%)
+                {offeringName(m.model, m.model)}: {m.marginPct ?? "—"}% margin (target {m.target})
               </li>
             ))}
           </ul>
