@@ -304,7 +304,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                       <span className="font-semibold">
                         ~{count} {c.noun}
                       </span>
-                      <span className="text-white/45">{(count * costs[c.id]).toLocaleString()} credits</span>
+                      <span className="text-white/45">{(count * costs[c.id]).toLocaleString("en-US")} credits</span>
                     </p>
                   </div>
                 );
@@ -365,7 +365,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                   </span>
                   <span className="flex items-center gap-1.5 rounded-full bg-black/25 px-2.5 py-1 text-sm font-semibold">
                     <Sparkles className="size-3.5" />
-                    {(plan.creditsPerMonth ?? 0).toLocaleString()}
+                    {(plan.creditsPerMonth ?? 0).toLocaleString("en-US")}
                   </span>
                 </div>
                 <div className="mt-5 flex items-baseline gap-2">
@@ -403,7 +403,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                 <div>
                   <p className="text-sm text-white/45">Expected monthly usage</p>
                   <p className="mt-0.5 font-semibold text-white">
-                    {Math.round(usage).toLocaleString()} of {(plan.creditsPerMonth ?? 0).toLocaleString()} credits
+                    {Math.round(usage).toLocaleString("en-US")} of {(plan.creditsPerMonth ?? 0).toLocaleString("en-US")} credits
                   </p>
                 </div>
                 <UsageDots fraction={(plan.creditsPerMonth ?? 0) > 0 ? usage / (plan.creditsPerMonth ?? 1) : 0} />
@@ -411,7 +411,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
               {needsTopUp && (
                 <p className="mt-3 rounded-xl bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
                   That&apos;s more than our biggest plan. Top up with credit packs for the extra{" "}
-                  {Math.round(usage - (plan.creditsPerMonth ?? 0)).toLocaleString()} credits.
+                  {Math.round(usage - (plan.creditsPerMonth ?? 0)).toLocaleString("en-US")} credits.
                 </p>
               )}
               <p className="mt-4 text-sm text-white/45">Included in plan</p>
@@ -420,7 +420,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                   <span className="bg-primary flex size-4.5 items-center justify-center rounded-full">
                     <Check className="size-3 text-white" strokeWidth={3} />
                   </span>
-                  <span className="font-medium">{(plan.creditsPerMonth ?? 0).toLocaleString()} credits</span>
+                  <span className="font-medium">{(plan.creditsPerMonth ?? 0).toLocaleString("en-US")} credits</span>
                   <span className="text-white/45">/ month</span>
                 </li>
                 <li className="flex items-center gap-2.5 text-white">

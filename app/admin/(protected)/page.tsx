@@ -16,10 +16,11 @@ interface PaymentStats {
 }
 
 export default async function AdminPage() {
-  const json = await fetchWithToken("/payments/stats").then((res) =>
-    res.json(),
-  );
-  const stats: PaymentStats = json.data;
+  // Zeros when the stats call fails, so the dashboard still renders.
+  const json = await fetchWithToken("/payments/stats")
+    .then((res) => res.json())
+    .catch(() => null);
+  const stats: PaymentStats = json?.data?.subStats ? json.data : { totalRevenue: 0, salesCount: 0, subStats: { active: 0, canceled: 0, pastDue: 0, trialing: 0, total: 0 } };
 
   return (
     <div className="space-y-8 ">

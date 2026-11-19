@@ -30,10 +30,11 @@ export default async function SubscriptionsPage() {
   const analytics = analyticsres.then((d) => d.data) as Promise<
     SubscriptionsAnalytics[]
     >;
-  const json = await fetchWithToken("/payments/stats").then((res) =>
-      res.json(),
-    );
-    const subStats: PaymentStats = json.data;
+  // Zeros when the stats call fails, so the page still renders.
+  const json = await fetchWithToken("/payments/stats")
+    .then((res) => res.json())
+    .catch(() => null);
+  const subStats: PaymentStats = json?.data?.subStats ? json.data : { totalRevenue: 0, salesCount: 0, subStats: { active: 0, canceled: 0, pastDue: 0, trialing: 0, total: 0 } };
   return (
     <>
       <BillingMetricsPanel />

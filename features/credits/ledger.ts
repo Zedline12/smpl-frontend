@@ -120,4 +120,4 @@ export function subjectHref(subject: LedgerRow["subject"]): string | null {
 
 /** "−1,200" / "+300", from the amount's sign. */
 export const signedCredits = (amount: number) =>
-  `${amount < 0 ? "−" : "+"}${Math.abs(amount).toLocaleString()}`;
+  `${amount < 0 ? "−" : "+"}${Math.abs(amount).toLocaleString("en-US")}`;

@@ -26,7 +26,7 @@ function formatPrice(plan?: SubscriptionPlan): string | null {
 }
 
 const formatDate = (value?: string | null) =>
-  value ? new Date(value).toLocaleDateString(undefined, { dateStyle: "long" }) : null;
+  value ? new Date(value).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }) : null;
 
 /** "SUMMER25 · 25% off until March 3, 2027" for the coupon lowering the price now. */
 function discountLabel(discount: UserPlanSummary["discount"], currency = "usd"): string | null {

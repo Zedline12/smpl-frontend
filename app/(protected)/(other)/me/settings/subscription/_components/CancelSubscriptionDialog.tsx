@@ -44,7 +44,7 @@ export function CancelSubscriptionDialog({ planName, endsAt }: CancelSubscriptio
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>("");
   const [comment, setComment] = useState("");
-  const endDate = endsAt ? new Date(endsAt).toLocaleDateString(undefined, { dateStyle: "long" }) : null;
+  const endDate = endsAt ? new Date(endsAt).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }) : null;
 
   const cancel = useMutation({
     mutationFn: () =>

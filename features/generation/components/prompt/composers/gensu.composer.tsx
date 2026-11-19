@@ -58,7 +58,7 @@ export default function GensuComposer({
                   className="w-full h-full object-cover"
                   muted
                   loop
-                  onMouseOver={(e) => e.currentTarget.play()}
+                  onMouseOver={(e) => e.currentTarget.play().catch(() => {})}
                   onMouseOut={(e) => e.currentTarget.pause()}
                 />
                 <button

@@ -118,7 +118,7 @@ export function VideoTrimEditor({ src, onChange, onError }: VideoTrimEditorProps
     if (!v) return;
     if (v.paused) {
       if (v.currentTime < range.start || v.currentTime >= range.end - 0.05) v.currentTime = range.start;
-      void v.play();
+      v.play().catch(() => {});
     } else {
       v.pause();
     }

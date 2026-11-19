@@ -65,7 +65,7 @@ function MediaTile({ media, isOwn }: { media: Media; isOwn: boolean }) {
           className="h-full w-full object-cover"
           muted
           loop
-          onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play()}
+          onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
           onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()}
         />
       ) : (

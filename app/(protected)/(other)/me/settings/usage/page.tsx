@@ -117,9 +117,9 @@ export default function UsagePage() {
 
   const stats = [
     { icon: Wallet, label: "Total cost", value: money(overview?.totalCost ?? 0) },
-    { icon: Coins, label: "Credits spent", value: (overview?.creditsSpent ?? 0).toLocaleString() },
-    { icon: Sparkles, label: "Features used", value: (overview?.featuresUsed ?? 0).toLocaleString() },
-    { icon: Wand2, label: "Total generations", value: (overview?.totalGenerations ?? 0).toLocaleString() },
+    { icon: Coins, label: "Credits spent", value: (overview?.creditsSpent ?? 0).toLocaleString("en-US") },
+    { icon: Sparkles, label: "Features used", value: (overview?.featuresUsed ?? 0).toLocaleString("en-US") },
+    { icon: Wand2, label: "Total generations", value: (overview?.totalGenerations ?? 0).toLocaleString("en-US") },
   ];
 
   return (
@@ -232,7 +232,7 @@ export default function UsagePage() {
                       labelStyle={{ color: "rgba(255,255,255,0.6)" }}
                       itemStyle={{ color: "#fff" }}
                       labelFormatter={(d) => shortDate(String(d))}
-                      formatter={(v) => [`${Number(v).toLocaleString()} credits`, "Spent"]}
+                      formatter={(v) => [`${Number(v).toLocaleString("en-US")} credits`, "Spent"]}
                     />
                     <Bar dataKey="credits" fill="var(--color-primary)" radius={[4, 4, 0, 0]} maxBarSize={36} />
                   </BarChart>
@@ -251,7 +251,7 @@ export default function UsagePage() {
                         {f.count} {f.count === 1 ? "run" : "runs"}
                       </span>
                       <span className="text-sm font-semibold text-white tabular-nums">
-                        {f.credits.toLocaleString()} cr
+                        {f.credits.toLocaleString("en-US")} cr
                       </span>
                     </span>
                   </div>
@@ -330,7 +330,7 @@ export default function UsagePage() {
                         {signedCredits(t.amount)}
                       </span>
                       <span className="hidden w-28 text-right text-xs text-white/40 tabular-nums sm:block">
-                        Balance {t.balanceAfter.toLocaleString()}
+                        Balance {t.balanceAfter.toLocaleString("en-US")}
                       </span>
                     </div>
                   </div>

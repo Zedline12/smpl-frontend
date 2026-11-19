@@ -27,15 +27,18 @@ export default async function OnboardPage() {
   return (
     <div className="w-full h-full relative">
       <section className="sm:w-1/2 w-full  fixed sm:bottom-10 bottom-19 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center">
-        <Link
-          href="/login"
-          aria-label="Sign in to start creating"
-          className="w-full cursor-pointer"
-        >
+        {/* The link sits over the composer, not around it: the composer has links of
+            its own, and a link inside a link breaks hydration. */}
+        <div className="relative w-full">
           <div className="pointer-events-none w-full" aria-hidden="true">
             <PromptComposer />
           </div>
-        </Link>
+          <Link
+            href="/login"
+            aria-label="Sign in to start creating"
+            className="absolute inset-0 z-10 cursor-pointer"
+          />
+        </div>
       </section>
 
       <div className="">

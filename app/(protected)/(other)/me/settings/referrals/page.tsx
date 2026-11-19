@@ -48,7 +48,7 @@ function StatCard({
         </span>
       </div>
       <span className="text-3xl font-bold text-white tracking-tight tabular-nums">
-        {value.toLocaleString()}
+        {value.toLocaleString("en-US")}
       </span>
     </div>
   );

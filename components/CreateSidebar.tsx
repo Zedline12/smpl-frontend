@@ -291,6 +291,14 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
   const { states, setField: raw } = useAiModelStore();
   const set = (k: string, v: any) => raw(model, k, v);
   const s = states[model] as any;
+  // Veo only takes 8 s with reference images, 1080p or 4k (the backend refuses the rest).
+  const veoNeeds8 =
+    model === AiModelsEnum.VEO_3 &&
+    !!s &&
+    (s.resolution === "1080p" || s.resolution === "4k" || (s.images?.length ?? 0) > 0);
+  useEffect(() => {
+    if (veoNeeds8 && s.durationSeconds !== 8) raw(model, "durationSeconds", 8);
+  }, [veoNeeds8, s?.durationSeconds, model, raw]);
   if (!s) return null;
 
   if (model === AiModelsEnum.VEO_3)
@@ -298,7 +306,7 @@ function ModelSettingsPanel({ model }: { model: AiModelsEnum }) {
       <>
         <SelectRow label="Resolution" options={VEO3_RESOLUTIONS} value={s.resolution} onChange={(v) => set("resolution", v)} />
         <SelectRow label="Aspect Ratio" options={VEO3_ASPECT_RATIOS} value={s.aspectRatio} onChange={(v) => set("aspectRatio", v)} />
-        <SettingsDuration options={VEO3_DURATION_SECONDS} value={s.durationSeconds} onChange={(v) => set("durationSeconds", v)} />
+        <SettingsDuration options={veoNeeds8 ? ([8] as const) : VEO3_DURATION_SECONDS} value={s.durationSeconds} onChange={(v) => set("durationSeconds", v)} />
         <SelectRow label="Audio" options={[true, false]} value={s.generateAudio} onChange={(v) => set("generateAudio", v)} />
       </>
     );

@@ -51,6 +51,8 @@ export function reportClientError(
     const message = e?.message ?? (typeof error === "string" ? error : safeJson(error));
     const stack = e?.stack;
     if (!message || IGNORED.some((rx) => rx.test(message))) return;
+    // Interrupted media play() and cancelled fetches: expected, not bugs.
+    if (e?.name === "AbortError") return;
     // Browser extensions throw into the page too.
     if (stack && /chrome-extension:|moz-extension:|safari-extension:/.test(stack)) return;
 

@@ -288,7 +288,7 @@ export function MediaManagerDialog({
             className="absolute inset-0 w-full h-full object-cover"
             muted
             loop
-            onMouseOver={(e) => e.currentTarget.play()}
+            onMouseOver={(e) => e.currentTarget.play().catch(() => {})}
             onMouseOut={(e) => e.currentTarget.pause()}
           />
         ) : (

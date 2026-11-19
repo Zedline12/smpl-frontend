@@ -938,9 +938,16 @@ function Change({
 }
 
 function PricingEditor({ overview }: { overview: Overview }) {
+  // An older backend sends no target: start from the default margin instead of crashing.
+  const target = {
+    method: METHODS.some((m) => m.id === overview.method)
+      ? overview.method
+      : ("margin" as Method),
+    value: Number.isFinite(overview.value) ? overview.value : 20,
+  };
   const queryClient = useQueryClient();
-  const [method, setMethod] = useState<Method>(overview.method);
-  const [value, setValue] = useState(String(overview.value));
+  const [method, setMethod] = useState<Method>(target.method);
+  const [value, setValue] = useState(String(target.value));
 
   // Debounced so typing doesn't fire a request per keystroke.
   const [debounced, setDebounced] = useState({ method, value });
@@ -955,7 +962,7 @@ function PricingEditor({ overview }: { overview: Overview }) {
     !Number.isFinite(v) ||
     v < 0 ||
     (debounced.method === "margin" && v >= 100);
-  const changed = debounced.method !== overview.method || v !== overview.value;
+  const changed = debounced.method !== target.method || v !== target.value;
   const body = JSON.stringify({ method: debounced.method, value: v });
 
   const preview = useQuery({
@@ -1011,11 +1018,11 @@ function PricingEditor({ overview }: { overview: Overview }) {
     setValue(eq == null ? "" : String(roundFor(next, Math.max(0, eq))));
   };
   const reset = () => {
-    setMethod(overview.method);
-    setValue(String(overview.value));
+    setMethod(target.method);
+    setValue(String(target.value));
   };
 
-  const def = METHODS.find((m) => m.id === method)!;
+  const def = METHODS.find((m) => m.id === method) ?? METHODS[1];
   const unit = overview.unit;
   const now = p?.current.byPlan[0] ?? overview.byPlan[0];
   const next = p?.byPlan[0];
@@ -1069,7 +1076,7 @@ function PricingEditor({ overview }: { overview: Overview }) {
           <button
             type="button"
             disabled={
-              method === overview.method && value === String(overview.value)
+              method === target.method && value === String(target.value)
             }
             onClick={reset}
             className="h-11 rounded-xl border border-white/15 px-4 text-[13px] font-medium text-white/80 disabled:opacity-40"

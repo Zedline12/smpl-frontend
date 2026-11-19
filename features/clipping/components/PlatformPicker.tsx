@@ -154,7 +154,7 @@ function PlatformMenu({
                         <span className="block text-[14px] font-semibold text-white">{p.label}</span>
                         <span className="block text-[11px] text-white/45">
                           {SHAPES[p.ratio].label} · clips {lengthRangeLabel(p.preferLength)}
-                          {p.captionMax ? ` · captions up to ${p.captionMax.toLocaleString()} chars` : ""}
+                          {p.captionMax ? ` · captions up to ${p.captionMax.toLocaleString("en-US")} chars` : ""}
                         </span>
                       </span>
                       <span

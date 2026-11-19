@@ -326,7 +326,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               {/* Credits */}
               <div className="rounded-xl border border-foreground/[0.08] p-4 mb-6">
                 <div className="text-[15px] font-bold text-foreground mb-0.5">
-                  {plan.creditsPerMonth?.toLocaleString()} credits/mo.
+                  {plan.creditsPerMonth?.toLocaleString("en-US")} credits/mo.
                 </div>
                 {plan.metadata?.[0] && (
                   <div className="text-[12px] mb-3 text-muted-foreground">≈ {plan.metadata[0]}</div>
