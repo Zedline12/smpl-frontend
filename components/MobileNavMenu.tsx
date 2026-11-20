@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { ChevronDown, Gem, Images, LogOut, Menu, Search, X } from "lucide-react";
+import { Bell, ChevronDown, ChevronLeft, Folder, Gem, Images, LogOut, Menu, Search, X } from "lucide-react";
+import { useNotifications } from "@/features/notifications/use-notifications";
+import { NotificationsList } from "@/features/notifications/NotificationsBell";
 import { cn } from "@/lib/utils";
 import { isFreePlan } from "@/lib/subscription";
 import type { Model } from "@/features/generation/enums/models.enum";
@@ -19,6 +21,7 @@ import { useCatalog } from "@/features/catalog/catalog";
 import { NAV_ROWS } from "@/components/AccountMenuPanel";
 import { CreditsPill } from "@/components/NavbarUserMenu";
 import { useChatStore } from "@/stores/useChatStore";
+import { useSignOut } from "@/features/auth/hooks/use-sign-out";
 
 const SECTION_TITLE = "px-2 pb-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase";
 const ROW = "flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.05]";
@@ -79,6 +82,7 @@ function MobileNavSheet({
   onSearch: () => void;
 }) {
   const router = useRouter();
+  const signOutAndLeave = useSignOut();
   const pathname = usePathname();
   const setMediaType = useAiGenerationControlStore((s) => s.setMediaType);
   const setModel = useAiGenerationControlStore((s) => s.setModel);
@@ -86,6 +90,9 @@ function MobileNavSheet({
   const openChat = useChatStore((s) => s.open);
   const { withCatalog, groupByKind } = useCatalog();
   const studios = useStudioLinks();
+  // The sheet's two views: the menu, or the notifications list (from the bell in its header).
+  const [view, setView] = useState<"menu" | "notifications">("menu");
+  const { notifications, unreadCount, isLoading, isError, markSeen } = useNotifications(!!user);
 
   // Close on any navigation the sheet didn't start itself (back/forward).
   const [lastPath, setLastPath] = useState(pathname);
@@ -93,6 +100,18 @@ function MobileNavSheet({
     setLastPath(pathname);
     if (open) onOpenChange(false);
   }
+
+  // Every opening starts on the menu.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (open) setView("menu");
+  }
+
+  const showNotifications = () => {
+    setView("notifications");
+    if (unreadCount > 0) markSeen();
+  };
 
   const go = (href: string) => {
     onOpenChange(false);
@@ -108,13 +127,7 @@ function MobileNavSheet({
 
   const signOut = async () => {
     onOpenChange(false);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/onboard");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
+    await signOutAndLeave();
   };
 
   const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -127,8 +140,51 @@ function MobileNavSheet({
           aria-describedby={undefined}
           className="data-[state=open]:animate-in data-[state=open]:slide-in-from-right-8 fixed inset-y-0 right-0 z-[100] flex w-[min(360px,88vw)] flex-col border-l border-white/10 bg-popover text-foreground shadow-2xl outline-none"
         >
-          <div className="flex shrink-0 items-center justify-between px-4 pt-4 pb-2">
-            <DialogPrimitive.Title className="text-base font-semibold">Menu</DialogPrimitive.Title>
+          <div className="flex shrink-0 items-center gap-2 px-4 pt-4 pb-2">
+            {view === "notifications" && (
+              <button
+                type="button"
+                onClick={() => setView("menu")}
+                aria-label="Back to menu"
+                className="-ml-1 flex size-9 items-center justify-center rounded-full text-foreground/70 hover:bg-white/[0.06]"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+            )}
+            <DialogPrimitive.Title className="flex-1 text-base font-semibold">
+              {view === "notifications" ? "Notifications" : "Menu"}
+            </DialogPrimitive.Title>
+
+            {/* Bell · assets, like the desktop navbar's group */}
+            {user && view === "menu" && (
+              <>
+                <button
+                  type="button"
+                  onClick={showNotifications}
+                  aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+                  className="relative flex size-9 items-center justify-center rounded-full bg-white/[0.06] text-foreground/80"
+                >
+                  <Bell className="size-[18px]" strokeWidth={1.75} />
+                  {unreadCount > 0 && (
+                    <span className="bg-primary absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] leading-none font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go("/assets")}
+                  aria-label="Assets"
+                  className={cn(
+                    "flex size-9 items-center justify-center rounded-full bg-white/[0.06]",
+                    isCurrent("/assets") ? "text-[var(--purple-300)]" : "text-foreground/80",
+                  )}
+                >
+                  <Folder className="size-[18px]" strokeWidth={1.75} />
+                </button>
+              </>
+            )}
+
             <DialogPrimitive.Close
               aria-label="Close menu"
               className="flex size-9 items-center justify-center rounded-full bg-white/[0.06]"
@@ -137,6 +193,16 @@ function MobileNavSheet({
             </DialogPrimitive.Close>
           </div>
 
+          {view === "notifications" ? (
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-1.5 pb-[max(16px,env(safe-area-inset-bottom))]">
+              <NotificationsList
+                notifications={notifications}
+                isLoading={isLoading}
+                isError={isError}
+                onNavigate={() => onOpenChange(false)}
+              />
+            </div>
+          ) : (
           <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
             {/* Search */}
             <button
@@ -258,6 +324,7 @@ function MobileNavSheet({
               </>
             )}
           </div>
+          )}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

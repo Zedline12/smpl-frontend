@@ -1,11 +1,10 @@
-import { redirect } from "next/navigation";
+import { AnalysisView } from "@/features/video-analyzer/components/AnalysisView";
 
-/** Old detail links open the analysis in the analyzer page's modal instead. */
 export default async function VideoAnalysisPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/video-analyzer?analysis=${encodeURIComponent(id)}`);
+  return <AnalysisView id={id} />;
 }

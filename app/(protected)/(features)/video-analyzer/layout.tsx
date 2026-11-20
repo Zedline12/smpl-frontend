@@ -1,4 +1,6 @@
 import { Navbar } from "@/components/navbar";
+import { STUDIO_PANEL_CLASS } from "@/components/studio/StudioSidebar";
+import { VideoAnalyzerSidebar } from "@/features/video-analyzer/components/VideoAnalyzerSidebar";
 
 export default function VideoAnalyzerLayout({
   children,
@@ -6,14 +8,15 @@ export default function VideoAnalyzerLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-background grid h-screen grid-rows-[auto_1fr]">
-      <header className="z-[60]">
+    // Same shell as Ads Studio: navbar, the studio's sidebar, one content panel.
+    <div className="bg-background grid h-screen grid-cols-1 grid-rows-[auto_1fr]">
+      <header className="z-[60] min-w-0">
         <Navbar />
       </header>
 
-      {/* No sidebar: the analyzer is one scrolling page. */}
-      <main className="custom-scrollbar row-start-2 min-h-0 overflow-y-auto">
-        {children}
+      <main className="row-start-2 flex min-h-0 min-w-0 flex-col gap-2 px-3 pb-3 md:flex-row md:gap-3">
+        <VideoAnalyzerSidebar />
+        <div className={STUDIO_PANEL_CLASS}>{children}</div>
       </main>
     </div>
   );

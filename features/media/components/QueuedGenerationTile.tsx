@@ -4,7 +4,6 @@ import { Clock, Loader2, RotateCcw } from "lucide-react";
 import { useRefundGenerationMutation } from "@/features/generation/hooks/generation";
 import { GenerationQueue } from "@/features/generation/types/generation";
 import { DjGeneratingTile } from "@/features/artist/components/DjGeneratingTile";
-import { RemixGeneratingTile } from "@/features/remix/components/RemixGeneratingTile";
 import { MediaDisplayVariant } from "../types/media";
 import { JobProgress } from "@/features/live/JobProgress";
 
@@ -17,7 +16,7 @@ export function QueuedGenerationTile({
   queue: GenerationQueue;
   /** Pixel height of the media cards beside it; without it the tile is 16:9. */
   height?: number;
-  /** "music" shows the DJ animation (Artist page); "remix" the film strip (Remix page). */
+  /** "music" shows the DJ animation (Artist page). */
   variant?: MediaDisplayVariant;
   /** Fill the parent's height instead of being 16:9 (when no height is given). */
   fill?: boolean;
@@ -76,11 +75,10 @@ export function QueuedGenerationTile({
     />
   );
 
-  if (variant === "music" || variant === "remix") {
-    const Tile = variant === "music" ? DjGeneratingTile : RemixGeneratingTile;
+  if (variant === "music") {
     return (
       <div style={sizeStyle} className={`relative w-full ${sizeClass}`}>
-        <Tile processing={isProcessing} className="h-full" />
+        <DjGeneratingTile processing={isProcessing} className="h-full" />
         <div className="absolute inset-x-3 bottom-2.5 rounded-lg bg-black/55 px-2.5 py-2 backdrop-blur-sm">{progress}</div>
       </div>
     );

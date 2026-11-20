@@ -1,23 +1,29 @@
-import { LeftPanel } from "./_components/LeftPanel";
+import Link from "next/link";
+import { X } from "lucide-react";
+import { AuthShowcase } from "./_components/AuthShowcase";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="h-screen overflow-hidden bg-black flex">
-      {/* Left panel — hidden on mobile, 70% on desktop */}
-      <div className="hidden md:flex md:flex-[8] min-w-0">
-        <LeftPanel />
+    <div className="flex h-dvh overflow-hidden bg-[#141416]">
+      {/* Videos: desktop only. */}
+      <div className="hidden min-w-0 flex-1 p-3 md:block">
+        <AuthShowcase />
       </div>
 
-      {/* Right panel — full width on mobile, 30% on desktop */}
-      <div
-        className="flex-1 md:flex-[2] flex flex-col items-center justify-center overflow-y-auto md:border-l md:border-white/[0.08]"
-        style={{
-          background: "#080808",
-          padding: "48px 24px",
-        }}
-      >
+      <div className="relative flex flex-1 flex-col overflow-y-auto">
+        <Link
+          href="/"
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 flex size-9 items-center justify-center rounded-full bg-white/[0.07] text-white/70 transition-colors hover:bg-white/[0.12] hover:text-white"
+        >
+          <X className="size-4" />
+        </Link>
         <div
-          className="w-full max-w-[340px]"
+          className="m-auto w-full max-w-[380px] px-6 py-16"
           style={{ animation: "fadeUp 0.6s ease-out 0.1s both" }}
         >
           {children}

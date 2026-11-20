@@ -29,7 +29,7 @@ export function DeleteAccountDialog({ userId, userEmail }: Props) {
         setError(data?.error || "Failed to delete account. Please try again.");
         return;
       }
-      router.push("/login");
+      router.push("/sign-in");
     } catch {
       setError("An unexpected error occurred.");
     } finally {

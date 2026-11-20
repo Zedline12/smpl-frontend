@@ -2,7 +2,7 @@ import { BaseAiInput } from "../generation";
 import { z } from "zod";
 
 export const GptImage2OptionsConst = {
-  aspectRatio: ["1:1", "3:4", "9:16", "4:3", "16:9", "auto"] as const,
+  aspectRatio: ["1:1", "3:4", "9:16", "4:3", "16:9"] as const,
   quality: ["auto", "low", "medium", "high"] as const,
 };
 

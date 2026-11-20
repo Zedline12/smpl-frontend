@@ -12,6 +12,8 @@ export type ClippingPlatformId =
 
 export interface ClippingPlatform {
   id: ClippingPlatformId;
+  /** URL segment for its My clips page. */
+  slug: string;
   label: string;
   short: string;
   /** Vizard ratioOfClip: 1 = 9:16, 2 = 1:1, 3 = 4:5, 4 = 16:9. */
@@ -26,13 +28,13 @@ export interface ClippingPlatform {
 }
 
 export const CLIPPING_PLATFORMS: ClippingPlatform[] = [
-  { id: "tiktok", label: "TikTok", short: "TikTok", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 5, brand: "linear-gradient(135deg,#25F4EE 0%,#000 45%,#000 55%,#FE2C55 100%)" },
-  { id: "instagram_reels", label: "Instagram Reels", short: "Reels", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 5, brand: "linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)" },
-  { id: "youtube_shorts", label: "YouTube Shorts", short: "Shorts", ratio: 1, preferLength: [1, 2], titleMax: 100, captionMax: 5000, hashtags: 3, brand: "#FF0033" },
-  { id: "facebook_reels", label: "Facebook Reels", short: "FB Reels", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 3, brand: "#1877F2" },
-  { id: "linkedin", label: "LinkedIn", short: "LinkedIn", ratio: 2, preferLength: [2, 3], titleMax: 0, captionMax: 3000, hashtags: 3, brand: "#0A66C2" },
-  { id: "x", label: "X", short: "X", ratio: 2, preferLength: [1, 2], titleMax: 0, captionMax: 280, hashtags: 2, hashtagsInCaption: true, brand: "#000000" },
-  { id: "youtube", label: "YouTube", short: "YouTube", ratio: 4, preferLength: [3, 4], titleMax: 100, captionMax: 5000, hashtags: 3, brand: "#FF0000" },
+  { id: "tiktok", slug: "tiktok", label: "TikTok", short: "TikTok", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 5, brand: "linear-gradient(135deg,#25F4EE 0%,#000 45%,#000 55%,#FE2C55 100%)" },
+  { id: "instagram_reels", slug: "instagram", label: "Instagram Reels", short: "Reels", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 5, brand: "linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)" },
+  { id: "youtube_shorts", slug: "youtube-shorts", label: "YouTube Shorts", short: "Shorts", ratio: 1, preferLength: [1, 2], titleMax: 100, captionMax: 5000, hashtags: 3, brand: "#FF0033" },
+  { id: "facebook_reels", slug: "facebook", label: "Facebook Reels", short: "FB Reels", ratio: 1, preferLength: [1, 2], titleMax: 0, captionMax: 2200, hashtags: 3, brand: "#1877F2" },
+  { id: "linkedin", slug: "linkedin", label: "LinkedIn", short: "LinkedIn", ratio: 2, preferLength: [2, 3], titleMax: 0, captionMax: 3000, hashtags: 3, brand: "#0A66C2" },
+  { id: "x", slug: "x", label: "X", short: "X", ratio: 2, preferLength: [1, 2], titleMax: 0, captionMax: 280, hashtags: 2, hashtagsInCaption: true, brand: "#000000" },
+  { id: "youtube", slug: "youtube", label: "YouTube", short: "YouTube", ratio: 4, preferLength: [3, 4], titleMax: 100, captionMax: 5000, hashtags: 3, brand: "#FF0000" },
 ];
 
 export const DEFAULT_PLATFORMS: ClippingPlatformId[] = ["tiktok", "instagram_reels", "youtube_shorts"];
@@ -41,6 +43,10 @@ export const PLATFORM_BY_ID = Object.fromEntries(CLIPPING_PLATFORMS.map((p) => [
   ClippingPlatformId,
   ClippingPlatform
 >;
+
+export const PLATFORM_BY_SLUG: Record<string, ClippingPlatform | undefined> = Object.fromEntries(
+  CLIPPING_PLATFORMS.map((p) => [p.slug, p]),
+);
 
 export const SHAPES: Record<number, { label: string; name: string }> = {
   1: { label: "9:16", name: "Vertical" },

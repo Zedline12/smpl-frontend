@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { BLOCKED_PATH } from "@/lib/api-errors";
+import { BLOCKED_PATH, insufficientCreditsFrom } from "@/lib/api-errors";
+import { useOutOfCreditsStore } from "@/stores/useOutOfCreditsStore";
 
 declare global {
   interface Window {
@@ -9,10 +10,21 @@ declare global {
   }
 }
 
+/** Whether a request is worth reading for a refused charge (charges are never GETs). */
+function mayBeCharge(args: Parameters<typeof fetch>, res: Response): boolean {
+  if (!res.headers.get("content-type")?.includes("application/json")) return false;
+  if (!res.ok) return true;
+  const [input, init] = args;
+  const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+  // Many /api proxies answer the backend's error with a 200, so read mutations too.
+  return method !== "GET" && method !== "HEAD";
+}
+
 /**
- * When a server-side `fetchWithToken` hits a blocked IP inside an /api route, the route
- * answers with a redirect to /blocked. `fetch` follows redirects silently, so this
- * watches for that and moves the whole page there. Mounted once in the root layout.
+ * Watches every fetch, once, from the root layout:
+ * - a server-side `fetchWithToken` that hit a blocked IP inside an /api route answers with
+ *   a redirect to /blocked, which `fetch` follows silently: move the whole page there;
+ * - a charge refused for a low balance (`INSUFFICIENT_CREDITS`) opens the buy-credits popup.
  */
 export function ApiRedirectWatcher() {
   useEffect(() => {
@@ -32,6 +44,17 @@ export function ApiRedirectWatcher() {
           ) {
             window.location.assign(BLOCKED_PATH);
           }
+        }
+        if (mayBeCharge(args, res)) {
+          // A clone: the caller still reads the body itself.
+          void res
+            .clone()
+            .json()
+            .then((body) => {
+              const refused = insufficientCreditsFrom(body);
+              if (refused) useOutOfCreditsStore.getState().show(refused.required);
+            })
+            .catch(() => {});
         }
       } catch {}
       return res;

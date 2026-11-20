@@ -1,5 +1,5 @@
 import { useLiveStore } from "@/features/live/store";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -13,9 +13,12 @@ import {
 } from "../api";
 import {
   CreateVideoClippingRequest,
+  VideoClip,
   VideoClippingProject,
   isActiveStatus,
 } from "../types";
+import type { ClippingPlatformId } from "../platforms";
+import { outputPlatforms, parseViralScore } from "../utils";
 
 // Clipping is slow work — a long interval keeps the poll cheap without the user
 // noticing a difference.
@@ -148,14 +151,24 @@ function patchClip(
   };
 }
 
+/** Applies a patch to a project in its detail cache and in the list (My clips reads the list). */
+function patchEverywhere(
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId: string,
+  patch: (p: VideoClippingProject | undefined) => VideoClippingProject | undefined,
+) {
+  queryClient.setQueryData<VideoClippingProject>(clippingKeys.detail(projectId), patch);
+  queryClient.setQueryData<VideoClippingProject[]>(clippingKeys.all, (old) =>
+    old?.map((p) => (p.id === projectId ? (patch(p) ?? p) : p)),
+  );
+}
+
 export function useRegenerateClipCopyMutation(projectId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (videoId: number) => regenerateClipCopy(projectId, videoId),
     onSuccess: ({ providerVideoId, postCopy }) => {
-      queryClient.setQueryData<VideoClippingProject>(clippingKeys.detail(projectId), (old) =>
-        patchClip(old, providerVideoId, { postCopy }),
-      );
+      patchEverywhere(queryClient, projectId, (p) => patchClip(p, providerVideoId, { postCopy }));
       toast.success("Captions rewritten");
     },
     onError: (error) => toast.error(error.message),
@@ -167,12 +180,54 @@ export function useSaveClipsMutation(projectId: string) {
   return useMutation({
     mutationFn: (videoIds: number[]) => saveClipsToLibrary(projectId, videoIds),
     onSuccess: ({ saved }) => {
-      queryClient.setQueryData<VideoClippingProject>(clippingKeys.detail(projectId), (old) =>
-        saved.reduce((p, s) => patchClip(p, s.providerVideoId, { savedMediaId: s.mediaId }), old),
+      patchEverywhere(queryClient, projectId, (p) =>
+        saved.reduce((acc, s) => patchClip(acc, s.providerVideoId, { savedMediaId: s.mediaId }), p),
       );
       queryClient.invalidateQueries({ queryKey: ["media"] });
       toast.success(saved.length === 1 ? "Saved to your library" : `${saved.length} clips saved to your library`);
     },
     onError: (error) => toast.error(error.message),
   });
+}
+
+/** One finished clip with what it belongs to. */
+export interface MyClip {
+  clip: VideoClip;
+  projectId: string;
+  /** Platforms the clip was made for. */
+  platforms: ClippingPlatformId[];
+  ratio: number;
+  createdAt: string;
+}
+
+const clipScore = (c: VideoClip) => c.viralScoreNum ?? parseViralScore(c.viralScore) ?? -1;
+
+/**
+ * Every finished clip, newest project first and best score first within it.
+ * With a platform, only clips made for it: a clip made for several platforms is in each.
+ */
+export function useMyClips(platform?: ClippingPlatformId) {
+  const query = useClippingProjectsQuery();
+  const projects = query.data;
+
+  const { clips, running } = useMemo(() => {
+    const list = [...(projects ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const clips: MyClip[] = [];
+    for (const project of list) {
+      const own: MyClip[] = [];
+      for (const output of project.outputs ?? []) {
+        if (output.status !== "completed") continue;
+        const platforms = outputPlatforms(output);
+        if (platform && !platforms.includes(platform)) continue;
+        for (const clip of output.clips) {
+          own.push({ clip, projectId: project.id, platforms, ratio: output.ratio, createdAt: project.createdAt });
+        }
+      }
+      clips.push(...own.sort((x, y) => clipScore(y.clip) - clipScore(x.clip)));
+    }
+    const running = list.filter((p) => isActiveStatus(p.status));
+    return { clips, running };
+  }, [projects, platform]);
+
+  return { ...query, clips, running };
 }

@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { LoginModal } from "@/features/auth/components/LoginModal";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const MarketingNavBar = () => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const openLoginModal = useAuthStore((s) => s.openLoginModal);
 
   return (
     <>
@@ -42,22 +41,22 @@ const MarketingNavBar = () => {
 
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => setIsLoginModalOpen(true)}
+                onClick={() => openLoginModal("sign-in")}
                 className="text-sm font-medium hover:text-primary transition-colors hidden sm:block"
               >
-                Log in
+                Sign in
               </button>
-              <Link
-                href="/signup"
+              <button
+                type="button"
+                onClick={() => openLoginModal("sign-up")}
                 className="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
               >
                 Get Started
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       </nav>
-      <LoginModal isOpen={isLoginModalOpen} onClose={setIsLoginModalOpen} />
     </>
   );
 };

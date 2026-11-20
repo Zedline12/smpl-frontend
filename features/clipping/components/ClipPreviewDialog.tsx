@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
-import { Bookmark, Check, Copy, Download, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { Bookmark, Check, Copy, Download, ExternalLink, FolderOpen, Loader2, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { downloadFile } from "@/lib/handle-downloads";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ interface ClipPreviewDialogProps {
   platforms: string[];
   open: boolean;
   onClose: () => void;
+  /** Shows an "Open project" link (for lists that mix clips from several projects). */
+  projectHref?: string;
 }
 
 /** Copies text, with a fallback for non-secure contexts (plain http on a LAN). */
@@ -131,7 +134,7 @@ function PostCopySection({ projectId, clip, platforms }: { projectId: string; cl
   );
 }
 
-export function ClipPreviewDialog({ projectId, clip, platforms, open, onClose }: ClipPreviewDialogProps) {
+export function ClipPreviewDialog({ projectId, clip, platforms, open, onClose, projectHref }: ClipPreviewDialogProps) {
   const save = useSaveClipsMutation(projectId);
   if (!clip) return null;
 
@@ -199,6 +202,16 @@ export function ClipPreviewDialog({ projectId, clip, platforms, open, onClose }:
                 )}
                 {clip.savedMediaId ? "In your library" : "Save to library"}
               </button>
+
+              {projectHref && (
+                <Link
+                  href={projectHref}
+                  className="border-border hover:bg-background-light text-white flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
+                >
+                  <FolderOpen className="size-3.5" />
+                  Open project
+                </Link>
+              )}
 
               {clip.providerClipEditorUrl && (
                 <a

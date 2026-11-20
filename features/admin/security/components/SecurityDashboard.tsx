@@ -2,16 +2,18 @@
 
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, Ban, CreditCard } from "lucide-react";
+import { AlertTriangle, Ban, CreditCard, UserX } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThreatUsersTab from "./ThreatUsersTab";
 import PaidUsersTab from "./PaidUsersTab";
 import BlockedIpsTab from "./BlockedIpsTab";
+import RejectedSignupsTab from "./RejectedSignupsTab";
 
 const TABS = [
   { value: "threats", label: "Threat users", icon: AlertTriangle },
   { value: "paid", label: "Paid users", icon: CreditCard },
   { value: "blocked", label: "Blocked IPs", icon: Ban },
+  { value: "rejected", label: "Rejected sign-ups", icon: UserX },
 ] as const;
 
 type TabValue = (typeof TABS)[number]["value"];
@@ -49,6 +51,9 @@ function SecurityTabs() {
       </TabsContent>
       <TabsContent value="blocked">
         <BlockedIpsTab />
+      </TabsContent>
+      <TabsContent value="rejected">
+        <RejectedSignupsTab />
       </TabsContent>
     </Tabs>
   );

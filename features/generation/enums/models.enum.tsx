@@ -295,6 +295,17 @@ export const VIDEO_MODELS: Model[] = [
     ),
   },
   {
+    id: AiModelsEnum.SMPL_REMIX,
+    name: "Remix",
+    description: "Drop your character into any video.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M4 7h11l-3-3m8 13H9l3 3M20 7v4M4 17v-4" />
+      </svg>
+    ),
+  },
+  {
     id: AiModelsEnum.SMPL_RIPPER,
     name: "Ripper",
     description: "Recreate any social video with your character, watermark-free.",
@@ -451,17 +462,6 @@ export const STUDIO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9 9l12-2" />
-      </svg>
-    ),
-  },
-  {
-    id: AiModelsEnum.SMPL_REMIX,
-    name: "Remix",
-    description: "Drop your character into any video.",
-    svg: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-          d="M4 7h11l-3-3m8 13H9l3 3M20 7v4M4 17v-4" />
       </svg>
     ),
   },

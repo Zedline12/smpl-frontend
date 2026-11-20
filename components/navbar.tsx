@@ -2,11 +2,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Images } from "lucide-react";
+import { Folder } from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { MediaTypeLauncher } from "@/features/generation/components/navbar/MediaTypeLauncher";
 import { StudioLinks } from "@/components/StudioLinks";
-import { NavbarUserMenu } from "@/components/NavbarUserMenu";
+import { CreditsPill, NavbarUserMenu } from "@/components/NavbarUserMenu";
+import { NotificationsBell } from "@/features/notifications/NotificationsBell";
 import { NavbarGuestActions } from "@/components/NavbarGuestActions";
 import { cn } from "@/lib/utils";
 import { JobsIndicator } from "@/features/live/JobsIndicator";
@@ -55,31 +56,37 @@ export function Navbar() {
         </div>
       )}
 
-      <div className={cn("shrink-0 items-center gap-3 sm:gap-6", isAuthenticated ? "hidden sm:flex" : "flex")}>
-        {isAuthenticated && <NavbarSearch />}
+      {isAuthenticated ? (
+        <div className="hidden shrink-0 items-center gap-7 sm:flex">
+          {/* Search · jobs · credits/plan */}
+          <div className="flex items-center gap-4">
+            <NavbarSearch />
+            <JobsIndicator />
+            <CreditsPill user={user} />
+          </div>
 
-        {isAuthenticated && (
-          <Link
-            href="/assets"
-            aria-label="Assets"
-            className={cn(
-              "flex items-center gap-1.5 text-sm font-medium transition-colors",
-              onAssets ? "text-[var(--purple-300)]" : "text-foreground/55 hover:text-foreground",
-            )}
-          >
-            <Images className="size-5" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Assets</span>
-          </Link>
-        )}
-
-        {isAuthenticated && <JobsIndicator />}
-
-        {isAuthenticated ? (
-          <NavbarUserMenu user={user} />
-        ) : (
+          {/* Bell · assets · avatar, kept close together */}
+          <div className="flex items-center gap-3">
+            <NotificationsBell />
+            <Link
+              href="/assets"
+              aria-label="Assets"
+              title="Assets"
+              className={cn(
+                "flex items-center transition-colors",
+                onAssets ? "text-[var(--purple-300)]" : "text-foreground/55 hover:text-foreground",
+              )}
+            >
+              <Folder className="size-5" strokeWidth={1.5} />
+            </Link>
+            <NavbarUserMenu user={user} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex shrink-0 items-center gap-3 sm:gap-6">
           <NavbarGuestActions />
-        )}
-      </div>
+        </div>
+      )}
     </header>
     </>
   );

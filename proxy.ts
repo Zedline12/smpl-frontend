@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
 
   if (!tokens) {
     // Session is over (refresh expired, account suspended, ...). Clear it so the
-    // protected layout sends the user to /login.
+    // protected layout sends the user to /sign-in.
     request.cookies.delete(TOKEN_COOKIE);
     request.cookies.delete(REFRESH_COOKIE);
     const res = NextResponse.next({ request: { headers: request.headers } });

@@ -41,9 +41,9 @@ function PasswordChangeContent() {
         password,
       });
       setSubmitStatus("success");
-      // Redirect to login after a short delay
+      // Back to sign in after a short delay
       setTimeout(() => {
-        router.push("/login");
+        router.push("/sign-in");
       }, 3000);
     } catch (error) {
       setSubmitStatus("error");
@@ -63,10 +63,10 @@ function PasswordChangeContent() {
           Please use the link provided in your email to reset your password.
         </p>
         <Link
-          href="/login"
+          href="/sign-in"
           className="text-sm text-blue-600 hover:underline mt-4 inline-block"
         >
-          Return to Login
+          Back to sign in
         </Link>
       </div>
     );
@@ -107,7 +107,7 @@ function PasswordChangeContent() {
               Password Reset Successfully
             </h3>
             <p className="text-gray-500">
-              Your password has been updated. Redirecting to login...
+              Your password has been updated. Taking you to sign in...
             </p>
           </div>
         ) : (

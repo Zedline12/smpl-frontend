@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /** Navbar actions shown to signed-out visitors. */
 export function NavbarGuestActions() {
+  const openLoginModal = useAuthStore((s) => s.openLoginModal);
   return (
     <div className="flex items-center gap-1.5 sm:gap-3">
       <Link href="/pricing">
@@ -18,20 +20,20 @@ export function NavbarGuestActions() {
         </Button>
       </Link>
 
-      <Link href="/login">
-        <Button
-          variant="ghost"
-          className="text-secondary hover:text-secondary hover:bg-secondary/10 border-secondary/40 border bg-transparent font-semibold"
-        >
-          Log In
-        </Button>
-      </Link>
+      <Button
+        variant="ghost"
+        onClick={() => openLoginModal("sign-in")}
+        className="text-secondary hover:text-secondary hover:bg-secondary/10 border-secondary/40 border bg-transparent font-semibold"
+      >
+        Sign In
+      </Button>
 
-      <Link href="/signup">
-        <Button className="bg-secondary hover:bg-secondary/90 font-semibold text-white">
-          Sign Up
-        </Button>
-      </Link>
+      <Button
+        onClick={() => openLoginModal("sign-up")}
+        className="bg-secondary hover:bg-secondary/90 font-semibold text-white"
+      >
+        Sign Up
+      </Button>
     </div>
   );
 }

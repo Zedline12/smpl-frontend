@@ -145,7 +145,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
   [AiModelsEnum.GPT_IMAGE_2]: {
     prompt: "",
     images: [],
-    aspectRatio: "auto",
+    aspectRatio: "1:1",
     quality: "auto",
   },
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: {

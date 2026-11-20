@@ -89,7 +89,7 @@ export default function GptImage2Composer({
             direction="up"
             trigger={
               <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors backdrop-blur-sm bg-white/10 border border-white/20 w-full text-center">
-                {aspectRatio ?? "auto"}
+                {aspectRatio ?? "1:1"}
               </div>
             }
             align="left"
@@ -98,7 +98,7 @@ export default function GptImage2Composer({
             <MenuItem className="p-0 m-0 sm:w-100 w-[200px]">
               <AspectRatioSelectorComponent
                 options={GptImage2OptionsConst.aspectRatio}
-                value={aspectRatio ?? "auto"}
+                value={aspectRatio ?? "1:1"}
                 onChange={(value: any) => setField("aspectRatio", value)}
               />
             </MenuItem>

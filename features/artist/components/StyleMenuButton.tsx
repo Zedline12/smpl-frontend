@@ -31,6 +31,8 @@ interface StyleMenuButtonProps<Id extends string> {
   menuSide?: "right" | "bottom";
   /** Extra classes for the row button (e.g. a transparent background). */
   triggerClassName?: string;
+  /** "plain": the icon, value and check mark are white instead of the accent colors. */
+  tone?: "accent" | "plain";
 }
 
 /** A sidebar row that opens its choices in a menu to the right. */
@@ -45,7 +47,9 @@ export function StyleMenuButton<Id extends string>({
   disabled,
   triggerClassName,
   menuSide = "right",
+  tone = "accent",
 }: StyleMenuButtonProps<Id>) {
+  const plain = tone === "plain";
   const single = max === 1;
   const full = max !== undefined && !single && selected.length >= max;
   const summary = selected.length
@@ -71,10 +75,10 @@ export function StyleMenuButton<Id extends string>({
             triggerClassName,
           )}
         >
-          <Icon className={`size-4 shrink-0 ${selected.length ? "text-primary" : "text-white/50"}`} />
+          <Icon className={`size-4 shrink-0 ${plain ? "text-white" : selected.length ? "text-primary" : "text-white/50"}`} />
           <span className="shrink-0 text-sm font-medium text-white">{label}</span>
           <span
-            className={`ml-auto min-w-0 truncate text-xs ${selected.length ? "font-medium text-secondary" : "text-white/35"}`}
+            className={`ml-auto min-w-0 truncate text-xs ${selected.length ? `font-medium ${plain ? "text-white" : "text-secondary"}` : "text-white/35"}`}
           >
             {summary}
           </span>
@@ -113,7 +117,7 @@ export function StyleMenuButton<Id extends string>({
               className={`gap-2 text-[13px] focus:bg-white/10 focus:text-white ${active ? "text-white" : "text-white/75"}`}
             >
               <span className="flex-1 truncate">{option.label}</span>
-              {active && <Check className="text-secondary size-3.5" />}
+              {active && <Check className={`${plain ? "text-white" : "text-secondary"} size-3.5`} />}
             </DropdownMenuItem>
           );
         })}

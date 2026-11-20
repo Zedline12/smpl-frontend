@@ -1,0 +1,56 @@
+import BottomNavbar from "@/components/BottomNavbar";
+import { Navbar } from "@/components/navbar";
+import Footer from "@/components/footer";
+const bottomNavbarItems = [
+  {
+    title: "Pricing",
+    link: "/pricing",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="size-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+      </svg>
+    ),
+  },
+];
+/** Navbar, mobile bottom bar, page content and footer: the shell of the main pages and the public explore page. */
+export function MainShell({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <div className="bg-background h-screen overflow-hidden grid grid-rows-[auto_1fr] grid-cols-1">
+      {/* NAVBAR */}
+      <header className="col-span-full z-[60]">
+        <Navbar />
+      </header>
+
+      {/* SIDEBAR (desktop) — commented out, replaced by per-section sidebars */}
+      {/* <div className="mt-5 z-50 hidden sm:block row-start-2 col-start-1 h-full">
+        <Sidebar />
+      </div> */}
+
+      {/* SIDEBAR (mobile) */}
+      <div className="row-start-2 col-start-1 h-full">
+        <BottomNavbar items={bottomNavbarItems} />
+      </div>
+
+      {/* CONTENT */}
+      <main className="row-start-2 h-full col-start-1 overflow-y-auto flex flex-col">
+        <div className="flex-1 w-full sm:w-[90%] sm:mx-auto">{children}</div>
+        <Footer />
+      </main>
+    </div>
+  );
+}

@@ -27,6 +27,9 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // The explore page is `/` for everyone now (it was /home, and /onboard for guests).
+      { source: "/home", destination: "/", permanent: true },
+      { source: "/onboard", destination: "/", permanent: true },
       { source: "/subscription-plans", destination: "/pricing", permanent: true },
       // Settings moved under /me; "Credits Usage" is now "Usage".
       { source: "/settings", destination: "/me/settings/account", permanent: true },

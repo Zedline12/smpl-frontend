@@ -71,18 +71,6 @@ function Phone({ phone, index }: { phone: (typeof PHONES)[number]; index: number
   );
 }
 
-const CHIPS: { label: string; left: string; top: string; delay: number }[] = [
-  { label: "+12.4K views", left: "8%", top: "62%", delay: 0 },
-  { label: "🔥 Viral 92", left: "80%", top: "58%", delay: 1.4 },
-  { label: "0:34 clip", left: "22%", top: "40%", delay: 2.8 },
-  { label: "9:16", left: "67%", top: "36%", delay: 4.1 },
-  { label: "❤️", left: "44%", top: "70%", delay: 0.7 },
-  { label: "❤️", left: "92%", top: "30%", delay: 3.3 },
-  { label: "✂️ Auto-cut", left: "4%", top: "28%", delay: 5.2 },
-  { label: "+3.2K shares", left: "54%", top: "64%", delay: 5.9 },
-];
-
-
 function PostCard({ index }: { index: number }) {
   const i = index % THUMBS.length;
   const tag = TAGS[i];
@@ -129,18 +117,6 @@ export function ClippingHeroBackground({ className }: { className?: string }) {
           <Phone key={i} phone={phone} index={i} />
         ))}
       </div>
-
-      {/* Floating stats */}
-      {CHIPS.map((chip, k) => (
-        <span
-          key={k}
-          className="animate-float-up absolute rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-white opacity-0 backdrop-blur-sm"
-          style={{ left: chip.left, top: chip.top, animationDelay: `${chip.delay}s` }}
-        >
-          {chip.label}
-        </span>
-      ))}
-
     </div>
   );
 }

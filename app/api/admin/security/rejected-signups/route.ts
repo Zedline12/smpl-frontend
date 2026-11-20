@@ -1,0 +1,27 @@
+import { unstable_rethrow } from "next/navigation";
+import { NextRequest, NextResponse } from "next/server";
+import { fetchWithToken } from "@/lib/fetcher";
+
+export async function GET(req: NextRequest) {
+  try {
+    const page = req.nextUrl.searchParams.get("page") ?? "1";
+    const limit = req.nextUrl.searchParams.get("limit") ?? "20";
+    const reason = req.nextUrl.searchParams.get("reason");
+    const params = new URLSearchParams({ page, limit });
+    if (reason) params.set("reason", reason);
+
+    const response = await fetchWithToken(
+      `/admin/users/security/rejected-signups?${params.toString()}`,
+    );
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return NextResponse.json({ error: err.message || "Failed" }, { status: response.status });
+    }
+
+    return NextResponse.json(await response.json());
+  } catch (error) {
+    unstable_rethrow(error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

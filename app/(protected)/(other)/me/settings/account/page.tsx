@@ -1,6 +1,7 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { DeleteAccountDialog } from "./_components/DeleteAccountDialog";
 import { SettingsHeader } from "../_components/SettingsUi";
+import { UserAvatar } from "@/components/UserAvatar";
 
 interface UserData {
   id: string;
@@ -11,6 +12,8 @@ interface UserData {
   createdAt: string;
   totalGenerations: number;
   totalCreditsUsed: number;
+  username?: string;
+  avatarUrl?: string | null;
 }
 
 async function getMe(): Promise<UserData | null> {
@@ -70,8 +73,6 @@ export default async function AccountPage() {
     );
   }
 
-  const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-
   return (
     <div className="flex flex-col gap-5">
       <SettingsHeader title="Profile" subtitle="Your account details and activity" />
@@ -84,12 +85,17 @@ export default async function AccountPage() {
         }}
       >
         <div className="flex items-center gap-4">
-          {/* Avatar */}
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #6b41ff, #ea4bff)" }}
-          >
-            {initials}
+          {/* Avatar + username */}
+          <div className="flex shrink-0 flex-col items-center gap-1.5">
+            <UserAvatar user={user} size={56} />
+            {user.username && (
+              <span
+                className="max-w-[6rem] truncate text-xs font-medium"
+                style={{ color: "rgba(255,255,255,0.6)" }}
+              >
+                @{user.username}
+              </span>
+            )}
           </div>
 
           <div className="min-w-0">

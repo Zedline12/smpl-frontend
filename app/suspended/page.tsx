@@ -21,5 +21,5 @@ export default async function SuspendedPage() {
   // Signed in to a suspended account (email or Google): support-only session.
   if (suspendedToken) return <SuspendedNotice />;
 
-  redirect("/login");
+  redirect("/sign-in");
 }

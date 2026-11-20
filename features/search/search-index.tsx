@@ -14,7 +14,6 @@ import {
   Music,
   Package,
   PenLine,
-  Repeat,
   Scissors,
   ScanSearch,
   Sparkles,
@@ -93,11 +92,6 @@ const STUDIO_DETAILS: Record<string, { subtitle: string; icon: ReactNode; keywor
     icon: lucide(Music),
     keywords: "music song lyrics dj singer",
   },
-  "/remix": {
-    subtitle: "Drop your character into any video",
-    icon: lucide(Repeat),
-    keywords: "remix swap character video",
-  },
 };
 
 const studioItems: SearchItem[] = STUDIOS.filter((s) => STUDIO_DETAILS[s.href]).map((s) => ({
@@ -110,7 +104,7 @@ const studioItems: SearchItem[] = STUDIOS.filter((s) => STUDIO_DETAILS[s.href]).
 }));
 
 const pageItems: SearchItem[] = [
-  { id: "page:/home", kind: "page", title: "Home", subtitle: "Start here", href: "/home", icon: lucide(Home), keywords: "start dashboard" },
+  { id: "page:/", kind: "page", title: "Home", subtitle: "Start here", href: "/", icon: lucide(Home), keywords: "start dashboard" },
   { id: "page:/create/image", kind: "page", title: "Create Image", subtitle: "Generate images from a prompt", href: "/create/image", icon: lucide(ImageIcon), keywords: "picture photo generate" },
   { id: "page:/create/video", kind: "page", title: "Create Video", subtitle: "Generate videos from text or images", href: "/create/video", icon: lucide(Video), keywords: "clip film generate animate" },
   { id: "page:/create/audio", kind: "page", title: "Create Audio", subtitle: "Speech and voice", href: "/create/audio", icon: lucide(AudioLines), keywords: "sound voice speech tts" },

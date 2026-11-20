@@ -13,7 +13,7 @@ export const STUDIOS: { label: string; href: string; isNew?: boolean }[] = [
   { label: "AI Influencer Studio", href: "/ai-influencer-studio", isNew: true },
   { label: "Ads Studio", href: "/ads-studio", isNew: true },
   { label: "Artist", href: "/artist", isNew: true },
-  { label: "Remix", href: "/remix", isNew: true },
+  { label: "Remix", href: "/create/video?model=smpl-remix", isNew: true },
   // { label: "Video Analyzer", href: "/video-analyzer", isNew: true },
 ];
 

@@ -1,6 +1,5 @@
 "use client";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "./ui/button";
 
@@ -22,14 +21,15 @@ export function UnAuthNavbar() {
               className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >
               {" "}
-              Log In
+              Sign In
             </Button>
-            <Link
-              href="/signup"
+            <button
+              type="button"
+              onClick={() => openLoginModal("sign-up")}
               className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
             >
               Sign Up
-            </Link>
+            </button>
           </div>
         
       </div>

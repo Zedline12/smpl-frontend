@@ -13,14 +13,14 @@ export default async function ProtectedLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const res = await fetchWithToken("/auth/me?include=subscription");
   const json = await res.json();
   const user = json.data;
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in");
   }
   if (user.isSuspended) {
     redirect("/suspended");

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /** Routes under (protected) that render a `position: fixed` prompt composer. */
-const COMPOSER_ROUTES = ["/home"];
+const COMPOSER_ROUTES = ["/"];
 
 /** Set by PromptComposer for the driver.js tour — reused here as a stable hook. */
 const COMPOSER_ELEMENT_ID = "tour-prompt-composer";

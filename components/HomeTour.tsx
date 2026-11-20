@@ -2,9 +2,14 @@
 
 import { useEffect } from "react";
 import "driver.js/dist/driver.css";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
+/** The first-visit tour of the explore page; signed-in users only (it points at their navbar). */
 export function HomeTour() {
+  const { isAuthenticated } = useCurrentUser();
+
   useEffect(() => {
+    if (!isAuthenticated) return;
     if (localStorage.getItem("homeTourDone") === "true") return;
 
     let driverInstance: ReturnType<typeof import("driver.js")["driver"]> | null = null;
@@ -55,7 +60,7 @@ export function HomeTour() {
     return () => {
       driverInstance?.destroy();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return null;
 }

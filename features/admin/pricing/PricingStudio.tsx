@@ -140,7 +140,8 @@ const GROUPS = [
 const ALL_MODELS = GROUPS.flatMap((g) => g.models);
 const EXTRA_NAMES: Record<string, string> = {
   "video-clipping": "Clipping Studio",
-  "video-analyzer": "Video Analyzer",
+  "video-analyzer": "Video Analyzer · Remake prompts",
+  "video-analyzer-script": "Video Analyzer · Script",
 };
 const modelDef = (id: string) => ALL_MODELS.find((m) => m.id === id);
 /** The catalog name (admin-editable), else the bundled one. */

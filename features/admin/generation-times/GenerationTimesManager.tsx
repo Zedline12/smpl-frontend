@@ -42,7 +42,11 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 const NON_TIME_PARAMS = new Set(["prompt", "units", "durationMinutes"]);
-const PER_MINUTE = new Set(["video-clipping", "video-analyzer"]);
+const PER_MINUTE = new Set([
+  "video-clipping",
+  "video-analyzer",
+  "video-analyzer-script",
+]);
 
 function modelName(id: string) {
   if (id === "brand-theme") return "Brand kit extraction";

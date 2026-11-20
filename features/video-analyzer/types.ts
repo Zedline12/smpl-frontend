@@ -11,12 +11,44 @@ export function isActiveStatus(status: VideoAnalysisProjectStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
 }
 
+/**
+ * What an analysis makes:
+ * - remake: fixed-length scenes, each with a prompt to remake it with AI.
+ * - script: the video's script, in sections with timestamps.
+ */
+export type VideoAnalysisType = "remake" | "script";
+
+export const ANALYSIS_TYPES: {
+  value: VideoAnalysisType;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "remake",
+    label: "Remake prompts",
+    description: "A prompt for every scene, ready to remake the video with AI",
+  },
+  {
+    value: "script",
+    label: "Script",
+    description: "The script, split into sections with timestamps",
+  },
+];
+
+export const analysisTypeLabel = (type: VideoAnalysisType | undefined) =>
+  type === "script" ? "Script" : "Remake prompts";
+
+/** One remake scene, or one script section (which leaves visual and prompt empty). */
 export interface VideoAnalysisScene {
   id: string;
   videoAnalysisProjectId: string;
   index: number;
   startTime: number;
   endTime: number;
+  /** Script: what the section does, e.g. "Hook". */
+  title?: string;
+  /** Script: who speaks, when it's clear. */
+  speaker?: string;
   visual: string;
   dialogue: string;
   onScreenText: string;
@@ -32,7 +64,10 @@ export interface VideoAnalysisProject {
   originalVideoUrl: string;
   name: string;
   status: VideoAnalysisProjectStatus;
-  sceneDurationSeconds: 4 | 6 | 8;
+  /** Missing on analyses from before scripts: those are remake. */
+  type?: VideoAnalysisType;
+  /** Remake only. */
+  sceneDurationSeconds: 4 | 6 | 8 | null;
   durationSeconds: number | null;
   totalScenes: number | null;
   /** Only populated by the single-item fetch, not by the list/queues endpoints. */
@@ -46,7 +81,14 @@ export interface VideoAnalysisProject {
 
 export interface CreateVideoAnalysisRequest {
   videoUrl: string;
-  sceneDurationSeconds: 4 | 6 | 8;
+  type: VideoAnalysisType;
+  /** Remake only. */
+  sceneDurationSeconds?: 4 | 6 | 8;
   name?: string;
   prompt?: string;
+}
+
+export interface VideoAnalysisCost {
+  durationSeconds: number;
+  creditsCost: number;
 }

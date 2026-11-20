@@ -55,6 +55,7 @@ import { SeedreamV45OptionsConst } from "@/features/generation/types/models/seed
 import { GptImage2OptionsConst } from "@/features/generation/types/models/gpt-image-2.type";
 import { ElevenLabsV3InputConst } from "@/features/generation/types/models/elevenlabs-v3.type";
 import { GENSU_MAX_IMAGES } from "@/features/generation/types/models/gensu.type";
+import { REMIX_MAX_SECONDS, REMIX_MIN_SECONDS } from "@/features/generation/types/models/remix.type";
 import { GPT_IMAGE_2_MAX_IMAGES } from "@/features/generation/types/models/gpt-image-2.type";
 import {
   AdsMultiplierLimits,
@@ -116,6 +117,7 @@ type EditMode = "create" | "edit";
 // models where prompt is optional (toggle to show)
 const OPTIONAL_PROMPT_MODELS = new Set([
   AiModelsEnum.SMPL_GENSU,
+  AiModelsEnum.SMPL_REMIX,
   AiModelsEnum.SMPL_RIPPER,
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
@@ -141,6 +143,10 @@ const NO_PROMPT_MODELS = new Set([
 
 // per-model prompt label/placeholder (default: "Prompt")
 const PROMPT_COPY: Partial<Record<AiModelsEnum, { label: string; placeholder: string }>> = {
+  [AiModelsEnum.SMPL_REMIX]: {
+    label: "Direction",
+    placeholder: "Keep the outfit from the photo, match the lighting of the video",
+  },
 };
 
 // ─── prompt section ───────────────────────────────────────────────────────────
@@ -633,6 +639,8 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
 
   // dialog open states — each slot can open independently
   const [dlg, setDlg] = useState<string | null>(null);
+  // Remix: the reference video's length is checked when it's picked.
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   if (!s) return null;
 
@@ -780,6 +788,45 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
           selectedImage={s.videoUrl} onSelect={(u) => { set("videoUrl", u[0]); setDlg(null); }} maxSelections={1} mediaType="video" />
         <MediaManagerDialog open={dlg === "images"} onOpenChange={(o) => !o && setDlg(null)}
           selectedImages={images} onSelect={(u) => { set("images", u); setDlg(null); }} maxSelections={GENSU_MAX_IMAGES} />
+      </>
+    );
+  }
+
+  // ── Remix (reference video + one character, run on Gensu) ─────────────────
+  if (model === AiModelsEnum.SMPL_REMIX) {
+    const pickVideo = async (url: string | undefined) => {
+      setDlg(null);
+      if (!url) return;
+      setVideoError(null);
+      const seconds = await readVideoDuration(url);
+      if (seconds !== null && (seconds < REMIX_MIN_SECONDS || seconds > REMIX_MAX_SECONDS + 0.2)) {
+        setVideoError(
+          `The reference video must be ${REMIX_MIN_SECONDS}–${REMIX_MAX_SECONDS} seconds (this one is ${Math.round(seconds)}s).`,
+        );
+        return;
+      }
+      set("videoUrl", url);
+    };
+    return (
+      <>
+        <SingleMediaSlot
+          label={`Reference Video (${REMIX_MIN_SECONDS}–${REMIX_MAX_SECONDS}s)`}
+          type="video"
+          url={s.videoUrl}
+          onOpenPicker={() => setDlg("video")}
+          onClear={() => set("videoUrl", "")}
+        />
+        {videoError && <p className="-mt-1 text-[11px] text-red-400/90">{videoError}</p>}
+        <SingleMediaSlot
+          label="Your Character"
+          url={s.image}
+          onOpenPicker={() => setDlg("img")}
+          onClear={() => set("image", "")}
+        />
+        <MediaManagerDialog open={dlg === "video"} onOpenChange={(o) => !o && setDlg(null)}
+          selectedImage={s.videoUrl} onSelect={(u) => void pickVideo(u[0])} maxSelections={1} mediaType="video" />
+        <MediaManagerDialog open={dlg === "img"} onOpenChange={(o) => !o && setDlg(null)}
+          selectedImage={s.image} onSelect={(u) => { set("image", u[0]); setDlg(null); }} maxSelections={1} />
       </>
     );
   }
@@ -1685,6 +1732,7 @@ export function CreateSidebar() {
   const showSettings =
     !pickerOpen &&
     model !== AiModelsEnum.SMPL_GENSU &&
+    model !== AiModelsEnum.SMPL_REMIX &&
     model !== AiModelsEnum.SMPL_RIPPER &&
     // Its only setting sits in its own panel.
     model !== AiModelsEnum.SMPL_VOICE_CHANGER;

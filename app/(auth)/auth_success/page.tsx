@@ -3,6 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startSuspendedSession } from "@/features/auth/actions/auth";
+import { AUTH_RETURN_KEY } from "@/features/auth/components/AuthFlow";
+
+/** The page the user started a Google / Microsoft sign-in from (same site only). */
+function takeReturnPath(): string {
+  try {
+    const value = sessionStorage.getItem(AUTH_RETURN_KEY);
+    sessionStorage.removeItem(AUTH_RETURN_KEY);
+    const authPage = /^\/(sign-in|sign-up|login|signup)(\/|\?|$)/;
+    if (value && value.startsWith("/") && !value.startsWith("//") && !authPage.test(value)) {
+      return value;
+    }
+  } catch {
+    /* storage blocked */
+  }
+  return "/";
+}
 
 export default function AuthSuccessPage() {
   const router = useRouter();
@@ -46,7 +62,7 @@ export default function AuthSuccessPage() {
           throw new Error("Token exchange failed");
         }
 
-        router.replace("/"); // 👈 better than push for auth
+        router.replace(takeReturnPath());
       } catch (err) {
         console.log(err);
         setError("Authentication failed");

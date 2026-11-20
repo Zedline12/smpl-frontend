@@ -19,12 +19,16 @@ import {
   useDeleteClippingProjectMutation,
 } from "@/features/clipping/hooks/use-clipping";
 import { isActiveStatus, VideoClippingOutput } from "@/features/clipping/types";
-import { hostnameOf, languageLabel, videoTypeLabel } from "@/features/clipping/utils";
-import { ClippingPlatformId, PLATFORM_BY_ID, PlatformIcon, SHAPES } from "@/features/clipping/platforms";
+import {
+  CLIP_ASPECT,
+  hostnameOf,
+  languageLabel,
+  outputPlatforms,
+  videoTypeLabel,
+} from "@/features/clipping/utils";
+import { PLATFORM_BY_ID, PlatformIcon, SHAPES } from "@/features/clipping/platforms";
 import { cn } from "@/lib/utils";
 import { JobProgress } from "@/features/live/JobProgress";
-
-const ASPECT: Record<number, string> = { 1: "9/16", 2: "1/1", 3: "4/5", 4: "16/9" };
 
 function ProjectSkeleton() {
   return (
@@ -44,18 +48,6 @@ function ProjectSkeleton() {
       </div>
     </div>
   );
-}
-
-/** Platforms an output's clips are for (older projects have none: use the shape's usual ones). */
-function outputPlatforms(output: VideoClippingOutput): ClippingPlatformId[] {
-  if (output.platforms?.length) return output.platforms as ClippingPlatformId[];
-  const defaults: Record<number, ClippingPlatformId[]> = {
-    1: ["tiktok", "instagram_reels", "youtube_shorts"],
-    2: ["linkedin", "x"],
-    3: ["instagram_reels"],
-    4: ["youtube"],
-  };
-  return defaults[output.ratio] ?? [];
 }
 
 function OutputStatus({ output, estimatedSeconds }: { output: VideoClippingOutput; estimatedSeconds?: number | null }) {
@@ -107,11 +99,11 @@ export default function ClippingProjectPage() {
     return (
       <div className="mx-auto max-w-6xl p-5 md:p-8">
         <Link
-          href="/clipping-studio"
+          href="/clipping-studio/clips"
           className="text-white/60 hover:text-white mb-6 inline-flex items-center gap-1.5 text-sm transition-colors"
         >
           <ArrowLeft className="size-4" />
-          Back to projects
+          Back to my clips
         </Link>
         <p className="text-white/60 text-sm">
           {error instanceof Error ? error.message : "This clipping project could not be found."}
@@ -130,11 +122,11 @@ export default function ClippingProjectPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-5 md:p-8">
       <Link
-        href="/clipping-studio"
+        href="/clipping-studio/clips"
         className="text-white/60 hover:text-white inline-flex items-center gap-1.5 text-sm transition-colors"
       >
         <ArrowLeft className="size-4" />
-        Back to projects
+        Back to my clips
       </Link>
 
       <header className="flex flex-col gap-3">
@@ -252,7 +244,7 @@ export default function ClippingProjectPage() {
               projectId={project.id}
               clips={current.clips}
               platforms={outputPlatforms(current)}
-              aspect={ASPECT[current.ratio] ?? "9/16"}
+              aspect={CLIP_ASPECT[current.ratio] ?? "9/16"}
             />
           )}
         </>

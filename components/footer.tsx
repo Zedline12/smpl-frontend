@@ -25,7 +25,7 @@ const studios: FooterLink[] = [
   { href: "/ads-studio", label: "Ads Studio" },
   { href: "/ai-influencer-studio", label: "AI Influencer" },
   { href: "/artist", label: "Artist" },
-  { href: "/remix", label: "Remix" },
+  { href: "/create/video?model=smpl-remix", label: "Remix" },
   { href: "/video-analyzer", label: "Video Analyzer" },
   { href: "/prompt-maker", label: "Prompt Maker" },
 ];
@@ -79,7 +79,6 @@ const NO_FOOTER = [
   "/ads-studio",
   "/ai-influencer-studio",
   "/artist",
-  "/remix",
   "/video-analyzer",
   "/prompt-maker",
 ];

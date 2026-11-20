@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useCheckout } from "../hooks/use-checkout";
 import { isFreePlan } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
 import { PromoCodeBox } from "./PromoCodeBox";
@@ -165,7 +166,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
   // Paying users switch plans in place; a second checkout would start a second subscription.
   const handleSubscribe = (planId: string) => {
     if (!user) {
-      router.push("/login");
+      useAuthStore.getState().openLoginModal("sign-up");
       return;
     }
     if (!isFreePlan(user)) {

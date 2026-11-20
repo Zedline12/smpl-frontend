@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+import { MyAnalyses } from "@/features/video-analyzer/components/MyAnalyses";
 
-/** The analyses list now lives on the analyzer page itself. */
 export default function VideoAnalysesPage() {
-  redirect("/video-analyzer");
+  return <MyAnalyses />;
 }

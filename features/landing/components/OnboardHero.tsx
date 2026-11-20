@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { OpenAuthButton } from "@/features/auth/components/OpenAuthButton";
 import { ArrowRight, Check } from "lucide-react";
 import {
   HERO_BULLETS,
@@ -72,13 +72,13 @@ export function OnboardHero() {
             ))}
           </ul>
 
-          <Link
-            href="/signup"
-            className="bg-background text-foreground hover:bg-background-light inline-flex w-fit items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+          <OpenAuthButton
+            mode="sign-up"
+            className="bg-background text-foreground hover:bg-background-light inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
           >
             Start creating free
             <ArrowRight className="size-4" />
-          </Link>
+          </OpenAuthButton>
         </div>
       </div>
 

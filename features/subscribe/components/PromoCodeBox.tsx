@@ -56,7 +56,7 @@ export function PromoCodeBox({
   if (!isSignedIn && pendingCode) {
     return (
       <p className="mb-8 px-4 text-center text-[13px] text-muted-foreground">
-        Log in to use code <span className="font-mono font-bold text-foreground">{pendingCode}</span>.
+        Sign in to use code <span className="font-mono font-bold text-foreground">{pendingCode}</span>.
       </p>
     );
   }

@@ -1,10 +1,10 @@
 "use server";
 
-import { authLoginSchema, authSignupSchema } from "../schemas/auth.schema";
+import { authLoginSchema } from "../schemas/auth.schema";
 import { z } from "zod";
 
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { fetchWithToken } from "@/lib/fetcher";
 import { clientIpHeader } from "@/lib/client-ip";
 import { AUTH_COOKIE_OPTIONS } from "@/lib/auth-tokens";
@@ -16,7 +16,88 @@ export async function logout() {
   cookieStore.delete("token");
   cookieStore.delete("refresh_token");
   cookieStore.delete(SUSPENDED_COOKIE);
-  redirect(`/login`);
+  redirect(`/sign-in`);
+}
+
+/** How a sign-in attempt ended: signed in (go to `redirectTo`), or an error to show. */
+export type SignInResult =
+  /** `isNewUser`: an email code just created the account (its avatar is made next). */
+  | { ok: true; redirectTo: string | null; isNewUser?: boolean }
+  | { ok: false; message: string };
+
+/**
+ * Stores the session from a sign-in response, or turns its error into a result.
+ * Suspended and blocked accounts are sent to their pages (`redirectTo`).
+ */
+async function finishSignIn(
+  response: Response,
+  fallbackError: string,
+): Promise<SignInResult> {
+  const result = await response.json().catch(() => null);
+  const errorCode = getApiErrorCode(result);
+  if (errorCode === ApiErrorCode.IP_BLOCKED) {
+    return { ok: true, redirectTo: BLOCKED_PATH };
+  }
+  const suspendedToken = result?.error?.details?.suspendedToken;
+  if (errorCode === ApiErrorCode.ACCOUNT_SUSPENDED && suspendedToken) {
+    await startSuspendedSession(suspendedToken);
+    return { ok: true, redirectTo: "/suspended" };
+  }
+  if (!response.ok || !result?.data?.token) {
+    const message = result?.message ?? result?.error?.message;
+    return { ok: false, message: typeof message === "string" ? message : fallbackError };
+  }
+  const { token, refreshToken } = result.data;
+  const cookieStore = await cookies();
+  cookieStore.delete(SUSPENDED_COOKIE);
+  cookieStore.set("token", token, AUTH_COOKIE_OPTIONS);
+  cookieStore.set("refresh_token", refreshToken, AUTH_COOKIE_OPTIONS);
+  return { ok: true, redirectTo: null, isNewUser: !!result.data.isNewUser };
+}
+
+/** Emails a 6-digit sign-in code (for new emails too). */
+export async function requestLoginCode(
+  email: string,
+  captchaToken: string,
+): Promise<{ ok: true; resendInSeconds: number } | { ok: false; message: string }> {
+  try {
+    const requestHeaders = await headers();
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      body: JSON.stringify({ email, captchaToken }),
+    });
+    const result = await response.json().catch(() => null);
+    if (getApiErrorCode(result) === ApiErrorCode.IP_BLOCKED) redirect(BLOCKED_PATH);
+    if (!response.ok) {
+      const message = result?.message;
+      return { ok: false, message: typeof message === "string" ? message : "Couldn't send the code. Try again." };
+    }
+    return { ok: true, resendInSeconds: result?.data?.resendInSeconds ?? result?.resendInSeconds ?? 30 };
+  } catch (error) {
+    unstable_rethrow(error);
+    return { ok: false, message: "Couldn't send the code. Try again." };
+  }
+}
+
+/** Signs in with the emailed code; an email with no account gets one. */
+export async function verifyLoginCode(
+  email: string,
+  code: string,
+  refToken?: string | null,
+): Promise<SignInResult> {
+  try {
+    const requestHeaders = await headers();
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/code/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      body: JSON.stringify({ email, code, ...(refToken ? { refToken } : {}) }),
+    });
+    return await finishSignIn(response, "That code didn't work. Try again.");
+  } catch (error) {
+    unstable_rethrow(error);
+    return { ok: false, message: "Something went wrong. Please try again." };
+  }
 }
 
 /**
@@ -36,65 +117,31 @@ export async function startSuspendedSession(suspendedToken: string) {
     maxAge: 60 * 60,
   });
 }
+/** Email + password sign-in. */
 export async function login(
   unsafeData: z.infer<typeof authLoginSchema>,
   captchaToken: string,
-): Promise<{ error: boolean; message: string } | undefined> {
+): Promise<SignInResult> {
   const { success, data } = authLoginSchema.safeParse(unsafeData);
   if (!success) {
-    return { error: true, message: "Invalid input data" };
+    return { ok: false, message: "Enter your email and password." };
   }
   if (!captchaToken) {
-    return { error: true, message: "Captcha verification is required" };
+    return { ok: false, message: "Captcha verification is required" };
   }
-
-  let suspended = false;
-  let blocked = false;
   try {
     const requestHeaders = await headers();
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/email/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...clientIpHeader(requestHeaders),
-        },
-       
-          body: JSON.stringify({ ...data, captchaToken }),
-      },
-    );
-
-    const result = await response.json();
-
-    const errorCode = getApiErrorCode(result);
-    const suspendedToken = result?.error?.details?.suspendedToken;
-    if (errorCode === ApiErrorCode.IP_BLOCKED) {
-      blocked = true;
-    } else if (errorCode === ApiErrorCode.ACCOUNT_SUSPENDED && suspendedToken) {
-      await startSuspendedSession(suspendedToken);
-      suspended = true;
-    } else if (!response.ok) {
-      return {
-        error: true,
-        message: result.message || "Invalid email or password",
-      };
-    } else {
-      const { token, refreshToken } = result.data;
-
-      const cookieStore = await cookies();
-      cookieStore.delete(SUSPENDED_COOKIE);
-
-      cookieStore.set("token", token, AUTH_COOKIE_OPTIONS);
-
-      cookieStore.set("refresh_token", refreshToken, AUTH_COOKIE_OPTIONS);
-    }
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      body: JSON.stringify({ ...data, captchaToken }),
+    });
+    return await finishSignIn(response, "Invalid email or password");
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Login error:", error);
-    return { error: true, message: "Something went wrong. Please try again." };
+    return { ok: false, message: "Something went wrong. Please try again." };
   }
-
-  redirect(blocked ? BLOCKED_PATH : suspended ? `/suspended` : `/`);
 }
 
 export async function exchangeToken(exchangeToken: string) {
@@ -147,41 +194,4 @@ export async function confirmEmail(hash: string) {
   cookieStore.set("refresh_token", refreshToken, AUTH_COOKIE_OPTIONS);
 
   return { success: true };
-}
-
-export async function signup(
-  unsafeData: z.infer<typeof authSignupSchema>,
-  captchaToken: string,
-): Promise<
-  | { error?: boolean; message?: string; success?: boolean; data?: any }
-  | undefined
-> {
-  const { success, data } = authSignupSchema.safeParse(unsafeData);
-  if (!success) {
-    return { error: true, message: "Validation Error" };
-  }
-  if (!captchaToken) {
-    return { error: true, message: "Captcha verification is required" };
-  }
-  const requestHeaders = await headers();
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/email/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...clientIpHeader(requestHeaders),
-      },
-      body: JSON.stringify({ ...data, captchaToken }),
-    },
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    if (getApiErrorCode(errorData) === ApiErrorCode.IP_BLOCKED) {
-      redirect(BLOCKED_PATH);
-    }
-    return { error: true, message: errorData.message || "Registration failed" };
-  }
-  return;
 }

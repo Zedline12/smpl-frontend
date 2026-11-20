@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
 
   useEffect(() => {
     if (step === "done") {
-      const t = setTimeout(() => router.push("/login"), 2500);
+      const t = setTimeout(() => router.push("/sign-in"), 2500);
       return () => clearTimeout(t);
     }
   }, [step, router]);
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
             Password reset!
           </h2>
           <p className="text-[13px] mb-5" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Redirecting you to login…
+            Taking you to sign in…
           </p>
         </div>
       )}
@@ -73,11 +73,11 @@ export default function ForgotPasswordPage() {
         <p className="text-center mt-7" style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
           Remember it?{" "}
           <Link
-            href="/login"
+            href="/sign-in"
             className="font-semibold hover:text-[#b89dff] transition-colors duration-150"
             style={{ color: "#9370ff", textDecoration: "none" }}
           >
-            Back to login
+            Back to sign in
           </Link>
         </p>
       )}

@@ -63,6 +63,7 @@ const DEFAULT_GENERATORS = new Set([
   "smpl-ai-influencer",
   "smpl-ads-studio",
   "video-analyzer",
+  "video-analyzer-script",
   "video-clipping",
 ]);
 const DEFAULT_COMPUTE = new Set([

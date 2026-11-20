@@ -910,28 +910,6 @@ select:focus {
   }
 }
 
-/* Remix generating tile: a film strip scrolling past a playhead, frames lighting up as they're cut. */
-@keyframes film-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.animate-film-scroll {
-  animation: film-scroll 6s linear infinite;
-}
-@keyframes frame-cut {
-  0%, 70%, 100% { opacity: 0; }
-  80%           { opacity: 1; }
-}
-.animate-frame-cut {
-  animation: frame-cut 2.4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-film-scroll,
-  .animate-frame-cut {
-    animation: none;
-  }
-}
-
 /* ── react-colorful overrides ────────────────────────────── */
 
 .react-colorful {
@@ -1097,7 +1075,7 @@ body[data-media-selecting] #tour-prompt-composer {
   }
 }
 
-/* Clipping Studio hero: social feeds scrolling, a playhead cutting clips, stats floating up. */
+/* Clipping Studio hero: social feeds scrolling, a playhead cutting clips. */
 @keyframes feed-scroll-up {
   from { transform: translateY(0); }
   to   { transform: translateY(-50%); }
@@ -1134,15 +1112,6 @@ body[data-media-selecting] #tour-prompt-composer {
 .animate-snip {
   animation: snip 1.2s ease-in-out infinite;
 }
-@keyframes float-up {
-  0%   { transform: translateY(30px) scale(0.9); opacity: 0; }
-  15%  { opacity: 1; }
-  80%  { opacity: 1; }
-  100% { transform: translateY(-140px) scale(1); opacity: 0; }
-}
-.animate-float-up {
-  animation: float-up 7s ease-in-out infinite;
-}
 @keyframes cut-flash {
   0%, 85%, 100% { opacity: 0.15; }
   90%           { opacity: 1; }
@@ -1156,108 +1125,8 @@ body[data-media-selecting] #tour-prompt-composer {
   .animate-phone-float,
   .animate-playhead,
   .animate-snip,
-  .animate-float-up,
   .animate-cut-flash {
     animation: none;
-  }
-}
-
-/* Clipping progress: a beam scans the film, the scissors cut, and finished clips pop out. */
-@keyframes clip-pop {
-  0%   { transform: translateY(10px) scale(0.4) rotate(0deg); opacity: 0; }
-  20%  { transform: translateY(-14px) scale(1) rotate(var(--pop-tilt, -6deg)); opacity: 1; }
-  70%  { transform: translateY(-34px) scale(1) rotate(var(--pop-tilt, -6deg)); opacity: 1; }
-  100% { transform: translateY(-52px) scale(0.85) rotate(var(--pop-tilt, -6deg)); opacity: 0; }
-}
-.animate-clip-pop {
-  animation: clip-pop 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-@keyframes scan-beam {
-  0%   { transform: translateX(-120%); }
-  100% { transform: translateX(520%); }
-}
-.animate-scan-beam {
-  animation: scan-beam 2.8s ease-in-out infinite;
-}
-@keyframes status-cycle {
-  0%, 22%  { opacity: 1; transform: translateY(0); }
-  25%, 97% { opacity: 0; transform: translateY(-6px); }
-  100%     { opacity: 0; transform: translateY(6px); }
-}
-.animate-status-cycle {
-  animation: status-cycle 10s ease-in-out infinite;
-}
-@keyframes spark {
-  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
-}
-.animate-spark {
-  animation: spark 1.2s ease-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-clip-pop,
-  .animate-scan-beam,
-  .animate-spark {
-    animation: none;
-  }
-  .animate-status-cycle {
-    animation: none;
-    opacity: 0;
-  }
-  .animate-status-cycle:first-child {
-    opacity: 1;
-  }
-}
-
-/* Video Analyzer: film strips drift, a beam scans them, detection boxes flash, audio bars pulse. */
-@keyframes analyzer-strip-left {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-@keyframes analyzer-strip-right {
-  from { transform: translateX(-50%); }
-  to   { transform: translateX(0); }
-}
-.animate-analyzer-strip-left {
-  animation: analyzer-strip-left var(--strip-speed, 60s) linear infinite;
-}
-.animate-analyzer-strip-right {
-  animation: analyzer-strip-right var(--strip-speed, 60s) linear infinite;
-}
-@keyframes analyzer-sweep {
-  0%   { left: -4%; }
-  100% { left: 104%; }
-}
-.animate-analyzer-sweep {
-  animation: analyzer-sweep var(--sweep-speed, 7s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-@keyframes analyzer-box {
-  0%, 100% { opacity: 0; transform: scale(1.12); }
-  12%      { opacity: 1; transform: scale(1); }
-  55%      { opacity: 1; transform: scale(1); }
-  70%      { opacity: 0; transform: scale(0.97); }
-}
-.animate-analyzer-box {
-  animation: analyzer-box 6s ease-out infinite;
-}
-@keyframes analyzer-bar {
-  0%, 100% { transform: scaleY(0.25); }
-  50%      { transform: scaleY(1); }
-}
-.animate-analyzer-bar {
-  transform-origin: bottom;
-  animation: analyzer-bar var(--bar-speed, 1.4s) ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-analyzer-strip-left,
-  .animate-analyzer-strip-right,
-  .animate-analyzer-sweep,
-  .animate-analyzer-bar {
-    animation: none;
-  }
-  .animate-analyzer-box {
-    animation: none;
-    opacity: 1;
   }
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { User } from "@/features/auth/types/auth";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { LiveEventsProvider } from "@/features/live/LiveEventsProvider";
 import { PaymentFailedNotice } from "@/features/billing-result/PaymentFailedNotice";
+import { OutOfCreditsModal } from "@/features/credit-packs/components/OutOfCreditsModal";
 
 const AuthContext = createContext<any>(null);
 
@@ -16,11 +17,18 @@ export default function AuthProvider({
 }) {
   const [currentUser, setCurrentUser] = useState(user);
 
+  // The layout passes a new user after sign-in / sign-out (`router.refresh()`): follow it,
+  // or the navbar keeps showing whoever was there when the page first loaded.
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
+
   return (
     <AuthContext.Provider value={{ user: currentUser, setCurrentUser }}>
       {children}
       <LiveEventsProvider />
       {currentUser && <PaymentFailedNotice />}
+      {currentUser && <OutOfCreditsModal />}
     </AuthContext.Provider>
   );
 }

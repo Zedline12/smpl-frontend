@@ -103,6 +103,58 @@ export async function removeBlockedIp(id: string): Promise<void> {
   if (!res.ok) throw new Error("Couldn't remove this IP");
 }
 
+export type SignupRejectionReason = "turnstile" | "risky_email";
+
+export interface SignupRejection {
+  id: string;
+  email: string;
+  reason: SignupRejectionReason;
+  /** Risky email: the score and what added to it (e.g. `blocked_tld:.bid`, `no_mx`). */
+  score: number | null;
+  signals: string[];
+  /** Turnstile: Cloudflare's error codes. */
+  detail: string | null;
+  clientIp: string | null;
+  /** From the IP lookup; null when unknown. */
+  country: string | null;
+  countryCode: string | null;
+  city: string | null;
+  createdAt: string;
+}
+
+export async function fetchRejectedSignups(
+  page: number,
+  reason?: SignupRejectionReason,
+): Promise<Paged<SignupRejection>> {
+  const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+  if (reason) params.set("reason", reason);
+  return readJson(await fetch(`/api/admin/security/rejected-signups?${params.toString()}`));
+}
+
+/** Unwraps `{ tlds }`, possibly inside the backend's `{ data }`. */
+function readTlds(json: any): string[] {
+  const body = json?.data && !Array.isArray(json.data) ? json.data : json;
+  return Array.isArray(body?.tlds) ? body.tlds : [];
+}
+
+export async function fetchBlockedTlds(): Promise<string[]> {
+  const res = await fetch("/api/admin/security/blocked-tlds");
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json?.error || "Couldn't load blocked TLDs");
+  return readTlds(json);
+}
+
+export async function saveBlockedTlds(tlds: string[]): Promise<string[]> {
+  const res = await fetch("/api/admin/security/blocked-tlds", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tlds }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json?.error || "Couldn't save blocked TLDs");
+  return readTlds(json);
+}
+
 export async function patchUser(userId: string, isSuspended: boolean) {
   const res = await fetch(`/api/admin/users/${userId}`, {
     method: "PATCH",
@@ -114,7 +166,13 @@ export async function patchUser(userId: string, isSuspended: boolean) {
 
 /** Suspending changes every tab (lists, counts, and the IP block list). */
 export function invalidateSecurityQueries(qc: QueryClient) {
-  for (const key of ["security-users", "security-paid-users", "security-stats", "security-blocked-ips"]) {
+  for (const key of [
+    "security-users",
+    "security-paid-users",
+    "security-stats",
+    "security-blocked-ips",
+    "security-rejected-signups",
+  ]) {
     qc.invalidateQueries({ queryKey: [key] });
   }
 }

@@ -5,6 +5,8 @@ import {
   RATIOS,
   VIDEO_TYPES,
 } from "./constants";
+import type { ClippingPlatformId } from "./platforms";
+import type { VideoClippingOutput } from "./types";
 
 /**
  * Accepts "youtube.com/watch?v=x" as well as a full URL and always returns one
@@ -85,4 +87,19 @@ export function parseViralScore(raw: string | null | undefined): number | null {
   // Some providers report 0-10 rather than 0-100.
   const normalized = parsed > 0 && parsed <= 10 ? parsed * 10 : parsed;
   return Math.max(0, Math.min(100, Math.round(normalized)));
+}
+
+/** CSS aspect-ratio for each clip shape (Vizard ratioOfClip). */
+export const CLIP_ASPECT: Record<number, string> = { 1: "9/16", 2: "1/1", 3: "4/5", 4: "16/9" };
+
+/** Platforms an output's clips are for (older projects have none: use the shape's usual ones). */
+export function outputPlatforms(output: VideoClippingOutput): ClippingPlatformId[] {
+  if (output.platforms?.length) return output.platforms as ClippingPlatformId[];
+  const defaults: Record<number, ClippingPlatformId[]> = {
+    1: ["tiktok", "instagram_reels", "youtube_shorts"],
+    2: ["linkedin", "x"],
+    3: ["instagram_reels"],
+    4: ["youtube"],
+  };
+  return defaults[output.ratio] ?? [];
 }

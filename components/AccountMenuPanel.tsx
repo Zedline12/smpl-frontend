@@ -14,11 +14,10 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserAvatar, remainingFraction } from "@/components/UserAvatar";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
 import { isFreePlan as isUserOnFreePlan } from "@/lib/subscription";
 
-const AVATAR_GRADIENT =
-  "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)";
 
 const DOT_COUNT = 20;
 
@@ -70,8 +69,8 @@ export function AccountMenuPanel({
   onSignOut,
   onSupport,
 }: AccountMenuPanelProps) {
-  const { remaining, allowance, usedPercentage, hasAllowance } =
-    useCreditsAllowance(user);
+  const allowanceInfo = useCreditsAllowance(user);
+  const { remaining, allowance, usedPercentage, hasAllowance } = allowanceInfo;
 
   const planName: string = user?.subscription?.name ?? "Free Plan";
   const isFreePlan = isUserOnFreePlan(user);
@@ -83,14 +82,7 @@ export function AccountMenuPanel({
     <div className="border-border bg-popover absolute top-full right-0 mt-2 w-72 rounded-2xl border p-1.5 shadow-lg">
       {/* Identity */}
       <div className="flex items-center gap-2.5 px-2 py-2">
-        <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-full p-[2px]"
-          style={{ background: AVATAR_GRADIENT }}
-        >
-          <span className="flex size-full items-center justify-center rounded-full bg-neutral-900">
-            <User className="size-4 text-white" />
-          </span>
-        </span>
+        <UserAvatar user={user} size={34} progress={remainingFraction(allowanceInfo)} />
         <div className="min-w-0">
           <p className="text-foreground truncate text-sm font-semibold">
             {displayName(user)}

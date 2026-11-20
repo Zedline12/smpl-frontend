@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { SIDEBAR_SECTIONS } from "./sidebar";
 import Link from "next/link";
 import { useAuth } from "@/providers/AuthProvider";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export type BottomNavItem = {
   title: string;
@@ -18,6 +19,7 @@ interface BottomNavbarProps {
 export default function BottomNavbar({ items }: BottomNavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useAuth();
+  const openLoginModal = useAuthStore((s) => s.openLoginModal);
 
   return (
     <>
@@ -58,8 +60,14 @@ export default function BottomNavbar({ items }: BottomNavbarProps) {
                   {section.items.map((item, itemIdx) => (
                     <Link
                       key={itemIdx}
-                      href={user ? item.url : "/login"}
-                      onClick={() => setIsMenuOpen(false)}
+                      href={user ? item.url : "/sign-in"}
+                      onClick={(e) => {
+                        setIsMenuOpen(false);
+                        if (!user) {
+                          e.preventDefault();
+                          openLoginModal();
+                        }
+                      }}
                       className="flex flex-col items-center justify-center p-4 bg-background-lighter rounded-xl hover:bg-neutral-800 transition-colors gap-2"
                     >
                       <div className="text-secondary-foreground">
@@ -119,7 +127,13 @@ export default function BottomNavbar({ items }: BottomNavbarProps) {
             return (
               <Link
                 key={index}
-                href={user ? item.link || "#" : "/login"}
+                href={user ? item.link || "#" : "/sign-in"}
+                onClick={(e) => {
+                  if (!user) {
+                    e.preventDefault();
+                    openLoginModal();
+                  }
+                }}
                 className="flex flex-col items-center justify-center gap-1 w-full p-2 group"
               >
                 {Content}

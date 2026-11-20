@@ -2,23 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useSignOut } from "@/features/auth/hooks/use-sign-out";
+import { UserAvatar, useCreditsRemaining } from "@/components/UserAvatar";
 import { AccountMenuPanel } from "@/components/AccountMenuPanel";
 import { SupportModal } from "@/features/support/components/SupportModal";
 import { isFreePlan } from "@/lib/subscription";
 
 const TRI_GRADIENT =
   "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)";
-const AVATAR_GRADIENT =
-  "linear-gradient(135deg, #ea4bff 0%, #2fcefd 55%, #ff6b00 100%)";
 
 const CLOSE_DELAY = 120;
 
-/** Navbar actions shown to a signed-in user: credits pill + account menu. */
+/** The signed-in user's avatar (with the credits-left ring) and account menu. */
 export function NavbarUserMenu({ user }: { user: any }) {
-  const router = useRouter();
   const pathname = usePathname();
+  const signOut = useSignOut();
+  const creditsLeft = useCreditsRemaining(user);
 
   const [isOpen, setIsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -66,24 +66,17 @@ export function NavbarUserMenu({ user }: { user: any }) {
 
   const handleLogout = async () => {
     close();
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/onboard");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
+    await signOut();
   };
 
   return (
     <>
       <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
-      <CreditsPill user={user} className="hidden sm:block" />
 
       {/* The panel lives inside this wrapper, so moving onto it never fires
           onMouseLeave and the mt-2 gap needs no bridging element. */}
       <div
-        className="relative ml-2 sm:ml-4"
+        className="relative"
         onMouseEnter={open}
         onMouseLeave={scheduleClose}
       >
@@ -97,18 +90,15 @@ export function NavbarUserMenu({ user }: { user: any }) {
           aria-haspopup="menu"
           className="group/avatar relative block cursor-pointer"
         >
-          {/* Thick gradient border ring */}
-          <div
-            className="relative rounded-full p-[2px]"
-            style={{ background: AVATAR_GRADIENT }}
-          >
-            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-neutral-900">
-              <User
-                className="h-3.5 w-3.5 sm:h-4 sm:w-4"
-                style={{ color: "#ea4bff" }}
-              />
-            </div>
-          </div>
+          {/* Thin primary ring = share of the plan's credits still left */}
+          <UserAvatar
+            user={user}
+            size={28}
+            progress={creditsLeft}
+          />
+          <span className="sr-only">
+            {Math.round(creditsLeft * 100)}% of credits left
+          </span>
         </button>
 
         {isOpen && (

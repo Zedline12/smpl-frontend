@@ -2,19 +2,13 @@
 
 import { createElement, FormEvent, useMemo, useRef, useState } from "react";
 import {
-  Check,
-  ChevronDown,
   FileVideo,
-  Globe,
-  Hash,
   Languages,
   Link2,
   Loader2,
   Scissors,
   Search,
-  SlidersHorizontal,
   Timer,
-  Type,
   UploadCloud,
   X,
 } from "lucide-react";
@@ -25,10 +19,7 @@ import {
   DEFAULT_LANG,
   INITIAL_VIDEO_TYPE,
   LANGUAGES,
-  MAX_CLIP_NUMBER,
-  MIN_CLIP_NUMBER,
   PREFER_LENGTHS,
-  VIDEO_TYPES,
 } from "../constants";
 import { videoTypeIcon } from "../icons";
 import { useClippingCostQuery } from "../hooks/use-clipping";
@@ -45,10 +36,6 @@ import {
 } from "../platforms";
 
 const SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-widest text-white/50";
-const FIELD_ROW =
-  "flex h-11 w-full items-center gap-3 rounded-xl border border-white/10 bg-transparent px-3 transition-colors focus-within:border-white/50";
-const FIELD_INPUT =
-  "ml-auto h-full min-w-0 flex-1 bg-transparent text-right text-xs text-white outline-none placeholder:text-white/35";
 
 /** Settings rows on the hero: no fill, just the outline. */
 const MENU_TRIGGER =
@@ -59,7 +46,6 @@ const LENGTH_OPTIONS = [
   { id: "platform", label: "Best for my platforms" },
   ...PREFER_LENGTHS.map((p) => ({ id: String(p.value), label: p.label })),
 ];
-const SOURCE_OPTIONS = VIDEO_TYPES.map((t) => ({ id: String(t.value), label: t.label }));
 
 const UPLOAD_TYPES = ["video/mp4", "video/quicktime", "video/webm", "video/x-m4v", "video/x-matroska"];
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024 * 1024;
@@ -71,9 +57,6 @@ const EXT_BY_TYPE: Record<string, string> = {
   "video/x-m4v": "m4v",
   "video/x-matroska": "mkv",
 };
-
-/** Temporarily hidden — kept wired so they can be switched back on. */
-const SHOW_PROVIDER_FIELDS = false;
 
 interface CreateClippingFormProps {
   onSubmit: (values: CreateVideoClippingRequest) => void;
@@ -107,18 +90,7 @@ export function CreateClippingForm({
   const [lang, setLang] = useState(DEFAULT_LANG);
   const [length, setLength] = useState<string>("platform");
   const [error, setError] = useState<string | null>(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  // Advanced
-  const [videoTypeOverride, setVideoTypeOverride] = useState<number | null>(null);
-  const [projectName, setProjectName] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [maxClipNumber, setMaxClipNumber] = useState("");
-  const [templateId, setTemplateId] = useState("");
-  const [clipModel, setClipModel] = useState("");
-  const [removeSilence, setRemoveSilence] = useState(false);
-  const [subtitles, setSubtitles] = useState(true);
-  const [headline, setHeadline] = useState(true);
 
   const normalizedUrl = useMemo(() => normalizeVideoUrl(videoUrl), [videoUrl]);
   const detectedType = useMemo(
@@ -126,7 +98,7 @@ export function CreateClippingForm({
     [normalizedUrl],
   );
   // Before anything is typed the form assumes YouTube.
-  const effectiveType = videoTypeOverride ?? detectedType ?? INITIAL_VIDEO_TYPE;
+  const effectiveType = detectedType ?? INITIAL_VIDEO_TYPE;
 
   const sourceUrl = sourceKind === "upload" ? (upload?.url ?? null) : normalizedUrl;
   const groups = useMemo(() => groupByShape(platforms), [platforms]);
@@ -194,16 +166,6 @@ export function CreateClippingForm({
       setError(upload?.error ?? "Upload a video first.");
       return;
     }
-    const clipCount = maxClipNumber.trim() ? Number.parseInt(maxClipNumber, 10) : undefined;
-    if (
-      clipCount !== undefined &&
-      (!Number.isFinite(clipCount) || clipCount < MIN_CLIP_NUMBER || clipCount > MAX_CLIP_NUMBER)
-    ) {
-      setError(`Max clips must be between ${MIN_CLIP_NUMBER} and ${MAX_CLIP_NUMBER}.`);
-      return;
-    }
-    const parsedTemplateId = templateId.trim() ? Number.parseInt(templateId, 10) : undefined;
-
     setError(null);
     onSubmit({
       videoUrl: sourceKind === "upload" ? upload!.url! : normalizedUrl!,
@@ -213,21 +175,15 @@ export function CreateClippingForm({
       platforms,
       // Without a choice, each platform's best lengths are used.
       ...(length !== "platform" ? { preferLength: [Number(length)] } : {}),
-      ...(clipCount !== undefined ? { maxClipNumber: clipCount } : {}),
-      ...(parsedTemplateId !== undefined && Number.isFinite(parsedTemplateId)
-        ? { templateId: parsedTemplateId }
-        : {}),
       ...(keyword.trim() ? { keyword: keyword.trim() } : {}),
-      ...(projectName.trim() ? { projectName: projectName.trim() } : {}),
-      ...(clipModel.trim() ? { clipModel: clipModel.trim() } : {}),
-      removeSilence,
-      subtitles,
-      headline,
+      // No longer offered: the defaults they always had.
+      removeSilence: false,
+      subtitles: true,
+      headline: true,
     });
 
     setVideoUrl("");
     setUpload(null);
-    setProjectName("");
     setKeyword("");
   };
 
@@ -413,6 +369,7 @@ export function CreateClippingForm({
             selected={[lang]}
             max={1}
             triggerClassName={MENU_TRIGGER}
+            tone="plain"
             onChange={([value]) => value && setLang(value)}
           />
           <StyleMenuButton
@@ -422,123 +379,26 @@ export function CreateClippingForm({
             selected={[length]}
             max={1}
             triggerClassName={MENU_TRIGGER}
+            tone="plain"
             onChange={([value]) => value && setLength(value)}
           />
         </div>
+        <label className="flex h-11 w-full items-center gap-3 rounded-xl border border-white/10 bg-transparent px-3 transition-colors focus-within:border-white/50">
+          <Search className="size-4 shrink-0 text-white" />
+          <span className="shrink-0 text-sm font-medium text-white">Focus on</span>
+          <span className="shrink-0 rounded-md bg-white/[0.06] px-1.5 py-px text-[10px] font-medium text-white/50">
+            Optional
+          </span>
+          <input
+            type="text"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            maxLength={200}
+            placeholder="e.g. pricing, funny moments"
+            className="h-full min-w-0 flex-1 bg-transparent text-right text-xs text-white outline-none placeholder:text-white/35"
+          />
+        </label>
       </div>
-
-      {/* Advanced */}
-      <button
-        type="button"
-        onClick={() => setShowAdvanced((previous) => !previous)}
-        className="flex h-11 w-full cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-transparent px-3 text-left transition-colors hover:border-white/25"
-      >
-        <SlidersHorizontal className="size-4 shrink-0 text-white/50" />
-        <span className="text-sm font-medium text-white">Advanced options</span>
-        <ChevronDown
-          className={cn("ml-auto size-4 text-white/40 transition-transform", showAdvanced && "rotate-180")}
-        />
-      </button>
-
-      {showAdvanced && (
-        <div className="grid gap-3 rounded-xl border border-white/10 bg-transparent p-3 sm:grid-cols-2">
-          {sourceKind === "link" && (
-            <StyleMenuButton
-              icon={Globe}
-              label="Source"
-              options={SOURCE_OPTIONS}
-              selected={[String(effectiveType)]}
-              max={1}
-              triggerClassName={MENU_TRIGGER}
-              onChange={([value]) => value && setVideoTypeOverride(Number(value))}
-            />
-          )}
-          <label className={FIELD_ROW}>
-            <Hash className="size-4 shrink-0 text-white/50" />
-            <span className="shrink-0 text-sm font-medium text-white">Max clips</span>
-            <input
-              type="number"
-              min={MIN_CLIP_NUMBER}
-              max={MAX_CLIP_NUMBER}
-              value={maxClipNumber}
-              onChange={(event) => setMaxClipNumber(event.target.value)}
-              placeholder="Auto"
-              className={FIELD_INPUT}
-            />
-          </label>
-          <label className={FIELD_ROW}>
-            <Type className="size-4 shrink-0 text-white/50" />
-            <span className="shrink-0 text-sm font-medium text-white">Name</span>
-            <input
-              type="text"
-              value={projectName}
-              onChange={(event) => setProjectName(event.target.value)}
-              placeholder="Optional"
-              className={FIELD_INPUT}
-            />
-          </label>
-          <label className={FIELD_ROW}>
-            <Search className="size-4 shrink-0 text-white/50" />
-            <span className="shrink-0 text-sm font-medium text-white">Focus on</span>
-            <input
-              type="text"
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="e.g. pricing, funny moments"
-              className={FIELD_INPUT}
-            />
-          </label>
-
-          {SHOW_PROVIDER_FIELDS && (
-            <>
-              <label className={FIELD_ROW}>
-                <span className="shrink-0 text-sm font-medium text-white">Template ID</span>
-                <input
-                  type="number"
-                  value={templateId}
-                  onChange={(event) => setTemplateId(event.target.value)}
-                  placeholder="Optional"
-                  className={FIELD_INPUT}
-                />
-              </label>
-              <label className={FIELD_ROW}>
-                <span className="shrink-0 text-sm font-medium text-white">Clip model</span>
-                <input
-                  type="text"
-                  value={clipModel}
-                  onChange={(event) => setClipModel(event.target.value)}
-                  placeholder="Optional"
-                  className={FIELD_INPUT}
-                />
-              </label>
-            </>
-          )}
-
-          <div className="flex flex-wrap gap-2 sm:col-span-2">
-            {[
-              { label: "Remove silence", value: removeSilence, set: setRemoveSilence },
-              { label: "Subtitles", value: subtitles, set: setSubtitles },
-              { label: "Headline", value: headline, set: setHeadline },
-            ].map((toggle) => (
-              <button
-                key={toggle.label}
-                type="button"
-                aria-pressed={toggle.value}
-                onClick={() => toggle.set(!toggle.value)}
-                className={cn(
-                  "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                  toggle.value
-                    ? "border-white/60 bg-white/20 text-white"
-                    : "border-white/10 text-white/60 hover:text-white",
-                )}
-              >
-                {toggle.value && <Check className="size-3" />}
-                {toggle.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Glowing white button as the create sidebar */}
       <div className="group/btn relative">

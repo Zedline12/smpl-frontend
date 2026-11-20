@@ -1,4 +1,9 @@
-import { CreateVideoAnalysisRequest, VideoAnalysisProject } from "./types";
+import {
+  CreateVideoAnalysisRequest,
+  VideoAnalysisCost,
+  VideoAnalysisProject,
+  VideoAnalysisType,
+} from "./types";
 
 function unwrap<T>(json: any): T {
   return (json?.data ?? json) as T;
@@ -61,4 +66,20 @@ export async function deleteVideoAnalysis(id: string): Promise<void> {
   if (!res.ok) {
     throw new Error(await readError(res, "Failed to delete video analysis"));
   }
+}
+
+/** What analyzing this video would cost. Charges nothing. */
+export async function fetchVideoAnalysisCost(body: {
+  videoUrl: string;
+  type: VideoAnalysisType;
+}): Promise<VideoAnalysisCost> {
+  const res = await fetch("/api/video-analyzer/cost", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    throw new Error(await readError(res, "Failed to calculate the cost"));
+  }
+  return unwrap<VideoAnalysisCost>(await res.json());
 }

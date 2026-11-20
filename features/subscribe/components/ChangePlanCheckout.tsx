@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Info, Loader2, Lock, Tag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/AuthProvider";
+import { OpenAuthButton } from "@/features/auth/components/OpenAuthButton";
 import { isFreePlan } from "@/lib/subscription";
 import { useBillingResult } from "@/features/billing-result/store";
 import type { CheckoutPromotion } from "../hooks/use-checkout";
@@ -120,10 +121,10 @@ export function ChangePlanCheckout({ planId }: { planId: string | null }) {
   if (!user) {
     return (
       <Card className="mx-auto max-w-md text-center">
-        <p className="text-white">Log in to change your plan.</p>
-        <Link href="/login" className="bg-primary mt-4 inline-flex rounded-xl px-5 py-2.5 text-sm font-semibold text-white">
-          Log in
-        </Link>
+        <p className="text-white">Sign in to change your plan.</p>
+        <OpenAuthButton className="bg-primary mt-4 inline-flex cursor-pointer rounded-xl px-5 py-2.5 text-sm font-semibold text-white">
+          Sign in
+        </OpenAuthButton>
       </Card>
     );
   }
