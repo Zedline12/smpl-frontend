@@ -29,7 +29,7 @@ import {
   type SignInResult,
 } from "../actions/auth";
 import { GoogleLoginButton } from "./google-login-button";
-import { MicrosoftLoginButton } from "./microsoft-login-button";
+// import { MicrosoftLoginButton } from "./microsoft-login-button"; // hidden for now
 import { OtpInput } from "./OtpInput";
 import { TurnstileWidget } from "./TurnstileWidget";
 
@@ -346,11 +346,13 @@ export function AuthFlow({
               isLoading={busy === "google"}
               lastUsed={lastMethod === "google"}
             />
+            {/* Microsoft sign-in hidden for now.
             <MicrosoftLoginButton
               onClick={() => social("microsoft")}
               isLoading={busy === "microsoft"}
               lastUsed={lastMethod === "microsoft"}
             />
+            */}
           </div>
 
           <Divider text="or continue with email" />
