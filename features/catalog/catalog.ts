@@ -59,6 +59,7 @@ const DEFAULT_GENERATORS = new Set([
   "smpl-ripper",
   "smpl-ad-multiplier",
   "smpl-artist",
+  "smpl-artist-video-clip",
   "smpl-voice-changer",
   "smpl-ai-influencer",
   "smpl-ads-studio",

@@ -16,6 +16,7 @@ import { IGensuInput } from "@/features/generation/types/models/gensu.type";
 import { IRemixInput } from "@/features/generation/types/models/remix.type";
 import { IRipperInput } from "@/features/generation/types/models/ripper.type";
 import { IArtistInput } from "@/features/generation/types/models/artist.type";
+import { IArtistVideoClipInput } from "@/features/generation/types/models/artist-video-clip.type";
 import { IAiInfluencerInput } from "@/features/generation/types/models/ai-influencer.type";
 import { IAdsStudioInput } from "@/features/generation/types/models/ads-studio.type";
 import { IMusicV25Input } from "@/features/generation/types/models/elevenlabs-music-v2-5.type";
@@ -49,6 +50,7 @@ export type ModelStateMap = {
   [AiModelsEnum.SMPL_REMIX]: IRemixInput;
   [AiModelsEnum.SMPL_RIPPER]: IRipperInput;
   [AiModelsEnum.SMPL_ARTIST]: IArtistInput;
+  [AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP]: IArtistVideoClipInput;
   [AiModelsEnum.SMPL_AI_INFLUENCER]: IAiInfluencerInput;
   [AiModelsEnum.SMPL_ADS_STUDIO]: IAdsStudioInput;
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: IMusicV25Input;
@@ -181,6 +183,15 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     duration: 10,
     resolution: "720p",
     aspectRatio: "auto",
+  },
+  [AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP]: {
+    prompt: "",
+    images: [],
+    audioUrl: "",
+    style: null,
+    duration: 10,
+    resolution: "720p",
+    aspectRatio: "9:16",
   },
   [AiModelsEnum.SMPL_AI_INFLUENCER]: {
     prompt: "",

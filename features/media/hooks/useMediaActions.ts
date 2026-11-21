@@ -116,6 +116,7 @@ const COMPOSER_ROUTES: Partial<Record<AiModelsEnum, string>> = {
   [AiModelsEnum.KLING_4_0]: "/create/video",
   [AiModelsEnum.KLING_4_0_FLASH]: "/create/video",
   [AiModelsEnum.SMPL_ARTIST]: "/artist?tab=clip",
+  [AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP]: "/artist?tab=clip",
   // Its result is a video, but the model lives on the audio page.
   [AiModelsEnum.SMPL_VOICE_CHANGER]: "/create/audio?model=smpl-voice-changer",
 };

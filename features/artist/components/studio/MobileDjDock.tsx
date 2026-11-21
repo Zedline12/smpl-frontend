@@ -24,6 +24,7 @@ import {
   VOCAL_OPTIONS,
 } from "./SongSettings";
 import { GenerateButton } from "./StudioCard";
+import { ArtistModeSwitch } from "./ArtistModeSwitch";
 
 /**
  * Phones: a small DJ docked at the bottom (like the prompt composer) instead of the
@@ -67,6 +68,8 @@ export function MobileDjDock() {
           : "bottom-[calc(1.5rem+env(safe-area-inset-bottom))]",
       )}
     >
+      <ArtistModeSwitch compact />
+
       {/* The DJ: three disc knobs and two dials */}
       <div className="flex items-start justify-between gap-2 overflow-x-auto px-1 [scrollbar-width:none]">
         <DiscMenuButton

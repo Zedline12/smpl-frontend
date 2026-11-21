@@ -62,6 +62,10 @@ import { IRemixInput, remixValidationSchema } from "./models/remix.type";
 import { IRipperInput, ripperValidationSchema } from "./models/ripper.type";
 import { IArtistInput, artistValidationSchema } from "./models/artist.type";
 import {
+  IArtistVideoClipInput,
+  artistVideoClipValidationSchema,
+} from "./models/artist-video-clip.type";
+import {
   IAiInfluencerInput,
   aiInfluencerValidationSchema,
 } from "./models/ai-influencer.type";
@@ -127,6 +131,7 @@ export type AllModelsInput =
   | IRemixInput
   | IRipperInput
   | IArtistInput
+  | IArtistVideoClipInput
   | IAiInfluencerInput
   | IAdsStudioInput
   | IMusicV25Input
@@ -158,6 +163,7 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SMPL_REMIX]: remixValidationSchema,
   [AiModelsEnum.SMPL_RIPPER]: ripperValidationSchema,
   [AiModelsEnum.SMPL_ARTIST]: artistValidationSchema,
+  [AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP]: artistVideoClipValidationSchema,
   [AiModelsEnum.SMPL_AI_INFLUENCER]: aiInfluencerValidationSchema,
   [AiModelsEnum.SMPL_ADS_STUDIO]: adsStudioValidationSchema,
   [AiModelsEnum.ELEVENLABS_MUSIC_V2_5]: musicV25ValidationSchema,

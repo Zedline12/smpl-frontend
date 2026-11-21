@@ -18,6 +18,8 @@ export enum AiModelsEnum {
   SMPL_REMIX = "smpl-remix",
   SMPL_RIPPER = "smpl-ripper",
   SMPL_ARTIST = "smpl-artist",
+  /** The Artist page's "Make a video clip". */
+  SMPL_ARTIST_VIDEO_CLIP = "smpl-artist-video-clip",
   SMPL_AI_INFLUENCER = "smpl-ai-influencer",
   SMPL_ADS_STUDIO = "smpl-ads-studio",
   ELEVENLABS_MUSIC_V2_5 = "elevenlabs-music-v2.5",
@@ -473,6 +475,17 @@ export const STUDIO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm6-3a6 6 0 0 1-12 0m6 6v3m-3 0h6" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP,
+    name: "Artist Video Clip",
+    description: "Your character sings your song in a music video.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M3 8h18M3 8v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8M3 8l2.5-4h3L6 8m5 0 2.5-4h3L14 8m5 0 2-4M10 12.5v4l3.5-2-3.5-2Z" />
       </svg>
     ),
   },

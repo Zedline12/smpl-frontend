@@ -3,6 +3,7 @@
 import {
   FormEvent,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -17,11 +18,15 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Gift,
   KeyRound,
   Loader2,
+  Mail,
   RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserService } from "@/lib/api/services/users.service";
 import {
   login,
   requestLoginCode,
@@ -34,10 +39,33 @@ import { OtpInput } from "./OtpInput";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 type Method = "google" | "microsoft" | "email";
-/** "create-password": a new account's first password, right after its code. */
-type Step = "choose" | "code" | "password" | "create-password";
+/**
+ * "create-password": a new account's first password, right after its code.
+ * "avatar": waiting for that account's profile picture before signing in.
+ */
+type Step = "choose" | "code" | "password" | "create-password" | "avatar";
 
 const MIN_PASSWORD = 8;
+/** About how long a profile picture takes (the countdown on the "avatar" step). */
+const AVATAR_ESTIMATE_MS = 30_000;
+/** What the Free plan gives a new account, shown until the real balance loads. */
+const FREE_CREDITS = 50;
+
+/** The inbox to open for an address: Outlook and Yahoo by domain, Gmail for the rest. */
+function inboxFor(email: string): { label: string; href: string } {
+  const domain = email.split("@")[1]?.toLowerCase() ?? "";
+  if (/^(outlook|hotmail|live|msn)\./.test(domain)) {
+    return { label: "Open Outlook", href: "https://outlook.live.com/mail/" };
+  }
+  if (/^(yahoo|ymail)\./.test(domain)) {
+    return { label: "Open Yahoo Mail", href: "https://mail.yahoo.com/" };
+  }
+  return {
+    label: "Open Gmail",
+    // Searches every folder, so a code that went to spam shows up too.
+    href: "https://mail.google.com/mail/u/0/#search/in%3Aanywhere+smpl",
+  };
+}
 
 const LAST_METHOD_KEY = "auth:last-method";
 /** Where a Google / Microsoft sign-in returns to (read by /auth_success). */
@@ -134,6 +162,12 @@ export function AuthFlow({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [avatarReady, setAvatarReady] = useState(true);
   const avatarJob = useRef<Promise<void> | null>(null);
+  const [avatarStartedAt, setAvatarStartedAt] = useState(0);
+  // The new account, for the welcome card on the "avatar" step.
+  const [welcome, setWelcome] = useState<{
+    username: string | null;
+    creditsBalance: number | null;
+  } | null>(null);
   const pendingSignIn = useRef<SignInResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The page's ?error= (from a failed Google / Microsoft sign-in) until the user acts.
@@ -245,6 +279,22 @@ export function AuthFlow({
         // A failed avatar just leaves the account without one; it never blocks sign-up.
         .catch(() => undefined)
         .finally(() => setAvatarReady(true));
+      setAvatarStartedAt(Date.now());
+      // The session cookie is set, so the account can be read for the welcome card.
+      UserService.getCurrentUser()
+        .then((data) => {
+          const user = data as {
+            username?: string | null;
+            firstName?: string | null;
+            creditsBalance?: unknown;
+          } | null;
+          setWelcome({
+            username: user?.username ?? user?.firstName ?? null,
+            creditsBalance:
+              typeof user?.creditsBalance === "number" ? user.creditsBalance : null,
+          });
+        })
+        .catch(() => setWelcome({ username: null, creditsBalance: null }));
       pendingSignIn.current = result;
       setStep("create-password");
       return;
@@ -273,9 +323,10 @@ export function AuthFlow({
       setError(typeof json?.message === "string" ? json.message : "Couldn't save your password. Try again.");
       return;
     }
-    // Still drawing the avatar: say so and wait for it.
+    // Still drawing the avatar: its own screen until it's ready.
     if (!avatarReady) {
       setBusy("avatar");
+      setStep("avatar");
       await avatarJob.current;
     }
     setBusy(null);
@@ -306,8 +357,11 @@ export function AuthFlow({
 
   return (
     <div className="tw-fields flex w-full flex-col">
-      {/* No Back once the account exists (create-password). */}
-      {step !== "choose" && step !== "create-password" && (
+      {/* No Back while confirming, or once the account exists (create-password, avatar). */}
+      {step !== "choose" &&
+        step !== "create-password" &&
+        step !== "avatar" &&
+        busy !== "verify" && (
         <button
           type="button"
           onClick={back}
@@ -405,7 +459,9 @@ export function AuthFlow({
         </>
       )}
 
-      {step === "code" && (
+      {step === "code" && busy === "verify" && <ConfirmingCode />}
+
+      {step === "code" && busy !== "verify" && (
         <>
           <h1 className="text-center text-[28px] font-bold tracking-tight text-white">
             Enter the code
@@ -416,25 +472,28 @@ export function AuthFlow({
 
           {shownError && <ErrorBox text={shownError} />}
 
-          <div
-            className={cn(
-              busy === "verify" && "pointer-events-none opacity-60",
-            )}
+          <OtpInput
+            value={code}
+            onChange={(value) => {
+              setCode(value);
+              if (shownError) clearError();
+              if (value.length === 6) void verify(value);
+            }}
+          />
+
+          <a
+            href={inboxFor(email).href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white/[0.07] text-[15px] font-semibold text-white transition-colors hover:bg-white/[0.11]"
           >
-            <OtpInput
-              value={code}
-              onChange={(value) => {
-                setCode(value);
-                if (shownError) clearError();
-                if (value.length === 6) void verify(value);
-              }}
-            />
-          </div>
-          {busy === "verify" && (
-            <p className="mt-3 flex items-center justify-center gap-2 text-sm text-white/55">
-              <Loader2 className="size-4 animate-spin" /> Confirming code…
-            </p>
-          )}
+            <Mail className="size-[18px] text-[#EA4335]" />
+            {inboxFor(email).label}
+          </a>
+          <p className="mt-2.5 text-center text-xs text-white/45">
+            Can&apos;t see the email? Check your{" "}
+            <span className="font-semibold text-white/70">spam</span> folder.
+          </p>
 
           <div className="mt-6 flex flex-col items-center gap-3">
             {resendIn > 0 ? (
@@ -466,20 +525,25 @@ export function AuthFlow({
             )}
           </div>
 
-          <EmailRow email={email} onEdit={back} className="mt-10" />
-          <Divider text="or" />
-          <button
-            type="button"
-            onClick={() => {
-              clearError();
-              resetCaptcha();
-              setStep("password");
-            }}
-            className="relative flex h-12 w-full items-center justify-center rounded-xl bg-white/[0.07] text-[15px] font-semibold text-white transition-colors hover:bg-white/[0.11]"
-          >
-            <KeyRound className="absolute left-4 size-[18px] text-white/70" />
-            Continue with a password
-          </button>
+          <EmailRow email={email} onEdit={back} className="mt-8" />
+          {/* Signing up: no account (or password) yet, so no password option. */}
+          {mode === "sign-in" && (
+            <>
+              <Divider text="or" />
+              <button
+                type="button"
+                onClick={() => {
+                  clearError();
+                  resetCaptcha();
+                  setStep("password");
+                }}
+                className="relative flex h-12 w-full items-center justify-center rounded-xl bg-white/[0.07] text-[15px] font-semibold text-white transition-colors hover:bg-white/[0.11]"
+              >
+                <KeyRound className="absolute left-4 size-[18px] text-white/70" />
+                Continue with a password
+              </button>
+            </>
+          )}
         </>
       )}
 
@@ -528,19 +592,14 @@ export function AuthFlow({
             disabled={!canCreatePassword}
             className="bg-primary hover:bg-primary/90 mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {(busy === "set-password" || busy === "avatar") && <Loader2 className="size-4 animate-spin" />}
+            {busy === "set-password" && <Loader2 className="size-4 animate-spin" />}
             Continue
           </button>
-
-          {busy === "avatar" && (
-            <div className="mt-4 flex flex-col items-center gap-1 text-center" aria-live="polite">
-              <p className="flex items-center gap-2 text-sm text-white/70">
-                <Loader2 className="size-4 animate-spin" /> Generating your avatar picture…
-              </p>
-              <p className="text-xs text-white/40">This takes less than 30 seconds.</p>
-            </div>
-          )}
         </form>
+      )}
+
+      {step === "avatar" && (
+        <GeneratingAvatar startedAt={avatarStartedAt} welcome={welcome} />
       )}
 
       {step === "password" && (
@@ -613,6 +672,133 @@ export function AuthFlow({
           </button>
         </form>
       )}
+    </div>
+  );
+}
+
+/** The code step while the code is being checked. */
+function ConfirmingCode() {
+  return (
+    <div
+      className="flex flex-col items-center py-10 text-center"
+      aria-live="polite"
+    >
+      <div className="bg-primary/15 shadow-primary/30 flex size-20 items-center justify-center rounded-full shadow-[0_0_48px_-4px]">
+        <Loader2 className="text-primary size-9 animate-spin" />
+      </div>
+      <h1 className="mt-7 text-[24px] font-bold tracking-tight text-white">
+        Confirming your code…
+      </h1>
+      <p className="mt-2 text-sm text-white/55">Just a moment.</p>
+    </div>
+  );
+}
+
+const RING_SIZE = 120;
+const RING_STROKE = 6;
+
+/** A new account waiting for its profile picture: a 30s countdown ring and a welcome card. */
+function GeneratingAvatar({
+  startedAt,
+  welcome,
+}: {
+  startedAt: number;
+  welcome: { username: string | null; creditsBalance: number | null } | null;
+}) {
+  // useId can contain ":" or "«»", which break `url(#…)`.
+  const gradientId = `avatar-ring-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(timer);
+  }, []);
+
+  const left = Math.max(0, AVATAR_ESTIMATE_MS - (now - (startedAt || now)));
+  const secondsLeft = Math.ceil(left / 1000);
+  const r = (RING_SIZE - RING_STROKE) / 2;
+  const circumference = 2 * Math.PI * r;
+  const credits = welcome?.creditsBalance ?? FREE_CREDITS;
+
+  return (
+    <div className="flex flex-col items-center text-center" aria-live="polite">
+      <div className="relative" style={{ width: RING_SIZE, height: RING_SIZE }}>
+        <svg
+          width={RING_SIZE}
+          height={RING_SIZE}
+          className="-rotate-90"
+          aria-hidden
+        >
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="var(--primary)" />
+              <stop offset="100%" stopColor="var(--secondary)" />
+            </linearGradient>
+          </defs>
+          <circle
+            cx={RING_SIZE / 2}
+            cy={RING_SIZE / 2}
+            r={r}
+            fill="none"
+            strokeWidth={RING_STROKE}
+            className="stroke-white/10"
+          />
+          <circle
+            cx={RING_SIZE / 2}
+            cy={RING_SIZE / 2}
+            r={r}
+            fill="none"
+            strokeWidth={RING_STROKE}
+            strokeLinecap="round"
+            stroke={`url(#${gradientId})`}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - left / AVATAR_ESTIMATE_MS)}
+            className="transition-[stroke-dashoffset] duration-300 ease-linear"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-[28px] leading-none font-bold text-white tabular-nums">
+            {secondsLeft}s
+          </span>
+          <span className="mt-1 text-[11px] tracking-wide text-white/45 uppercase">
+            estimated
+          </span>
+        </div>
+      </div>
+
+      <h1 className="mt-7 text-[24px] leading-tight font-bold tracking-tight text-white">
+        Generating your profile picture
+      </h1>
+      <p className="mt-2 text-sm text-white/55">
+        {secondsLeft > 0
+          ? "Please wait, this takes about 30 seconds."
+          : "Almost done, please wait…"}
+      </p>
+
+      <div className="mt-8 w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-left">
+        <div className="flex items-center justify-between gap-3">
+          {welcome ? (
+            <span className="min-w-0 truncate text-[15px] font-semibold text-white">
+              {welcome.username ? `@${welcome.username}` : "Welcome!"}
+            </span>
+          ) : (
+            <span className="h-4 w-28 animate-pulse rounded bg-white/10" />
+          )}
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/[0.07] px-2.5 py-1 text-sm font-semibold text-white">
+            <Sparkles className="text-primary size-3.5" />
+            {welcome ? credits : "—"} credits
+          </span>
+        </div>
+        <div className="from-primary/15 to-secondary/15 border-primary/25 mt-3 flex items-center gap-3 rounded-xl border bg-gradient-to-r p-3">
+          <span className="from-primary to-secondary flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white">
+            <Gift className="size-5" />
+          </span>
+          <p className="text-sm text-white/85">
+            You got a free{" "}
+            <span className="font-bold text-white">{credits} credits</span>{" "}
+            gift 🎉
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
