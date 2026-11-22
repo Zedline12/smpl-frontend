@@ -2,16 +2,9 @@
 import { ArtistVideoClipInputConst } from "@/features/generation/types/models/artist-video-clip.type";
 import { clipSeconds, useVideoClipBuilder } from "../../hooks/useVideoClipBuilder";
 import { AudioWindowPicker } from "../AudioWindowPicker";
-import { Segmented, studioLabel } from "./ChipGroup";
+import { studioLabel } from "./ChipGroup";
 import { ClipCharacterPicker, ClipStylePicker } from "./ClipInputs";
 import { GenerateButton, StudioCard } from "./StudioCard";
-
-export const CLIP_ASPECTS = [
-  { id: "9:16", label: "9:16" },
-  { id: "16:9", label: "16:9" },
-  { id: "1:1", label: "1:1" },
-] as const;
-export const CLIP_RESOLUTIONS = ArtistVideoClipInputConst.resolution.map((id) => ({ id, label: id }));
 
 /** Make a video clip: character · song part · style, prompt and Generate (desktop). */
 export function VideoClipSettings() {
@@ -29,7 +22,7 @@ export function VideoClipSettings() {
           disabled={clip.pending}
         />
         <p className="text-xs text-white/40">
-          A clear photo of the face and outfit works best. Up to {ArtistVideoClipInputConst.maxImages} images.
+          A clear, front-facing photo of the face and outfit works best.
         </p>
       </StudioCard>
 
@@ -58,23 +51,6 @@ export function VideoClipSettings() {
             rows={3}
             placeholder="e.g. wearing a red hoodie, golden hour, close-up shots"
             className="focus:border-primary/50 resize-none rounded-2xl border border-white/[0.07] bg-black/30 px-4 py-3 text-sm leading-relaxed text-white placeholder:text-white/30 focus:outline-none"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Segmented
-            label="Format"
-            options={[...CLIP_ASPECTS]}
-            value={state.aspectRatio as (typeof CLIP_ASPECTS)[number]["id"]}
-            onChange={(aspectRatio) => set("aspectRatio", aspectRatio)}
-            disabled={clip.pending}
-          />
-          <Segmented
-            label="Quality"
-            options={CLIP_RESOLUTIONS}
-            value={state.resolution}
-            onChange={(resolution) => set("resolution", resolution)}
-            disabled={clip.pending}
           />
         </div>
 

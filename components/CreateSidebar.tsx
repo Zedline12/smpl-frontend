@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SettingsDuration } from "@/components/SettingsDuration";
 import { SettingsSelect } from "@/components/SettingsSelect";
-import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload, ChevronRight } from "lucide-react";
+import { X, Plus, Image as ImageIcon, Video as VideoIcon, BookOpen, Upload, ChevronRight, Music, Loader2 } from "lucide-react";
 import {
   STYLE_FALLBACK_GRADIENTS,
   STYLE_MODEL_IDS,
@@ -44,6 +44,15 @@ import { KlingV3TextToVideoInputConst } from "@/features/generation/types/models
 import { Seedance20InputConst } from "@/features/generation/types/models/seedance-2.0.type";
 import { Seedance25InputConst } from "@/features/generation/types/models/seedance-2.5.type";
 import { GrokImagineVideo15InputConst } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
+import {
+  IOmniHumanV2Input,
+  OmniHumanV2InputConst,
+} from "@/features/generation/types/models/omnihuman-v2.type";
+import {
+  OMNIHUMAN_AUDIO_ACCEPT,
+  formatAudioSeconds,
+  useOmniHumanAudioUpload,
+} from "@/features/generation/hooks/useOmniHumanAudio";
 import { KlingV3ImageToVideoInputConst } from "@/features/generation/types/models/kling-v3-image-to-video.type";
 import { KlingV3ProMotionControlInputConst } from "@/features/generation/types/models/kling-v3-pro-motion-control";
 import {
@@ -105,6 +114,7 @@ const CREATE_VIDEO_MODEL_IDS = new Set([
   AiModelsEnum.SEEDANCE_2_0,
   AiModelsEnum.SEEDANCE_2_5,
   AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
+  AiModelsEnum.OMNIHUMAN_V2,
   AiModelsEnum.SMPL_AD_MULTIPLIER,
 ]);
 
@@ -121,6 +131,8 @@ const OPTIONAL_PROMPT_MODELS = new Set([
   AiModelsEnum.SMPL_RIPPER,
   AiModelsEnum.KLING_V3_PRO_MOTION_CONTROL,
   AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO,
+  // The audio drives it; the prompt only directs the scene.
+  AiModelsEnum.OMNIHUMAN_V2,
 ]);
 
 // models whose prompt is optional once a reference image or video is added
@@ -146,6 +158,10 @@ const PROMPT_COPY: Partial<Record<AiModelsEnum, { label: string; placeholder: st
   [AiModelsEnum.SMPL_REMIX]: {
     label: "Direction",
     placeholder: "Keep the outfit from the photo, match the lighting of the video",
+  },
+  [AiModelsEnum.OMNIHUMAN_V2]: {
+    label: "Scene direction",
+    placeholder: "e.g. singing on a neon-lit stage, slow push-in, moving to the beat",
   },
 };
 
@@ -716,6 +732,9 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
+  // ── OmniHuman v2 (photo + audio) ───────────────────────────────────────────
+  if (model === AiModelsEnum.OMNIHUMAN_V2) return <OmniHumanV2Panel />;
+
   // ── KLING Image-to-Video ───────────────────────────────────────────────────
   if (model === AiModelsEnum.KLING_V3_IMAGE_TO_VIDEO) {
     return (
@@ -1209,6 +1228,99 @@ function VoiceChangerPanel() {
         onSelect={(u) => void pickVideo(u[0])}
         maxSelections={1}
         mediaType="video"
+      />
+    </>
+  );
+}
+
+// ─── OmniHuman v2 (photo + audio → lip-synced video) ──────────────────────────
+
+function OmniHumanV2Panel() {
+  const model = AiModelsEnum.OMNIHUMAN_V2;
+  const { states, setField: raw } = useAiModelStore();
+  const set = (k: keyof IOmniHumanV2Input, v: unknown) => raw(model, k, v);
+  const s = (states[model] ?? {}) as Partial<IOmniHumanV2Input>;
+  const { minSeconds, maxSeconds, maxAudioBytes } = OmniHumanV2InputConst;
+  const audio = useOmniHumanAudioUpload(set);
+  const audioInput = useRef<HTMLInputElement>(null);
+  const [dlg, setDlg] = useState(false);
+
+  return (
+    <>
+      <SingleMediaSlot
+        label="Person"
+        url={s.imageUrl || undefined}
+        onOpenPicker={() => setDlg(true)}
+        onClear={() => set("imageUrl", "")}
+        description="A clear photo of one person; its shape sets the video's format"
+      />
+
+      <div className="flex flex-col gap-1.5">
+        {s.audioUrl ? (
+          <div className={`${slotCard} flex items-center gap-3 border-solid px-4 py-4`}>
+            <RequirementTag />
+            <SlotIcon>
+              <Music className="size-4" />
+            </SlotIcon>
+            <span className="flex flex-col">
+              <span className="text-[14px] font-bold text-white">Audio</span>
+              <span className="text-[12px] text-white/45">
+                {s.duration ? `${formatAudioSeconds(s.duration)} · the video is this long` : "Uploaded"}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={audio.clear}
+              aria-label="Remove audio"
+              className="absolute top-2.5 left-2.5 z-[2] flex size-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={audio.uploading}
+            onClick={() => audioInput.current?.click()}
+            className={`${slotCard} flex flex-col items-center px-4 pt-7 pb-5 text-center disabled:cursor-wait`}
+          >
+            <RequirementTag />
+            <span className="flex -space-x-2">
+              <SlotIcon>
+                {audio.uploading ? <Loader2 className="size-4 animate-spin" /> : <Music className="size-4" />}
+              </SlotIcon>
+              <SlotIcon>
+                <Upload className="size-4" />
+              </SlotIcon>
+            </span>
+            <span className="mt-3 text-[14px] font-bold text-white">{audio.uploading ? "Uploading…" : "Audio"}</span>
+            <span className="mt-1 text-[12px] leading-snug text-white/45">
+              What they sing or say: wav or mp3, {minSeconds}s to {maxSeconds / 60} min, up to {maxAudioBytes / 1024 / 1024} MB
+            </span>
+          </button>
+        )}
+      </div>
+
+      <input
+        ref={audioInput}
+        type="file"
+        accept={OMNIHUMAN_AUDIO_ACCEPT}
+        className="hidden"
+        onChange={(e) => {
+          void audio.upload(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
+
+      <MediaManagerDialog
+        open={dlg}
+        onOpenChange={(o) => !o && setDlg(false)}
+        selectedImage={s.imageUrl || undefined}
+        onSelect={(u) => {
+          set("imageUrl", u[0]);
+          setDlg(false);
+        }}
+        maxSelections={1}
       />
     </>
   );

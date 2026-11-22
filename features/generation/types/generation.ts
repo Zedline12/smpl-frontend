@@ -55,6 +55,10 @@ import {
   grokImagineVideo15ValidationSchema,
 } from "./models/grok-imagine-video-1.5.type";
 import {
+  IOmniHumanV2Input,
+  omniHumanV2ValidationSchema,
+} from "./models/omnihuman-v2.type";
+import {
   IGensuInput,
   gensuValidationSchema,
 } from "./models/gensu.type";
@@ -127,6 +131,7 @@ export type AllModelsInput =
   | ISeedance25Input
   | IGptImage2Input
   | IGrokImagineVideo15Input
+  | IOmniHumanV2Input
   | IGensuInput
   | IRemixInput
   | IRipperInput
@@ -158,6 +163,7 @@ export const ModelsValidatorSchemaMap = {
   [AiModelsEnum.SEEDANCE_2_5]: seedance25ValidationSchema,
   [AiModelsEnum.GPT_IMAGE_2]: gptImage2ValidationSchema,
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: grokImagineVideo15ValidationSchema,
+  [AiModelsEnum.OMNIHUMAN_V2]: omniHumanV2ValidationSchema,
   [AiModelsEnum.SMPL_GENSU]:
     gensuValidationSchema,
   [AiModelsEnum.SMPL_REMIX]: remixValidationSchema,

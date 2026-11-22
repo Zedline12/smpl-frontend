@@ -24,6 +24,7 @@ import Seedance20Composer from "./composers/seedance-2.0.composer";
 import Seedance25RefComposer from "./composers/seedance-2.5-ref.composer";
 import GptImage2Composer from "./composers/gpt-image-2.composer";
 import GrokImagineVideo15Composer from "./composers/grok-imagine-video-1.5.composer";
+import OmniHumanV2Composer from "./composers/omnihuman-v2.composer";
 import GensuComposer from "./composers/gensu.composer";
 import Kling40Composer from "./composers/kling-4-0.composer";
 /** Models this composer can drive; the rest (Ad Multiplier, edit tools) only exist in the sidebar. */
@@ -41,6 +42,7 @@ const HAS_COMPOSER: ReadonlySet<AiModelsEnum> = new Set([
   AiModelsEnum.FAL_SEEDANCE_2_5,
   AiModelsEnum.GPT_IMAGE_2,
   AiModelsEnum.GROK_IMAGINE_VIDEO_1_5,
+  AiModelsEnum.OMNIHUMAN_V2,
   AiModelsEnum.SMPL_GENSU,
   AiModelsEnum.KLING_4_0,
   AiModelsEnum.KLING_4_0_FLASH,
@@ -153,6 +155,9 @@ export default function PromptComposer() {
         )}
         {model === AiModelsEnum.GROK_IMAGINE_VIDEO_1_5 && (
           <GrokImagineVideo15Composer isFocused={isFocused} />
+        )}
+        {model === AiModelsEnum.OMNIHUMAN_V2 && (
+          <OmniHumanV2Composer isFocused={isFocused} />
         )}
         {model === AiModelsEnum.SMPL_GENSU && (
           <GensuComposer isFocused={isFocused} />

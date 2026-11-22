@@ -12,6 +12,7 @@ import { ISeedance20Input } from "@/features/generation/types/models/seedance-2.
 import { ISeedance25Input } from "@/features/generation/types/models/seedance-2.5.type";
 import { IGptImage2Input } from "@/features/generation/types/models/gpt-image-2.type";
 import { IGrokImagineVideo15Input } from "@/features/generation/types/models/grok-imagine-video-1.5.type";
+import { IOmniHumanV2Input } from "@/features/generation/types/models/omnihuman-v2.type";
 import { IGensuInput } from "@/features/generation/types/models/gensu.type";
 import { IRemixInput } from "@/features/generation/types/models/remix.type";
 import { IRipperInput } from "@/features/generation/types/models/ripper.type";
@@ -46,6 +47,7 @@ export type ModelStateMap = {
   [AiModelsEnum.SEEDANCE_2_5]: ISeedance25Input;
   [AiModelsEnum.GPT_IMAGE_2]: IGptImage2Input;
   [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]: IGrokImagineVideo15Input;
+  [AiModelsEnum.OMNIHUMAN_V2]: IOmniHumanV2Input;
   [AiModelsEnum.SMPL_GENSU]: IGensuInput;
   [AiModelsEnum.SMPL_REMIX]: IRemixInput;
   [AiModelsEnum.SMPL_RIPPER]: IRipperInput;
@@ -157,6 +159,11 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     resolution: "720p",
     aspectRatio: "16:9",
   },
+  [AiModelsEnum.OMNIHUMAN_V2]: {
+    prompt: "",
+    imageUrl: "",
+    audioUrl: "",
+  },
   [AiModelsEnum.SMPL_GENSU]: {
     prompt: "",
     videoUrl: "",
@@ -190,8 +197,6 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     audioUrl: "",
     style: null,
     duration: 10,
-    resolution: "720p",
-    aspectRatio: "9:16",
   },
   [AiModelsEnum.SMPL_AI_INFLUENCER]: {
     prompt: "",

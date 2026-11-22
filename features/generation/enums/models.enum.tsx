@@ -14,6 +14,7 @@ export enum AiModelsEnum {
   SEEDANCE_2_5 = "seedance-2.5",
   GPT_IMAGE_2 = "gpt-image-2",
   GROK_IMAGINE_VIDEO_1_5 = "grok-imagine-video-1.5",
+  OMNIHUMAN_V2 = "omnihuman-v2",
   SMPL_GENSU = "smpl-gensu",
   SMPL_REMIX = "smpl-remix",
   SMPL_RIPPER = "smpl-ripper",
@@ -326,6 +327,17 @@ export const VIDEO_MODELS: Model[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
           d="M5 19 19 5M9.5 5H19v9.5M10 19H5v-5" />
+      </svg>
+    ),
+  },
+  {
+    id: AiModelsEnum.OMNIHUMAN_V2,
+    name: "OmniHuman v2",
+    description: "Make the person in a photo sing or talk to your audio, perfectly lip-synced.",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
+        <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          d="M12 3a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4Zm-2.5 5.5c.7.6 1.5.9 2.5.9s1.8-.3 2.5-.9M5 21a7 7 0 0 1 14 0M19 4c.8.8 1.3 1.9 1.3 3.1S19.8 9.4 19 10.2" />
       </svg>
     ),
   },

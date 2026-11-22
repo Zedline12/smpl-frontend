@@ -6,8 +6,12 @@ export async function uploadReferenceAudio(file: Blob): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ contentType, purpose: "reference-audio" }),
   });
-  if (!sigRes.ok) throw new Error("Could not start the audio upload");
-  const sig = await sigRes.json();
+  const sig = await sigRes.json().catch(() => null);
+  if (!sigRes.ok) {
+    const reason = Array.isArray(sig?.message) ? sig.message.join(", ") : sig?.message;
+    console.error("[reference-audio] upload signature failed", sigRes.status, sig);
+    throw new Error(`Could not start the audio upload${reason ? `: ${reason}` : ` (${sigRes.status})`}`);
+  }
   const { url, publicUrl } = (sig?.data ?? sig) as { url?: string; publicUrl?: string };
   if (!url || !publicUrl) throw new Error("Could not start the audio upload");
 

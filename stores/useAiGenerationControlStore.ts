@@ -49,6 +49,7 @@ export const useAiModelStore = create<AiModelStore>((set, get) => ({
     [AiModelsEnum.GPT_IMAGE_2]: ModelDefaults[AiModelsEnum.GPT_IMAGE_2],
     [AiModelsEnum.GROK_IMAGINE_VIDEO_1_5]:
       ModelDefaults[AiModelsEnum.GROK_IMAGINE_VIDEO_1_5],
+    [AiModelsEnum.OMNIHUMAN_V2]: ModelDefaults[AiModelsEnum.OMNIHUMAN_V2],
     [AiModelsEnum.SMPL_GENSU]:
       ModelDefaults[AiModelsEnum.SMPL_GENSU],
     [AiModelsEnum.SMPL_REMIX]:

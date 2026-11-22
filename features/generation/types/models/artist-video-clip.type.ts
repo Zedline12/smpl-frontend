@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-/** Artist Video Clip (Smpl, Kling 4.0): the character sings the song part. Kept in sync with the backend. */
+/**
+ * Artist Video Clip (Smpl): Nano Banana puts the character from one image into a 16:9 scene,
+ * then OmniHuman v2 makes it sing the song part (no resolution or format options). Kept in sync with the backend.
+ */
 export const ArtistVideoClipInputConst = {
   styles: ["cozy", "rap", "aggressive", "sad"] as const,
-  resolution: ["720p", "1080p"] as const,
-  aspectRatio: ["9:16", "16:9", "1:1"] as const,
-  maxImages: 3,
+  maxImages: 1,
   minSeconds: 4,
   maxSeconds: 30,
   maxPromptLength: 2000,
@@ -15,7 +16,7 @@ export type ArtistVideoClipStyle = (typeof ArtistVideoClipInputConst.styles)[num
 
 export interface IArtistVideoClipInput {
   prompt: string;
-  /** Character images, @Image1 first. */
+  /** The character image (one). */
   images: string[];
   /** Uploaded on Generate: the chosen song part (also the clip length). */
   audioUrl: string;
@@ -23,19 +24,16 @@ export interface IArtistVideoClipInput {
   style: ArtistVideoClipStyle | null;
   /** The chosen song part's length; only used for the price preview. */
   duration: number;
-  resolution: (typeof ArtistVideoClipInputConst.resolution)[number];
-  aspectRatio: (typeof ArtistVideoClipInputConst.aspectRatio)[number];
 }
 
 export const artistVideoClipValidationSchema = z.object({
   prompt: z.string().max(ArtistVideoClipInputConst.maxPromptLength).optional(),
-  images: z.array(z.string().url()).min(1).max(ArtistVideoClipInputConst.maxImages),
+  // Older saved inputs may have up to 3 images: keep the first.
+  images: z.preprocess(
+    (v) => (Array.isArray(v) ? v.slice(0, ArtistVideoClipInputConst.maxImages) : v),
+    z.array(z.string().url()).min(1).max(ArtistVideoClipInputConst.maxImages),
+  ),
   audioUrl: z.string().url().nonempty(),
   style: z.enum(ArtistVideoClipInputConst.styles),
   duration: z.number().optional(),
-  // Saved inputs from the Seedance version may say 480p; Kling's lowest is 720p.
-  resolution: z
-    .preprocess((v) => (v === "480p" ? "720p" : v), z.enum(ArtistVideoClipInputConst.resolution))
-    .optional(),
-  aspectRatio: z.enum(ArtistVideoClipInputConst.aspectRatio).optional(),
 }) as unknown as z.ZodType<IArtistVideoClipInput>;

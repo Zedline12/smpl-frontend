@@ -8,10 +8,8 @@ import { useCurrentTrack } from "../../stores/useArtistPlayerStore";
 import { formatDuration } from "../../utils/composition-plan";
 import { AudioWindowPicker } from "../AudioWindowPicker";
 import { ArtistModeSwitch } from "./ArtistModeSwitch";
-import { Segmented } from "./ChipGroup";
 import { ClipCharacterPicker, ClipStylePicker } from "./ClipInputs";
 import { GenerateButton } from "./StudioCard";
-import { CLIP_ASPECTS, CLIP_RESOLUTIONS } from "./VideoClipSettings";
 
 /**
  * Phones: the video clip inputs docked at the bottom, like the song DJ (MobileDjDock).
@@ -77,22 +75,6 @@ export function MobileClipDock() {
       {open && (
         <div className="flex flex-col gap-3 rounded-xl border border-white/[0.07] bg-black/30 p-2.5">
           <AudioWindowPicker value={audio} onChange={clip.changeAudio} disabled={clip.pending} />
-          <div className="grid grid-cols-2 gap-2">
-            <Segmented
-              label="Format"
-              options={[...CLIP_ASPECTS]}
-              value={state.aspectRatio as (typeof CLIP_ASPECTS)[number]["id"]}
-              onChange={(aspectRatio) => set("aspectRatio", aspectRatio)}
-              disabled={clip.pending}
-            />
-            <Segmented
-              label="Quality"
-              options={CLIP_RESOLUTIONS}
-              value={state.resolution}
-              onChange={(resolution) => set("resolution", resolution)}
-              disabled={clip.pending}
-            />
-          </div>
         </div>
       )}
 
