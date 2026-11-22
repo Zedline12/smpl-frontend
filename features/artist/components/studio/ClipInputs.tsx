@@ -13,8 +13,23 @@ import { cn } from "@/lib/utils";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
 import {
   ArtistVideoClipInputConst,
+  ArtistVideoClipScene,
   ArtistVideoClipStyle,
 } from "@/features/generation/types/models/artist-video-clip.type";
+
+/** Scene: a Nano Banana scene from the style, or the photo as is. */
+export const CLIP_SCENE_OPTIONS: { id: ArtistVideoClipScene; label: string }[] = [
+  { id: "song", label: "Song scene" },
+  { id: "original", label: "Original photo" },
+];
+
+/** Lyrics burned in at the bottom, or none ("on"/"off": the rail takes string ids). */
+export const CLIP_LYRICS_OPTIONS: { id: "off" | "on"; label: string }[] = [
+  { id: "off", label: "Off" },
+  { id: "on", label: "On bottom" },
+];
+
+export const ORIGINAL_PHOTO_HINT = "Your photo is animated as is: its background and shape stay.";
 
 export const CLIP_STYLES: {
   id: ArtistVideoClipStyle;

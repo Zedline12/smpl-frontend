@@ -8,12 +8,58 @@ import { useCurrentTrack } from "../../stores/useArtistPlayerStore";
 import { formatDuration } from "../../utils/composition-plan";
 import { AudioWindowPicker } from "../AudioWindowPicker";
 import { ArtistModeSwitch } from "./ArtistModeSwitch";
-import { ClipCharacterPicker, ClipStylePicker } from "./ClipInputs";
+import {
+  CLIP_LYRICS_OPTIONS,
+  CLIP_SCENE_OPTIONS,
+  ClipCharacterPicker,
+  ClipStylePicker,
+  ORIGINAL_PHOTO_HINT,
+} from "./ClipInputs";
 import { GenerateButton } from "./StudioCard";
+
+/** A small labelled one-of rail for the dock (Scene, Lyrics). */
+function MiniRail<Id extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  options: { id: Id; label: string }[];
+  value: Id;
+  onChange: (id: Id) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div role="radiogroup" aria-label={label} className="flex min-w-0 flex-1 flex-col gap-1">
+      <span className="px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">{label}</span>
+      <div className="flex gap-0.5 rounded-xl border border-white/10 bg-black/40 p-0.5">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={value === o.id}
+            disabled={disabled}
+            onClick={() => onChange(o.id)}
+            className={cn(
+              "h-8 min-w-0 flex-1 truncate rounded-lg px-1.5 text-[11px] font-semibold transition-colors disabled:opacity-40",
+              value === o.id ? "bg-primary/30 text-white" : "text-white/60",
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /**
  * Phones: the video clip inputs docked at the bottom, like the song DJ (MobileDjDock).
- * Collapsed: styles, character, song chip, prompt and Generate; open: the song picker too.
+ * Collapsed: scene and lyrics, styles, character, song chip, prompt and Generate; open: the
+ * song picker too. The original photo needs no style or prompt.
  */
 export function MobileClipDock() {
   const clip = useVideoClipBuilder();
@@ -48,7 +94,28 @@ export function MobileClipDock() {
     >
       <ArtistModeSwitch compact />
 
-      <ClipStylePicker compact value={state.style} onChange={(style) => set("style", style)} disabled={clip.pending} />
+      <div className="flex gap-2">
+        <MiniRail
+          label="Scene"
+          options={CLIP_SCENE_OPTIONS}
+          value={clip.scene}
+          onChange={(scene) => set("scene", scene)}
+          disabled={clip.pending}
+        />
+        <MiniRail
+          label="Lyrics"
+          options={CLIP_LYRICS_OPTIONS}
+          value={clip.lyrics ? "on" : "off"}
+          onChange={(v) => set("lyrics", v === "on")}
+          disabled={clip.pending}
+        />
+      </div>
+
+      {clip.scene === "song" ? (
+        <ClipStylePicker compact value={state.style} onChange={(style) => set("style", style)} disabled={clip.pending} />
+      ) : (
+        <p className="px-1 text-xs text-white/45">{ORIGINAL_PHOTO_HINT}</p>
+      )}
 
       <div className="flex items-center gap-2">
         <ClipCharacterPicker
@@ -78,17 +145,19 @@ export function MobileClipDock() {
         </div>
       )}
 
-      <div className="flex items-end gap-2">
-        <textarea
-          value={state.prompt}
-          onChange={(e) => set("prompt", e.target.value)}
-          onFocus={() => setOpen(true)}
-          maxLength={ArtistVideoClipInputConst.maxPromptLength}
-          rows={open ? 2 : 1}
-          placeholder="Add a prompt (optional)…"
-          aria-label="Your prompt, optional"
-          className="focus:border-primary/50 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:outline-none"
-        />
+      <div className={cn("flex items-end gap-2", clip.scene !== "song" && "justify-end")}>
+        {clip.scene === "song" && (
+          <textarea
+            value={state.prompt}
+            onChange={(e) => set("prompt", e.target.value)}
+            onFocus={() => setOpen(true)}
+            maxLength={ArtistVideoClipInputConst.maxPromptLength}
+            rows={open ? 2 : 1}
+            placeholder="Add a prompt (optional)…"
+            aria-label="Your prompt, optional"
+            className="focus:border-primary/50 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:outline-none"
+          />
+        )}
         <GenerateButton
           compact
           needsProject={!!clip.user && !clip.templateMode}

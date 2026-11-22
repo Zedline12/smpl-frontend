@@ -53,11 +53,14 @@ export function useVideoClipBuilder() {
     }
   };
 
+  // Saved states from before the scene option have none: the Song scene, no lyrics.
+  const scene = state.scene ?? "song";
+  const lyrics = !!state.lyrics;
   const missing = !state.images.length
     ? "Add your character"
     : !audio
       ? "Choose part of a song"
-      : !state.style
+      : scene === "song" && !state.style
         ? "Pick a style for the clip"
         : null;
   const pending =
@@ -84,9 +87,13 @@ export function useVideoClipBuilder() {
     } finally {
       setPreparing(false);
     }
+    // The original photo is animated as is: no style or prompt goes with it.
     const input: IArtistVideoClipInput = {
       ...state,
-      prompt: state.prompt.trim(),
+      scene,
+      lyrics,
+      prompt: scene === "song" ? state.prompt.trim() : "",
+      style: scene === "song" ? state.style : null,
       duration: clipSeconds(audio.lengthSec),
       audioUrl,
     };
@@ -104,6 +111,8 @@ export function useVideoClipBuilder() {
     templateMode,
     state,
     set,
+    scene,
+    lyrics,
     audio,
     changeAudio,
     missing,

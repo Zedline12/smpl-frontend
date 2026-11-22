@@ -2,11 +2,17 @@
 import { ArtistVideoClipInputConst } from "@/features/generation/types/models/artist-video-clip.type";
 import { clipSeconds, useVideoClipBuilder } from "../../hooks/useVideoClipBuilder";
 import { AudioWindowPicker } from "../AudioWindowPicker";
-import { studioLabel } from "./ChipGroup";
-import { ClipCharacterPicker, ClipStylePicker } from "./ClipInputs";
+import { Segmented, studioLabel } from "./ChipGroup";
+import {
+  CLIP_LYRICS_OPTIONS,
+  CLIP_SCENE_OPTIONS,
+  ClipCharacterPicker,
+  ClipStylePicker,
+  ORIGINAL_PHOTO_HINT,
+} from "./ClipInputs";
 import { GenerateButton, StudioCard } from "./StudioCard";
 
-/** Make a video clip: character · song part · style, prompt and Generate (desktop). */
+/** Make a video clip: character · song part · scene, style, prompt, lyrics and Generate (desktop). */
 export function VideoClipSettings() {
   const clip = useVideoClipBuilder();
   const { state, set, audio } = clip;
@@ -37,22 +43,44 @@ export function VideoClipSettings() {
       </StudioCard>
 
       <StudioCard className="gap-4 md:col-span-2 xl:col-span-1">
-        <div className="flex flex-col gap-2.5">
-          <span className={studioLabel}>Style</span>
-          <ClipStylePicker value={state.style} onChange={(style) => set("style", style)} disabled={clip.pending} />
-        </div>
+        <Segmented
+          label="Scene"
+          options={CLIP_SCENE_OPTIONS}
+          value={clip.scene}
+          onChange={(scene) => set("scene", scene)}
+          disabled={clip.pending}
+        />
 
-        <div className="flex flex-col gap-2.5">
-          <span className={studioLabel}>Your prompt · optional</span>
-          <textarea
-            value={state.prompt}
-            onChange={(e) => set("prompt", e.target.value)}
-            maxLength={ArtistVideoClipInputConst.maxPromptLength}
-            rows={3}
-            placeholder="e.g. wearing a red hoodie, golden hour, close-up shots"
-            className="focus:border-primary/50 resize-none rounded-2xl border border-white/[0.07] bg-black/30 px-4 py-3 text-sm leading-relaxed text-white placeholder:text-white/30 focus:outline-none"
-          />
-        </div>
+        {clip.scene === "song" ? (
+          <>
+            <div className="flex flex-col gap-2.5">
+              <span className={studioLabel}>Style</span>
+              <ClipStylePicker value={state.style} onChange={(style) => set("style", style)} disabled={clip.pending} />
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <span className={studioLabel}>Your prompt · optional</span>
+              <textarea
+                value={state.prompt}
+                onChange={(e) => set("prompt", e.target.value)}
+                maxLength={ArtistVideoClipInputConst.maxPromptLength}
+                rows={3}
+                placeholder="e.g. wearing a red hoodie, golden hour, close-up shots"
+                className="focus:border-primary/50 resize-none rounded-2xl border border-white/[0.07] bg-black/30 px-4 py-3 text-sm leading-relaxed text-white placeholder:text-white/30 focus:outline-none"
+              />
+            </div>
+          </>
+        ) : (
+          <p className="text-xs text-white/45">{ORIGINAL_PHOTO_HINT}</p>
+        )}
+
+        <Segmented
+          label="Lyrics"
+          options={CLIP_LYRICS_OPTIONS}
+          value={clip.lyrics ? "on" : "off"}
+          onChange={(v) => set("lyrics", v === "on")}
+          disabled={clip.pending}
+        />
 
         <GenerateButton
           className="mt-auto"

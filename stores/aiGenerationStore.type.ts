@@ -195,7 +195,9 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     prompt: "",
     images: [],
     audioUrl: "",
+    scene: "song",
     style: null,
+    lyrics: false,
     duration: 10,
   },
   [AiModelsEnum.SMPL_AI_INFLUENCER]: {
