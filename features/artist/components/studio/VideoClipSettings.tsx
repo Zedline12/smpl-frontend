@@ -3,21 +3,19 @@ import { useState } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { ArtistVideoClipInputConst } from "@/features/generation/types/models/artist-video-clip.type";
 import { cn } from "@/lib/utils";
-import { type ClipBackgroundVideo, type ClipScenes, useClipScenes } from "../../api/clip-scenes";
+import { useClipScenes } from "../../api/clip-scenes";
 import { clipSeconds, useVideoClipBuilder } from "../../hooks/useVideoClipBuilder";
 import { AudioWindowPicker } from "../AudioWindowPicker";
 import { Segmented, studioLabel } from "./ChipGroup";
 import {
-  BACKGROUND_SET_HINT,
   CLIP_SCENE_OPTIONS,
   CLIP_TYPE_OPTIONS,
-  ClipBackgroundPicker,
   ClipCharacterPicker,
   ClipMoodPicker,
   ORIGINAL_PHOTO_HINT,
-  ThumbPicker,
 } from "./ClipInputs";
 import { GenerateButton } from "./StudioCard";
+import { PlaceChooser } from "./PlaceChooser";
 import { LyricsStylePanel } from "./LyricsStylePanel";
 
 type Clip = ReturnType<typeof useVideoClipBuilder>;
@@ -50,98 +48,13 @@ function MoodAndPrompt({ clip }: { clip: Clip }) {
   );
 }
 
-/** Location, Weather and Time: three menus of large 16:9 photos (admin-editable). */
-function PlacePicks({ clip, scenes }: { clip: Clip; scenes: ClipScenes }) {
-  const { picks, set, pending } = clip;
-  const off = pending || !!clip.backgroundImage;
-  return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      <ThumbPicker label="Location" options={scenes.locations} value={picks.location} onChange={(v) => set("location", v)} disabled={off} />
-      <ThumbPicker label="Weather" options={scenes.weathers} value={picks.weather} onChange={(v) => set("weather", v)} disabled={off} />
-      <ThumbPicker label="Time" options={scenes.times} value={picks.time} onChange={(v) => set("time", v)} disabled={off} />
-    </div>
-  );
-}
-
-const PLACE_SOURCE_OPTIONS: { id: "custom" | "video"; label: string }[] = [
-  { id: "custom", label: "Customize" },
-  { id: "video", label: "Ready-made video" },
-];
-
-/**
- * React sets `muted` as a property after the element exists, so browsers can block the
- * autoplay: mute it on the element itself and start it.
- */
-const startLoop = (el: HTMLVideoElement | null) => {
-  if (!el) return;
-  el.muted = true;
-  el.defaultMuted = true;
-  el.setAttribute("muted", "");
-  void el.play().catch(() => {});
-};
-
-/** Lyrics type: the ready-made background videos as 16:9 cards, all playing on a muted loop. */
-function VideoPicks({ clip, videos }: { clip: Clip; videos: ClipBackgroundVideo[] }) {
-  if (!videos.length)
-    return <p className="text-sm text-white/45">No ready-made videos yet. Customize the place instead.</p>;
-  return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4" role="radiogroup" aria-label="Ready-made videos">
-      {videos.map((v) => {
-        const on = clip.backgroundVideoId === v.id;
-        const tags = [v.location, v.weather, v.time].filter(Boolean).join(" · ");
-        return (
-          <button
-            key={v.id}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            disabled={clip.pending}
-            onClick={() => clip.set("backgroundVideoId", v.id)}
-            className={cn(
-              "group relative aspect-video overflow-hidden rounded-xl border text-left transition-all disabled:opacity-40",
-              on ? "border-primary ring-1 ring-primary shadow-[0_0_16px_-6px_var(--color-primary)]" : "border-white/10 hover:border-white/25",
-            )}
-          >
-            {v.thumbnail ? (
-              // The thumbnail photo (set in the admin Catalog); the video itself otherwise.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={v.thumbnail} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-            ) : (
-              <video
-                src={v.videoUrl}
-                ref={startLoop}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                onCanPlay={(e) => void e.currentTarget.play().catch(() => {})}
-                className="absolute inset-0 size-full object-cover"
-              />
-            )}
-            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-3 pt-6 pb-2">
-              <span className="block truncate text-sm font-semibold text-white">{v.title}</span>
-              {tags && <span className="block truncate text-[11px] text-white/60 capitalize">{tags}</span>}
-            </span>
-            {on && (
-              <span className="bg-primary absolute top-2 right-2 flex size-6 items-center justify-center rounded-full text-white">
-                <Check className="size-3.5" />
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 type StepId = "song" | "place" | "character" | "finish";
 
 const STEP_TITLES: Record<StepId, string> = {
   song: "Choose your song",
   place: "The place",
   character: "Your character",
-  finish: "Mood, prompt & lyrics",
+  finish: "Settings",
 };
 
 const GRADIENT = { background: "linear-gradient(135deg, var(--color-primary), var(--color-secondary))" };
@@ -213,14 +126,10 @@ export function VideoClipSettings() {
   const clip = useVideoClipBuilder();
   const { state, set, audio } = clip;
   const lipsync = clip.type === "lipsync";
-  const bgSet = !!clip.backgroundImage;
   const generated = !lipsync || clip.scene === "song";
   const scenes = useClipScenes();
   /** Lyrics on a ready-made video: no picks, prompt or mood go to Kling. */
   const premade = !!clip.backgroundVideoId;
-  // The tab shown: "video" stays open with no video picked yet (or none in the list).
-  const [placeTab, setPlaceTab] = useState<"custom" | "video">(premade ? "video" : "custom");
-  const showVideos = !lipsync && (premade || placeTab === "video");
 
   const steps: StepId[] = lipsync ? ["song", "place", "character", "finish"] : ["song", "place", "finish"];
   const [index, setIndex] = useState(0);
@@ -232,17 +141,9 @@ export function VideoClipSettings() {
   const canNext = step === "song" ? !!audio : step === "character" ? state.images.length > 0 : true;
   const optional = step === "place";
 
-  const placeHint = premade
-    ? "Your lyrics go on this video. Cheaper and faster than making a new one."
-    : bgSet
-    ? BACKGROUND_SET_HINT
-    : !generated
-      ? ORIGINAL_PHOTO_HINT
-      : clip.pickedFromSong
-        ? "Picked from your song's mood. Change any of them, or skip to keep them."
-        : clip.type === "lyrics"
-          ? "Kling makes one video of this place, as long as your song part."
-          : "Pick a place, or skip to keep these.";
+  const placeHint = !generated
+    ? ORIGINAL_PHOTO_HINT
+    : "Choose how to set the place: tap a card. Skip keeps the one in use.";
 
   return (
     // Phones get the compact dock (MobileClipDock) instead.
@@ -281,37 +182,12 @@ export function VideoClipSettings() {
                 <Segmented label="Scene" options={CLIP_SCENE_OPTIONS} value={clip.scene} onChange={(scene) => set("scene", scene)} disabled={clip.pending} />
               </div>
             )}
-            {!lipsync && (
-              <div className="w-full max-w-sm">
-                <Segmented
-                  label=""
-                  options={PLACE_SOURCE_OPTIONS}
-                  value={showVideos ? "video" : "custom"}
-                  onChange={(v) => {
-                    setPlaceTab(v);
-                    set("backgroundVideoId", v === "video" ? (scenes.videos[0]?.id ?? null) : null);
-                  }}
-                  disabled={clip.pending}
-                />
-              </div>
-            )}
-            {showVideos && <VideoPicks clip={clip} videos={scenes.videos} />}
-            {clip.usesScene && !showVideos && (
-              <div className={cn("grid gap-5", clip.usesBackground && "xl:grid-cols-[minmax(0,1fr)_13rem]")}>
-                <PlacePicks clip={clip} scenes={scenes} />
-                {clip.usesBackground && (
-                  <div className="flex flex-col gap-2">
-                    <span className={studioLabel}>Or your own · optional</span>
-                    <ClipBackgroundPicker value={clip.backgroundImage} onChange={(url) => set("backgroundImage", url)} disabled={clip.pending} />
-                  </div>
-                )}
-              </div>
-            )}
+            {clip.usesScene && <PlaceChooser clip={clip} scenes={scenes} />}
           </div>
         )}
 
         {step === "character" && (
-          <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4">
+          <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 pt-2">
             <StepHeading center title="Choose your character" hint="A clear, front-facing photo of the face and outfit works best." />
             <div className="w-full">
               <ClipCharacterPicker images={state.images} onChange={(images) => set("images", images)} disabled={clip.pending} />

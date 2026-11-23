@@ -438,7 +438,7 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             <div className="text-[10px] font-bold uppercase tracking-wider mb-1 text-muted-foreground">
               One-Time Credits
             </div>
-            <div className="text-[16px] font-bold mb-3 text-foreground">50 credits</div>
+            <div className="text-[16px] font-bold mb-3 text-foreground">None for now</div>
             <div className="flex flex-col md:flex-row gap-3 md:gap-6">
               {[
                 concurrencyLabel(freePlan?.maxConcurrentJobs),

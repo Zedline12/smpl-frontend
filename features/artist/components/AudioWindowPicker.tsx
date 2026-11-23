@@ -332,7 +332,7 @@ export function AudioWindowPicker({
             align="start"
             sideOffset={10}
             collisionPadding={12}
-            className={`${MENU_CONTENT_CLASS} max-h-[60vh] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto p-1.5`}
+            className={`${MENU_CONTENT_CLASS} max-h-[60vh] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
           >
             <DropdownMenuLabel className="px-2 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
               Your songs
@@ -540,11 +540,6 @@ export function AudioWindowPicker({
 
       {tooShort && <p className="text-[11px] text-red-400/90">Pick audio at least {MIN_SEC} seconds long.</p>}
       {error && <p className="text-[11px] text-red-400/90">{error}</p>}
-      {!source && !error && (
-        <p className="text-[11px] text-white/40">
-          Choose one of your songs or upload an MP3/WAV, then pick up to {MAX_SEC} seconds of it.
-        </p>
-      )}
     </div>
   );
 }

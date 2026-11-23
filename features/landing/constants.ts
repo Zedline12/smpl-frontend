@@ -63,5 +63,5 @@ export const HERO_VIDEO_SRC = "/assets/hero-promo.mp4";
 export const HERO_BULLETS = [
   "10+ models in one place",
   "No editing skills needed",
-  "Free credits to start",
+  "Pay only for what you make",
 ];

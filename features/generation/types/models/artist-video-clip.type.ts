@@ -50,6 +50,8 @@ export const ArtistVideoClipInputConst = {
   maxSeconds: 30,
   /** Lyrics type: one Kling 3 text-to-video, at most 15 s. */
   lyricsMaxSeconds: 15,
+  /** The "Describe the place" text (same as the backend). */
+  maxPlacePromptLength: 500,
   /** Lyrics text opacity, % (same as the backend). */
   lyricsOpacity: { min: 10, max: 100, default: 100 },
   /** How much darker the video is under the lyrics, %. */
@@ -86,6 +88,8 @@ export interface IArtistVideoClipInput extends ArtistVideoClipScenePicks {
   audioUrl: string;
   /** Lip sync: "song" (default), a generated scene; "original", the photo as is. */
   scene: ArtistVideoClipScene;
+  /** The place in the user's own words, instead of location, weather and time. */
+  placePrompt: string;
   /** The place instead of location, weather and time (generated scenes, Lyrics). */
   backgroundImage: string | null;
   /** Lyrics type: a ready-made background video (its id) instead of generating one. */
@@ -125,8 +129,9 @@ export const artistVideoClipValidationSchema = z
     time: z.string().regex(PICK_KEY).default("sunrise"),
     mood: z.enum(c.moods).default("uplifting"),
     backgroundImage: z.string().url().nullable().optional(),
+    placePrompt: z.string().max(c.maxPlacePromptLength).optional(),
     backgroundVideoId: z.string().nullable().optional(),
-    lyrics: z.boolean().default(false),
+    lyrics: z.boolean().default(true),
     lyricsPosition: z.enum(c.lyricsPositions).default("center"),
     lyricsFont: z.enum(c.lyricsFonts).default("anton"),
     lyricsSize: z.enum(c.lyricsSizes).default("medium"),

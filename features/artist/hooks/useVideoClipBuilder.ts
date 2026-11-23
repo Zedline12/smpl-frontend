@@ -68,7 +68,7 @@ export function useVideoClipBuilder() {
   // Saved states from before these options have none: lip sync, the Song scene, no lyrics.
   const type = state.type ?? "lipsync";
   const scene = state.scene ?? "song";
-  const lyrics = !!state.lyrics;
+  const lyrics = state.lyrics ?? true;
   const lyricsPosition = state.lyricsPosition ?? "center";
   const lyricsFont = state.lyricsFont ?? "anton";
   const lyricsSize = state.lyricsSize ?? "medium";
@@ -82,6 +82,11 @@ export function useVideoClipBuilder() {
   const backgroundImage = state.backgroundImage || null;
   /** Lyrics type: a ready-made background video instead of the picks. */
   const backgroundVideoId = type === "lyrics" ? state.backgroundVideoId || null : null;
+  /** The place in the user's own words (replaces the picks); not with a photo or a ready-made video. */
+  const placePrompt =
+    (type === "lyrics" || scene === "song") && !backgroundVideoId && !(type === "lipsync" && backgroundImage)
+      ? (state.placePrompt ?? "").trim()
+      : "";
   const picks = {
     location: state.location ?? UPLOAD_SCENE_DEFAULTS.location,
     weather: state.weather ?? UPLOAD_SCENE_DEFAULTS.weather,
@@ -139,6 +144,7 @@ export function useVideoClipBuilder() {
       images: lyricsType ? [] : state.images,
       prompt: usesScene && !backgroundVideoId ? state.prompt.trim() : "",
       backgroundVideoId,
+      placePrompt,
       backgroundImage: usesBackground ? backgroundImage : null,
       duration: clipSeconds(audio.lengthSec, maxClipSeconds),
       audioUrl,
@@ -170,6 +176,7 @@ export function useVideoClipBuilder() {
     backgroundImage: usesBackground ? backgroundImage : null,
     picks,
     backgroundVideoId,
+    placePrompt,
     usesScene,
     usesBackground,
     /** The picks came from the chosen song's mood (not the upload defaults). */

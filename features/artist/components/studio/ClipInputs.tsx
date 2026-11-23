@@ -36,10 +36,10 @@ export const CLIP_SCENE_OPTIONS: { id: ArtistVideoClipScene; label: string }[] =
   { id: "original", label: "Original photo" },
 ];
 
-/** Lip sync: lyrics burned in at the bottom, or none ("on"/"off": the rail takes string ids). */
+/** Lip sync: lyrics burned in (on by default) or none ("on"/"off": the rail takes string ids). */
 export const CLIP_LYRICS_OPTIONS: { id: "off" | "on"; label: string }[] = [
+  { id: "on", label: "On" },
   { id: "off", label: "Off" },
-  { id: "on", label: "On bottom" },
 ];
 
 /** Lyrics type: where the lines sit. */
@@ -308,7 +308,7 @@ export function ClipCharacterPicker({
 }) {
   const [open, setOpen] = useState(false);
   const { maxImages } = ArtistVideoClipInputConst;
-  const size = compact ? "size-10 rounded-xl" : "aspect-square w-44 rounded-2xl";
+  const size = compact ? "size-10 rounded-xl" : "aspect-square w-64 rounded-3xl";
 
   return (
     <>
@@ -339,8 +339,8 @@ export function ClipCharacterPicker({
               size,
             )}
           >
-            <ImagePlus className={compact ? "size-4" : "size-8"} />
-            {!compact && <span className="text-sm font-semibold">{images.length ? "Add more" : "Add character"}</span>}
+            <ImagePlus className={compact ? "size-4" : "size-10"} />
+            {!compact && <span className="text-base font-semibold">{images.length ? "Add more" : "Add character"}</span>}
           </button>
         )}
       </div>
