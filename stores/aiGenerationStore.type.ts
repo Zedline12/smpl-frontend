@@ -192,12 +192,25 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     aspectRatio: "auto",
   },
   [AiModelsEnum.SMPL_ARTIST_VIDEO_CLIP]: {
+    type: "lipsync",
     prompt: "",
     images: [],
     audioUrl: "",
     scene: "song",
-    style: null,
+    // An uploaded song's defaults; a song from My songs sets its own (sceneFromSong).
+    location: "mountain",
+    weather: "sunny",
+    time: "sunrise",
+    mood: "uplifting",
+    backgroundImage: null,
+    backgroundVideoId: null,
     lyrics: false,
+    lyricsPosition: "center",
+    lyricsFont: "anton",
+    lyricsSize: "medium",
+    lyricsOpacity: 100,
+    // null: the clip type's default (Lyrics 35 %, lip sync 0).
+    backgroundDim: null,
     duration: 10,
   },
   [AiModelsEnum.SMPL_AI_INFLUENCER]: {

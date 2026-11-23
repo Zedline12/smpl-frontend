@@ -8,12 +8,19 @@ import { useCurrentTrack } from "../../stores/useArtistPlayerStore";
 import { formatDuration } from "../../utils/composition-plan";
 import { AudioWindowPicker } from "../AudioWindowPicker";
 import { ArtistModeSwitch } from "./ArtistModeSwitch";
+import { useClipScenes } from "../../api/clip-scenes";
 import {
+  BACKGROUND_SET_HINT,
   CLIP_LYRICS_OPTIONS,
+  CLIP_LYRICS_POSITION_OPTIONS,
   CLIP_SCENE_OPTIONS,
+  CLIP_TYPE_OPTIONS,
+  ClipBackgroundPicker,
   ClipCharacterPicker,
-  ClipStylePicker,
+  ClipFontPicker,
+  ClipMoodPicker,
   ORIGINAL_PHOTO_HINT,
+  ThumbPicker,
 } from "./ClipInputs";
 import { GenerateButton } from "./StudioCard";
 
@@ -58,12 +65,18 @@ function MiniRail<Id extends string>({
 
 /**
  * Phones: the video clip inputs docked at the bottom, like the song DJ (MobileDjDock).
- * Collapsed: scene and lyrics, styles, character, song chip, prompt and Generate; open: the
- * song picker too. The original photo needs no style or prompt.
+ * Collapsed: type and lyrics, scene, the place picks and mood, character / background,
+ * song chip, prompt and Generate; open: the song picker too. The original photo needs no
+ * picks or prompt; a background image replaces Location, Weather and Time.
  */
 export function MobileClipDock() {
   const clip = useVideoClipBuilder();
-  const { state, set, audio } = clip;
+  const { state, set, audio, picks } = clip;
+  const lipsync = clip.type === "lipsync";
+  const bgSet = !!clip.backgroundImage;
+  // Mood and prompt direct a generated scene (Lyrics, or lip sync's Song scene).
+  const generated = clip.usesScene;
+  const scenes = useClipScenes();
   const hasTrack = !!useCurrentTrack();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -81,7 +94,7 @@ export function MobileClipDock() {
   }, []);
 
   const songLabel = audio
-    ? `${formatDuration(audio.startSec)}–${formatDuration(audio.startSec + audio.lengthSec)} · ${clipSeconds(audio.lengthSec)}s`
+    ? `${formatDuration(audio.startSec)}–${formatDuration(audio.startSec + audio.lengthSec)} · ${clipSeconds(audio.lengthSec, clip.maxClipSeconds)}s`
     : "Choose a song part";
 
   return (
@@ -96,34 +109,112 @@ export function MobileClipDock() {
 
       <div className="flex gap-2">
         <MiniRail
-          label="Scene"
-          options={CLIP_SCENE_OPTIONS}
-          value={clip.scene}
-          onChange={(scene) => set("scene", scene)}
+          label="Type"
+          options={CLIP_TYPE_OPTIONS}
+          value={clip.type}
+          onChange={(type) => set("type", type)}
           disabled={clip.pending}
         />
-        <MiniRail
-          label="Lyrics"
-          options={CLIP_LYRICS_OPTIONS}
-          value={clip.lyrics ? "on" : "off"}
-          onChange={(v) => set("lyrics", v === "on")}
-          disabled={clip.pending}
-        />
+        {lipsync ? (
+          <MiniRail
+            label="Lyrics"
+            options={CLIP_LYRICS_OPTIONS}
+            value={clip.lyrics ? "on" : "off"}
+            onChange={(v) => set("lyrics", v === "on")}
+            disabled={clip.pending}
+          />
+        ) : (
+          <MiniRail
+            label="Lyrics"
+            options={CLIP_LYRICS_POSITION_OPTIONS}
+            value={clip.lyricsPosition}
+            onChange={(position) => set("lyricsPosition", position)}
+            disabled={clip.pending}
+          />
+        )}
       </div>
 
-      {clip.scene === "song" ? (
-        <ClipStylePicker compact value={state.style} onChange={(style) => set("style", style)} disabled={clip.pending} />
+      {(lipsync || clip.type === "lyrics") && (
+        <div className="flex items-end gap-2">
+          {lipsync && (
+            <MiniRail
+              label="Scene"
+              options={CLIP_SCENE_OPTIONS}
+              value={clip.scene}
+              onChange={(scene) => set("scene", scene)}
+              disabled={clip.pending}
+            />
+          )}
+          {(!lipsync || clip.lyrics) && (
+            <ClipFontPicker
+              compact
+              value={clip.lyricsFont}
+              onChange={(f) => set("lyricsFont", f)}
+              disabled={clip.pending}
+            />
+          )}
+        </div>
+      )}
+
+      {clip.usesScene ? (
+        <>
+          <div className="flex items-start gap-2">
+            <ThumbPicker
+              variant="menu"
+              label="Location"
+              options={scenes.locations}
+              value={picks.location}
+              onChange={(v) => set("location", v)}
+              disabled={clip.pending || bgSet}
+            />
+            <ThumbPicker
+              variant="menu"
+              label="Weather"
+              options={scenes.weathers}
+              value={picks.weather}
+              onChange={(v) => set("weather", v)}
+              disabled={clip.pending || bgSet}
+            />
+            <ThumbPicker
+              variant="menu"
+              label="Time"
+              options={scenes.times}
+              value={picks.time}
+              onChange={(v) => set("time", v)}
+              disabled={clip.pending || bgSet}
+            />
+            {generated && (
+              <ClipMoodPicker
+                compact
+                value={picks.mood}
+                onChange={(mood) => set("mood", mood)}
+                disabled={clip.pending}
+              />
+            )}
+          </div>
+          {bgSet && <p className="px-1 text-xs text-white/45">{BACKGROUND_SET_HINT}</p>}
+        </>
       ) : (
         <p className="px-1 text-xs text-white/45">{ORIGINAL_PHOTO_HINT}</p>
       )}
 
       <div className="flex items-center gap-2">
-        <ClipCharacterPicker
-          compact
-          images={state.images}
-          onChange={(images) => set("images", images)}
-          disabled={clip.pending}
-        />
+        {lipsync && (
+          <ClipCharacterPicker
+            compact
+            images={state.images}
+            onChange={(images) => set("images", images)}
+            disabled={clip.pending}
+          />
+        )}
+        {clip.usesBackground && (
+          <ClipBackgroundPicker
+            compact
+            value={clip.backgroundImage}
+            onChange={(url) => set("backgroundImage", url)}
+            disabled={clip.pending}
+          />
+        )}
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -141,12 +232,18 @@ export function MobileClipDock() {
 
       {open && (
         <div className="flex flex-col gap-3 rounded-xl border border-white/[0.07] bg-black/30 p-2.5">
-          <AudioWindowPicker value={audio} onChange={clip.changeAudio} disabled={clip.pending} />
+          <AudioWindowPicker
+            value={audio}
+            onChange={clip.changeAudio}
+            disabled={clip.pending}
+            maxSeconds={clip.maxClipSeconds}
+            compact
+          />
         </div>
       )}
 
-      <div className={cn("flex items-end gap-2", clip.scene !== "song" && "justify-end")}>
-        {clip.scene === "song" && (
+      <div className={cn("flex items-end gap-2", !generated && "justify-end")}>
+        {generated && (
           <textarea
             value={state.prompt}
             onChange={(e) => set("prompt", e.target.value)}

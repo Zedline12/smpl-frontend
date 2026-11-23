@@ -150,6 +150,11 @@ export function CatalogManager() {
 
 // ─── one entry ─────────────────────────────────────────────────────────────────
 
+/** Offerings with their own content editor (opened from the card). */
+const CONTENT_PAGES: Record<string, string> = {
+  "smpl-artist-video-clip": "/admin/catalog/artist-video-clip",
+};
+
 function EntryCard({ row, studio }: { row: AdminOffering | AdminStudio; studio: boolean }) {
   const queryClient = useQueryClient();
   const offering = studio ? null : (row as AdminOffering);
@@ -245,6 +250,14 @@ function EntryCard({ row, studio }: { row: AdminOffering | AdminStudio; studio: 
               onChange={(e) => save.mutate({ enabled: e.target.checked })}
             />
           </label>
+          {CONTENT_PAGES[row.id] && (
+            <Link
+              href={CONTENT_PAGES[row.id]}
+              className="flex items-center gap-1 text-[12px] font-medium text-primary hover:text-white"
+            >
+              Edit content <ArrowUpRight className="size-3.5" />
+            </Link>
+          )}
           {offering && !offering.internal && (
             <Link
               href={`/admin/credit-pricing?model=${encodeURIComponent(row.id)}`}

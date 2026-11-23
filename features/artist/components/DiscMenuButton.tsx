@@ -28,6 +28,10 @@ interface DiscMenuButtonProps<Id extends string> {
    * "mini": a small knob for the mobile dock (menu above).
    */
   variant?: "row" | "knob" | "mini";
+  /** Exactly one pick: tapping an option replaces it and closes the menu (no Clear). */
+  single?: boolean;
+  /** Knob variants: no caption under the knob (the caller shows its own). */
+  hideLabel?: boolean;
 }
 
 const DISC = 320; // disc diameter, px
@@ -44,12 +48,14 @@ export function DiscMenuButton<Id extends string>({
   max,
   disabled,
   variant = "row",
+  single,
+  hideLabel,
 }: DiscMenuButtonProps<Id>) {
   const [hovered, setHovered] = useState<Id | null>(null);
   // Unique per instance: the page renders both the desktop panel and the mobile dock.
   const gradientId = `disc${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const mini = variant === "mini";
-  const full = selected.length >= max;
+  const full = !single && selected.length >= max;
   const picked = options.filter((o) => selected.includes(o.id));
   const focus = options.find((o) => o.id === hovered);
 
@@ -147,7 +153,7 @@ export function DiscMenuButton<Id extends string>({
                 )}
               </span>
             </span>
-            <span
+            {!hideLabel && <span
               className={`font-semibold text-white/55 uppercase ${
                 mini
                   ? "text-[9px] tracking-[0.12em]"
@@ -155,7 +161,7 @@ export function DiscMenuButton<Id extends string>({
               }`}
             >
               {label}
-            </span>
+            </span>}
           </button>
         ) : (
           <button
@@ -222,17 +228,26 @@ export function DiscMenuButton<Id extends string>({
                   {focus.label}
                 </span>
               </>
+            ) : single && picked[0] ? (
+              <>
+                <span className="text-lg">{picked[0].emoji}</span>
+                <span className="truncate text-xs font-bold text-white">
+                  {picked[0].label}
+                </span>
+              </>
             ) : (
               <span className="text-xs font-semibold text-white/90">
-                {picked.length
-                  ? `${picked.length}/${max} picked`
-                  : `Pick up to ${max}`}
+                {single
+                  ? "Pick one"
+                  : picked.length
+                    ? `${picked.length}/${max} picked`
+                    : `Pick up to ${max}`}
               </span>
             )}
           </span>
           {/* Spindle hole */}
           <span className="my-0.5 size-2 rounded-full bg-black/80 ring-1 ring-white/20" />
-          {picked.length > 0 ? (
+          {picked.length > 0 && !single ? (
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();
@@ -259,8 +274,12 @@ export function DiscMenuButton<Id extends string>({
               aria-label={option.label}
               title={option.label}
               disabled={!active && full}
-              // Stays open so several can be picked in one go.
+              // Stays open so several can be picked in one go (a single pick closes it).
               onSelect={(e) => {
+                if (single) {
+                  if (!active) onChange([option.id]);
+                  return;
+                }
                 e.preventDefault();
                 toggle(option.id);
               }}

@@ -21,10 +21,10 @@ import { CLIP_MODEL } from "../../hooks/useVideoClipBuilder";
 import { useArtistQueues } from "../../hooks/useArtistQueues";
 
 const PAGE_SIZE = 12;
-const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+const GRID = "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
-/** The user's video clips (and the ones being made), below the clip inputs. */
-export function ClipLibrary() {
+/** The user's video clips (and the ones being made), below the clip inputs; `full`: the "Your clips" page. */
+export function ClipLibrary({ full }: { full?: boolean } = {}) {
   const query = useInfiniteMediaQuery({
     type: "video",
     filters: createMediaFilters(CLIP_MODEL),
@@ -42,31 +42,37 @@ export function ClipLibrary() {
 
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-        <Clapperboard className="size-4" /> Your video clips
+      <h2
+        className={
+          full
+            ? "flex items-center gap-2 text-xl font-bold text-white"
+            : "flex items-center gap-2 text-sm font-semibold text-white"
+        }
+      >
+        <Clapperboard className={full ? "size-5" : "size-4"} /> Your {full ? "clips" : "video clips"}
       </h2>
 
       {loading ? (
         <div className={GRID}>
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="aspect-[9/16] animate-pulse rounded-2xl bg-white/[0.05]" />
+            <div key={i} className="aspect-video animate-pulse rounded-2xl bg-white/[0.05]" />
           ))}
         </div>
       ) : clips.length === 0 && running.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-white/10 py-14 text-center text-sm text-white/45">
-          No clips yet. Pick a song part, your character and a style above.
+          {full ? "No clips yet. Make one from Home." : "No clips yet. Pick a clip type and a song part above."}
         </p>
       ) : (
         <div className={GRID}>
           {running.map((queue) => (
-            <div key={queue.id} className="aspect-[9/16] overflow-hidden rounded-2xl border border-primary/25">
+            <div key={queue.id} className="aspect-video overflow-hidden rounded-2xl border border-primary/25">
               <QueuedGenerationTile queue={queue} fill />
             </div>
           ))}
           {clips.map((m) => (
             <div
               key={m.id}
-              className="group relative aspect-[9/16] overflow-hidden rounded-2xl border border-white/[0.07] bg-black/40"
+              className="group relative aspect-video overflow-hidden rounded-2xl border border-white/[0.07] bg-black/40"
             >
               <video
                 src={m.url}

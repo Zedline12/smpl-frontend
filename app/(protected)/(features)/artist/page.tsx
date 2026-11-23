@@ -9,7 +9,15 @@ import { MobileDjDock } from "@/features/artist/components/studio/MobileDjDock";
 import { MobileClipDock } from "@/features/artist/components/studio/MobileClipDock";
 import { PlayerBar } from "@/features/artist/components/studio/PlayerBar";
 import { SpectrumBackdrop } from "@/features/artist/components/studio/SpectrumBackdrop";
-import { useArtistMode } from "@/features/artist/components/studio/ArtistModeSwitch";
+import {
+  useArtistMode,
+  useArtistSection,
+} from "@/features/artist/components/studio/ArtistModeSwitch";
+import {
+  ArtistSectionTabs,
+  ArtistSidebar,
+} from "@/features/artist/components/studio/ArtistSidebar";
+import { ArtistHero } from "@/features/artist/components/studio/ArtistHero";
 import { SONG_MODEL } from "@/features/artist/hooks/useSongBuilder";
 import { CLIP_MODEL } from "@/features/artist/hooks/useVideoClipBuilder";
 import {
@@ -17,11 +25,18 @@ import {
   useCurrentTrack,
 } from "@/features/artist/stores/useArtistPlayerStore";
 
-/** The Artist page: create a song, or make a video clip of one (`?tab=clip`). */
+/**
+ * The Artist page. Sidebar sections (`?view=`): Home, the studio (create a song, or make a
+ * video clip of one with `?tab=clip`) with its library below; Your songs; Your clips.
+ */
 export default function ArtistPage() {
   const { model, setMediaType, setModel } = useAiGenerationControlStore();
   const hasTrack = !!useCurrentTrack();
-  const [mode] = useArtistMode();
+  const [tabMode] = useArtistMode();
+  const [section] = useArtistSection();
+  // Your clips / Your songs pick their model (recreate from there works like on Home).
+  const mode = section === "clips" ? "clip" : section === "songs" ? "song" : tabMode;
+  const home = section === "home";
   const pageModel = mode === "clip" ? CLIP_MODEL : SONG_MODEL;
 
   // Recreate can load another model; this page works on the song or the clip model.
@@ -46,19 +61,39 @@ export default function ArtistPage() {
   const ready = model === pageModel;
 
   return (
-    <div className="relative h-full overflow-y-auto [scrollbar-width:thin]">
-      <SpectrumBackdrop />
-      <div
-        className={`relative z-10 mx-auto flex w-full max-w-[1800px] flex-col gap-8 px-3 pt-1 sm:px-6 lg:px-10 ${
-          // Phones: clear the docked DJ (and the player bar under it).
-          hasTrack ? "pb-80 md:pb-28" : "pb-64 md:pb-10"
-        }`}
-      >
-        {ready && <ArtistStudioPanel />}
-        {mode === "clip" ? <ClipLibrary /> : <ArtistLibrary />}
+    // The sidebar is a full-height rail on the left; only the body scrolls.
+    <div className="relative flex h-full">
+      <ArtistSidebar />
+      <div className="relative min-w-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
+        <SpectrumBackdrop />
+        <div
+          className={`relative z-10 mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-3 pt-3 sm:px-6 md:gap-8 md:pt-6 lg:px-8 ${
+            // Phones on Home: clear the docked DJ (and the player bar under it).
+            home
+              ? hasTrack
+                ? "pb-80 md:pb-28"
+                : "pb-64 md:pb-10"
+              : hasTrack
+                ? "pb-28"
+                : "pb-10"
+          }`}
+        >
+          <ArtistSectionTabs />
+          {home && <ArtistHero />}
+          {home && ready && <ArtistStudioPanel />}
+          {section === "clips" ? (
+            <ClipLibrary full />
+          ) : section === "songs" ? (
+            <ArtistLibrary full />
+          ) : mode === "clip" ? (
+            <ClipLibrary />
+          ) : (
+            <ArtistLibrary />
+          )}
+        </div>
       </div>
 
-      {ready && (mode === "clip" ? <MobileClipDock /> : <MobileDjDock />)}
+      {home && ready && (mode === "clip" ? <MobileClipDock /> : <MobileDjDock />)}
 
       <PlayerBar />
     </div>

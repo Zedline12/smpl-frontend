@@ -111,16 +111,19 @@ export function Segmented<Id extends string>({
   value,
   onChange,
   disabled,
+  small,
 }: {
   label: string;
   options: ChipOption<Id>[];
   value: Id;
   onChange: (id: Id) => void;
   disabled?: boolean;
+  /** A short rail (h-8, small text). */
+  small?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <span className={studioLabel}>{label}</span>
+      {label && <span className={studioLabel}>{label}</span>}
       <div className="flex flex-wrap gap-1 rounded-2xl border border-white/[0.07] bg-black/30 p-1">
         {options.map((o) => (
           <button
@@ -130,7 +133,9 @@ export function Segmented<Id extends string>({
             disabled={disabled}
             onClick={() => onChange(o.id)}
             className={cn(
-              "h-11 min-w-[4.5rem] flex-1 rounded-xl border px-3 text-sm font-semibold transition-all disabled:opacity-40",
+              small
+                ? "h-8 min-w-[4rem] flex-1 rounded-lg border px-2.5 text-xs font-semibold transition-all disabled:opacity-40"
+                : "h-11 min-w-[4.5rem] flex-1 rounded-xl border px-3 text-sm font-semibold transition-all disabled:opacity-40",
               value === o.id
                 ? "border-primary bg-primary/25 text-white shadow-[0_0_18px_-8px_var(--color-primary)]"
                 : "border-transparent text-white/70 hover:text-white",

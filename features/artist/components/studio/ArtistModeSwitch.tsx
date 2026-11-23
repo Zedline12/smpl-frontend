@@ -22,6 +22,27 @@ export function useArtistMode(): [ArtistMode, (mode: ArtistMode) => void] {
   return [mode, setMode];
 }
 
+export type ArtistSection = "home" | "songs" | "clips";
+
+/** The Artist page's sidebar section, from `?view=` (anything else is Home). */
+export function useArtistSection(): [ArtistSection, (section: ArtistSection) => void] {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("view");
+  const section: ArtistSection = raw === "songs" || raw === "clips" ? raw : "home";
+  const setSection = (next: ArtistSection) => {
+    if (next === section) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "home") params.delete("view");
+    else params.set("view", next);
+    const query = params.toString();
+    // push: the back button returns to the previous section.
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+  return [section, setSection];
+}
+
 const MODES = [
   { id: "song", label: "Create a song", icon: Music2 },
   { id: "clip", label: "Make a video clip", icon: Clapperboard },

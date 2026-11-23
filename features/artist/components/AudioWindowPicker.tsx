@@ -1,5 +1,8 @@
 "use client";
-import { PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from "react";
+import { PointerEvent as ReactPointerEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { formatDistanceToNowStrict } from "date-fns";
+import { cn } from "@/lib/utils";
+import type { Media } from "@/features/media/types/media";
 import { Loader2, Music2, Pause, Play, Upload, X } from "lucide-react";
 import {
   DropdownMenu,
@@ -13,14 +16,18 @@ import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 import { Seedance25RefLimits } from "@/features/generation/types/models/seedance-2.5-ref-to-video.type";
 import { useInfiniteMediaQuery } from "@/features/media/queries/media";
 import { createMediaFilters } from "@/features/media/types/media-filters";
+import { clipSongInfo, type ClipSongInfo } from "../data/clip-scene";
 import { decodeAudio, peaksFromBuffer } from "../utils/audio-clip";
 import { formatDuration } from "../utils/composition-plan";
+import { songCover, songSubtitle, songTitle } from "../utils/song-meta";
 
 export interface AudioSource {
   url: string;
   name: string;
   /** Object URLs (uploads) are revoked when replaced. */
   local?: boolean;
+  /** A song from My songs: its mood and Background sounds (the clip's scene picks follow them). */
+  song?: ClipSongInfo;
 }
 
 export interface AudioWindow {
@@ -33,21 +40,95 @@ interface AudioWindowPickerProps {
   value: AudioWindow | null;
   onChange: (next: AudioWindow | null) => void;
   disabled?: boolean;
+  /** The longest part that can be picked (default 30 s). */
+  maxSeconds?: number;
+  /** Smaller tiles (the phone dock). */
+  compact?: boolean;
 }
 
 const BARS = 72;
 const DEFAULT_LENGTH_SEC = 15;
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-const { minDurationSec: MIN_SEC, maxDurationSec: MAX_SEC } = Seedance25RefLimits;
+const { minDurationSec: MIN_SEC, maxDurationSec: DEFAULT_MAX_SEC } = Seedance25RefLimits;
 const SONG_FILTERS = createMediaFilters(AiModelsEnum.ELEVENLABS_MUSIC_V2_5);
 
-const songName = (input: Record<string, unknown> | undefined) => {
-  const text = typeof input?.prompt === "string" ? input.prompt.trim() : "";
-  return text ? (text.length > 40 ? `${text.slice(0, 40)}…` : text) : "Untitled song";
-};
+/** The two choices: square tiles. */
+const TILE =
+  "group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-3xl border bg-white/[0.03] p-3 text-white transition-all hover:-translate-y-0.5 hover:bg-white/[0.06] hover:shadow-[0_18px_40px_-20px_rgba(0,0,0,0.9)] disabled:pointer-events-none disabled:opacity-40";
+
+function TileLabel({
+  icon,
+  title,
+  hint,
+  compact,
+  ring,
+}: {
+  icon: ReactNode;
+  title: string;
+  hint: string;
+  compact?: boolean;
+  /** The icon circle's glow (a Tailwind from- color); none on a picked song's cover. */
+  ring?: string;
+}) {
+  return (
+    <span className="flex w-full flex-col items-center gap-2 text-center">
+      <span
+        className={cn(
+          "flex items-center justify-center rounded-full border border-white/10 transition-transform group-hover:scale-105",
+          compact ? "size-10" : "size-14",
+          ring ? `bg-gradient-to-br ${ring} to-transparent` : "bg-black/30 backdrop-blur",
+        )}
+      >
+        {icon}
+      </span>
+      <span className={cn("w-full truncate font-semibold", compact ? "text-xs" : "text-sm")}>{title}</span>
+      <span className="w-full truncate text-[11px] text-white/50">{hint}</span>
+    </span>
+  );
+}
+
+/** A song's length: from its input when known, else read from the file. */
+function SongLength({ song }: { song: Media }) {
+  const fromInput = songSeconds(song.input);
+  const [probed, setProbed] = useState<number | null>(null);
+  useEffect(() => {
+    if (fromInput) return;
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.onloadedmetadata = () => Number.isFinite(audio.duration) && setProbed(audio.duration);
+    audio.src = song.url;
+    return () => {
+      audio.onloadedmetadata = null;
+      audio.src = "";
+    };
+  }, [fromInput, song.url]);
+  const seconds = fromInput ?? probed;
+  return (
+    <span className="text-[11px] font-medium text-white/70 tabular-nums">
+      {seconds ? formatDuration(seconds) : "–:––"}
+    </span>
+  );
+}
+
+/** ElevenLabs Music: a plan's sections added up, or the prompt mode's length. */
+function songSeconds(input: Record<string, unknown> | undefined): number | null {
+  const sections = input?.sections as { durationSec?: number }[] | undefined;
+  if (input?.mode === "plan" && Array.isArray(sections)) {
+    const total = sections.reduce((n, s) => n + (Number(s.durationSec) || 0), 0);
+    if (total > 0) return total;
+  }
+  const ms = Number(input?.musicLengthMs);
+  return ms > 0 ? ms / 1000 : null;
+}
 
 /** Pick a song (or upload one) and choose up to 30 seconds of it for the clip. */
-export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPickerProps) {
+export function AudioWindowPicker({
+  value,
+  onChange,
+  disabled,
+  maxSeconds: MAX_SEC = DEFAULT_MAX_SEC,
+  compact,
+}: AudioWindowPickerProps) {
   const source = value?.source ?? null;
   const fileRef = useRef<HTMLInputElement>(null);
   const waveRef = useRef<HTMLDivElement>(null);
@@ -64,6 +145,7 @@ export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPick
 
   const songs = useInfiniteMediaQuery({ type: "audio", filters: SONG_FILTERS, limit: 20 });
   const songList = songs.data?.pages.flatMap((p) => p.data ?? []) ?? [];
+  const pickedSong = source && !source.local ? songList.find((s) => s.url === source.url) : undefined;
 
   // Decode the chosen audio once for its length and waveform.
   const sourceUrl = source?.url;
@@ -133,7 +215,7 @@ export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPick
   const pickSource = (next: AudioSource) => {
     setFileError(null);
     releaseSource();
-    onChange({ source: next, startSec: 0, lengthSec: DEFAULT_LENGTH_SEC });
+    onChange({ source: next, startSec: 0, lengthSec: Math.min(DEFAULT_LENGTH_SEC, MAX_SEC) });
   };
 
   const handleFile = (file: File | undefined) => {
@@ -215,21 +297,42 @@ export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPick
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className={cn("grid grid-cols-2 gap-3", !compact && "mx-auto w-full max-w-sm")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild disabled={disabled}>
             <button
               type="button"
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-sm text-white transition-colors hover:bg-white/[0.07] disabled:opacity-40 data-[state=open]:border-white/25"
+              className={cn(
+                TILE,
+                "data-[state=open]:border-primary/60",
+                pickedSong ? "border-primary/50" : "border-white/10",
+              )}
+              style={pickedSong ? { background: songCover(pickedSong.id) } : undefined}
             >
-              <Music2 className="text-primary size-4" /> My songs
+              {pickedSong ? (
+                <TileLabel
+                  icon={<Music2 className="size-5" />}
+                  title={songTitle(pickedSong.input)}
+                  hint="Tap to change"
+                  compact={compact}
+                />
+              ) : (
+                <TileLabel
+                  icon={<Music2 className="text-primary size-6" />}
+                  title="My songs"
+                  hint={songList.length ? `${songList.length}${songs.hasNextPage ? "+" : ""} songs` : "Songs you made"}
+                  compact={compact}
+                  ring="from-primary/30"
+                />
+              )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            side="right"
+            side={compact ? "top" : "left"}
             align="start"
             sideOffset={10}
-            className={`${MENU_CONTENT_CLASS} max-h-[60vh] w-64 overflow-y-auto p-1.5`}
+            collisionPadding={12}
+            className={`${MENU_CONTENT_CLASS} max-h-[60vh] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto p-1.5`}
           >
             <DropdownMenuLabel className="px-2 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
               Your songs
@@ -245,12 +348,29 @@ export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPick
             {songList.map((song) => (
               <DropdownMenuItem
                 key={song.id}
-                onSelect={() => pickSource({ url: song.url, name: songName(song.input) })}
-                className="flex flex-col items-start gap-0.5 text-[13px] focus:bg-white/10 focus:text-white"
+                onSelect={() =>
+                  pickSource({ url: song.url, name: songTitle(song.input), song: clipSongInfo(song.input) })
+                }
+                className={cn(
+                  "flex items-center gap-3 rounded-lg p-2 focus:bg-white/10 focus:text-white",
+                  song.url === source?.url && "bg-primary/15",
+                )}
               >
-                <span className="w-full truncate text-white/85">{songName(song.input)}</span>
-                <span className="text-[10px] text-white/40">
-                  {new Date(song.createdAt).toLocaleDateString()}
+                <span
+                  className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-[0_8px_20px_-10px_rgba(0,0,0,0.9)]"
+                  style={{ background: songCover(song.id) }}
+                >
+                  <Music2 className="size-4 text-white/80" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="truncate text-[13px] font-semibold text-white/90">{songTitle(song.input)}</span>
+                  <span className="truncate text-[11px] text-white/45">{songSubtitle(song.input)}</span>
+                </span>
+                <span className="flex shrink-0 flex-col items-end gap-0.5">
+                  <SongLength song={song} />
+                  <span className="text-[10px] text-white/40">
+                    {formatDistanceToNowStrict(new Date(song.createdAt), { addSuffix: true })}
+                  </span>
                 </span>
               </DropdownMenuItem>
             ))}
@@ -271,9 +391,15 @@ export function AudioWindowPicker({ value, onChange, disabled }: AudioWindowPick
           type="button"
           disabled={disabled}
           onClick={() => fileRef.current?.click()}
-          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-sm text-white transition-colors hover:bg-white/[0.07] disabled:opacity-40"
+          className={cn(TILE, source?.local ? "border-secondary/50 bg-secondary/10" : "border-dashed border-white/15")}
         >
-          <Upload className="text-secondary size-4" /> Upload
+          <TileLabel
+            icon={<Upload className="text-secondary size-6" />}
+            title={source?.local ? source.name : "Upload"}
+            hint={source?.local ? "Tap to change" : "MP3 or WAV · 50 MB"}
+            compact={compact}
+            ring="from-secondary/30"
+          />
         </button>
         <input
           ref={fileRef}

@@ -5,6 +5,7 @@ import {
   Download,
   Heart,
   History as HistoryIcon,
+  Music2,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -60,9 +61,13 @@ interface SongItem {
   template?: Template;
 }
 
-/** Explore (example songs) and History (the user's songs) below the settings. */
-export function ArtistLibrary() {
-  const [view, setView] = useState<View>("explore");
+/**
+ * Explore (example songs) and History (the user's songs) below the settings; `full`:
+ * the "Your songs" page, just the user's songs.
+ */
+export function ArtistLibrary({ full }: { full?: boolean } = {}) {
+  const [picked, setView] = useState<View>("explore");
+  const view: View = full ? "history" : picked;
 
   const model = SONG_MODEL;
   const isExplore = view === "explore";
@@ -148,6 +153,11 @@ export function ArtistLibrary() {
 
   return (
     <section className="flex flex-col gap-5">
+      {full ? (
+        <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+          <Music2 className="size-5" /> Your songs
+        </h2>
+      ) : (
       <div className="flex items-center gap-2.5">
         {VIEWS.map(({ value, label, icon: Icon }) => (
           <button
@@ -166,6 +176,7 @@ export function ArtistLibrary() {
           </button>
         ))}
       </div>
+      )}
 
       {loading && !showRunning ? (
         <div className={SONG_GRID}>
@@ -189,7 +200,9 @@ export function ArtistLibrary() {
         <p className="rounded-2xl border border-dashed border-white/10 py-14 text-center text-sm text-white/45">
           {isExplore
             ? "No examples yet."
-            : "No songs yet. Describe one above and hit Generate."}
+            : full
+              ? "No songs yet. Make one from Home."
+              : "No songs yet. Describe one above and hit Generate."}
         </p>
       ) : (
         <div className={SONG_GRID}>
