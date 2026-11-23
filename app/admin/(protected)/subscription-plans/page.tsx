@@ -1,6 +1,7 @@
 import { fetchWithToken } from "@/lib/fetcher";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { SubscriptionPlansTable } from "@/features/admin/subscriptions/components/SubscriptionPlansTable";
+import { AccountDefaultsCard } from "@/features/admin/subscriptions/components/AccountDefaultsCard";
 
 export default async function SubscriptionsPage() {
   const json = await fetchWithToken("/subscription-plans").then((res) =>
@@ -14,6 +15,7 @@ export default async function SubscriptionsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Subscription Plans</h1>
       </div>
+      <AccountDefaultsCard />
       <SubscriptionPlansTable plans={plans} />
     </div>
   );

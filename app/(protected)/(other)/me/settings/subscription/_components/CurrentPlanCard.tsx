@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
-import { isFreePlan, UserPlanSummary } from "@/lib/subscription";
+import { isFreePlan, UserPlanSummary, NO_PLAN_LABEL } from "@/lib/subscription";
 import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
 import { SettingsPanel, SettingsTile } from "../../_components/SettingsUi";
 
@@ -51,7 +51,7 @@ function usePlan() {
     enabled: !!user,
   });
   const subscription = user?.subscription as UserPlanSummary | undefined;
-  const planName: string = subscription?.name ?? "Free Plan";
+  const planName: string = subscription?.name ?? NO_PLAN_LABEL;
   const subscriptionId: string | undefined = subscription?.id;
   return {
     user,
@@ -131,7 +131,7 @@ export function PlanCard() {
           <p className="flex items-center gap-2 text-sm text-amber-200">
             <CalendarClock className="size-4 shrink-0" />
             {endDate
-              ? `Your plan ends on ${endDate}. After that you'll be on the Free plan.`
+              ? `Your plan ends on ${endDate}. After that you won't have a plan.`
               : "Your plan ends at the end of this period."}
           </p>
           <ResumeButton />

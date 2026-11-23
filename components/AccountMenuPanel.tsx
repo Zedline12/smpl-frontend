@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UserAvatar, remainingFraction } from "@/components/UserAvatar";
 import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allowance";
-import { isFreePlan as isUserOnFreePlan } from "@/lib/subscription";
+import { isFreePlan as isUserOnFreePlan, NO_PLAN_LABEL } from "@/lib/subscription";
 
 
 const DOT_COUNT = 20;
@@ -72,7 +72,7 @@ export function AccountMenuPanel({
   const allowanceInfo = useCreditsAllowance(user);
   const { remaining, allowance, usedPercentage, hasAllowance } = allowanceInfo;
 
-  const planName: string = user?.subscription?.name ?? "Free Plan";
+  const planName: string = user?.subscription?.name ?? NO_PLAN_LABEL;
   const isFreePlan = isUserOnFreePlan(user);
   const filledDots = hasAllowance
     ? Math.round(((100 - usedPercentage) / 100) * DOT_COUNT)

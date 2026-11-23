@@ -236,7 +236,7 @@ export default function UserActionsBar({
               {confirmDialog === "refund" &&
                 `This will issue a full refund for the most recent payment${subscriptionPlanName ? ` (${subscriptionPlanName}${formatPrice(subscriptionPlanPriceAmount)})` : ""}.`}
               {confirmDialog === "cancel" &&
-                "The subscription stops renewing. The user keeps the plan until the end of the period they paid for, then moves to Free."}
+                "The subscription stops renewing. The user keeps the plan until the end of the period they paid for, then has no plan (plan credits cleared, pack credits kept)."}
             </p>
             <div className="flex justify-end gap-2">
               <button

@@ -109,7 +109,7 @@ export function CancelSubscriptionDialog({ planName, endsAt }: CancelSubscriptio
                   ? `You keep ${planName} and your credits until ${endDate}.`
                   : `You keep ${planName} until the end of your paid period.`}
               </li>
-              <li>After that you move to the Free plan and your monthly credits stop renewing.</li>
+              <li>After that you won't have a plan: your monthly credits stop and the plan's unused credits are cleared. Credits you bought in packs stay.</li>
             </ul>
           </div>
 

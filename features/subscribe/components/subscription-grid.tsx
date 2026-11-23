@@ -215,9 +215,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
     );
   }
 
-  const freePlan = plans.find((p) => p.priceAmount === 0);
   const filteredPlans = plans
-    .filter((plan) => plan.billingPeriod === period && plan.priceAmount !== 0)
+    // Paid plans only (there is no Free plan; a $0 row is ignored).
+    .filter((plan) => plan.billingPeriod === period && plan.priceAmount > 0)
     .sort((a, b) => a.priceAmount - b.priceAmount);
 
   const isYearly = period === billingPeriod.YEARLY;
@@ -421,40 +421,6 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             </div>
           );
         })}
-      </div>
-
-      {/* Free tier */}
-      <div className="max-w-[1000px] mx-auto px-4 mt-5 pb-4">
-        <div className="rounded-2xl border border-foreground/[0.08] p-7 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col text-left min-w-[140px]">
-            <div className="text-[16px] font-bold mb-1 text-foreground">Free Plan</div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[26px] font-bold text-foreground">$0</span>
-              <span className="text-[14px] text-muted-foreground">/mo</span>
-            </div>
-          </div>
-
-          <div className="flex-grow flex flex-col items-center md:items-start text-center md:text-left">
-            <div className="text-[10px] font-bold uppercase tracking-wider mb-1 text-muted-foreground">
-              One-Time Credits
-            </div>
-            <div className="text-[16px] font-bold mb-3 text-foreground">None for now</div>
-            <div className="flex flex-col md:flex-row gap-3 md:gap-6">
-              {[
-                concurrencyLabel(freePlan?.maxConcurrentJobs),
-                "Access to basic generation",
-                "Standard quality outputs",
-              ].map((feat, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#4ade80]" strokeWidth={2.25} />
-                  <span className="text-[13px] text-foreground/75">{feat}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-[12px] flex-shrink-0 text-muted-foreground">No credit card required</div>
-        </div>
       </div>
 
       <PlanFinder

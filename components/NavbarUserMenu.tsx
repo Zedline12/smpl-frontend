@@ -7,7 +7,7 @@ import { useSignOut } from "@/features/auth/hooks/use-sign-out";
 import { UserAvatar, useCreditsRemaining } from "@/components/UserAvatar";
 import { AccountMenuPanel } from "@/components/AccountMenuPanel";
 import { SupportModal } from "@/features/support/components/SupportModal";
-import { isFreePlan } from "@/lib/subscription";
+import { isFreePlan, NO_PLAN_LABEL } from "@/lib/subscription";
 
 const TRI_GRADIENT =
   "linear-gradient(135deg, #6b41ff 0%, #ea4bff 50%, #ff6b00 100%)";
@@ -197,7 +197,7 @@ export function CreditsPill({
             className="text-sm font-medium leading-none"
             style={{ color: "rgba(255,255,255,0.75)" }}
           >
-            {user?.subscription?.name}
+            {user?.subscription?.name ?? NO_PLAN_LABEL}
           </span>
         </div>
       </div>

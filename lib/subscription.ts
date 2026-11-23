@@ -24,11 +24,15 @@ export interface UserPlanSummary {
   } | null;
 }
 
+/** What users without a paid plan are called. A label only: there is no Free plan. */
+export const NO_PLAN_LABEL = "Free";
+
 /** True when the user has no paid plan. */
 export function isFreePlan(user: { subscription?: Partial<UserPlanSummary> | null } | null | undefined): boolean {
   const subscription = user?.subscription;
   if (!subscription) return true;
   if (typeof subscription.isFree === "boolean") return subscription.isFree;
   // Older responses without `isFree`.
-  return subscription.name === "Free Plan" || !subscription.priceAmount;
+  // Legacy: accounts still pointing at the old $0 Free plan.
+  return !subscription.priceAmount;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { NO_PLAN_LABEL } from "@/lib/subscription";
 
 import {
   Table,
@@ -91,7 +92,7 @@ export function UsersTable({
               <TableCell className="font-medium">{formatName(user)}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.creditsBalance}</TableCell>
-              <TableCell>{user.subscriptionPlanName ?? "Free"}</TableCell>
+              <TableCell>{user.subscriptionPlanName ?? NO_PLAN_LABEL}</TableCell>
               <TableCell>{user.subscriptionPlanPriceAmount}</TableCell>
               <TableCell>{user.billingPeriod ?? "—"}</TableCell>
               <TableCell>

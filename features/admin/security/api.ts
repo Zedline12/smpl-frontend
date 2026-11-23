@@ -21,7 +21,6 @@ export interface SecurityUser {
   country?: string | null;
   countryCode?: string | null;
   city?: string | null;
-  plan?: string;
   creditsBalance?: number;
   isSuspended?: boolean;
   isVpn?: boolean;

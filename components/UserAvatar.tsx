@@ -6,7 +6,7 @@ import {
   useCreditsAllowance,
 } from "@/features/subscribe/hooks/use-credits-allowance";
 
-/** Share of the plan's credits (monthly, or the Free plan's 50) still left, 0–1. Pack credits aren't counted. */
+/** Share of the paid plan's monthly credits still left, 0–1 (0 without a plan). Pack credits aren't counted. */
 export function remainingFraction({ remaining, allowance, hasAllowance }: CreditsAllowance): number {
   if (!hasAllowance || allowance <= 0) return 0;
   return Math.min(1, Math.max(0, remaining / allowance));

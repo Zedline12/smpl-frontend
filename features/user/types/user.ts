@@ -9,7 +9,6 @@ export interface User {
   emailVerified: boolean;
 
   creditsBalance: number;
-  plan: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;

@@ -48,8 +48,8 @@ type Step = "choose" | "code" | "password" | "create-password" | "avatar";
 const MIN_PASSWORD = 8;
 /** About how long a profile picture takes (the countdown on the "avatar" step). */
 const AVATAR_ESTIMATE_MS = 30_000;
-/** What the Free plan gives a new account, shown until the real balance loads. */
-const FREE_CREDITS = 50;
+/** A new account starts with no credits (there is no Free plan). */
+const NEW_ACCOUNT_CREDITS = 0;
 
 /** The inbox to open for an address: Outlook and Yahoo by domain, Gmail for the rest. */
 function inboxFor(email: string): { label: string; href: string } {
@@ -717,7 +717,7 @@ function GeneratingAvatar({
   const secondsLeft = Math.ceil(left / 1000);
   const r = (RING_SIZE - RING_STROKE) / 2;
   const circumference = 2 * Math.PI * r;
-  const credits = welcome?.creditsBalance ?? FREE_CREDITS;
+  const credits = welcome?.creditsBalance ?? NEW_ACCOUNT_CREDITS;
 
   return (
     <div className="flex flex-col items-center text-center" aria-live="polite">
@@ -793,9 +793,13 @@ function GeneratingAvatar({
             <Gift className="size-5" />
           </span>
           <p className="text-sm text-white/85">
-            You got a free{" "}
-            <span className="font-bold text-white">{credits} credits</span>{" "}
-            gift 🎉
+            {credits > 0 ? (
+              <>
+                You have <span className="font-bold text-white">{credits} credits</span> to start 🎉
+              </>
+            ) : (
+              <>Pick a plan or a credit pack to start creating.</>
+            )}
           </p>
         </div>
       </div>

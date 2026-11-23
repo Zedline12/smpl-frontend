@@ -1,4 +1,5 @@
 "use client";
+import { NO_PLAN_LABEL } from "@/lib/subscription";
 
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,8 +18,7 @@ interface TicketDetail {
     firstName?: string;
     lastName?: string;
     creditsBalance?: number;
-    subscription?: { planName?: string; status?: string };
-    subscriptionPlan?: string;
+    subscriptionPlanName?: string | null;
   } | null;
 }
 
@@ -260,7 +260,7 @@ export function SupportTicketDrawer({ ticketId, onClose, onChanged }: SupportTic
                 <div className="rounded-xl bg-white/[0.04] p-2.5">
                   <p className="mb-0.5 text-[10px] font-bold tracking-wider text-white/30 uppercase">Plan</p>
                   <p className="text-[13px] font-semibold text-white">
-                    {user?.subscription?.planName ?? user?.subscriptionPlan ?? "Free"}
+                    {user?.subscriptionPlanName ?? NO_PLAN_LABEL}
                   </p>
                 </div>
                 <div className="rounded-xl bg-white/[0.04] p-2.5">
