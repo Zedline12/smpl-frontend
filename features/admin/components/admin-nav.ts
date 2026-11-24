@@ -7,6 +7,7 @@ import {
   CircleUserRound,
   CreditCard,
   Film,
+  FileSpreadsheet,
   Flag,
   Gavel,
   Gift,
@@ -106,6 +107,7 @@ export const SETTINGS_SECTIONS: AdminNavSection[] = [
     label: "Site",
     links: [
       { icon: Scale, label: "Legal", href: "/admin/legal" },
+      { icon: FileSpreadsheet, label: "Summary Reports", href: "/admin/summary-reports" },
       { icon: Rocket, label: "Updates", href: "/admin/updates", ownerOrDev: true },
     ],
   },
@@ -118,6 +120,7 @@ const SETTINGS_PREFIXES = [
   "/admin/subscription-plans",
   "/admin/credit-packs",
   "/admin/legal",
+  "/admin/summary-reports",
   "/admin/updates",
 ];
 

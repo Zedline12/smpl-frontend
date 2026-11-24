@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowDown, ArrowUp, BarChart3, CircleDollarSign, Coins, Loader2, Search, TrendingUp, TriangleAlert } from "lucide-react";
+import { ArrowDown, ArrowUp, BarChart3, CircleDollarSign, Coins, Loader2, Search, TrendingUp, TriangleAlert, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DeltaText, KpiTile } from "@/features/admin/components/data-viz/kpi";
 import { ChartCard, Legend, TooltipBox } from "@/features/admin/components/data-viz/parts";
@@ -11,11 +11,17 @@ import { GRID, SERIES, axisProps } from "@/features/admin/components/data-viz/pa
 import { dayLabel, int, pct, usdDollars } from "@/features/admin/components/data-viz/format";
 
 type Kind = "all" | "model" | "generator";
+type UserType = "all" | "paid" | "free";
+type Split = "kind" | "users";
 type Sort = "generations" | "cost" | "revenue" | "profit" | "failRate" | "name";
 type Metric = "generations" | "cost" | "revenue" | "profit";
 
 interface Kpi {
   generations: number;
+  paidGenerations: number;
+  freeGenerations: number;
+  paidUsers: number;
+  freeUsers: number;
   failed: number;
   successRate: number | null;
   credits: number;
@@ -29,6 +35,8 @@ interface Row {
   name: string;
   kind: "model" | "generator";
   generations: number;
+  paidGenerations: number;
+  freeGenerations: number;
   failed: number;
   failRate: number;
   credits: number;
@@ -84,13 +92,15 @@ export function GenerationsDashboard() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [kind, setKind] = useState<Kind>("all");
+  const [users, setUsers] = useState<UserType>("all");
+  const [split, setSplit] = useState<Split>("kind");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<Sort>("generations");
   const [dir, setDir] = useState<"asc" | "desc">("desc");
   const [metric, setMetric] = useState<Metric>("generations");
 
   const params = useMemo(() => {
-    const p = new URLSearchParams({ kind, sort, dir });
+    const p = new URLSearchParams({ kind, users, sort, dir });
     if (range === "custom") {
       if (customFrom) p.set("from", new Date(customFrom).toISOString());
       if (customTo) p.set("to", new Date(new Date(customTo).getTime() + 86_400_000).toISOString());
@@ -100,7 +110,7 @@ export function GenerationsDashboard() {
     }
     if (search.trim()) p.set("q", search.trim());
     return p.toString();
-  }, [range, customFrom, customTo, kind, sort, dir, search]);
+  }, [range, customFrom, customTo, kind, users, sort, dir, search]);
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["admin-generation-stats", params],
@@ -116,10 +126,16 @@ export function GenerationsDashboard() {
 
   const c = data?.kpis.current;
   const p = data?.kpis.previous;
-  const lines = [
-    ...(kind !== "generator" ? [{ key: `model${cap(metric)}`, label: "Models", color: SERIES[0] }] : []),
-    ...(kind !== "model" ? [{ key: `generator${cap(metric)}`, label: "Smpl generators", color: SERIES[1] }] : []),
-  ];
+  const lines =
+    split === "users"
+      ? [
+          ...(users !== "free" ? [{ key: `paid${cap(metric)}`, label: "Paid users", color: SERIES[2] }] : []),
+          ...(users !== "paid" ? [{ key: `free${cap(metric)}`, label: "Free users", color: SERIES[3] }] : []),
+        ]
+      : [
+          ...(kind !== "generator" ? [{ key: `model${cap(metric)}`, label: "Models", color: SERIES[0] }] : []),
+          ...(kind !== "model" ? [{ key: `generator${cap(metric)}`, label: "Smpl generators", color: SERIES[1] }] : []),
+        ];
   const fmt = (n: number) => (metric === "generations" ? int(n) : money(n));
 
   const toggleSort = (s: Sort) => {
@@ -166,6 +182,13 @@ export function GenerationsDashboard() {
             </button>
           ))}
         </div>
+        <div className="flex gap-1 rounded-lg border border-white/10 p-1 text-[13px]" title="Paid: made on a paid plan or with purchased credits">
+          {(["all", "paid", "free"] as UserType[]).map((u) => (
+            <button key={u} type="button" onClick={() => setUsers(u)} className={cn("rounded-md px-2.5 py-1", users === u ? "bg-white text-black" : "text-white/60 hover:text-white")}>
+              {u === "all" ? "All users" : u === "paid" ? "Paid users" : "Free users"}
+            </button>
+          ))}
+        </div>
         <div className="relative min-w-[12rem] flex-1">
           <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-white/35" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name" className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] pr-3 pl-8 text-sm text-white outline-none focus:border-white/30" />
@@ -187,9 +210,12 @@ export function GenerationsDashboard() {
 
       {c && p && (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <KpiTile label="Generations" value={int(c.generations)} accent="blue" icon={BarChart3}>
               <DeltaText now={c.generations} before={p.generations} /> · {pct(c.successRate)} succeeded
+            </KpiTile>
+            <KpiTile label="Paid vs free" value={`${int(c.paidGenerations)} / ${int(c.freeGenerations)}`} accent="sky" icon={Users}>
+              {int(c.paidUsers)} paid · {int(c.freeUsers)} free users · <DeltaText now={c.freeGenerations} before={p.freeGenerations} goodWhenUp={false} /> free
             </KpiTile>
             <KpiTile label="Revenue" value={money(c.revenue)} accent="emerald" icon={CircleDollarSign}>
               <DeltaText now={c.revenue} before={p.revenue} /> · {int(c.credits)} credits
@@ -206,12 +232,21 @@ export function GenerationsDashboard() {
             title={`${METRICS.find((m) => m.id === metric)!.label} over time`}
             subtitle={data!.range.unit === "week" ? "Per week" : "Per day"}
             action={
+              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-1 rounded-lg border border-white/10 p-1 text-[12px]">
+                {(["kind", "users"] as Split[]).map((x) => (
+                  <button key={x} type="button" onClick={() => setSplit(x)} className={cn("rounded-md px-2 py-0.5", split === x ? "bg-white text-black" : "text-white/60")}>
+                    {x === "kind" ? "By type" : "By user"}
+                  </button>
+                ))}
+              </div>
               <div className="flex gap-1 rounded-lg border border-white/10 p-1 text-[12px]">
                 {METRICS.map((m) => (
                   <button key={m.id} type="button" onClick={() => setMetric(m.id)} className={cn("rounded-md px-2 py-0.5", metric === m.id ? "bg-white text-black" : "text-white/60")}>
                     {m.label}
                   </button>
                 ))}
+              </div>
               </div>
             }
           >
@@ -244,22 +279,27 @@ export function GenerationsDashboard() {
           </ChartCard>
 
           <div className="overflow-x-auto rounded-2xl border border-white/[0.08]">
-            <table className="w-full min-w-[820px] text-sm">
+            <table className="w-full min-w-[920px] text-sm">
               <thead className="bg-white/[0.03] text-left text-[11px] tracking-wide text-white/45 uppercase">
                 <tr>
                   {[
                     ["name", "Model"],
                     ["generations", "Generations"],
+                    ["split", "Paid / free"],
                     ["failRate", "Fail rate"],
                     ["cost", "Cost"],
                     ["revenue", "Revenue"],
                     ["profit", "Profit"],
                   ].map(([id, label]) => (
                     <th key={id} className={cn("px-4 py-2.5 font-medium", id !== "name" && "text-right")}>
+                      {id === "split" ? (
+                        label
+                      ) : (
                       <button type="button" onClick={() => toggleSort(id as Sort)} className="inline-flex items-center gap-1 uppercase hover:text-white">
                         {label}
                         {sort === id && (dir === "desc" ? <ArrowDown className="size-3" /> : <ArrowUp className="size-3" />)}
                       </button>
+                      )}
                     </th>
                   ))}
                   <th className="px-4 py-2.5 text-right font-medium">Margin</th>
@@ -275,6 +315,9 @@ export function GenerationsDashboard() {
                       </div>
                     </td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{int(r.generations)}</td>
+                    <td className="px-4 py-2.5 text-right text-white/60 tabular-nums">
+                      {int(r.paidGenerations)} / {int(r.freeGenerations)}
+                    </td>
                     <td className={cn("px-4 py-2.5 text-right tabular-nums", r.failRate > 0.1 && "text-red-300")}>
                       {r.failRate > 0.1 && <TriangleAlert className="mr-1 inline size-3.5" />}
                       {pct(r.failRate)}
@@ -287,7 +330,7 @@ export function GenerationsDashboard() {
                 ))}
                 {!data!.rows.length && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-white/40">
+                    <td colSpan={8} className="px-4 py-8 text-center text-white/40">
                       No generations match.
                     </td>
                   </tr>
