@@ -146,14 +146,13 @@ export function VideoClipSettings() {
     : "Choose how to set the place: tap a card. Skip keeps the one in use.";
 
   return (
-    // Phones get the compact dock (MobileClipDock) instead.
-    <div className="hidden flex-col gap-6 md:flex">
+    <div className="flex flex-col gap-6">
       <Stepper steps={steps} current={at} onGo={go} />
 
-      <div className="min-h-[22rem]">
+      <div className="sm:min-h-[22rem]">
         {step === "song" && (
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4">
-            <div className="w-72"><Segmented label="" options={CLIP_TYPE_OPTIONS} value={clip.type} onChange={(type) => {
+            <div className="w-full max-w-72"><Segmented label="" options={CLIP_TYPE_OPTIONS} value={clip.type} onChange={(type) => {
               set("type", type);
               // Each type's usual place for the lines: over the scene, or under the singer.
               set("lyricsPosition", type === "lipsync" ? "bottom" : "center");
@@ -218,10 +217,10 @@ export function VideoClipSettings() {
             <ChevronLeft className="size-4" /> Back
           </button>
         )}
-        <div className="ml-auto flex items-end gap-3">
+        <div className="ml-auto flex min-w-0 flex-1 items-end justify-end gap-3">
           {step === "finish" ? (
             <GenerateButton
-              className="w-80"
+              className="w-full sm:w-80"
               label={clip.label}
               credits={clip.creditsCost}
               onClick={() => void clip.generate()}

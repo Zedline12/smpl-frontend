@@ -46,7 +46,7 @@ export function ArtistHero() {
         </span>
         <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">{copy.title}</h1>
         <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">{copy.text}</p>
-        <ArtistModeSwitch className="mt-2 hidden md:flex" />
+        <ArtistModeSwitch className="mt-2" />
       </div>
 
       <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)]">

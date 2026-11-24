@@ -224,7 +224,7 @@ export const ModelDefaults: { [M in AiModelsEnum]: ModelStateMap[M] } = {
     seed: null,
     variationIndex: 0,
     bodyColor: "",
-    resolution: "2K",
+    resolution: "1K",
   },
   [AiModelsEnum.SMPL_ADS_STUDIO]: {
     prompt: "",

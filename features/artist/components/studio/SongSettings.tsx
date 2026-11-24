@@ -1,9 +1,12 @@
 "use client";
-import { Guitar, Music2, Plus, Smile } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { ChevronDown, Guitar, Mic, Music2, Plus, Smile } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -44,6 +47,47 @@ export const VOCAL_OPTIONS: { id: Vocals | "any"; label: string }[] = [
   ...VOCALS,
 ];
 
+const PHONE = "(max-width: 767px)";
+function subscribePhone(cb: () => void) {
+  const mq = window.matchMedia(PHONE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+/** True below the md breakpoint (phones). */
+const useIsPhone = () => useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE).matches, () => false);
+
+type VocalId = (typeof VOCAL_OPTIONS)[number]["id"];
+
+/** Vocals as one select-style button with a menu (phones). */
+function VocalsSelect({ value, onChange }: { value: VocalId; onChange: (v: VocalId) => void }) {
+  const current = VOCAL_OPTIONS.find((o) => o.id === value) ?? VOCAL_OPTIONS[0];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={`Vocals: ${current.label}`}
+          className="flex h-11 w-full items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 text-sm text-white"
+        >
+          <Mic className="size-4 shrink-0 text-white/55" />
+          <span className={studioLabel}>Vocals</span>
+          <span className="ml-auto truncate font-semibold">{current.label}</span>
+          <ChevronDown className="size-4 shrink-0 text-white/50" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className={MENU_CONTENT_CLASS}>
+        <DropdownMenuRadioGroup value={value} onValueChange={(v) => onChange(v as VocalId)}>
+          {VOCAL_OPTIONS.map((o) => (
+            <DropdownMenuRadioItem key={o.id} value={o.id}>
+              {o.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** "70-85 bpm" → "70–85 BPM" (the tempo preset's range). */
 export const bpmOf = (tempo: Tempo) => {
   const range = TEMPOS.find((t) => t.id === tempo)?.styles.find((s) =>
@@ -66,10 +110,11 @@ export function SongSettings() {
   const { vibe, sections } = state;
   const tempoIndex = TEMPO_STEPS.indexOf(vibe.tempo);
   const lengthIndex = nearestLength(state.musicLengthMs / 1000);
+  const phone = useIsPhone();
+  const knobSize = phone ? "sm" : "md";
 
   return (
-    // Phones get the compact dock (MobileDjDock) instead.
-    <div className="hidden flex-col gap-4 md:flex">
+    <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr]">
         {/* Describe */}
         <StudioCard className="gap-4 md:col-span-2 xl:col-span-1">
@@ -82,13 +127,13 @@ export function SongSettings() {
               onChange={(e) => update({ prompt: e.target.value })}
               disabled={advanced}
               maxLength={MusicLimits.maxPromptLength}
-              rows={5}
+              rows={phone ? 2 : 5}
               placeholder={
                 advanced
                   ? "Turn off Advanced to describe your song in words"
                   : "A cozy late-night rap about driving through the rain"
               }
-              className="min-h-36 flex-1 resize-none rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-[15px] leading-relaxed text-white placeholder:text-white/30 focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed"
+              className="min-h-20 flex-1 md:min-h-36 resize-none rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-[15px] leading-relaxed text-white placeholder:text-white/30 focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed"
             />
           </div>
           {SHOW_ADVANCED_SWITCH && (
@@ -153,18 +198,23 @@ export function SongSettings() {
               onChange={(instruments) => setVibe({ instruments })}
             />
           </div>
-          <Segmented
-            label="Vocals"
-            options={VOCAL_OPTIONS}
-            value={vibe.vocals ?? "any"}
-            onChange={(v) => setVibe({ vocals: v === "any" ? null : v })}
-          />
+          {phone ? (
+            <VocalsSelect value={vibe.vocals ?? "any"} onChange={(v) => setVibe({ vocals: v === "any" ? null : v })} />
+          ) : (
+            <Segmented
+              label="Vocals"
+              options={VOCAL_OPTIONS}
+              value={vibe.vocals ?? "any"}
+              onChange={(v) => setVibe({ vocals: v === "any" ? null : v })}
+            />
+          )}
         </StudioCard>
 
         {/* Knobs + Generate */}
         <StudioCard className="gap-5">
-          <div className="grid grid-cols-2 justify-items-center gap-5">
+          <div className="grid grid-cols-2 justify-items-center gap-3 md:gap-5">
             <Knob
+              size={knobSize}
               label="Tempo"
               steps={TEMPO_STEPS.length}
               index={tempoIndex < 0 ? 0 : tempoIndex}
@@ -181,6 +231,7 @@ export function SongSettings() {
             />
             {advanced ? (
               <Knob
+                size={knobSize}
                 label="Length"
                 steps={LENGTH_PRESETS.length}
                 index={nearestLength(song.totalSec)}
@@ -192,6 +243,7 @@ export function SongSettings() {
               />
             ) : (
               <Knob
+                size={knobSize}
                 label="Length"
                 steps={LENGTH_PRESETS.length}
                 index={lengthIndex}

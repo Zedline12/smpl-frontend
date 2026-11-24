@@ -5,8 +5,6 @@ import { GenerationTypeEnum } from "@/features/generation/types/generation";
 import { ArtistStudioPanel } from "@/features/artist/components/studio/ArtistStudioPanel";
 import { ArtistLibrary } from "@/features/artist/components/studio/ArtistLibrary";
 import { ClipLibrary } from "@/features/artist/components/studio/ClipLibrary";
-import { MobileDjDock } from "@/features/artist/components/studio/MobileDjDock";
-import { MobileClipDock } from "@/features/artist/components/studio/MobileClipDock";
 import { PlayerBar } from "@/features/artist/components/studio/PlayerBar";
 import { SpectrumBackdrop } from "@/features/artist/components/studio/SpectrumBackdrop";
 import {
@@ -67,16 +65,7 @@ export default function ArtistPage() {
       <div className="relative min-w-0 flex-1 overflow-y-auto [scrollbar-width:thin]">
         <SpectrumBackdrop />
         <div
-          className={`relative z-10 mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-3 pt-3 sm:px-6 md:gap-8 md:pt-6 lg:px-8 ${
-            // Phones on Home: clear the docked DJ (and the player bar under it).
-            home
-              ? hasTrack
-                ? "pb-80 md:pb-28"
-                : "pb-64 md:pb-10"
-              : hasTrack
-                ? "pb-28"
-                : "pb-10"
-          }`}
+          className={`relative z-10 mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-3 pt-3 sm:px-6 md:gap-8 md:pt-6 lg:px-8 ${hasTrack ? "pb-28" : "pb-10"}`}
         >
           <ArtistSectionTabs />
           {home && <ArtistHero />}
@@ -93,7 +82,6 @@ export default function ArtistPage() {
         </div>
       </div>
 
-      {home && ready && (mode === "clip" ? <MobileClipDock /> : <MobileDjDock />)}
 
       <PlayerBar />
     </div>

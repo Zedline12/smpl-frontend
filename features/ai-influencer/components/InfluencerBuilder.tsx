@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { Dices, Shuffle, Upload, User, X } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import { Shuffle, Upload, User, X } from "lucide-react";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
 import {
   AiInfluencerInputConst,
@@ -13,7 +12,6 @@ import { toggleOption } from "../hooks/useAiInfluencerOptions";
 import {
   CHARACTER_CATEGORY,
   categoryIcon,
-  randomSeed,
   useInfluencerBuilder,
 } from "../hooks/useInfluencerBuilder";
 
@@ -29,7 +27,6 @@ export default function InfluencerBuilder() {
     canGenerate,
     changeTier,
     generate: handleGenerate,
-    randomize,
   } = useInfluencerBuilder();
 
   // Multi-open accordion: set of open section ids
@@ -52,13 +49,10 @@ export default function InfluencerBuilder() {
   const {
     tier,
     selection,
-    brief,
     imageUrl,
     itemImageUrls,
-    seed,
     variationIndex,
     bodyColor,
-    resolution,
   } = state;
   const human = isHumanTier(tier);
 
@@ -239,82 +233,8 @@ export default function InfluencerBuilder() {
         </section>
       )}
 
-      {/* Brief */}
-      <section className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">Direction (optional)</p>
-          <span className="text-xs text-muted-foreground">
-            {brief.length}/{AiInfluencerInputConst.maxBriefLength}
-          </span>
-        </div>
-        <Textarea
-          value={brief}
-          maxLength={AiInfluencerInputConst.maxBriefLength}
-          onChange={(e) => setField("brief", e.target.value)}
-          placeholder="e.g. A cheerful fitness coach who loves streetwear…"
-          className="min-h-[80px] resize-none border-white/10 bg-white/[0.02] text-foreground"
-        />
-      </section>
-
-      {/* Seed */}
-      <section className="flex flex-col gap-1.5">
-        <p className="text-sm font-medium text-foreground">Seed (optional)</p>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min={1}
-            max={AiInfluencerInputConst.maxSeed}
-            value={seed ?? ""}
-            placeholder="Random"
-            onChange={(e) => {
-              const v = e.target.value === "" ? null : Number(e.target.value);
-              setField("seed", v);
-            }}
-            className="h-9 w-36 rounded-lg border border-white/10 bg-white/[0.02] px-3 text-sm text-foreground outline-none focus:border-white/30"
-          />
-          <button
-            type="button"
-            onClick={() => setField("seed", randomSeed())}
-            title="Random seed"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 hover:bg-white/5"
-          >
-            <Dices className="size-4 text-foreground" />
-          </button>
-        </div>
-      </section>
-
-      {/* Resolution */}
-      <section className="flex flex-col gap-1.5">
-        <p className="text-sm font-medium text-foreground">Resolution</p>
-        <div className="flex rounded-lg border border-white/10 p-1">
-          {AiInfluencerInputConst.resolution.map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => setField("resolution", r)}
-              className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
-                (resolution ?? "2K") === r
-                  ? "bg-white text-black"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* Footer */}
       <div className="sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-white/10 bg-background/90 px-4 py-4 backdrop-blur">
-        <button
-          type="button"
-          onClick={randomize}
-          aria-label="Randomize"
-          title="Randomize"
-          className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-muted-foreground hover:text-foreground"
-        >
-          <Shuffle className="size-4" />
-        </button>
         {/* Same look as the create pages' Generate (CreateSidebar). */}
         <button
           type="button"
