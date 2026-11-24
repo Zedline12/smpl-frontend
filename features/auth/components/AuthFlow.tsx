@@ -34,6 +34,7 @@ import {
   type SignInResult,
 } from "../actions/auth";
 import { GoogleLoginButton } from "./google-login-button";
+import { useSignupGift } from "../hooks/use-signup-gift";
 // import { MicrosoftLoginButton } from "./microsoft-login-button"; // hidden for now
 import { OtpInput } from "./OtpInput";
 import { TurnstileWidget } from "./TurnstileWidget";
@@ -175,6 +176,8 @@ export function AuthFlow({
   const [resendAt, setResendAt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   // Read on the client only (the server has no storage).
+  // Sign-up only: the credits a new Google account gets right now (admin → Gifts).
+  const signupGift = useSignupGift(mode === "sign-up");
   const lastMethod = useSyncExternalStore(
     noSubscribe,
     () => readStorage("local", LAST_METHOD_KEY),
@@ -399,6 +402,11 @@ export function AuthFlow({
               onClick={() => social("google")}
               isLoading={busy === "google"}
               lastUsed={lastMethod === "google"}
+              badge={
+                signupGift && signupGift.provider === "google"
+                  ? `+${signupGift.credits.toLocaleString("en-US")} free credits`
+                  : undefined
+              }
             />
             {/* Microsoft sign-in hidden for now.
             <MicrosoftLoginButton

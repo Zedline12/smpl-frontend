@@ -8,7 +8,7 @@ import { Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 /** Stripe's cancellation reasons, worded for people. */
-const REASONS = [
+export const CANCEL_REASONS = [
   { value: "too_expensive", label: "It's too expensive" },
   { value: "unused", label: "I don't use it enough" },
   { value: "missing_features", label: "It's missing features I need" },
@@ -109,7 +109,7 @@ export function CancelSubscriptionDialog({ planName, endsAt }: CancelSubscriptio
                   ? `You keep ${planName} and your credits until ${endDate}.`
                   : `You keep ${planName} until the end of your paid period.`}
               </li>
-              <li>After that you won't have a plan: your monthly credits stop and the plan's unused credits are cleared. Credits you bought in packs stay.</li>
+              <li>After that you won&apos;t have a plan: your monthly credits stop and the plan&apos;s unused credits are cleared. Credits you bought in packs stay.</li>
             </ul>
           </div>
 
@@ -123,7 +123,7 @@ export function CancelSubscriptionDialog({ planName, endsAt }: CancelSubscriptio
             className="border-border bg-background text-foreground mt-1.5 w-full rounded-lg border px-3 py-2 text-sm"
           >
             <option value="">Choose a reason</option>
-            {REASONS.map((r) => (
+            {CANCEL_REASONS.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
               </option>

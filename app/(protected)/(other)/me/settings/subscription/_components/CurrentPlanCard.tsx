@@ -11,6 +11,12 @@ import { useCreditsAllowance } from "@/features/subscribe/hooks/use-credits-allo
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { isFreePlan, UserPlanSummary, NO_PLAN_LABEL } from "@/lib/subscription";
 import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
+import {
+  fetchRefundEligibility,
+  REFUND_ELIGIBILITY_KEY,
+  RefundCancelDialog,
+  RefundEligibility,
+} from "./RefundCancelDialog";
 import { SettingsPanel, SettingsTile } from "../../_components/SettingsUi";
 
 async function fetchSubscriptionPlans(): Promise<SubscriptionPlan[]> {
@@ -231,25 +237,62 @@ export function ManageBillingButton({ label = "Manage" }: { label?: string } = {
   );
 }
 
-/** Cancel the paid plan (only shown on a paid plan that isn't already ending). */
+/** Why there's no refund option (shown under the cancel card). */
+function refundRule(e: RefundEligibility | null | undefined): string | null {
+  if (!e || e.eligible) return null;
+  const days = e.windowDays ?? 14;
+  switch (e.reason) {
+    case "credits_used":
+      return `Full refunds are for payments with no credits used. You've used ${e.netCreditsUsed.toLocaleString("en-US")} credits since your last payment.`;
+    case "window_passed":
+      return `Full refunds are available within ${days} days of a payment when no credits were used.`;
+    case "already_refunded":
+    case "refund_in_progress":
+      return "Your last payment was already refunded.";
+    default:
+      return null;
+  }
+}
+
+/**
+ * Cancel the paid plan. Within the refund window with no credits used, it also offers
+ * "Cancel and get a full refund" (that one ends the plan now).
+ */
 export function CancelPlanCard() {
   const { user, planName, subscriptionId, isFreePlan: onFree, isCanceling, periodEnd } = usePlan();
-  if (!user || onFree || !subscriptionId || isCanceling) return null;
+  const onPaidPlan = !!user && !onFree && !!subscriptionId;
+  const { data: eligibility } = useQuery({
+    queryKey: REFUND_ELIGIBILITY_KEY,
+    queryFn: fetchRefundEligibility,
+    enabled: onPaidPlan,
+    staleTime: 30_000,
+  });
+  if (!onPaidPlan) return null;
+  const canRefund = !!eligibility?.eligible;
+  // A scheduled cancellation can still be turned into a refund while it's eligible.
+  if (isCanceling && !canRefund) return null;
+  const rule = refundRule(eligibility);
 
   return (
     <div
       className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-5"
       style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.04)" }}
     >
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold" style={{ color: "rgba(239,68,68,0.9)" }}>
           Cancel subscription
         </p>
         <p className="mt-0.5 text-xs text-white/35">
-          You keep your plan until the end of the paid period, then your credits stop renewing.
+          {canRefund
+            ? `You haven't used any credits since your last payment, so you can get a full refund (until ${formatDate(eligibility!.deadline)}). Or cancel and keep your plan until the end of the paid period.`
+            : "You keep your plan until the end of the paid period, then your credits stop renewing."}
         </p>
+        {rule && <p className="mt-1 text-[11px] text-white/30">{rule}</p>}
       </div>
-      <CancelSubscriptionDialog planName={planName} endsAt={periodEnd} />
+      <div className="flex flex-wrap gap-2">
+        {canRefund && <RefundCancelDialog planName={planName} eligibility={eligibility!} />}
+        {!isCanceling && <CancelSubscriptionDialog planName={planName} endsAt={periodEnd} />}
+      </div>
     </div>
   );
 }

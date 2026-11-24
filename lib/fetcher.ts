@@ -1,6 +1,7 @@
 // lib/fetcher.ts
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
-import { cookies } from "next/headers";
+import { cookies, headers as requestHeaders } from "next/headers";
+import { clientContextHeaders } from "@/lib/client-ip";
 import { redirect } from "next/navigation";
 import { ApiErrorCode, BLOCKED_PATH, getApiErrorCode } from "@/lib/api-errors";
 import {
@@ -10,10 +11,21 @@ import {
   refreshTokens,
 } from "@/lib/auth-tokens";
 
-function send(url: string, options: RequestInit, accessToken?: string) {
+/** The browser's IP and User-Agent, when this runs for a browser request (empty otherwise). */
+async function browserContext(): Promise<Record<string, string>> {
+  try {
+    return clientContextHeaders(await requestHeaders());
+  } catch {
+    return {};
+  }
+}
+
+async function send(url: string, options: RequestInit, accessToken?: string) {
+  const context = await browserContext();
   return fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
     ...options,
     headers: {
+      ...context,
       ...options.headers,
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },

@@ -21,6 +21,10 @@ import {
   Rocket,
   LineChart,
   Boxes,
+  Gift,
+  LayoutDashboard,
+  RotateCcw,
+  Gavel,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 import { useQuery } from "@tanstack/react-query";
@@ -29,6 +33,7 @@ const SECTIONS = [
   {
     label: "Management",
     links: [
+      { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
       { icon: Brain, label: "Smpl Brain", href: "/admin/brain" },
       { icon: Users, label: "Users", href: "/admin/users" },
       { icon: ShieldAlert, label: "Security", href: "/admin/security" },
@@ -49,6 +54,9 @@ const SECTIONS = [
       { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
       { icon: Package, label: "Credit Packs", href: "/admin/credit-packs" },
       { icon: Tag, label: "Discounts", href: "/admin/discounts" },
+      { icon: Gift, label: "Gifts", href: "/admin/gifts" },
+      { icon: RotateCcw, label: "Refunds", href: "/admin/billing/refunds" },
+      { icon: Gavel, label: "Disputes", href: "/admin/billing/disputes" },
       { icon: Zap, label: "Pricing", href: "/admin/credit-pricing" },
       { icon: Timer, label: "Generation Times", href: "/admin/generation-times" },
       { icon: TrendingUp, label: "Profit", href: "/admin/profit" },
@@ -104,7 +112,7 @@ export const AdminSidebar = () => {
                 .filter((link) => !("ownerOrDev" in link) || canSeeUpdates)
                 .map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(`${link.href}/`));
                 return (
                   <Link
                     key={link.href}

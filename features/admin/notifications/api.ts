@@ -9,6 +9,8 @@ export type NotificationKind =
   | "subscription_canceled"
   | "refund"
   | "payment_disputed"
+  | "fraud_warning"
+  | "dispute_closed"
   | "payment_failed"
   | "support_ticket"
   | "server_error"

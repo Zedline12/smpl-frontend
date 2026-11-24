@@ -6,7 +6,7 @@ import { z } from "zod";
 import { cookies, headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { fetchWithToken } from "@/lib/fetcher";
-import { clientIpHeader } from "@/lib/client-ip";
+import { clientContextHeaders } from "@/lib/client-ip";
 import { AUTH_COOKIE_OPTIONS } from "@/lib/auth-tokens";
 import { ApiErrorCode, BLOCKED_PATH, getApiErrorCode } from "@/lib/api-errors";
 const SUSPENDED_COOKIE = "suspended_token";
@@ -64,7 +64,7 @@ export async function requestLoginCode(
     const requestHeaders = await headers();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/code`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      headers: { "Content-Type": "application/json", ...clientContextHeaders(requestHeaders) },
       body: JSON.stringify({ email, captchaToken }),
     });
     const result = await response.json().catch(() => null);
@@ -90,7 +90,7 @@ export async function verifyLoginCode(
     const requestHeaders = await headers();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/code/verify`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      headers: { "Content-Type": "application/json", ...clientContextHeaders(requestHeaders) },
       body: JSON.stringify({ email, code, ...(refToken ? { refToken } : {}) }),
     });
     return await finishSignIn(response, "That code didn't work. Try again.");
@@ -133,7 +133,7 @@ export async function login(
     const requestHeaders = await headers();
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/email/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...clientIpHeader(requestHeaders) },
+      headers: { "Content-Type": "application/json", ...clientContextHeaders(requestHeaders) },
       body: JSON.stringify({ ...data, captchaToken }),
     });
     return await finishSignIn(response, "Invalid email or password");

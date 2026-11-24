@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { SocialButton } from "./SocialButton";
 
 export function GoogleIcon({
@@ -36,6 +37,8 @@ interface GoogleLoginButtonProps {
   onClick?: () => void;
   isLoading?: boolean;
   lastUsed?: boolean;
+  /** E.g. "+50 free credits" (sign-up only). */
+  badge?: ReactNode;
 }
 
 /** "Continue with Google": the white, main button. */
@@ -43,6 +46,7 @@ export function GoogleLoginButton({
   onClick,
   isLoading,
   lastUsed,
+  badge,
 }: GoogleLoginButtonProps) {
   return (
     <SocialButton
@@ -51,6 +55,7 @@ export function GoogleLoginButton({
       onClick={onClick}
       isLoading={isLoading}
       lastUsed={lastUsed}
+      badge={badge}
       variant="light"
     />
   );

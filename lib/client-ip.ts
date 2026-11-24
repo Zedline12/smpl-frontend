@@ -14,6 +14,15 @@ export function getClientIp(headers: Headers): string | null {
   );
 }
 
+/**
+ * The browser's IP and User-Agent for the backend's activity log (the Next server's own
+ * User-Agent would be Node's).
+ */
+export function clientContextHeaders(headers: Headers): Record<string, string> {
+  const ua = headers.get("user-agent");
+  return { ...clientIpHeader(headers), ...(ua ? { "X-Client-User-Agent": ua.slice(0, 512) } : {}) };
+}
+
 /** `{ "X-Client-IP": ip }` when the IP is known, otherwise `{}`. */
 export function clientIpHeader(headers: Headers): Record<string, string> {
   const ip = getClientIp(headers);

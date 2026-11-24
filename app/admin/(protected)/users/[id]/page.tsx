@@ -4,6 +4,7 @@ import { MediaGrid } from "@/features/media/components/MediaGrid";
 import { FailedStatCard } from "@/features/admin/users/components/FailedStatCard";
 import { CreditsCard } from "@/features/admin/users/components/CreditsCard";
 import { CreditLedgerCard } from "@/features/admin/users/components/CreditLedgerCard";
+import { UserActivityCard } from "@/features/admin/users/components/UserActivityCard";
 import { GenerationEconomicsCard } from "@/features/admin/users/components/GenerationEconomicsCard";
 import UserActionsBar from "@/features/admin/users/components/UserActionsBar";
 import {
@@ -38,6 +39,45 @@ async function getUserBilling(userId: string): Promise<AdminUserBilling | null> 
   } catch {
     return null;
   }
+}
+
+const SUSPENSION_SOURCE: Record<string, string> = {
+  dispute: "Payment disputed",
+  early_fraud_warning: "Stripe fraud warning",
+  admin: "Suspended by an admin",
+};
+
+interface SuspensionFields {
+  isSuspended?: boolean;
+  suspendedAt?: string | null;
+  suspensionReason?: string | null;
+  suspensionSource?: string | null;
+  suspensionRef?: string | null;
+}
+
+/** Why the account is suspended, with a link to the dispute or the fraud-warning refund. */
+function SuspensionBanner({ user }: { user: SuspensionFields }) {
+  if (!user.isSuspended || !user.suspensionSource) return null;
+  const link =
+    user.suspensionSource === "dispute" && user.suspensionRef
+      ? { href: `/admin/billing/disputes?q=${encodeURIComponent(user.suspensionRef)}&status=`, label: "Open the dispute" }
+      : user.suspensionSource === "early_fraud_warning" && user.suspensionRef
+        ? { href: `/admin/billing/refunds?id=${encodeURIComponent(user.suspensionRef)}`, label: "Open the refund" }
+        : null;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] px-4 py-3 text-sm">
+      <p className="text-red-200">
+        <span className="font-semibold">{SUSPENSION_SOURCE[user.suspensionSource] ?? "Suspended"}</span>
+        {user.suspendedAt ? ` · ${new Date(user.suspendedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}` : ""}
+        {user.suspensionReason ? ` · ${user.suspensionReason}` : ""}
+      </p>
+      {link && (
+        <a href={link.href} className="text-[13px] font-medium text-red-100 underline-offset-2 hover:underline">
+          {link.label} →
+        </a>
+      )}
+    </div>
+  );
 }
 
 function formatName(u: AdminUserDetail): string {
@@ -219,6 +259,8 @@ export default async function UserDetailPage({
         isThreat={(user as any).isThreat}
       />
 
+      <SuspensionBanner user={user as AdminUserDetail & SuspensionFields} />
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {STAT_CARDS.map(({ key, label, color, bg, icon }) =>
@@ -369,6 +411,8 @@ export default async function UserDetailPage({
       </section>
 
       <CreditLedgerCard userId={user.id} />
+
+      <UserActivityCard userId={user.id} />
 
       <GenerationEconomicsCard userId={user.id} />
 

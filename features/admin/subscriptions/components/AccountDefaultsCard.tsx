@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { NO_PLAN_LABEL } from "@/lib/subscription";
 
 interface AccountSettings {
-  signupBonusCredits: number;
   noPlanMaxConcurrentJobs: number;
 }
 
@@ -22,8 +21,8 @@ async function api(init?: RequestInit): Promise<AccountSettings> {
 }
 
 /**
- * Defaults for accounts without a paid plan (shown as "Free"): credits given once at
- * sign-up, and how many generations they can run at once.
+ * Defaults for accounts without a paid plan (shown as "Free"): how many generations they
+ * can run at once. (Credits for new users: admin → Gifts.)
  */
 export function AccountDefaultsCard() {
   const qc = useQueryClient();
@@ -74,7 +73,6 @@ export function AccountDefaultsCard() {
         <p className="text-xs text-red-300">Couldn&apos;t load the account defaults.</p>
       ) : (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {field("signupBonusCredits", "Sign-up bonus credits", "Given once to each new account. 0: none.", 0, 100000)}
           {field("noPlanMaxConcurrentJobs", "Generations at once", "How many can run at the same time without a plan.", 1, 10)}
           <button
             type="button"
