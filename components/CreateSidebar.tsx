@@ -850,7 +850,7 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
     );
   }
 
-  // ── Ripper (social video + character, watermarks removed) ──────────────────
+  // ── Ripper (a video the user has rights to + character) ──────────────────
   if (model === AiModelsEnum.SMPL_RIPPER) {
     return (
       <>
@@ -858,7 +858,7 @@ function ModelMediaPanel({ model }: { model: AiModelsEnum }) {
           label="Social Video (4–30s)"
           type="video"
           url={s.videoUrl}
-          description="Upload a TikTok, Instagram or YouTube video. Watermarks are removed."
+          description="Upload a video you own or have the rights to use."
           onOpenPicker={() => setDlg("video")}
           onClear={() => set("videoUrl", "")}
         />

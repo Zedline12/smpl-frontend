@@ -9,7 +9,7 @@ export const RipperInputConst = {
   resolution: GensuInputConst.resolution,
 };
 
-/** Ripper: an uploaded social video plus one character image; watermarks are removed. */
+/** Ripper: an uploaded social video plus one character image (the user confirms they have the rights to it). */
 export interface IRipperInput {
   prompt: string;
   /** The uploaded TikTok / Instagram / YouTube video. */

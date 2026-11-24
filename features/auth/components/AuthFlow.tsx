@@ -920,14 +920,16 @@ function Terms({ className }: { className?: string }) {
     >
       By continuing, you agree to the{" "}
       <Link
-        href="https://smplcontent.com/terms"
+        href="/legal/terms"
+        target="_blank"
         className="underline hover:text-white/70"
       >
         Terms of Use
       </Link>
       , acknowledge the{" "}
       <Link
-        href="https://smplcontent.com/privacy-policy"
+        href="/legal/privacy"
+        target="_blank"
         className="underline hover:text-white/70"
       >
         Privacy Policy

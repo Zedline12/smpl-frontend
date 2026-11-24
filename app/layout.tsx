@@ -6,6 +6,7 @@ import { Providers } from "@/providers/providers";
 import { GlobalLoginModal } from "@/features/auth/components/GlobalLoginModal";
 import { ApiRedirectWatcher } from "@/components/ApiRedirectWatcher";
 import { BillingResultWatcher } from "@/features/billing-result/BillingResultWatcher";
+import { CookieNotice } from "@/features/legal/CookieNotice";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,8 @@ export default function RootLayout({
           <GlobalLoginModal />
           <ApiRedirectWatcher />
           <BillingResultWatcher />
+          {/* Cookie choices (essential only today; non-essential waits for consent). */}
+          <CookieNotice />
         </Providers>
         <Toaster />
       </body>

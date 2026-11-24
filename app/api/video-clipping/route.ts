@@ -44,7 +44,12 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: data?.message || "Failed to start clipping" },
+        {
+          error: data?.message || "Failed to start clipping",
+          // e.g. RIGHTS_REQUIRED (with details.features): the page asks and retries.
+          code: data?.error?.code ?? null,
+          details: data?.error?.details ?? null,
+        },
         { status: response.status },
       );
     }

@@ -311,7 +311,7 @@ export const VIDEO_MODELS: Model[] = [
   {
     id: AiModelsEnum.SMPL_RIPPER,
     name: "Ripper",
-    description: "Recreate any social video with your character, watermark-free.",
+    description: "Recreate a video you have the rights to with your character.",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
         <path stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"

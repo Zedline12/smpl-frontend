@@ -26,6 +26,8 @@ import {
   RotateCcw,
   Gavel,
   Megaphone,
+  Scale,
+  Flag,
 } from "lucide-react";
 import { AppearanceSidebar } from "./AppearanceSidebar";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +42,8 @@ const SECTIONS = [
       { icon: ShieldAlert, label: "Security", href: "/admin/security" },
       { icon: Bell, label: "Notifications", href: "/admin/notifications" },
       { icon: Megaphone, label: "Announcements", href: "/admin/broadcasts" },
+      { icon: Flag, label: "Reports", href: "/admin/reports" },
+      { icon: Scale, label: "Legal", href: "/admin/legal" },
       { icon: Image, label: "Media", href: "/admin/media" },
       { icon: Boxes, label: "Catalog", href: "/admin/catalog" },
       { icon: BarChart3, label: "Generations", href: "/admin/generations" },

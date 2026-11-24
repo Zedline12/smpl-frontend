@@ -5,6 +5,7 @@ import { Activity, Brain, CreditCard, LifeBuoy, ShieldAlert, TrendingUp, Users, 
 import { cn } from "@/lib/utils";
 import { int, pct, usd } from "@/features/admin/components/data-viz/format";
 import { fetchOverview } from "../api";
+import { ClaudeConnectorCard } from "./ClaudeConnectorCard";
 
 const PROMPTS: { group: string; icon: LucideIcon; items: string[] }[] = [
   {
@@ -138,6 +139,8 @@ export function EmptyState({ onAsk }: { onAsk: (q: string) => void }) {
           </div>
         ))}
       </section>
+
+      <ClaudeConnectorCard />
     </div>
   );
 }

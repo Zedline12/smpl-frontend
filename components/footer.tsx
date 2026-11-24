@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AUDIO_MODELS, IMAGE_MODELS, VIDEO_MODELS } from "@/features/generation/enums/models.enum";
 import { useCatalog, withCatalog } from "@/features/catalog/catalog";
+import { CookieSettingsLink } from "@/features/legal/CookieNotice";
 
 type FooterLink = { href: string; label: string; external?: boolean };
 
@@ -42,13 +43,17 @@ const resources: FooterLink[] = [
   { href: "https://smplcontent.com/#faq", label: "FAQ", external: true },
 ];
 
+/** In-app pages (they forward to the old smplcontent.com pages until a version is published). */
 const legal: FooterLink[] = [
-  { href: "https://smplcontent.com/privacy-policy", label: "Privacy Policy", external: true },
-  { href: "https://smplcontent.com/terms", label: "Terms of Service", external: true },
-  { href: "https://smplcontent.com/refund-policy", label: "Refund Policy", external: true },
-  { href: "https://smplcontent.com/acceptable-use-policy", label: "Acceptable Use", external: true },
-  { href: "https://smplcontent.com/copyright-policy", label: "Copyright Policy", external: true },
-  { href: "https://smplcontent.com/cookie-policy", label: "Cookie Policy", external: true },
+  { href: "/legal/privacy", label: "Privacy Policy" },
+  { href: "/legal/terms", label: "Terms of Service" },
+  { href: "/legal/refund-policy", label: "Refund Policy" },
+  { href: "/legal/acceptable-use", label: "Acceptable Use" },
+  { href: "/legal/copyright", label: "Copyright Policy" },
+  { href: "/legal/cookies", label: "Cookie Policy" },
+  { href: "/legal/ai-content", label: "AI Content" },
+  { href: "/ai-check", label: "Check if smpl made it" },
+  { href: "/report", label: "Report content" },
 ];
 
 function Column({ title, links }: { title: string; links: FooterLink[] }) {
@@ -113,7 +118,10 @@ export default function Footer() {
           </div>
           <div className="flex flex-col gap-10">
             <Column title="Resources" links={resources} />
-            <Column title="Legal" links={legal} />
+            <div>
+              <Column title="Legal" links={legal} />
+              <CookieSettingsLink className="mt-2.5 text-[14px] font-medium text-white transition-opacity hover:opacity-70 sm:text-[15px]" />
+            </div>
           </div>
         </div>
       </div>

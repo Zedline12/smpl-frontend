@@ -31,6 +31,13 @@ const nextConfig: NextConfig = {
       { source: "/home", destination: "/", permanent: true },
       { source: "/onboard", destination: "/", permanent: true },
       { source: "/subscription-plans", destination: "/pricing", permanent: true },
+      // Legal pages live under /legal (short links used in emails and by Stripe).
+      { source: "/terms", destination: "/legal/terms", permanent: false },
+      { source: "/privacy", destination: "/legal/privacy", permanent: false },
+      { source: "/privacy-policy", destination: "/legal/privacy", permanent: false },
+      { source: "/cookies", destination: "/legal/cookies", permanent: false },
+      { source: "/refund-policy", destination: "/legal/refund-policy", permanent: false },
+      { source: "/dmca", destination: "/legal/copyright", permanent: false },
       // Settings moved under /me; "Credits Usage" is now "Usage".
       { source: "/settings", destination: "/me/settings/account", permanent: true },
       { source: "/settings/credits-usage", destination: "/me/settings/usage", permanent: true },
