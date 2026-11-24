@@ -19,7 +19,7 @@ export function AttachmentGrid({ attachments }: { attachments: SupportAttachment
             onClick={() => setOpen(a.url)}
             className="size-16 overflow-hidden rounded-lg border border-white/10 hover:border-white/40"
           >
-            <img src={a.url} alt="Screenshot" className="size-full object-cover" />
+            <img loading="lazy" decoding="async" src={a.url} alt="Screenshot" className="size-full object-cover" />
           </button>
         ))}
       </div>
@@ -28,7 +28,7 @@ export function AttachmentGrid({ attachments }: { attachments: SupportAttachment
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-6"
           onClick={() => setOpen(null)}
         >
-          <img src={open} alt="Screenshot" className="max-h-full max-w-full rounded-lg object-contain" />
+          <img loading="lazy" decoding="async" src={open} alt="Screenshot" className="max-h-full max-w-full rounded-lg object-contain" />
           <button
             className="absolute top-4 right-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
             aria-label="Close"

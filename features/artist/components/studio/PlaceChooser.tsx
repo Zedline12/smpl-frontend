@@ -167,7 +167,7 @@ function Preview({ image, quote, children }: { image?: string; quote?: boolean; 
     <span className="relative block aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-black/40">
       {image && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt="" className="absolute inset-0 size-full object-cover" />
+        <img loading="lazy" decoding="async" src={image} alt="" className="absolute inset-0 size-full object-cover" />
       )}
       <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 to-transparent px-3 pt-6 pb-2 text-sm font-semibold text-white">
         {children}

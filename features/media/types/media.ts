@@ -32,6 +32,10 @@ export const VIDEO_DURATION_SECONDS = [
 export interface Media {
   id: string;
   url: string;
+  /** Small WebP for grids (null until made, or for audio); fall back to `url`. */
+  thumbUrl?: string | null;
+  /** A video's first frame, for <video poster>. */
+  posterUrl?: string | null;
   type: MediaType;
   aspectRatio: AspectRatio;
   model: string;

@@ -110,7 +110,7 @@ export function BrandPicker({ fallbackName }: { fallbackName?: string }) {
                   >
                     {brand.logoUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={brand.logoUrl}
                         alt=""
                         className="size-7 object-contain"
@@ -185,7 +185,7 @@ export function ProductPicker() {
                   className={itemClass}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={product.images[0]}
                     alt=""
                     className="size-9 shrink-0 rounded-lg object-cover"
@@ -275,7 +275,7 @@ export function AvatarPicker() {
                       )}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={avatar.imageUrl}
                         alt={avatar.name}
                         className="size-full object-cover"
@@ -351,7 +351,7 @@ export function StylePicker({
                   />
                 ) : style.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={style.imageUrl}
                     alt=""
                     className="absolute inset-0 size-full object-cover"

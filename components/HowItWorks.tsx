@@ -59,7 +59,7 @@ function MediaTile({
     >
       {item.src ? (
         isImage ? (
-          <img src={item.src} alt={item.label ?? ""} className="absolute inset-0 w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={item.src} alt={item.label ?? ""} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <video
             ref={videoRef}
@@ -177,7 +177,7 @@ function SlideNav({
         aria-current={active ? "true" : undefined}
       >
         {src ? (
-          <img src={src} alt="" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={src} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full" style={{ backgroundColor: "var(--bg-elevated)" }} />
         )}

@@ -39,7 +39,7 @@ function isUrl(value: unknown): value is string {
 function InputValue({ value }: { value: unknown }) {
   if (isImageUrl(value)) {
     return (
-      <img
+      <img loading="lazy" decoding="async"
         src={value}
         alt="Input"
         className="max-h-48 rounded-lg object-contain"

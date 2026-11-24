@@ -241,7 +241,7 @@ function PromoCard({ title, subtitle, ctaLabel, ctaHref, statusItems, thumbUrls 
                 }}
               >
                 {url ? (
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <img loading="lazy" decoding="async" src={url} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "var(--bg-elevated)" }}>
                     <ImageIcon className="w-5 h-5 opacity-20" />

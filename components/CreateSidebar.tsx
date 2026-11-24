@@ -1512,7 +1512,7 @@ function ModelHeroCard({
         />
       ) : thumbnail ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <img loading="lazy" decoding="async"
           key={thumbnail.url}
           src={thumbnail.url}
           alt=""
@@ -1638,7 +1638,7 @@ function StyleThumb({ index, videoUrl, imageUrl }: { index: number; videoUrl?: s
     <video src={videoUrl} autoPlay muted loop playsInline className="h-full w-full object-cover" />
   ) : imageUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+    <img loading="lazy" decoding="async" src={imageUrl} alt="" className="h-full w-full object-cover" />
   ) : (
     <span
       className={`block h-full w-full bg-gradient-to-br ${STYLE_FALLBACK_GRADIENTS[index % STYLE_FALLBACK_GRADIENTS.length]}`}

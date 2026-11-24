@@ -219,7 +219,7 @@ function OptionList({
               >
                 {o.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={o.thumbnail} alt="" className="absolute inset-0 size-full object-cover" />
+                  <img loading="lazy" decoding="async" src={o.thumbnail} alt="" className="absolute inset-0 size-full object-cover" />
                 ) : (
                   <span className="absolute inset-0 flex items-center justify-center text-2xl">{o.emoji}</span>
                 )}

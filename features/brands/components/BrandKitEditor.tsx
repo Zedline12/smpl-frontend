@@ -161,7 +161,7 @@ export function BrandKitEditor({ brand }: { brand?: Brand }) {
             >
               {input.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <img loading="lazy" decoding="async"
                   src={input.logoUrl}
                   alt="Logo"
                   className="max-h-full max-w-full object-contain p-3"

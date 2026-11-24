@@ -52,7 +52,7 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
       >
         {reduceMotion ? (
           item.poster && (
-            <img
+            <img loading="lazy" decoding="async"
               src={item.poster}
               alt={item.title}
               className="absolute inset-0 w-full h-full object-cover"

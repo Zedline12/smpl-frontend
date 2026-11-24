@@ -60,8 +60,9 @@ function MediaTile({ media, isOwn }: { media: Media; isOwn: boolean }) {
   return (
     <div className="group relative aspect-square overflow-hidden rounded-xl bg-neutral-900">
       {isVideo ? (
-        <video
+        <video preload="metadata"
           src={media.url}
+          poster={media.posterUrl ?? undefined}
           className="h-full w-full object-cover"
           muted
           loop
@@ -69,7 +70,13 @@ function MediaTile({ media, isOwn }: { media: Media; isOwn: boolean }) {
           onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()}
         />
       ) : (
-        <Image src={media.url} alt="" fill className="object-cover" />
+        <Image
+          src={media.thumbUrl || media.url}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover"
+        />
       )}
 
       <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100">

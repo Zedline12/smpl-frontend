@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type {
   DashboardCard,
   DashboardCatalog,
@@ -34,5 +34,7 @@ export function useMetric(id: string, range: DashboardRange) {
     queryKey: metricKey(id, range),
     queryFn: () => fetchMetric(id, range),
     staleTime: 2 * 60_000,
+    // Switching the range keeps the old numbers on screen until the new ones arrive.
+    placeholderData: keepPreviousData,
   });
 }

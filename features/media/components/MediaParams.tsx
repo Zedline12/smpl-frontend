@@ -64,7 +64,7 @@ export function ReferenceThumb({ url }: { url: string }) {
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <img loading="lazy" decoding="async"
         src={url}
         alt="Reference"
         onError={() => setFailed(true)}

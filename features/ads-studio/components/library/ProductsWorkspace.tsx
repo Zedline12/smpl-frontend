@@ -120,7 +120,7 @@ function ProductDialog({
                   className="group relative size-20 overflow-hidden rounded-xl border border-white/10"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="size-full object-cover" />
+                  <img loading="lazy" decoding="async" src={url} alt="" className="size-full object-cover" />
                   <button
                     type="button"
                     aria-label="Remove photo"
@@ -226,7 +226,7 @@ export function ProductsWorkspace() {
               >
                 <div className="relative aspect-square bg-black">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={product.images[0]}
                     alt={product.name}
                     className="size-full object-cover"

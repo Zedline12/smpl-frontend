@@ -37,7 +37,7 @@ function Preview({ thumbnail, id }: { thumbnail: Thumbnail | null; id: string })
         <video key={thumbnail.url} src={thumbnail.url} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
       ) : thumbnail ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={thumbnail.url} src={thumbnail.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" key={thumbnail.url} src={thumbnail.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
       ) : (
         <div className="absolute inset-0 flex items-start justify-center bg-[radial-gradient(120%_90%_at_50%_0%,rgba(107,65,255,0.35),rgba(234,75,255,0.12)_45%,transparent_75%)] pt-8">
           <span className="text-[40px] opacity-90 [&>svg]:size-10" aria-hidden>

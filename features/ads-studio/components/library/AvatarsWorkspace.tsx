@@ -69,7 +69,7 @@ export function AvatarDialog({
           >
             {imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <img loading="lazy" decoding="async"
                 src={imageUrl}
                 alt=""
                 className="absolute inset-0 size-full object-cover"
@@ -134,7 +134,7 @@ function AvatarTile({
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img loading="lazy" decoding="async"
           src={avatar.imageUrl}
           alt={avatar.name}
           className="size-full object-cover"

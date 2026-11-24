@@ -103,7 +103,7 @@ export function MediaPreviewDialog({
             </div>
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <img loading="lazy" decoding="async"
               src={media.url}
               alt="Generated media"
               className="max-h-full max-w-full object-contain"

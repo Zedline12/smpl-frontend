@@ -43,7 +43,7 @@ const audioDuration = (file: File) =>
   });
 
 function Thumb({ kind, url }: { kind: Kind; url: string }) {
-  if (kind === "images") return <img src={url} alt="" className="h-full w-full object-cover" />;
+  if (kind === "images") return <img loading="lazy" decoding="async" src={url} alt="" className="h-full w-full object-cover" />;
   if (kind === "videos")
     return <video src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />;
   return (

@@ -41,7 +41,7 @@ export default function OmniHumanV2Composer({ isFocused, editMode }: { isFocused
             <span className="text-primary-foreground text-xs">Person</span>
             {imageUrl ? (
               <div className={tile}>
-                <img src={imageUrl} alt="Person" className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={imageUrl} alt="Person" className="h-full w-full object-cover" />
                 <button type="button" aria-label="Remove image" onClick={() => setField("imageUrl", "")} className={removeButton}>
                   <X className="size-3 text-white" />
                 </button>

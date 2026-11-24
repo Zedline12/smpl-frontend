@@ -41,7 +41,7 @@ export const ComposerChip = forwardRef<HTMLButtonElement, ComposerChipProps>(
         >
           {thumb ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <img loading="lazy" decoding="async"
               src={thumb}
               alt=""
               className="size-5 shrink-0 rounded object-cover"

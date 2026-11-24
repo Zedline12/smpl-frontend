@@ -224,7 +224,7 @@ export function VideoTrimEditor({ src, onChange, onError }: VideoTrimEditorProps
             <div className="absolute inset-0 flex pointer-events-none">
               {thumbs.map((t, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={t} alt="" className="h-full flex-1 min-w-0 object-cover" />
+                <img loading="lazy" decoding="async" key={i} src={t} alt="" className="h-full flex-1 min-w-0 object-cover" />
               ))}
             </div>
           )}

@@ -69,6 +69,7 @@ export function MediaCard({
           {media.type === "video" ? (
             <LazyVideo
               src={media.url}
+              poster={media.posterUrl}
               options={{
                 aspectRatio: mediaAspect,
                 width,
@@ -111,7 +112,8 @@ export function MediaCard({
           ) : (
             <LazyImage
               key={media.id}
-              src={media.url}
+              src={media.thumbUrl || media.url}
+              fallback={media.url}
               options={{ aspectRatio: mediaAspect, width, height: cardHeight }}
             />
           )}

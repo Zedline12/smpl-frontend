@@ -24,7 +24,7 @@ export function ReferenceImagesField({
             key={url + index}
             className="group border-border bg-background-light relative h-20 w-20 overflow-hidden rounded-xl border"
           >
-            <img src={url} alt="Reference" className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={url} alt="Reference" className="h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => onChange(images.filter((img) => img !== url))}

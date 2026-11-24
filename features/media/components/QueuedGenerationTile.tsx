@@ -47,7 +47,7 @@ export function QueuedGenerationTile({
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <img
+          <img loading="lazy" decoding="async"
             src={queue.providerUrl}
             alt="Generated"
             className="absolute inset-0 w-full h-full object-cover"

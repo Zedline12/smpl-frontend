@@ -112,7 +112,7 @@ export function LyricsStylePanel({ clip }: { clip: Clip }) {
             />
             {imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={imageUrl} alt="" className="absolute inset-0 size-full object-cover" />
+              <img loading="lazy" decoding="async" src={imageUrl} alt="" className="absolute inset-0 size-full object-cover" />
             )}
             {videoUrl && (
               <video

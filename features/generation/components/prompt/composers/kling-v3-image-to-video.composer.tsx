@@ -67,7 +67,7 @@ export default function KlingV3ImageToVideoComposer({
             <span className="text-xs text-primary-foreground">Start Image</span>
             {startImageUrl ? (
               <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5">
-                <img
+                <img loading="lazy" decoding="async"
                   src={startImageUrl}
                   alt="Start"
                   className="w-full h-full object-cover"
@@ -95,7 +95,7 @@ export default function KlingV3ImageToVideoComposer({
             <span className="text-xs text-primary-foreground">End Image</span>
             {endImageUrl ? (
               <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5">
-                <img
+                <img loading="lazy" decoding="async"
                   src={endImageUrl}
                   alt="End"
                   className="w-full h-full object-cover"
@@ -278,7 +278,7 @@ export default function KlingV3ImageToVideoComposer({
                       <span className="text-xs text-primary-foreground">Frontal Image</span>
                       {el.frontalImageUrl ? (
                         <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5">
-                          <img src={el.frontalImageUrl} className="w-full h-full object-cover" />
+                          <img loading="lazy" decoding="async" src={el.frontalImageUrl} className="w-full h-full object-cover" />
                           <Button onClick={() => {
                               const newEls = [...elements];
                               newEls[index].frontalImageUrl = undefined;
@@ -300,7 +300,7 @@ export default function KlingV3ImageToVideoComposer({
                       <span className="text-xs text-primary-foreground">Video</span>
                       {el.videoUrl ? (
                         <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5 flex items-center justify-center">
-                          <video src={el.videoUrl} className="w-full h-full object-cover" />
+                          <video preload="metadata" src={el.videoUrl} className="w-full h-full object-cover" />
                           <Button onClick={() => {
                               const newEls = [...elements];
                               newEls[index].videoUrl = undefined;
@@ -323,7 +323,7 @@ export default function KlingV3ImageToVideoComposer({
                       <div className="flex gap-2 flex-wrap items-center">
                         {el.referenceImageUrls?.map((url, i) => (
                            <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10 group bg-white/5">
-                             <img src={url} className="w-full h-full object-cover" />
+                             <img loading="lazy" decoding="async" src={url} className="w-full h-full object-cover" />
                              <Button onClick={() => {
                                  const newEls = [...elements];
                                  newEls[index].referenceImageUrls = newEls[index].referenceImageUrls?.filter((_, idx) => idx !== i);

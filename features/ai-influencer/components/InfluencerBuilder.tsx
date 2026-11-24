@@ -79,7 +79,7 @@ export default function InfluencerBuilder() {
       <div className="relative">
         {imageUrl ? (
           <div className="relative h-28 w-full overflow-hidden rounded-xl border border-white/10">
-            <img src={imageUrl} alt="Your photo" className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={imageUrl} alt="Your photo" className="h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => setField("imageUrl", "")}
@@ -290,7 +290,7 @@ export default function InfluencerBuilder() {
 function Thumb({ url, onRemove }: { url: string; onRemove: () => void }) {
   return (
     <div className="group relative h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-      <img src={url} alt="Reference" className="h-full w-full object-cover" />
+      <img loading="lazy" decoding="async" src={url} alt="Reference" className="h-full w-full object-cover" />
       <button
         type="button"
         onClick={onRemove}

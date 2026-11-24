@@ -37,7 +37,7 @@ function BrandCard({ brand }: { brand: Brand }) {
         <span className="-mt-9 flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#17171c] shadow-lg">
           {brand.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <img loading="lazy" decoding="async"
               src={brand.logoUrl}
               alt=""
               className="max-h-full max-w-full object-contain p-2"

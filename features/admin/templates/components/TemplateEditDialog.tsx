@@ -57,7 +57,7 @@ function MediaListEditor({
           <div className="relative h-10 w-16 shrink-0 overflow-hidden rounded bg-black">
             {kind === "images" ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={item} alt="" className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={item} alt="" className="h-full w-full object-cover" />
             ) : (
               <video src={item} muted preload="metadata" className="h-full w-full object-cover" />
             )}

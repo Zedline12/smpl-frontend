@@ -77,7 +77,7 @@ function ThumbFace<Id extends string>({
     >
       {option.thumbnail ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={option.thumbnail} alt="" className="absolute inset-0 size-full object-cover" />
+        <img loading="lazy" decoding="async" src={option.thumbnail} alt="" className="absolute inset-0 size-full object-cover" />
       ) : (
         <span
           className={cn(
@@ -249,7 +249,7 @@ export function ClipBackgroundPicker({
       {value ? (
         <div className={cn("group relative overflow-hidden border border-primary/40 bg-black/40", size)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="Background" className="h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" src={value} alt="Background" className="h-full w-full object-cover" />
           <button
             type="button"
             disabled={disabled}
@@ -316,7 +316,7 @@ export function ClipCharacterPicker({
         {images.map((url, i) => (
           <div key={url} className={cn("group relative overflow-hidden border border-white/10 bg-black/40", size)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={`Character ${i + 1}`} className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={url} alt={`Character ${i + 1}`} className="h-full w-full object-cover" />
             <button
               type="button"
               disabled={disabled}

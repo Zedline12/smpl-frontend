@@ -45,7 +45,7 @@ export default function GptImage2Composer({
               key={url + index}
               className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5"
             >
-              <img src={url} alt="Ref" className="w-full h-full object-cover" />
+              <img loading="lazy" decoding="async" src={url} alt="Ref" className="w-full h-full object-cover" />
               <button
                 onClick={() => removeReferenceImage(url)}
                 className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"

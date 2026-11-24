@@ -93,7 +93,7 @@ export function MediaEditDialog({ media, open, onClose }: MediaEditDialogProps) 
               <audio src={media.url} controls className="w-full max-w-sm" />
             </div>
           ) : (
-            <img src={media.url} alt="Media" className="max-w-full max-h-[35vh] object-contain" />
+            <img loading="lazy" decoding="async" src={media.url} alt="Media" className="max-w-full max-h-[35vh] object-contain" />
           )}
         </div>
 

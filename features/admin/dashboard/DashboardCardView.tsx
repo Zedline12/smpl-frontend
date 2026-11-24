@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils";
 import { cardClass } from "@/features/admin/components/data-viz/palette";
 import { formatValue } from "@/features/admin/brain/components/blocks/format";
 import { fetchMetric, metricKey, useMetric } from "./api";
-import { MetricChart } from "./MetricChart";
+import dynamic from "next/dynamic";
+
+// The chart library is big; load it with the first card instead of with the page.
+const MetricChart = dynamic(() => import("./MetricChart").then((m) => m.MetricChart), {
+  ssr: false,
+  loading: () => <div className="h-full min-h-32 w-full animate-pulse rounded-lg bg-white/[0.04]" />,
+});
 import {
   CHART_LABELS,
   RANGE_LABELS,

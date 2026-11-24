@@ -104,7 +104,7 @@ function Results({ analysis }: { analysis: VideoAnalysisProject }) {
       {/* The video, stuck in view while the results scroll */}
       <div className="flex flex-col gap-3 lg:sticky lg:top-0 lg:self-start">
         <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black">
-          <video
+          <video preload="metadata"
             ref={videoRef}
             src={analysis.originalVideoUrl}
             controls

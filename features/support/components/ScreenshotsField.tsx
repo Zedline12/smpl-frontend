@@ -107,7 +107,7 @@ export function ScreenshotsField({ onChange, onUploadingChange }: ScreenshotsFie
             style={{ borderColor: s.error ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.1)" }}
             title={s.error ?? undefined}
           >
-            <img src={s.previewUrl} alt="" className="size-full object-cover" />
+            <img loading="lazy" decoding="async" src={s.previewUrl} alt="" className="size-full object-cover" />
             {!s.key && !s.error && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/55">
                 <Loader2 className="size-4 animate-spin text-white" />

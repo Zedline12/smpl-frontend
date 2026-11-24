@@ -124,7 +124,7 @@ export default function AdsBuilder() {
               key={url + i}
               className="group relative h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-white/5"
             >
-              <img
+              <img loading="lazy" decoding="async"
                 src={url}
                 alt="Product"
                 className="h-full w-full object-cover"

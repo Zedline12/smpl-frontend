@@ -85,7 +85,7 @@ export function AvatarsEditor() {
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <img loading="lazy" decoding="async"
                 src={avatar.imageUrl}
                 alt={avatar.name}
                 className="aspect-[3/4] w-full rounded-lg object-cover"

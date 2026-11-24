@@ -108,7 +108,7 @@ function StyleRow({
           <video key={draft.videoUrl} src={draft.videoUrl} autoPlay muted loop playsInline className="h-full w-full object-cover" />
         ) : draft.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={draft.imageUrl} src={draft.imageUrl} alt="" className="h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" key={draft.imageUrl} src={draft.imageUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-white/30">No video or image yet</div>
         )}

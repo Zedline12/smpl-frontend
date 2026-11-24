@@ -59,14 +59,14 @@ export function RecentBody({ body, header }: { body: Body; header?: ReactNode })
             className="group relative aspect-square overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03]"
           >
             {m.type === "video" ? (
-              <video src={m.url} muted playsInline preload="metadata" className="size-full object-cover" />
+              <video src={m.url} poster={m.posterUrl ?? undefined} muted playsInline preload={m.posterUrl ? "none" : "metadata"} className="size-full object-cover" />
             ) : m.type === "audio" ? (
               <span className="flex size-full items-center justify-center">
                 <AudioLines className="size-8 text-white/40" />
               </span>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={m.url} alt="" loading="lazy" className="size-full object-cover" />
+              <img src={m.thumbUrl || m.url} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
             )}
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent px-2.5 pt-6 pb-2 text-[11px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
               Continue <ArrowRight className="size-3.5" />

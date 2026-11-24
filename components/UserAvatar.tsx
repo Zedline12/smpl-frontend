@@ -81,7 +81,7 @@ export function UserAvatar({
       >
         {showImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <img loading="lazy" decoding="async"
             src={src!}
             alt=""
             className="h-full w-full object-cover"

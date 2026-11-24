@@ -36,7 +36,7 @@ function RefTile({ kind, index, url, onRemove, onTag }: { kind: RefKind; index: 
   return (
     <div className="group relative flex h-20 w-20 shrink-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5">
       {kind === "images" ? (
-        <img src={url} alt={tag} className="h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" src={url} alt={tag} className="h-full w-full object-cover" />
       ) : (
         <video src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
       )}

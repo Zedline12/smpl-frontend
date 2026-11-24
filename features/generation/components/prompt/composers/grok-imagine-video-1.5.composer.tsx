@@ -46,7 +46,7 @@ export default function GrokImagineVideo15Composer({
           <span className="text-xs text-primary-foreground">Image</span>
           {imageUrl ? (
             <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 group bg-white/5">
-              <img
+              <img loading="lazy" decoding="async"
                 src={imageUrl}
                 alt="Reference"
                 className="w-full h-full object-cover"

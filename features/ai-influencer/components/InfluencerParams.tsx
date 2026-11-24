@@ -93,7 +93,7 @@ export function InfluencerParams({ input }: { input: Record<string, unknown> }) 
                     >
                       {o.img ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={o.img} alt="" className="size-5 rounded-full object-cover" />
+                        <img loading="lazy" decoding="async" src={o.img} alt="" className="size-5 rounded-full object-cover" />
                       ) : o.color ? (
                         <Swatch color={o.color} />
                       ) : (

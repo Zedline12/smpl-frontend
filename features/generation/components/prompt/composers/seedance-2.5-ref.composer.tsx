@@ -81,7 +81,7 @@ function RefTile({
   return (
     <div className="group relative flex h-20 w-20 shrink-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5">
       {kind === "images" ? (
-        <img src={url} alt={tag} className="h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" src={url} alt={tag} className="h-full w-full object-cover" />
       ) : kind === "videos" ? (
         <video src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
       ) : (

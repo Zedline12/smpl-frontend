@@ -138,7 +138,7 @@ export function AdsComposer() {
               className="group relative size-12 overflow-hidden rounded-lg border border-white/10"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="size-full object-cover" />
+              <img loading="lazy" decoding="async" src={url} alt="" className="size-full object-cover" />
               <button
                 type="button"
                 aria-label="Remove image"

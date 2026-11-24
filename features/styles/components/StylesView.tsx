@@ -77,7 +77,7 @@ function StyleCard({
         />
       ) : style.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <img loading="lazy" decoding="async"
           src={style.imageUrl}
           alt=""
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"

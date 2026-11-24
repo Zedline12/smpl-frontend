@@ -24,7 +24,7 @@ export default function ImageSlot({ image, onChange }: ImageSlotProps) {
         onClick={() => fileInputRef.current?.click()}
       >
         {image ? (
-          <img
+          <img loading="lazy" decoding="async"
             src={URL.createObjectURL(image)}
             alt="Preview"
             className="w-full h-full object-cover"

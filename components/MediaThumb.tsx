@@ -29,8 +29,8 @@ export function MediaThumb({
         </>
       ) : (
         <>
-          <img src={url} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-md" />
-          <img src={url} alt={alt} className="relative h-full w-full object-contain" />
+          <img loading="lazy" decoding="async" src={url} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-md" />
+          <img loading="lazy" decoding="async" src={url} alt={alt} className="relative h-full w-full object-contain" />
         </>
       )}
     </div>

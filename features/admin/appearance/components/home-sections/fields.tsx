@@ -123,7 +123,7 @@ export function MediaField({
             <video src={url} muted loop autoPlay playsInline className="h-full w-full object-cover" />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={url} alt="" className="h-full w-full object-cover" />
+            <img loading="lazy" decoding="async" src={url} alt="" className="h-full w-full object-cover" />
           )
         ) : (
           <div className="flex h-full items-center justify-center text-[10px] text-white/30">None</div>
