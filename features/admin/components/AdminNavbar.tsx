@@ -3,19 +3,21 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { NotificationBell } from "@/features/admin/notifications/components/NotificationBell";
+import { AdminMobileNav } from "./AdminMobileNav";
 
 export const AdminNavbar = () => {
   return (
     <nav
-      className="h-16 flex items-center justify-between px-6 sticky top-0 z-50"
+      className="h-16 flex items-center justify-between gap-3 px-3 sm:px-6 sticky top-0 z-50"
       style={{
         background: "rgba(12,12,12,0.85)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}
     >
-      {/* Left: brand */}
+      {/* Left: menu (phones) + brand */}
       <div className="flex items-center gap-3">
+        <AdminMobileNav />
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{

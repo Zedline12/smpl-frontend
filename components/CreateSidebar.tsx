@@ -1481,7 +1481,7 @@ function EditToolPanel({ model }: { model: AiModelsEnum }) {
 
 // ─── model hero card ──────────────────────────────────────────────────────────
 
-// Hero card media: set in App Appearance → Model Thumbnails (catalog), else bundled defaults.
+// Hero card media: set in App Settings → Model Thumbnails (catalog), else bundled defaults.
 
 function ModelHeroCard({
   model,

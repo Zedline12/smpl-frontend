@@ -4,7 +4,7 @@ import { getHomeSections } from "@/features/home-sections/server";
 
 /**
  * `/`: the explore page, for guests and signed-in users alike (only the navbar differs).
- * Everything on it is the live home preset's sections (Admin → App Appearance → Homepage).
+ * Everything on it is the live home preset's sections (Admin → App Settings → Homepage).
  * Admins can preview another preset with `?preset=<id>` and as another viewer with
  * `?as=guest|no_plan|paid`.
  */

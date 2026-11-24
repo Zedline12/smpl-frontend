@@ -3,76 +3,20 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Users,
-  CreditCard,
-  BarChart3,
-  Image,
-  ShieldAlert,
-  TrendingUp,
-  Paintbrush,
-  Zap,
-  Timer,
-  Brain,
-  LifeBuoy,
-  Bell,
-  Package,
-  Tag,
-  Rocket,
-  LineChart,
-  Boxes,
-  Gift,
-  LayoutDashboard,
-  RotateCcw,
-  Gavel,
-  Megaphone,
-  Scale,
-  Flag,
-} from "lucide-react";
-import { AppearanceSidebar } from "./AppearanceSidebar";
+import { ChevronLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import {
+  ADMIN_SECTIONS,
+  SETTINGS_SECTIONS,
+  isActiveLink,
+  isSettingsPath,
+  type AdminNavSection,
+} from "./admin-nav";
 
-const SECTIONS = [
-  {
-    label: "Management",
-    links: [
-      { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
-      { icon: Brain, label: "Smpl Brain", href: "/admin/brain" },
-      { icon: Users, label: "Users", href: "/admin/users" },
-      { icon: ShieldAlert, label: "Security", href: "/admin/security" },
-      { icon: Bell, label: "Notifications", href: "/admin/notifications" },
-      { icon: Megaphone, label: "Announcements", href: "/admin/broadcasts" },
-      { icon: Flag, label: "Reports", href: "/admin/reports" },
-      { icon: Scale, label: "Legal", href: "/admin/legal" },
-      { icon: Image, label: "Media", href: "/admin/media" },
-      { icon: Boxes, label: "Catalog", href: "/admin/catalog" },
-      { icon: BarChart3, label: "Generations", href: "/admin/generations" },
-      { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
-      { icon: LifeBuoy, label: "Support", href: "/admin/support" },
-      // Shown only to the owner and devs (OWNER_EMAILS / DEV_EMAILS on the server).
-      { icon: Rocket, label: "Updates", href: "/admin/updates", ownerOrDev: true },
-    ],
-  },
-  {
-    label: "Billing & Monetization",
-    links: [
-      { icon: LineChart, label: "Analytics", href: "/admin/billing/analytics" },
-      { icon: CreditCard, label: "Subscription Plans", href: "/admin/subscription-plans" },
-      { icon: Package, label: "Credit Packs", href: "/admin/credit-packs" },
-      { icon: Tag, label: "Discounts", href: "/admin/discounts" },
-      { icon: Gift, label: "Gifts", href: "/admin/gifts" },
-      { icon: RotateCcw, label: "Refunds", href: "/admin/billing/refunds" },
-      { icon: Gavel, label: "Disputes", href: "/admin/billing/disputes" },
-      { icon: Zap, label: "Pricing", href: "/admin/credit-pricing" },
-      { icon: Timer, label: "Generation Times", href: "/admin/generation-times" },
-      { icon: TrendingUp, label: "Profit", href: "/admin/profit" },
-    ],
-  },
-];
-
-export const AdminSidebar = () => {
-  const pathname = usePathname();
-  const { data: releaseAccess } = useQuery({
+/** Owner/dev-only links (Updates). */
+function useCanSeeUpdates() {
+  const { data } = useQuery({
     queryKey: ["admin-releases-access"],
     queryFn: async () => {
       const res = await fetch("/api/admin/releases/access");
@@ -80,151 +24,100 @@ export const AdminSidebar = () => {
     },
     staleTime: 5 * 60_000,
   });
-  const canSeeUpdates = !!(releaseAccess?.owner || releaseAccess?.dev);
+  return !!(data?.owner || data?.dev);
+}
 
-  if (pathname.startsWith("/admin/appearance")) {
-    return <AppearanceSidebar />;
-  }
-
-  const isAppearance = pathname.startsWith("/admin/appearance");
+/**
+ * The menu for this page: App Settings pages get the settings menu (with a way back),
+ * everything else the main admin menu. Shared by the desktop sidebar and the phone drawer.
+ */
+export function AdminNavMenu({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  const canSeeUpdates = useCanSeeUpdates();
+  const settings = isSettingsPath(pathname);
+  const sections: AdminNavSection[] = settings ? SETTINGS_SECTIONS : ADMIN_SECTIONS;
+  const accent = settings
+    ? { bg: "rgba(234,75,255,0.12)", text: "#f5a8ff", icon: "#ea4bff", bar: "#ea4bff" }
+    : { bg: "rgba(107,65,255,0.14)", text: "#b89dff", icon: "#9370ff", bar: "var(--purple-500)" };
 
   return (
-    <aside
-      className="w-64 hidden md:flex flex-col h-[calc(100vh-64px)] sticky top-16 overflow-y-auto"
-      style={{ background: "#0c0c0c", borderRight: "1px solid rgba(255,255,255,0.07)" }}
-    >
-      {/* Logo mark */}
+    <>
       <div className="px-5 pt-5 pb-3">
-        <div
-          className="text-[11px] font-bold uppercase tracking-[0.12em]"
-          style={{ color: "rgba(255,255,255,0.25)" }}
-        >
-          Admin
+        {settings && (
+          <Link
+            href="/admin"
+            onClick={onNavigate}
+            className="mb-4 flex items-center gap-1.5 text-[12px] text-white/35 transition-colors hover:text-white/80"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Back to Admin
+          </Link>
+        )}
+        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/25">
+          {settings ? "App Settings" : "Admin"}
         </div>
       </div>
 
-      {/* Nav sections */}
-      <nav className="flex-1 px-3 pb-4 space-y-6">
-        {SECTIONS.map((section) => (
+      <nav className="flex-1 space-y-6 px-3 pb-4">
+        {sections.map((section) => (
           <div key={section.label}>
-            <p
-              className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em]"
-              style={{ color: "rgba(255,255,255,0.22)" }}
-            >
-              {section.label}
-            </p>
+            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/[0.22]">{section.label}</p>
             <div className="space-y-0.5">
               {section.links
-                .filter((link) => !("ownerOrDev" in link) || canSeeUpdates)
+                .filter((link) => !link.ownerOrDev || canSeeUpdates)
                 .map((link) => {
-                const Icon = link.icon;
-                const isActive = pathname === link.href || (link.href !== "/admin" && pathname.startsWith(`${link.href}/`));
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-medium transition-all duration-150 group relative"
-                    style={
-                      isActive
-                        ? {
-                            background: "rgba(107,65,255,0.14)",
-                            color: "#b89dff",
-                          }
-                        : {
-                            color: "rgba(255,255,255,0.48)",
-                          }
-                    }
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                        e.currentTarget.style.color = "rgba(255,255,255,0.9)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = "";
-                        e.currentTarget.style.color = "rgba(255,255,255,0.48)";
-                      }
-                    }}
-                  >
-                    {isActive && (
-                      <span
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
-                        style={{ background: "var(--purple-500)" }}
-                      />
-                    )}
-                    <Icon
-                      className="w-4 h-4 flex-shrink-0"
-                      style={{ color: isActive ? "#9370ff" : "rgba(255,255,255,0.35)" }}
-                    />
-                    {link.label}
-                  </Link>
-                );
-              })}
+                  const Icon = link.icon;
+                  // "App Settings" lights up on every settings page.
+                  const active =
+                    link.label === "App Settings" ? settings : isActiveLink(pathname, link.href);
+                  return (
+                    <Link
+                      key={link.href + link.label}
+                      href={link.href}
+                      onClick={onNavigate}
+                      className={cn(
+                        "relative flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
+                        !active && "text-white/[0.48] hover:bg-white/5 hover:text-white/90",
+                      )}
+                      style={active ? { background: accent.bg, color: accent.text } : undefined}
+                    >
+                      {active && (
+                        <span className="absolute top-1/2 left-0 h-5 w-0.5 -translate-y-1/2 rounded-full" style={{ background: accent.bar }} />
+                      )}
+                      <Icon className="h-4 w-4 flex-shrink-0" style={{ color: active ? accent.icon : "rgba(255,255,255,0.35)" }} />
+                      {link.label}
+                    </Link>
+                  );
+                })}
             </div>
           </div>
         ))}
-
-        {/* App Appearance */}
-        <div>
-          <p
-            className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em]"
-            style={{ color: "rgba(255,255,255,0.22)" }}
-          >
-            Content
-          </p>
-          <Link
-            href="/admin/appearance/how-it-works"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-medium transition-all duration-150"
-            style={
-              isAppearance
-                ? { background: "rgba(234,75,255,0.12)", color: "#f5a8ff" }
-                : { color: "rgba(255,255,255,0.48)" }
-            }
-            onMouseEnter={(e) => {
-              if (!isAppearance) {
-                e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                e.currentTarget.style.color = "rgba(255,255,255,0.9)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isAppearance) {
-                e.currentTarget.style.background = "";
-                e.currentTarget.style.color = "rgba(255,255,255,0.48)";
-              }
-            }}
-          >
-            <Paintbrush
-              className="w-4 h-4 flex-shrink-0"
-              style={{ color: isAppearance ? "#ea4bff" : "rgba(255,255,255,0.35)" }}
-            />
-            App Appearance
-          </Link>
-        </div>
       </nav>
-
-      {/* Footer */}
-      <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <div
-          className="rounded-xl p-4"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(107,65,255,0.12) 0%, rgba(234,75,255,0.08) 100%)",
-            border: "1px solid rgba(107,65,255,0.2)",
-          }}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e" }}
-            />
-            <span className="text-[12px] font-semibold text-white">Admin Active</span>
-          </div>
-          <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Full access to all controls
-          </p>
-        </div>
-      </div>
-    </aside>
+    </>
   );
-};
+}
+
+/** Desktop / tablet sidebar (phones use the drawer in the navbar: AdminMobileNav). */
+export const AdminSidebar = () => (
+  <aside
+    className="sticky top-16 hidden h-[calc(100vh-64px)] w-64 shrink-0 flex-col overflow-y-auto md:flex"
+    style={{ background: "#0c0c0c", borderRight: "1px solid rgba(255,255,255,0.07)" }}
+  >
+    <AdminNavMenu />
+    <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+      <div
+        className="rounded-xl p-4"
+        style={{
+          background: "linear-gradient(135deg, rgba(107,65,255,0.12) 0%, rgba(234,75,255,0.08) 100%)",
+          border: "1px solid rgba(107,65,255,0.2)",
+        }}
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e" }} />
+          <span className="text-[12px] font-semibold text-white">Admin Active</span>
+        </div>
+        <p className="text-[11px] text-white/40">Full access to all controls</p>
+      </div>
+    </div>
+  </aside>
+);

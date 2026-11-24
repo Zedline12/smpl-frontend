@@ -1,7 +1,7 @@
 import { AiModelsEnum } from "@/features/generation/enums/models.enum";
 
 /**
- * A visual style (backend StylesModule; admins edit them in App Appearance → Styles).
+ * A visual style (backend StylesModule; admins edit them in App Settings → Styles).
  * The detailed prompt stays on the backend; generations send only `id` (an ObjectId)
  * as input.styleId. Load them with useStylesQuery (features/styles/api.ts).
  */

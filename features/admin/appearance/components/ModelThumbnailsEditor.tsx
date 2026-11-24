@@ -123,7 +123,7 @@ function ThumbnailCard({ offering }: { offering: AdminOffering }) {
   );
 }
 
-/** App Appearance → Model Thumbnails: the video or image on each model's card in Create. */
+/** App Settings → Model Thumbnails: the video or image on each model's card in Create. */
 export function ModelThumbnailsEditor() {
   const catalog = useQuery({
     queryKey: ["admin", "catalog"],

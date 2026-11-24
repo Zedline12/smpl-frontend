@@ -2,7 +2,7 @@ import type { Template } from "@/features/templates/types";
 
 /**
  * Home page sections (backend modules/home-sections; admins edit them in
- * App Appearance → Homepage). Sections belong to presets; one preset is live.
+ * App Settings → Homepage). Sections belong to presets; one preset is live.
  * Kept in sync with the backend's domain/home-section.ts.
  */
 

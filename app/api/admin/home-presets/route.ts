@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { proxyToBackend } from "@/lib/backend-proxy";
 
-/** App Appearance → Homepage: saved home page presets. */
+/** App Settings → Homepage: saved home page presets. */
 export async function GET() {
   return proxyToBackend("/admin/home-presets");
 }

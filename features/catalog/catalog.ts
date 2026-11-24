@@ -27,7 +27,7 @@ export interface Offering {
   provider: string | null;
   /** Turned off by an admin: hidden from pickers, refused by the backend. */
   enabled: boolean;
-  /** Set in App Appearance; null: the bundled default below. */
+  /** Set in App Settings; null: the bundled default below. */
   thumbnail?: Thumbnail | null;
 }
 
@@ -76,7 +76,7 @@ const DEFAULT_COMPUTE = new Set([
 ]);
 
 // Bundled card media (R2 bucket smpl-ui / "Models Selection Thumbnail Videos"), shown
-// until an admin sets one in App Appearance → Model Thumbnails.
+// until an admin sets one in App Settings → Model Thumbnails.
 const THUMBS = "https://pub-c9ce2e0e90ea4982abdc05b1e4bd66bb.r2.dev/Models%20Selection%20Thumbnail%20Videos/";
 const video = (file: string): Thumbnail => ({ type: "video", url: THUMBS + encodeURIComponent(file) });
 const image = (file: string): Thumbnail => ({ type: "image", url: THUMBS + encodeURIComponent(file) });

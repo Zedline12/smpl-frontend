@@ -234,7 +234,7 @@ function StyleRow({
   );
 }
 
-/** App Appearance → Styles: names, looping thumbnail videos, hidden prompts and order. */
+/** App Settings → Styles: names, looping thumbnail videos, hidden prompts and order. */
 export function StylesEditor() {
   const queryClient = useQueryClient();
   const { data: styles, isLoading, isError } = useQuery({ queryKey: ADMIN_KEY, queryFn: fetchAdminStyles });

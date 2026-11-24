@@ -84,6 +84,13 @@ export function CatalogManager() {
     queryFn: () => api<{ offerings: AdminOffering[]; studios: AdminStudio[] }>(""),
   });
 
+  // Templates per model and the media studios run on, counted.
+  const content = useQuery({
+    queryKey: ["admin", "catalog", "content"],
+    queryFn: () => api<CatalogContent>("/content"),
+    staleTime: 60_000,
+  });
+
   const rows = useMemo(() => {
     if (!catalog.data) return [];
     if (tab === "studio") return catalog.data.studios;
@@ -103,7 +110,8 @@ export function CatalogManager() {
       <div>
         <h1 className="text-2xl font-semibold text-white">Catalog</h1>
         <p className="mt-1 text-[13px] text-white/50">
-          Everything we sell. Names and descriptions change everywhere users see them; ids never change.
+          Everything we sell, and the content each needs: studios show their media (scenes, avatars, options), models
+          their templates. Names and descriptions change everywhere users see them; ids never change.
         </p>
       </div>
 
@@ -140,7 +148,7 @@ export function CatalogManager() {
       ) : (
         <div className="space-y-3">
           {rows.map((row) => (
-            <EntryCard key={`${tab}:${row.id}:${row.updatedAt ?? ""}`} row={row} studio={tab === "studio"} />
+            <EntryCard key={`${tab}:${row.id}:${row.updatedAt ?? ""}`} row={row} studio={tab === "studio"} content={content.data} />
           ))}
         </div>
       )}
@@ -155,7 +163,51 @@ const CONTENT_PAGES: Record<string, string> = {
   "smpl-artist-video-clip": "/admin/catalog/artist-video-clip",
 };
 
-function EntryCard({ row, studio }: { row: AdminOffering | AdminStudio; studio: boolean }) {
+interface CatalogContent {
+  templates: Record<string, { total: number; published: number }>;
+  studios: Record<string, { items: { label: string; count: number; href: string }[] }>;
+}
+
+/** What this entry runs on: a studio's media, or a model's templates (with where to edit them). */
+function ContentLine({ row, studio, content }: { row: AdminOffering | AdminStudio; studio: boolean; content?: CatalogContent }) {
+  if (!content) return null;
+  if (studio) {
+    const items = content.studios[row.id]?.items ?? [];
+    if (!items.length) return null;
+    return (
+      <div className="flex flex-wrap gap-2">
+        {items.map((i) => (
+          <Link key={i.label} href={i.href} className="flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1 text-[12px] text-white/70 hover:border-white/25 hover:text-white">
+            <span className="font-semibold text-white tabular-nums">{i.count}</span> {i.label}
+            <ArrowUpRight className="size-3" />
+          </Link>
+        ))}
+      </div>
+    );
+  }
+  const t = content.templates[row.id];
+  return (
+    <Link
+      href={`/admin/appearance/templates?model=${encodeURIComponent(row.id)}`}
+      className={cn(
+        "flex w-fit items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px] hover:text-white",
+        t?.published ? "border-white/10 text-white/70 hover:border-white/25" : "border-amber-400/30 text-amber-200",
+      )}
+    >
+      {t ? (
+        <>
+          <span className="font-semibold text-white tabular-nums">{t.published}</span> published template{t.published === 1 ? "" : "s"}
+          {t.total > t.published && <span className="text-white/40">· {t.total - t.published} hidden</span>}
+        </>
+      ) : (
+        "No templates yet"
+      )}
+      <ArrowUpRight className="size-3" />
+    </Link>
+  );
+}
+
+function EntryCard({ row, studio, content }: { row: AdminOffering | AdminStudio; studio: boolean; content?: CatalogContent }) {
   const queryClient = useQueryClient();
   const offering = studio ? null : (row as AdminOffering);
   const renamable = studio || !!offering?.renamable;
@@ -233,6 +285,7 @@ function EntryCard({ row, studio }: { row: AdminOffering | AdminStudio; studio: 
               <span className="ml-2 text-white/30">(never shown to users)</span>
             </p>
           )}
+          <ContentLine row={row} studio={studio} content={content} />
           {studio && (
             <p className="text-[12px] text-white/45">
               Page <code className="text-white/60">{(row as AdminStudio).route}</code>

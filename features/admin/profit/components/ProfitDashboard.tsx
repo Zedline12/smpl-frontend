@@ -1,27 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { ChevronDown, CircleDollarSign, Coins, Percent, TrendingUp } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { cn } from "@/lib/utils";
+import { KpiTile, DeltaText } from "@/features/admin/components/data-viz/kpi";
+import { ChartCard, Legend, TooltipBox } from "@/features/admin/components/data-viz/parts";
+import { GRID, SERIES, axisProps } from "@/features/admin/components/data-viz/palette";
+import { int, pct, usdDollars } from "@/features/admin/components/data-viz/format";
 
 interface ModelGeneration {
   totalGenerations: number;
   totalCost: number;
 }
-
+interface RevenueBySource {
+  newMonthly: number;
+  newYearly: number;
+  renewalsMonthly: number;
+  renewalsYearly: number;
+  planChanges: number;
+  creditPacks: number;
+  refunds: number;
+  gross: number;
+}
 interface MonthData {
   grossVolume: number;
   netVolume: number;
@@ -33,50 +44,62 @@ interface MonthData {
   stripeFees: number;
   transfers: number;
   generations: Record<string, ModelGeneration>;
+  yearMonth?: string;
+  revenueBySource?: RevenueBySource;
+  grossMargin?: number | null;
+  costPerGeneration?: number;
 }
 
-interface ProfitDashboardProps {
-  months: Record<string, MonthData>;
-}
+/** The revenue sources, in display order (colors from the shared palette). */
+const SOURCES: { key: keyof RevenueBySource; label: string; color: string }[] = [
+  { key: "newMonthly", label: "New · monthly", color: SERIES[0] },
+  { key: "newYearly", label: "New · annual", color: "#86b6ef" },
+  { key: "renewalsMonthly", label: "Renewals · monthly", color: SERIES[2] },
+  { key: "renewalsYearly", label: "Renewals · annual", color: "#5fd0a8" },
+  { key: "planChanges", label: "Plan changes", color: SERIES[3] },
+  { key: "creditPacks", label: "Credit packs", color: SERIES[4] },
+];
 
-const chartConfig = {
-  totalGenerations: {
-    label: "Generations",
-    color: "#6b41ff",
-  },
-  totalCost: {
-    label: "Cost ($)",
-    color: "#ff6b00",
-  },
-} satisfies ChartConfig;
+const money = (n: number | undefined) => usdDollars(n ?? 0);
 
-export function ProfitDashboard({ months }: ProfitDashboardProps) {
+/** Profit: revenue by source (new vs renewals, monthly vs annual, packs), costs and profit over time. */
+export function ProfitDashboard({ months }: { months: Record<string, MonthData> }) {
   const monthKeys = Object.keys(months);
   const [selected, setSelected] = useState(monthKeys[0] ?? "");
-
   const data = months[selected];
+  const prevKey = monthKeys[monthKeys.indexOf(selected) + 1];
+  const prev = prevKey ? months[prevKey] : undefined;
 
-  const chartData = data
-    ? Object.entries(data.generations).map(([model, v]) => ({
-        model,
-        totalGenerations: v.totalGenerations,
-        totalCost: v.totalCost,
-      }))
+  // Oldest → newest for the trend charts.
+  const timeline = [...monthKeys].reverse().map((k) => ({
+    month: k,
+    revenue: months[k].netVolume,
+    cost: months[k].totalGenerationsCost,
+    profit: months[k].netProfit,
+    generations: months[k].totalGenerations,
+    ...Object.fromEntries(SOURCES.map((s) => [s.key, months[k].revenueBySource?.[s.key] ?? 0])),
+  }));
+
+  const sources = data?.revenueBySource;
+  const sourceTotal = sources ? SOURCES.reduce((n, s) => n + (sources[s.key] ?? 0), 0) : 0;
+  const modelRows = data
+    ? Object.entries(data.generations)
+        .map(([model, v]) => ({ model, ...v }))
+        .sort((a, b) => b.totalCost - a.totalCost)
     : [];
 
   return (
-    <div className="space-y-8">
-      {/* Header row */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold text-white">Profit Analytics</h2>
-          <p className="text-gray-400 text-sm mt-1">Monthly revenue, costs, and per-model breakdown.</p>
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">Profit</h2>
+          <p className="mt-1 text-sm text-white/45">Where revenue comes from, what generations cost, and what is left.</p>
         </div>
         <div className="relative">
           <select
             value={selected}
             onChange={(e) => setSelected(e.target.value)}
-            className="appearance-none h-10 w-48 rounded-xl border border-neutral-700 bg-neutral-900 pl-4 pr-9 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all cursor-pointer"
+            className="h-10 w-48 cursor-pointer appearance-none rounded-xl border border-neutral-700 bg-neutral-900 pr-9 pl-4 text-sm font-medium text-white focus:outline-none"
           >
             {monthKeys.map((m) => (
               <option key={m} value={m}>
@@ -84,154 +107,218 @@ export function ProfitDashboard({ months }: ProfitDashboardProps) {
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
         </div>
       </div>
 
-      {data ? (
+      {!data ? (
+        <p className="text-neutral-500">No data available.</p>
+      ) : (
         <>
-          {/* Stat cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {/* Gross Volume */}
-            <Card className="bg-emerald-500/10 border-emerald-500/20 text-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-emerald-400">Gross Volume</CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-emerald-400">
-                  <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-                  <path fillRule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z" clipRule="evenodd" />
-                  <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${data.grossVolume}</div>
-              </CardContent>
-            </Card>
-
-            {/* Net Volume */}
-            <Card className="bg-teal-500/10 border-teal-500/20 text-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-teal-400">Net Volume</CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-teal-400">
-                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v.816a3.836 3.836 0 0 0-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 0 1-.921-.421l-.879-.66a.75.75 0 0 0-.9 1.2l.879.66c.533.4 1.169.645 1.821.75V18a.75.75 0 0 0 1.5 0v-.81a4.124 4.124 0 0 0 1.821-.749c.745-.559 1.179-1.344 1.179-2.191 0-.847-.434-1.632-1.179-2.191a4.122 4.122 0 0 0-1.821-.75V8.354c.29.082.559.213.786.393l.415.33a.75.75 0 0 0 .933-1.175l-.415-.33a3.836 3.836 0 0 0-1.719-.755V6Z" clipRule="evenodd" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${data.netVolume}</div>
-              </CardContent>
-            </Card>
-                {/* Generations Cost */}
-            <Card className="bg-orange-500/10 border-orange-500/20 text-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-orange-400">Generations Cost</CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-orange-400">
-                  <path d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 0 1-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004ZM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 0 1-.921.42Z" />
-                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v.816a3.836 3.836 0 0 0-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 0 1-.921-.421l-.879-.66a.75.75 0 0 0-.9 1.2l.879.66c.533.4 1.169.645 1.821.75V18a.75.75 0 0 0 1.5 0v-.81a4.124 4.124 0 0 0 1.821-.749c.745-.559 1.179-1.344 1.179-2.191 0-.847-.434-1.632-1.179-2.191a4.122 4.122 0 0 0-1.821-.75V8.354c.29.082.559.213.786.393l.415.33a.75.75 0 0 0 .933-1.175l-.415-.33a3.836 3.836 0 0 0-1.719-.755V6Z" clipRule="evenodd" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${data.totalGenerationsCost}</div>
-              </CardContent>
-            </Card>
-            {/* Net Profit */}
-            <Card className="bg-violet-500/10 border-violet-500/20 text-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-violet-400">Net Profit</CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-violet-400">
-                  <path fillRule="evenodd" d="M15.22 6.268a.75.75 0 0 1 .968-.431l5.942 2.28a.75.75 0 0 1 .431.97l-2.28 5.94a.75.75 0 1 1-1.4-.537l1.63-4.251-1.086.484a17.252 17.252 0 0 0-3.305 2.084c-1.311 1.026-2.397 2.14-3.791 2.948-1.26.733-2.641 1.148-4.196 1.148a.75.75 0 0 1 0-1.5c1.243 0 2.359-.322 3.427-.933 1.232-.716 2.199-1.706 3.468-2.7a18.768 18.768 0 0 1 3.598-2.267l1.084-.484-4.25-1.631a.75.75 0 0 1-.432-.97Z" clipRule="evenodd" />
-                  <path fillRule="evenodd" d="M1.72 6.268a.75.75 0 0 0-.97.431L.47 12.64a.75.75 0 1 0 1.4.537l1.63-4.251 1.086.484a17.25 17.25 0 0 1 3.305 2.084c1.311 1.026 2.396 2.14 3.79 2.948 1.26.733 2.642 1.148 4.197 1.148a.75.75 0 0 0 0-1.5c-1.243 0-2.36-.322-3.427-.933-1.232-.716-2.2-1.706-3.469-2.7A18.768 18.768 0 0 0 5.38 8.19l-1.084-.484 4.25-1.631a.75.75 0 0 0 .432-.97L8.72 6.27l-7 .001Z" clipRule="evenodd" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${data.netProfit}</div>
-              </CardContent>
-            </Card>
-
-           
-
-            {/* Total Generations
-            <Card className="bg-blue-500/10 border-blue-500/20 text-foreground">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-blue-400">Total Generations</CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-blue-400">
-                  <path fillRule="evenodd" d="M2.25 13.5a8.25 8.25 0 0 1 8.25-8.25.75.75 0 0 1 .75.75v6.75H18a.75.75 0 0 1 .75.75 8.25 8.25 0 0 1-16.5 0Z" clipRule="evenodd" />
-                  <path fillRule="evenodd" d="M12.75 3a.75.75 0 0 1 .75-.75 8.25 8.25 0 0 1 8.25 8.25.75.75 0 0 1-.75.75h-7.5a.75.75 0 0 1-.75-.75V3Z" clipRule="evenodd" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{data.totalGenerations?.toLocaleString()}</div>
-              </CardContent>
-            </Card> */}
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <KpiTile label="Net revenue (after Stripe)" value={money(data.netVolume)} accent="emerald" icon={CircleDollarSign}>
+              <DeltaText now={data.netVolume} before={prev?.netVolume} /> · gross {money(data.grossVolume)}
+            </KpiTile>
+            <KpiTile label="Generation cost" value={money(data.totalGenerationsCost)} accent="orange" icon={Coins}>
+              <DeltaText now={data.totalGenerationsCost} before={prev?.totalGenerationsCost} goodWhenUp={false} /> · {int(data.totalGenerations)} generations
+            </KpiTile>
+            <KpiTile label="Net profit" value={money(data.netProfit)} accent="violet" icon={TrendingUp}>
+              <DeltaText now={data.netProfit} before={prev?.netProfit} />
+            </KpiTile>
+            <KpiTile label="Margin" value={pct(data.grossMargin ?? null)} accent="blue" icon={Percent}>
+              {usdDollars(data.costPerGeneration ?? 0)} cost per generation
+            </KpiTile>
           </div>
 
-          {/* Secondary cards — Stripe breakdown */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Stripe Fees", value: `$${data.stripeFees}` },
-              { label: "Transfers",   value: `$${data.transfers}` },
-              { label: "Refunds",     value: `$${data.refunds}` },
-              { label: "Disputes",    value: `$${data.disputes}` },
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                className="flex flex-col gap-1 rounded-lg border border-neutral-800 bg-neutral-900/40 px-4 py-3"
-              >
-                <span className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
-                  {label}
-                </span>
-                <span className="text-base font-semibold text-neutral-200">{value}</span>
+              ["Stripe fees", data.stripeFees],
+              ["Refunds", data.refunds],
+              ["Disputes", data.disputes],
+              ["Transfers", data.transfers],
+            ].map(([label, value]) => (
+              <div key={label as string} className="flex flex-col gap-1 rounded-lg border border-neutral-800 bg-neutral-900/40 px-4 py-3">
+                <span className="text-[11px] font-medium tracking-wider text-neutral-500 uppercase">{label}</span>
+                <span className="text-base font-semibold text-neutral-200">{money(value as number)}</span>
               </div>
             ))}
           </div>
 
-          {/* Bar chart */}
-          <Card className="bg-neutral-900 border-neutral-800 text-primary-foreground">
-            <CardHeader>
-              <CardTitle>Model Breakdown</CardTitle>
-              <CardDescription>
-                Generations and cost per model for {selected}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {chartData.length > 0 ? (
-                <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-                  <BarChart
-                    accessibilityLayer
-                    data={chartData}
-                    margin={{ top: 20, left: 12, right: 12, bottom: 20 }}
-                  >
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="model"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      tick={{ fontSize: 11 }}
-                    />
-                    <YAxis tickLine={false} axisLine={false} />
-                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                    <Bar
-                      dataKey="totalGenerations"
-                      fill="var(--color-totalGenerations)"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar
-                      dataKey="totalCost"
-                      fill="var(--color-totalCost)"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ChartContainer>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            <ChartCard title="Where the money came from" subtitle={`${selected} · paid invoices, before refunds`}>
+              {sources && sourceTotal > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {SOURCES.map((s) => {
+                    const v = sources[s.key] ?? 0;
+                    const share = sourceTotal ? v / sourceTotal : 0;
+                    return (
+                      <div key={s.key}>
+                        <div className="flex items-center justify-between text-[13px]">
+                          <span className="flex items-center gap-2 text-white/75">
+                            <span className="inline-block size-2.5 rounded-[3px]" style={{ background: s.color }} />
+                            {s.label}
+                          </span>
+                          <span className="text-white tabular-nums">
+                            {money(v)} <span className="text-white/40">· {pct(share, 0)}</span>
+                          </span>
+                        </div>
+                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                          <div className="h-full rounded-full" style={{ width: `${share * 100}%`, background: s.color }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="mt-1 flex justify-between border-t border-white/10 pt-2 text-[13px]">
+                    <span className="text-white/55">Refunded this month</span>
+                    <span className="text-red-300 tabular-nums">−{money(sources.refunds)}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[12px] text-white/50">
+                    <span>
+                      New customers: <b className="text-white">{money(sources.newMonthly + sources.newYearly)}</b>
+                    </span>
+                    <span>
+                      Renewals: <b className="text-white">{money(sources.renewalsMonthly + sources.renewalsYearly)}</b>
+                    </span>
+                    <span>
+                      Annual plans: <b className="text-white">{money(sources.newYearly + sources.renewalsYearly)}</b>
+                    </span>
+                    <span>
+                      Credit packs: <b className="text-white">{money(sources.creditPacks)}</b>
+                    </span>
+                  </div>
+                </div>
               ) : (
-                <p className="text-neutral-500 text-sm py-10 text-center">
-                  No generation data for {selected}.
-                </p>
+                <p className="py-8 text-center text-sm text-white/40">No payments recorded for {selected}.</p>
               )}
-            </CardContent>
-          </Card>
+            </ChartCard>
+
+            <ChartCard title="Revenue by source over time" subtitle="Each month's paid invoices">
+              <Legend items={SOURCES.map((s) => ({ label: s.label, color: s.color }))} />
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={timeline} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                    <CartesianGrid stroke={GRID} vertical={false} />
+                    <XAxis dataKey="month" {...axisProps} />
+                    <YAxis {...axisProps} width={56} tickFormatter={(v) => usdDollars(Number(v), true)} />
+                    <Tooltip
+                      cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                      content={({ active, label, payload }) => (
+                        <TooltipBox
+                          active={active}
+                          label={String(label ?? "")}
+                          rows={(payload ?? []).filter((x) => Number(x.value) > 0).map((x) => ({
+                            label: SOURCES.find((s) => s.key === x.dataKey)?.label ?? String(x.dataKey),
+                            value: money(Number(x.value)),
+                            color: String(x.color),
+                          }))}
+                        />
+                      )}
+                    />
+                    {SOURCES.map((s, i) => (
+                      <Bar key={s.key} dataKey={s.key} stackId="rev" fill={s.color} radius={i === SOURCES.length - 1 ? [3, 3, 0, 0] : 0} />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
+
+          <ChartCard title="Revenue, cost and profit" subtitle="Net revenue (after Stripe), generation cost and net profit per month">
+            <Legend
+              items={[
+                { label: "Net revenue", color: SERIES[2], line: true },
+                { label: "Generation cost", color: SERIES[1], line: true },
+                { label: "Net profit", color: "#b89dff", line: true },
+              ]}
+            />
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={timeline} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke={GRID} vertical={false} />
+                  <XAxis dataKey="month" {...axisProps} />
+                  <YAxis {...axisProps} width={56} tickFormatter={(v) => usdDollars(Number(v), true)} />
+                  <Tooltip
+                    content={({ active, label, payload }) => (
+                      <TooltipBox
+                        active={active}
+                        label={String(label ?? "")}
+                        rows={(payload ?? []).map((x) => ({
+                          label: x.dataKey === "revenue" ? "Net revenue" : x.dataKey === "cost" ? "Generation cost" : "Net profit",
+                          value: money(Number(x.value)),
+                          color: String(x.color),
+                          bold: x.dataKey === "profit",
+                        }))}
+                      />
+                    )}
+                  />
+                  <Line type="monotone" dataKey="revenue" stroke={SERIES[2]} strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="cost" stroke={SERIES[1]} strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="profit" stroke="#b89dff" strokeWidth={2.5} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+
+          <ChartCard title="Models" subtitle={`Generations and cost per model in ${selected}, most expensive first`}>
+            {modelRows.length ? (
+              <>
+                <Legend items={[{ label: "Generations", color: SERIES[0] }, { label: "Cost ($)", color: SERIES[1] }]} />
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={modelRows.slice(0, 15)} margin={{ top: 5, right: 5, left: 0, bottom: 30 }}>
+                      <CartesianGrid stroke={GRID} vertical={false} />
+                      <XAxis dataKey="model" {...axisProps} interval={0} angle={-30} textAnchor="end" height={50} />
+                      <YAxis yAxisId="n" {...axisProps} width={44} />
+                      <YAxis yAxisId="c" orientation="right" {...axisProps} width={50} tickFormatter={(v) => usdDollars(Number(v), true)} />
+                      <Tooltip
+                        cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                        content={({ active, label, payload }) => (
+                          <TooltipBox
+                            active={active}
+                            label={String(label ?? "")}
+                            rows={(payload ?? []).map((x) => ({
+                              label: x.dataKey === "totalCost" ? "Cost" : "Generations",
+                              value: x.dataKey === "totalCost" ? money(Number(x.value)) : int(Number(x.value)),
+                              color: String(x.color),
+                            }))}
+                          />
+                        )}
+                      />
+                      <Bar yAxisId="n" dataKey="totalGenerations" fill={SERIES[0]} radius={[3, 3, 0, 0]} />
+                      <Bar yAxisId="c" dataKey="totalCost" fill={SERIES[1]} radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-sm">
+                    <thead className="text-left text-[11px] tracking-wide text-white/40 uppercase">
+                      <tr>
+                        <th className="py-2 font-medium">Model</th>
+                        <th className="py-2 text-right font-medium">Generations</th>
+                        <th className="py-2 text-right font-medium">Cost</th>
+                        <th className="py-2 text-right font-medium">Share of cost</th>
+                        <th className="py-2 text-right font-medium">Per generation</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-white/80">
+                      {modelRows.map((r) => (
+                        <tr key={r.model}>
+                          <td className="py-2">{r.model}</td>
+                          <td className="py-2 text-right tabular-nums">{int(r.totalGenerations)}</td>
+                          <td className="py-2 text-right tabular-nums">{money(r.totalCost)}</td>
+                          <td className="py-2 text-right tabular-nums">{pct(data.totalGenerationsCost ? r.totalCost / data.totalGenerationsCost : 0, 0)}</td>
+                          <td className={cn("py-2 text-right tabular-nums")}>{money(r.totalGenerations ? r.totalCost / r.totalGenerations : 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <p className="py-10 text-center text-sm text-neutral-500">No generation data for {selected}.</p>
+            )}
+          </ChartCard>
         </>
-      ) : (
-        <p className="text-neutral-500">No data available.</p>
       )}
     </div>
   );

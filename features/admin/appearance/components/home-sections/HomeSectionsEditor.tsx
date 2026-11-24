@@ -141,7 +141,7 @@ function SectionRow({
   );
 }
 
-/** App Appearance → Homepage: presets (saved layouts, one live) and their sections. */
+/** App Settings → Homepage: presets (saved layouts, one live) and their sections. */
 export function HomeSectionsEditor() {
   const queryClient = useQueryClient();
   const presetsQuery = useQuery({ queryKey: PRESETS_KEY, queryFn: fetchHomePresets });

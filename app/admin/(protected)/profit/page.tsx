@@ -1,14 +1,14 @@
+import type { ComponentProps } from "react";
 import { fetchWithToken } from "@/lib/fetcher";
 import { ProfitDashboard } from "@/features/admin/profit/components/ProfitDashboard";
 
 export default async function ProfitPage() {
-  let months: Record<string, any> = {};
+  let months: ComponentProps<typeof ProfitDashboard>["months"] = {};
 
   try {
     const res = await fetchWithToken("/admin/analytics/profit");
     if (res.ok) {
       const json = await res.json();
-      console.log(json)
       months = json.data?.months ?? json.months ?? {};
     }
   } catch (error) {
@@ -16,7 +16,7 @@ export default async function ProfitPage() {
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 sm:p-2">
       <ProfitDashboard months={months} />
     </div>
   );

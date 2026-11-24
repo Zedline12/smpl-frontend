@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 const iconButton =
   "flex size-7 items-center justify-center rounded-md text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-25";
 
-/** App Appearance → Avatars: the preset avatars users can pick in Ads Studio. */
+/** App Settings → Avatars: the preset avatars users can pick in Ads Studio. */
 export function AvatarsEditor() {
   const { data: avatars = [], isFetched } = useAdminAvatarsQuery();
   const create = useCreateAdminAvatar();

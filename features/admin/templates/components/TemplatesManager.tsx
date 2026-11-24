@@ -68,6 +68,15 @@ export function TemplatesManager() {
     setModel(id);
   };
 
+  // Opened from the Catalog hub with ?model=<id>: start on that model.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("model");
+    if (!wanted) return;
+    const group = MODEL_GROUPS.find((g) => g.models.some((m) => m.id === wanted));
+    if (group) pickModel(group.type, wanted as AiModelsEnum);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { data, isFetched, hasNextPage, fetchNextPage, isFetchingNextPage } =
     // Up to 200 per model, so the display order covers all of them.
     useAdminTemplatesQuery(model, 200);
