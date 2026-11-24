@@ -18,22 +18,56 @@ import {
   Music,
   Repeat,
   Scissors,
+  Video,
+  Image as ImageLucide,
+  Mic,
+  AudioLines,
+  Palette,
+  Layers,
+  Rocket,
+  Star,
+  Camera,
+  Clapperboard,
+  Bot,
+  Brush,
+  Type,
+  Users,
+  Flame,
+  Gift,
   LucideIcon,
 } from "lucide-react";
 
-const ICON_MAP: Record<string, LucideIcon> = {
+/** Icons admins can pick for tool cards (Homepage Sections). Unknown keys show Sparkles. */
+export const TOOL_ICONS: Record<string, LucideIcon> = {
   Sparkles,
-  BarChart: BarChart2,
-  Cpu,
   Film,
-  Asterisk,
+  Video,
+  Clapperboard,
+  Camera,
+  Image: ImageLucide,
+  Brush,
+  Palette,
   Wand: Wand2,
+  Music,
+  Mic,
+  AudioLines,
   Megaphone,
   UserRound,
-  Music,
+  Users,
+  Bot,
   Repeat,
   Scissors,
+  Layers,
+  Type,
+  BarChart: BarChart2,
+  Cpu,
+  Asterisk,
+  Rocket,
+  Star,
+  Flame,
+  Gift,
 };
+const ICON_MAP = TOOL_ICONS;
 
 export interface FeatureItem {
   icon: string;
@@ -118,11 +152,12 @@ function FeatureCard({ item }: { item: FeatureItem }) {
 
 // ─── large promo card ─────────────────────────────────────────────────────────
 
-interface PromoCardProps {
+export interface PromoCardProps {
   title: string;
   subtitle: string;
-  ctaLabel: string;
-  ctaHref: string;
+  /** No button when either is empty. */
+  ctaLabel?: string;
+  ctaHref?: string;
   statusItems: { label: string; accent?: boolean }[];
   thumbUrls: string[];
 }
@@ -149,6 +184,7 @@ function PromoCard({ title, subtitle, ctaLabel, ctaHref, statusItems, thumbUrls 
         </div>
 
         {/* CTA */}
+        {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
           className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[13px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
@@ -160,6 +196,7 @@ function PromoCard({ title, subtitle, ctaLabel, ctaHref, statusItems, thumbUrls 
           <Plus className="w-3.5 h-3.5" />
           {ctaLabel}
         </Link>
+        )}
       </div>
 
       {/* inner status panel */}
@@ -222,17 +259,20 @@ function PromoCard({ title, subtitle, ctaLabel, ctaHref, statusItems, thumbUrls 
 // ─── grid ─────────────────────────────────────────────────────────────────────
 
 interface FeatureGridProps {
-  promo: PromoCardProps;
+  /** The tall card on the left; without it the cards fill 3 columns. */
+  promo?: PromoCardProps | null;
   features: FeatureItem[];
 }
 
 export function FeatureGrid({ promo, features }: FeatureGridProps) {
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr">
+    <div className={`grid gap-4 grid-cols-1 sm:grid-cols-2 ${promo ? "lg:grid-cols-4" : "lg:grid-cols-3"} auto-rows-fr`}>
       {/* large promo — spans 1 col on mobile, 1 col on sm, 1 col of 4 on lg (rows 1–2) */}
-      <div className="sm:col-span-1 lg:row-span-2 min-h-[260px]">
-        <PromoCard {...promo} />
-      </div>
+      {promo && (
+        <div className="sm:col-span-1 lg:row-span-2 min-h-[260px]">
+          <PromoCard {...promo} />
+        </div>
+      )}
 
       {/* 6 small cards — fill remaining 3 cols × 2 rows on lg */}
       {features.map((f, i) => (

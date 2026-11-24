@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -10,21 +10,23 @@ export interface FeaturedItem {
   video: string;
   poster?: string;
   href: string;
+  /** Small pill on the video ("NEW"). */
+  badge?: string;
+}
+
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+const prefersReducedMotion = () => window.matchMedia(REDUCED_MOTION).matches;
+function subscribeReducedMotion(onChange: () => void) {
+  const mq = window.matchMedia(REDUCED_MOTION);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
 }
 
 // ─── single card ─────────────────────────────────────────────────────────────
 
 function FeaturedCard({ item }: { item: FeaturedItem }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduceMotion(mq.matches);
-    const handler = () => setReduceMotion(mq.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const reduceMotion = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
 
   // IntersectionObserver — play only when visible
   useEffect(() => {
@@ -67,6 +69,14 @@ function FeaturedCard({ item }: { item: FeaturedItem }) {
             preload="metadata"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
+        )}
+        {item.badge && (
+          <span
+            className="absolute top-2.5 left-2.5 z-10 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase italic"
+            style={{ background: "var(--secondary)", color: "#0a0a0a" }}
+          >
+            {item.badge}
+          </span>
         )}
         {/* dark overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300 rounded-[12px]" />

@@ -10,22 +10,27 @@ import {
   deleteHomeSection,
   duplicateHomeSection,
   fetchAdminHomeSections,
+  fetchHomePresets,
   reorderHomeSections,
   updateHomeSection,
 } from "@/features/home-sections/api";
 import {
+  AUDIENCE_LABELS,
   HOME_SECTION_TYPES,
   HOME_SECTION_TYPE_LABELS,
   blankBody,
+  blankHeader,
+  defaultAudience,
   sectionStatus,
   type AdminHomeSection,
   type HomeSectionType,
   type SectionStatus,
 } from "@/features/home-sections/types";
 import { HomeSectionForm } from "./HomeSectionForm";
+import { PRESETS_KEY, PresetBar } from "./PresetBar";
 import { SmallButton } from "./fields";
 
-const ADMIN_KEY = ["home-sections", "admin"];
+const sectionsKey = (presetId: string | null) => ["home-sections", "admin", presetId];
 
 const STATUS: Record<SectionStatus, { label: string; className: string }> = {
   live: { label: "Live", className: "bg-green-500/15 text-green-300" },
@@ -81,6 +86,11 @@ function SectionRow({
             <div className="flex items-center gap-2">
               <span className="truncate text-sm font-medium text-white">{section.name}</span>
               <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", status.className)}>{status.label}</span>
+              {section.audience && section.audience !== "all" && (
+                <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-violet-300">
+                  {AUDIENCE_LABELS[section.audience]}
+                </span>
+              )}
             </div>
             <p className="truncate text-[11px] text-white/40">
               {HOME_SECTION_TYPE_LABELS[section.body.type]}
@@ -131,25 +141,47 @@ function SectionRow({
   );
 }
 
-/** App Appearance → Homepage Sections: custom sections shown after the home page hero. */
+/** App Appearance → Homepage: presets (saved layouts, one live) and their sections. */
 export function HomeSectionsEditor() {
   const queryClient = useQueryClient();
-  const { data: sections = [], isLoading, error } = useQuery({ queryKey: ADMIN_KEY, queryFn: fetchAdminHomeSections });
+  const presetsQuery = useQuery({ queryKey: PRESETS_KEY, queryFn: fetchHomePresets });
+  const presets = presetsQuery.data ?? [];
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  // The picked preset, else the live one.
+  const preset = presets.find((p) => p.id === pickedId) ?? presets.find((p) => p.isActive) ?? presets[0] ?? null;
+  const presetId = preset?.id ?? null;
+  const ADMIN_KEY = sectionsKey(presetId);
+  const sectionsQuery = useQuery({
+    queryKey: ADMIN_KEY,
+    queryFn: () => fetchAdminHomeSections(presetId),
+    enabled: !!presetId,
+  });
+  const sections = sectionsQuery.data ?? [];
+  const isLoading = presetsQuery.isLoading || (!!presetId && sectionsQuery.isLoading);
+  const error = presetsQuery.error ?? sectionsQuery.error;
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ADMIN_KEY });
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEY }),
+      // Section counts on the preset chips.
+      queryClient.invalidateQueries({ queryKey: PRESETS_KEY }),
+    ]);
 
   const add = async (type: HomeSectionType) => {
     setAdding(true);
     try {
       // New sections start hidden, so nothing half-done shows on the home page.
+      if (!presetId) return;
       const created = await createHomeSection({
+        presetId,
         name: `New ${HOME_SECTION_TYPE_LABELS[type].toLowerCase()}`,
+        audience: defaultAudience(type),
         isActive: false,
         startsAt: null,
         expiresAt: null,
-        header: type === "hero" ? { align: "none", title: "", description: "" } : { align: "left", title: "Section title", description: "" },
+        header: blankHeader(type),
         body: blankBody(type),
       });
       await refresh();
@@ -179,12 +211,23 @@ export function HomeSectionsEditor() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Homepage Sections</h1>
+        <h1 className="text-2xl font-semibold">Homepage</h1>
         <p className="mt-1 text-sm text-white/40">
-          Custom sections shown on the home page after the hero, top to bottom in this order. A section shows while it&apos;s
-          active and inside its show-from / hide-after window.
+          Everything on the home page, top to bottom in this order. Save several presets and make one live. A section shows
+          while it&apos;s active, inside its show-from / hide-after window, and only to its audience.
         </p>
       </div>
+
+      {presets.length > 0 && (
+        <PresetBar
+          presets={presets}
+          selected={preset}
+          onSelect={(id) => {
+            setPickedId(id);
+            setExpandedId(null);
+          }}
+        />
+      )}
 
       {isLoading ? (
         <Loader2 className="size-5 animate-spin text-white/40" />
@@ -219,7 +262,7 @@ export function HomeSectionsEditor() {
           <button
             key={type}
             type="button"
-            disabled={adding}
+            disabled={adding || !presetId}
             onClick={() => add(type)}
             className="rounded-lg border border-dashed border-white/15 px-3 py-2 text-xs text-white/60 transition-colors hover:border-white/30 hover:text-white disabled:opacity-40"
           >

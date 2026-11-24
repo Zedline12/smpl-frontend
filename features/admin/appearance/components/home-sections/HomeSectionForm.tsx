@@ -6,10 +6,12 @@ import { toast } from "sonner";
 import { updateHomeSection } from "@/features/home-sections/api";
 import { HomeSectionView } from "@/features/home-sections/components/HomeSections";
 import {
+  AUDIENCE_LABELS,
   HEADER_ALIGNS,
   HOME_SECTION_TYPES,
   HOME_SECTION_TYPE_LABELS,
   HomeSectionLimits as L,
+  SECTION_AUDIENCES,
   TITLE_COLORS,
   blankBody,
   type AdminHomeSection,
@@ -21,11 +23,26 @@ import { MediaBodyEditor } from "./body-editors/MediaBodyEditor";
 import { TemplatesBodyEditor, usePublishedTemplates } from "./body-editors/TemplatesBodyEditor";
 import { CardsBodyEditor } from "./body-editors/CardsBodyEditor";
 import { HeroBodyEditor } from "./body-editors/HeroBodyEditor";
+import { ShowcaseBodyEditor } from "./body-editors/ShowcaseBodyEditor";
+import { ToolsBodyEditor } from "./body-editors/ToolsBodyEditor";
+import { AnnouncementBodyEditor } from "./body-editors/AnnouncementBodyEditor";
+import { ModelsBodyEditor } from "./body-editors/ModelsBodyEditor";
+import { RecentBodyEditor } from "./body-editors/RecentBodyEditor";
+import { UpgradeBodyEditor } from "./body-editors/UpgradeBodyEditor";
 
-type Draft = Omit<AdminHomeSection, "id" | "sortOrder">;
+type Draft = Omit<AdminHomeSection, "id" | "sortOrder" | "presetId">;
+
+const AUDIENCE_HINT: Record<string, string> = {
+  all: "Everyone who opens the home page.",
+  guests: "Only people who aren't signed in.",
+  signed_in: "Anyone signed in, with or without a plan.",
+  no_plan: "Signed in, without a paid plan (good for upgrade banners).",
+  paid: "Signed in with a paid plan.",
+};
 
 const toDraft = (s: AdminHomeSection): Draft => ({
   name: s.name,
+  audience: s.audience ?? "all",
   isActive: s.isActive,
   startsAt: s.startsAt,
   expiresAt: s.expiresAt,
@@ -43,6 +60,18 @@ function BodyEditor({ body, onChange }: { body: HomeSectionBody; onChange: (b: H
       return <CardsBodyEditor body={body} onChange={onChange} />;
     case "hero":
       return <HeroBodyEditor body={body} onChange={onChange} />;
+    case "showcase":
+      return <ShowcaseBodyEditor body={body} onChange={onChange} />;
+    case "tools":
+      return <ToolsBodyEditor body={body} onChange={onChange} />;
+    case "announcement":
+      return <AnnouncementBodyEditor body={body} onChange={onChange} />;
+    case "models":
+      return <ModelsBodyEditor body={body} onChange={onChange} />;
+    case "recent":
+      return <RecentBodyEditor body={body} onChange={onChange} />;
+    case "upgrade":
+      return <UpgradeBodyEditor body={body} onChange={onChange} />;
   }
 }
 
@@ -75,6 +104,7 @@ export function HomeSectionForm({ section, onSaved }: { section: AdminHomeSectio
       type: "templates",
       columns: draft.body.columns,
       templates: draft.body.templateIds.flatMap((id) => byId.get(id) ?? []),
+      link: draft.body.link ?? null,
     };
   }, [draft.body, templates]);
 
@@ -113,6 +143,15 @@ export function HomeSectionForm({ section, onSaved }: { section: AdminHomeSectio
           />
         </Field>
       </div>
+
+      <Field label="Who sees it" hint={AUDIENCE_HINT[draft.audience]}>
+        <Segmented
+          options={SECTION_AUDIENCES}
+          value={draft.audience}
+          onChange={(audience) => set({ audience })}
+          label={(a) => AUDIENCE_LABELS[a]}
+        />
+      </Field>
 
       {/* Header */}
       <fieldset className="flex flex-col gap-3 rounded-xl border border-white/10 p-4">
