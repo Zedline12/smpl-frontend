@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AuthProvider from "@/providers/AuthProvider";
 import { MainShell } from "@/components/MainShell";
 import AiAssistantWidget from "@/features/chat/components/AiAssistantWidget";
+import { BroadcastModal } from "@/features/broadcasts/components/BroadcastModal";
 import { fetchWithToken } from "@/lib/fetcher";
 
 /**
@@ -34,6 +35,7 @@ export default async function ExploreLayout({
     <AuthProvider user={user}>
       <MainShell>{children}</MainShell>
       {user && <AiAssistantWidget />}
+      {user && <BroadcastModal />}
     </AuthProvider>
   );
 }
