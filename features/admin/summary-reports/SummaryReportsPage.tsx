@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Download, FileSpreadsheet, Loader2, Mail, Send, XCircle } from "lucide-react";
+import { CheckCircle2, Download, FileSpreadsheet, Loader2, Mail, Presentation, Send, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +72,9 @@ function defaultRange() {
   return { from: isoDay(from), to: isoDay(to) };
 }
 
+/** What the emailed slides show. */
+const SLIDES = ["New free & paid users", "Generation cost & profit (paid vs free)", "Revenue by source and plan", "Failed, stuck & system errors"];
+
 const TABS = [
   "Summary (vs previous period)",
   "New subscriptions",
@@ -85,7 +88,7 @@ const TABS = [
   "Top users",
 ];
 
-/** App Settings → Summary Reports: an Excel summary emailed to the admins daily or weekly. */
+/** App Settings → Summary Reports: summary slides emailed to the admins daily or weekly. */
 export function SummaryReportsPage() {
   const qc = useQueryClient();
   const settings = useQuery({ queryKey: ["admin-summary-reports"], queryFn: () => api<Settings>("/settings") });
@@ -93,7 +96,7 @@ export function SummaryReportsPage() {
   const zones = useMemo(allZones, []);
   const [draft, setDraft] = useState<Form | null>(null);
   const [range, setRange] = useState(defaultRange);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "xlsx" | null>(null);
 
   const s = settings.data;
   const neverSaved = !!s && !s.updatedBy;
@@ -143,19 +146,19 @@ export function SummaryReportsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const download = async () => {
+  const download = async (format: "pdf" | "xlsx") => {
     if (!range.from || !range.to) return;
-    setDownloading(true);
+    setDownloading(format);
     try {
       const from = new Date(`${range.from}T00:00:00`);
       const to = new Date(new Date(`${range.to}T00:00:00`).getTime() + 86_400_000);
-      const res = await fetch(`/api/admin/summary-reports/download?from=${from.toISOString()}&to=${to.toISOString()}`);
+      const res = await fetch(`/api/admin/summary-reports/download?from=${from.toISOString()}&to=${to.toISOString()}&format=${format}`);
       if (!res.ok) {
         const json = await res.json().catch(() => null);
         throw new Error(json?.error || "Couldn't build the report");
       }
       const blob = await res.blob();
-      const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? "smpl-summary.xlsx";
+      const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? `smpl-summary.${format}`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -165,7 +168,7 @@ export function SummaryReportsPage() {
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
@@ -177,7 +180,10 @@ export function SummaryReportsPage() {
     <div className="flex flex-col gap-5 p-4 sm:p-6">
       <div>
         <h1 className="text-xl font-semibold text-white">Summary Reports</h1>
-        <p className="text-sm text-white/50">An Excel summary of billing, generations, new users and support, emailed to the admins every day or week.</p>
+        <p className="text-sm text-white/50">
+          A 4-slide SMPL summary (new users, generation cost &amp; profit, revenue, system health) emailed to the admins every day or week: the slides
+          show in the email, with the PDF attached.
+        </p>
       </div>
 
       {settings.isLoading || !form || !s ? (
@@ -309,15 +315,26 @@ export function SummaryReportsPage() {
               <input type="date" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} className={cn(input, "[color-scheme:dark]")} />
               <button
                 type="button"
-                onClick={() => void download()}
-                disabled={downloading}
+                onClick={() => void download("pdf")}
+                disabled={!!downloading}
+                className="bg-primary hover:bg-primary/90 flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {downloading === "pdf" ? <Loader2 className="size-4 animate-spin" /> : <Presentation className="size-4" />}
+                Slides (PDF)
+              </button>
+              <button
+                type="button"
+                onClick={() => void download("xlsx")}
+                disabled={!!downloading}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-white/15 px-3 text-sm text-white hover:bg-white/5 disabled:opacity-50"
               >
-                {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-                Download .xlsx
+                {downloading === "xlsx" ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                Detailed .xlsx
               </button>
             </div>
-            <p className="text-xs text-white/40">Tabs: {TABS.join(" · ")}. Up to 366 days.</p>
+            <p className="text-xs text-white/40">
+              Slides: {SLIDES.join(" · ")}. The spreadsheet has every row: {TABS.join(" · ")}. Up to 366 days.
+            </p>
           </section>
 
           <section className={cn(card, "flex flex-col gap-3")}>

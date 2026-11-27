@@ -210,12 +210,13 @@ export function GenerationsDashboard() {
 
       {c && p && (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {/* 5 cards: 3 + 2 on laptops, one row only on very wide screens. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
             <KpiTile label="Generations" value={int(c.generations)} accent="blue" icon={BarChart3}>
               <DeltaText now={c.generations} before={p.generations} /> · {pct(c.successRate)} succeeded
             </KpiTile>
-            <KpiTile label="Paid vs free" value={`${int(c.paidGenerations)} / ${int(c.freeGenerations)}`} accent="sky" icon={Users}>
-              {int(c.paidUsers)} paid · {int(c.freeUsers)} free users · <DeltaText now={c.freeGenerations} before={p.freeGenerations} goodWhenUp={false} /> free
+            <KpiTile label="By paid users" value={pct(c.generations ? c.paidGenerations / c.generations : null)} accent="sky" icon={Users}>
+              {int(c.paidGenerations)} paid · {int(c.freeGenerations)} free · {int(c.paidUsers)} / {int(c.freeUsers)} users
             </KpiTile>
             <KpiTile label="Revenue" value={money(c.revenue)} accent="emerald" icon={CircleDollarSign}>
               <DeltaText now={c.revenue} before={p.revenue} /> · {int(c.credits)} credits
