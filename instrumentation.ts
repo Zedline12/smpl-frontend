@@ -15,6 +15,8 @@ export async function onRequestError(err: unknown, request: RequestInfo, context
     const e = err as Error & { digest?: string };
     // redirect() and notFound() are thrown on purpose.
     if (typeof e?.digest === "string" && e.digest.startsWith("NEXT_")) return;
+    // `next dev` on a laptop: don't report (it used to land in the production list).
+    if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_REPORT_LOCAL_ERRORS !== "1") return;
     const api = process.env.NEXT_PUBLIC_API_URL;
     if (!api) return;
 
