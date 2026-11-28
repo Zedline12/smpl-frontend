@@ -71,7 +71,9 @@ export function notifyFinished(
     ? item.kind === "clipping"
       ? "Your clips are ready"
       : `Your ${what} is ready`
-    : `${capitalize(what)} failed`;
+    : item.failedTitle
+      ? `${capitalize(what)} failed: ${item.failedTitle}`
+      : `${capitalize(what)} failed`;
   const body = ok
     ? (item.title ?? undefined)
     : [
@@ -79,6 +81,7 @@ export function notifyFinished(
         item.refunded && !/refund/i.test(item.failedMessage ?? "")
           ? "Credits refunded."
           : null,
+        item.failedCode ? `(${item.failedCode})` : null,
       ]
         .filter(Boolean)
         .join(" ") || undefined;

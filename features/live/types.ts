@@ -23,6 +23,9 @@ export interface LiveItem {
   providerUrl?: string | null;
   failedMessage?: string | null;
   failedCategory?: string | null;
+  /** The failure code ("E1004") and its friendly title. */
+  failedCode?: string | null;
+  failedTitle?: string | null;
   refunded?: boolean;
   /** The kind's own object (job, clipping project, brand, analysis). */
   data?: unknown;

@@ -1,4 +1,5 @@
 "use client";
+import { failureCodeLabel, failureMessage, failureTitle, type FailureMeta } from "@/lib/failure";
 import { useGenerationQueuesQuery } from "@/features/generation/hooks/generation";
 import { AiModelsEnum,  normalizeModelId } from "@/features/generation/enums/models.enum";
 import { useQueryClient } from "@tanstack/react-query";
@@ -256,12 +257,13 @@ export default function MediaExplorer({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {(failedQueue as any).failedMeta?.category ??
-                  "Generation Failed"}
+                {failureTitle((failedQueue as { failedMeta?: FailureMeta }).failedMeta)}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {(failedQueue as any).failedMeta?.clientMessage ??
-                  "An unknown error occurred during generation."}
+                {failureMessage((failedQueue as { failedMeta?: FailureMeta }).failedMeta)}
+                {failureCodeLabel((failedQueue as { failedMeta?: FailureMeta }).failedMeta?.code) && (
+                  <span className="mt-2 block text-xs text-white/40">{failureCodeLabel((failedQueue as { failedMeta?: FailureMeta }).failedMeta?.code)}</span>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

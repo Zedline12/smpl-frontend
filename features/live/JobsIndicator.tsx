@@ -50,7 +50,7 @@ function JobRow({ item }: { item: LiveItem }) {
         >
           {item.status === "success"
             ? "Ready · View"
-            : item.failedMessage || "Failed"}
+            : item.failedTitle || item.failedMessage || "Failed"}
         </p>
       )}
     </Link>

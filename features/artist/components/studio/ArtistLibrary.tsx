@@ -1,4 +1,5 @@
 "use client";
+import { failureCodeLabel, failureMessage, failureTitle } from "@/lib/failure";
 import { ArrowRight, Download, Heart, Music2, Sparkles } from "lucide-react";
 import {
   AlertDialog,
@@ -181,11 +182,13 @@ export function ArtistLibrary({ full }: { full?: boolean } = {}) {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {failed.failedMeta?.category ?? "Generation Failed"}
+                {failureTitle(failed.failedMeta)}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {failed.failedMeta?.clientMessage ??
-                  "An unknown error occurred during generation."}
+                {failureMessage(failed.failedMeta)}
+                {failureCodeLabel(failed.failedMeta?.code) && (
+                  <span className="mt-2 block text-xs text-white/40">{failureCodeLabel(failed.failedMeta?.code)}</span>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

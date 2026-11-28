@@ -204,7 +204,14 @@ export interface GenerationQueue {
   startedAt?: string | Date | null;
   /** Expected duration in seconds (for the progress bar). */
   estimatedSeconds?: number | null;
-  failedMeta?: { category?: string; retryable?: boolean; clientMessage?: string } | null;
+  failedMeta?: {
+    category?: string;
+    retryable?: boolean;
+    clientMessage?: string;
+    /** "E1004": see lib/failure.ts. */
+    code?: string;
+    title?: string;
+  } | null;
 }
 export enum GenerationStatus {
   COMPLETED = "COMPLETED",

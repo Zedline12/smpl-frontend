@@ -1,4 +1,5 @@
 "use client";
+import { failureCodeLabel, failureMessage, failureTitle } from "@/lib/failure";
 import { useState } from "react";
 import { ArrowRight, Clapperboard, Download, Sparkles } from "lucide-react";
 import {
@@ -146,9 +147,12 @@ export function ClipLibrary({ full }: { full?: boolean } = {}) {
         <AlertDialog open onOpenChange={(open) => !open && dismiss(failed.id)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{failed.failedMeta?.category ?? "Generation Failed"}</AlertDialogTitle>
+              <AlertDialogTitle>{failureTitle(failed.failedMeta)}</AlertDialogTitle>
               <AlertDialogDescription>
-                {failed.failedMeta?.clientMessage ?? "An unknown error occurred during generation."}
+                {failureMessage(failed.failedMeta)}
+                {failureCodeLabel(failed.failedMeta?.code) && (
+                  <span className="mt-2 block text-xs text-white/40">{failureCodeLabel(failed.failedMeta?.code)}</span>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
