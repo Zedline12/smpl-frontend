@@ -59,7 +59,10 @@ async function fetchPreview(planId: string, promotionCode: string | null): Promi
     body: JSON.stringify({ planId, ...(promotionCode ? { promotionCode } : {}) }),
   });
   const json = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(json?.error || "Couldn't price this plan change.");
+  if (!res.ok) {
+    // e.g. DOWNGRADE_NOT_ALLOWED: subscribed users can only upgrade.
+    throw Object.assign(new Error(json?.error || "Couldn't price this plan change."), { code: json?.code ?? null });
+  }
   return unwrap<PlanChangePreview>(json);
 }
 

@@ -18,6 +18,9 @@ export interface SubscriptionPlan {
 
   stripePriceId: string;
 
+  /** Rank that tells upgrades from downgrades (higher = better); missing on some responses. */
+  tier?: number | null;
+
   /** Generation jobs a user on this plan can run at the same time. */
   maxConcurrentJobs?: number;
 }

@@ -18,7 +18,8 @@ export async function proxyUserSubscriptions(
     const data = await response.json().catch(() => null);
     if (!response.ok) {
       return NextResponse.json(
-        { error: data?.message || "Something went wrong with your subscription", code: data?.code },
+        // The backend's filter puts the code under error.code.
+        { error: data?.message || "Something went wrong with your subscription", code: data?.error?.code ?? data?.code },
         { status: response.status },
       );
     }

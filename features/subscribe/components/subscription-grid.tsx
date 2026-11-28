@@ -7,7 +7,8 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCheckout } from "../hooks/use-checkout";
-import { isFreePlan } from "@/lib/subscription";
+import { isFreePlan, planAction, unavailableReason } from "@/lib/subscription";
+import { CurrentPlanExtras } from "./CurrentPlanExtras";
 import { useAuth } from "@/providers/AuthProvider";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { cn } from "@/lib/utils";
@@ -290,7 +291,9 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
             concurrencyLabel(plan.maxConcurrentJobs),
             ...(plan.metadata || []).slice(1),
           ];
-          const isCurrent = user?.subscription?.id === plan.id;
+          // Subscribed: only upgrades (or a credit pack, or waiting for the renewal).
+          const action = planAction(user, plan, plans);
+          const isCurrent = action === "current";
           const codePrice = promoPrice(plan.id);
           const isRedirecting = isCheckoutLoading && processingPlanId === plan.id;
 
@@ -379,15 +382,25 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
               {/* CTA */}
               <button
                 onClick={() => handleSubscribe(plan.id)}
-                disabled={isRedirecting || isCurrent}
+                disabled={isRedirecting || isCurrent || action === "unavailable"}
+                title={action === "unavailable" ? unavailableReason(user) : undefined}
                 className={cn(
                   "w-full py-3 rounded-[10px] text-[14px] font-bold transition-colors disabled:opacity-50 mb-2",
                   style.cta,
                 )}
               >
-                {isRedirecting ? "Redirecting…" : isCurrent ? "Current plan" : `Get ${plan.name}`}
+                {isRedirecting
+                  ? "Redirecting…"
+                  : isCurrent
+                    ? "Current plan"
+                    : action === "upgrade"
+                      ? `Upgrade to ${plan.name}`
+                      : action === "unavailable"
+                        ? unavailableReason(user)
+                        : `Get ${plan.name}`}
               </button>
 
+              {isCurrent && user?.subscription && <CurrentPlanExtras subscription={user.subscription} />}
               <div className="text-center text-[12px] mb-6 text-muted-foreground">
                 {isYearly && yearlySavings > 0
                   ? `Save $${Math.round(yearlySavings)} compared to monthly`
@@ -430,6 +443,8 @@ export function SubscriptionGrid({ plans, isLoading }: SubscriptionGridProps) {
         onSubscribe={handleSubscribe}
         processingPlanId={processingPlanId}
         currentPlanId={user && !isFreePlan(user) ? user.subscription?.id : null}
+        actionFor={(plan) => planAction(user, plan, plans)}
+        unavailableText={unavailableReason(user)}
       />
 
       <FaqAccordion />

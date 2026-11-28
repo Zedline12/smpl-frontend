@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Clapperboard, Film, Image as ImageIcon, Info, Layers, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { billingPeriod, SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { cn } from "@/lib/utils";
+import type { PlanAction } from "@/lib/subscription";
 
 // ─── What people make, and what each thing costs ─────────────────────────────
 
@@ -189,9 +190,22 @@ interface PlanFinderProps {
   processingPlanId: string | null;
   /** The user's current paid plan, if any. */
   currentPlanId?: string | null;
+  /** What each plan offers this user (subscribed users can only upgrade). */
+  actionFor?: (plan: SubscriptionPlan) => PlanAction;
+  /** The disabled button's text for plans that can't be picked. */
+  unavailableText?: string;
 }
 
-export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, processingPlanId, currentPlanId }: PlanFinderProps) {
+export function PlanFinder({
+  plans,
+  period,
+  onPeriodChange,
+  onSubscribe,
+  processingPlanId,
+  currentPlanId,
+  actionFor,
+  unavailableText = "Not available on your plan",
+}: PlanFinderProps) {
   const costs = useCreditCosts();
   const [goals, setGoals] = useState<GoalId[]>(["viral"]);
   const [counts, setCounts] = useState<Record<ContentId, number>>(
@@ -377,6 +391,10 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                   <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-white/90 py-3 text-sm font-semibold text-black">
                     <Check className="size-4" /> Your plan
                   </div>
+                ) : actionFor?.(plan) === "unavailable" ? (
+                  <div className="mt-5 flex items-center justify-center rounded-xl bg-white/40 py-3 text-sm font-semibold text-black/70">
+                    {unavailableText}
+                  </div>
                 ) : (
                   <button
                     type="button"
@@ -385,7 +403,7 @@ export function PlanFinder({ plans, period, onPeriodChange, onSubscribe, process
                     className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
                   >
                     {processingPlanId === plan.id && <Loader2 className="size-4 animate-spin" />}
-                    Get {plan.name}
+                    {actionFor?.(plan) === "upgrade" ? `Upgrade to ${plan.name}` : `Get ${plan.name}`}
                     {discountPct > 0 && (
                       <span className="bg-primary rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white">
                         −{discountPct}% · Save {formatCents(yearlySavings)}

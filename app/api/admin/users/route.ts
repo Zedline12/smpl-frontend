@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
     if (sortBy) params.set("sortBy", sortBy);
     const billing = req.nextUrl.searchParams.get("billing");
     if (billing) params.set("billing", billing);
+    const search = req.nextUrl.searchParams.get("search")?.trim();
+    if (search) params.set("search", search);
 
     const response = await fetchWithToken(`/admin/users?${params.toString()}`);
 

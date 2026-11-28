@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Map } from "lucide-react";
+import { Map, Search, X } from "lucide-react";
 import { SubscribedUser } from "@/features/admin/users/types/types";
 import { UsersTable } from "./UsersTable";
 import dynamic from "next/dynamic";
@@ -41,14 +41,17 @@ async function fetchUsers(
   sortBy: SortBy,
   subscriptionFilter: SubscriptionFilter,
   page: number,
+  search: string,
 ): Promise<PageResult> {
   const isBillingFilter = BILLING_FILTERS.includes(subscriptionFilter);
+  // A search looks through every user, whatever filter is picked.
   const params = new URLSearchParams({
-    isSubscribed: isBillingFilter ? "all" : subscriptionFilter === "paid" ? "true" : "false",
+    isSubscribed: search ? "all" : isBillingFilter ? "all" : subscriptionFilter === "paid" ? "true" : "false",
     page: String(page),
     limit: "10",
   });
-  if (isBillingFilter) params.set("billing", subscriptionFilter);
+  if (search) params.set("search", search);
+  else if (isBillingFilter) params.set("billing", subscriptionFilter);
   if (sortBy) params.set("sortBy", sortBy);
   const res = await fetch(`/api/admin/users?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch users");
@@ -66,10 +69,24 @@ export default function UsersPageClient() {
   const [page, setPage] = useState(1);
   const [accumulated, setAccumulated] = useState<SubscribedUser[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  // Search 300 ms after typing stops, from the first page.
+  useEffect(() => {
+    const next = searchInput.trim();
+    if (next === search) return;
+    const t = setTimeout(() => {
+      setSearch(next);
+      setPage(1);
+      setAccumulated([]);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput, search]);
 
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ["admin-users", sortBy, subscriptionFilter, page],
-    queryFn: () => fetchUsers(sortBy, subscriptionFilter, page),
+    queryKey: ["admin-users", sortBy, subscriptionFilter, page, search],
+    queryFn: () => fetchUsers(sortBy, subscriptionFilter, page, search),
     placeholderData: (prev) => prev,
   });
 
@@ -80,6 +97,9 @@ export default function UsersPageClient() {
   }, [data, page, accumulated]);
 
   const handleFilterChange = (newFilter: SubscriptionFilter) => {
+    // Picking a filter leaves the search.
+    setSearchInput("");
+    setSearch("");
     setSubscriptionFilter(newFilter);
     setPage(1);
     setAccumulated([]);
@@ -104,6 +124,29 @@ export default function UsersPageClient() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4 flex-wrap">
+        {/* Search by email (searches every user, ignoring the filter) */}
+        <div className="relative w-full sm:w-72">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search by email"
+            aria-label="Search users by email"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800/50 py-1.5 pr-8 pl-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-neutral-500 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => setSearchInput("")}
+              aria-label="Clear search"
+              className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
         {/* Heat map button */}
         <button
           onClick={() => setMapOpen(true)}
@@ -120,7 +163,7 @@ export default function UsersPageClient() {
               key={f.value}
               onClick={() => handleFilterChange(f.value)}
               className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-                subscriptionFilter === f.value
+                !search && subscriptionFilter === f.value
                   ? "bg-neutral-700 text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}

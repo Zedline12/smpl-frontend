@@ -25,7 +25,7 @@ import {
   when,
 } from "./shared";
 
-type Kind = "self_service" | "early_fraud_warning" | "admin" | "support" | "external";
+type Kind = "self_service" | "early_fraud_warning" | "admin" | "support" | "external" | "duplicate";
 type Status = "pending" | "succeeded" | "failed" | "canceled" | "requires_action";
 
 export interface RefundRow {
@@ -84,6 +84,7 @@ export const KIND_LABEL: Record<Kind, string> = {
   admin: "Admin",
   support: "Support",
   external: "Stripe dashboard",
+  duplicate: "Duplicate subscription",
 };
 const KIND_TONE: Record<Kind, Tone> = {
   self_service: "sky",
@@ -91,6 +92,7 @@ const KIND_TONE: Record<Kind, Tone> = {
   admin: "violet",
   support: "violet",
   external: "gray",
+  duplicate: "sky",
 };
 export const STATUS_TONE: Record<Status, Tone> = {
   pending: "amber",

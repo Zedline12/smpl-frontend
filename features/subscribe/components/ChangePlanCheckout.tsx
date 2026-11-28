@@ -142,9 +142,19 @@ export function ChangePlanCheckout({ planId }: { planId: string | null }) {
     return (
       <Card className="mx-auto max-w-md text-center">
         <p className="text-white">{(preview.error as Error).message}</p>
-        <Link href="/pricing" className="mt-4 inline-flex rounded-xl border border-white/10 px-5 py-2.5 text-sm font-medium text-white">
-          Back to plans
-        </Link>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Link href="/pricing" className="inline-flex rounded-xl border border-white/10 px-5 py-2.5 text-sm font-medium text-white">
+            Back to plans
+          </Link>
+          {(preview.error as Error & { code?: string | null }).code === "DOWNGRADE_NOT_ALLOWED" && (
+            <Link
+              href="/me/settings/subscription#credit-packs"
+              className="inline-flex rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black"
+            >
+              Buy credits
+            </Link>
+          )}
+        </div>
       </Card>
     );
   }

@@ -4,21 +4,25 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubscriptionPlan } from "@/lib/types/subscription-plan.type";
 import { useCheckout } from "../hooks/use-checkout";
-import { isFreePlan } from "@/lib/subscription";
+import { isFreePlan, planAction, unavailableReason } from "@/lib/subscription";
 import { useAuth } from "@/providers/AuthProvider";
 import { AiAssistantBadge } from "@/features/chat/components/AiAssistantBadge";
 import { CheckoutCaptchaDialog } from "./CheckoutCaptchaDialog";
 interface SubscriptionCardProps {
   plan: SubscriptionPlan;
+  /** All plans (to tell an upgrade from a downgrade); defaults to just this one. */
+  plans?: SubscriptionPlan[];
 }
 
-export function SubscriptionCard({ plan }: SubscriptionCardProps) {
+export function SubscriptionCard({ plan, plans = [plan] }: SubscriptionCardProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { startCheckout, isLoading: isCheckoutLoading } = useCheckout();
   const isLoading = isCheckoutLoading;
   const [captchaOpen, setCaptchaOpen] = useState(false);
   const onPaidPlan = !!user && !isFreePlan(user);
+  // Subscribed: only upgrades (or a credit pack, or waiting for the renewal).
+  const action = planAction(user, plan, plans);
 
   const handleVerified = (token: string) => {
     startCheckout(plan.id, token);
@@ -82,7 +86,7 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
             ? router.push(`/checkout/change-plan?plan=${encodeURIComponent(plan.id)}`)
             : setCaptchaOpen(true)
         }
-        disabled={isLoading || user?.subscription?.id === plan.id}
+        disabled={isLoading || action === "current" || action === "unavailable"}
         className={`w-full py-3 px-6 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-primary-foreground ${
           plan.isMostPopular
             ? "bg-gradient-primary border-none"
@@ -113,10 +117,12 @@ export function SubscriptionCard({ plan }: SubscriptionCardProps) {
             </svg>
             Processing...
           </>
-        ) : user?.subscription?.id === plan.id ? (
-          "Subscribed"
-        ) : onPaidPlan ? (
-          "Switch to this plan"
+        ) : action === "current" ? (
+          "Current plan"
+        ) : action === "upgrade" ? (
+          `Upgrade to ${plan.name}`
+        ) : action === "unavailable" ? (
+          unavailableReason(user)
         ) : (
           "Subscribe"
         )}
