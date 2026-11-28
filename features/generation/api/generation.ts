@@ -5,7 +5,6 @@ import {
 import { EditGenerateRequest, GenerateImageRequest, GenerateRequest, GenerateVideoRequest } from "../types/api";
 import { GenerationQueue } from "../types/generation";
 import { clearRecreatedFrom, clientOrigin } from "../lib/origin";
-import { withRights } from "@/features/legal/rights";
 export async function fetchGenerationCost(
   data: CalculateMediaCostRequest,
 ): Promise<CalculateMediaCostResponse> {
@@ -59,16 +58,11 @@ export async function refundGeneration(generationId: string) {
 }
 
 export async function generate(data: GenerateRequest) {
-  // Real-person tools ask for a one-time rights confirmation, then retry.
-  const res = await withRights(() =>
-    fetch("/api/generation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...data, origin: clientOrigin(data.model) }),
-    }),
-  );
+  const res = await fetch("/api/generation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...data, origin: clientOrigin(data.model) }),
+  });
   const json = await res.json();
   if (!json.success) {
     throw new Error(json.message);

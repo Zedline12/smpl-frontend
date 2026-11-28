@@ -2,7 +2,6 @@ import { Navbar } from "@/components/navbar";
 import AiAssistantWidget from "@/features/chat/components/AiAssistantWidget";
 import { BroadcastModal } from "@/features/broadcasts/components/BroadcastModal";
 import { ReacceptModal } from "@/features/legal/ReacceptModal";
-import { RightsDialog } from "@/features/legal/RightsDialog";
 import { fetchWithToken } from "@/lib/fetcher";
 import AuthProvider from "@/providers/AuthProvider";
 import { cookies } from "next/headers";
@@ -34,7 +33,6 @@ export default async function ProtectedLayout({
       <AiAssistantWidget />
       <BroadcastModal />
       <ReacceptModal />
-      <RightsDialog />
     </AuthProvider>
   );
 }

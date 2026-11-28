@@ -5,7 +5,6 @@ import { MainShell } from "@/components/MainShell";
 import AiAssistantWidget from "@/features/chat/components/AiAssistantWidget";
 import { BroadcastModal } from "@/features/broadcasts/components/BroadcastModal";
 import { ReacceptModal } from "@/features/legal/ReacceptModal";
-import { RightsDialog } from "@/features/legal/RightsDialog";
 import { fetchWithToken } from "@/lib/fetcher";
 
 /**
@@ -39,7 +38,6 @@ export default async function ExploreLayout({
       {user && <AiAssistantWidget />}
       {user && <BroadcastModal />}
       {user && <ReacceptModal />}
-      {user && <RightsDialog />}
     </AuthProvider>
   );
 }

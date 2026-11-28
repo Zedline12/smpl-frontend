@@ -1,4 +1,3 @@
-import { withRights } from "@/features/legal/rights";
 import {
   ClipPostCopy,
   ClippingCost,
@@ -57,14 +56,11 @@ export async function fetchClippingCost(input: {
 export async function createClippingProject(
   body: CreateVideoClippingRequest,
 ): Promise<VideoClippingProject> {
-  // Their own videos only: a one-time rights confirmation, then retry.
-  const res = await withRights(() =>
-    fetch("/api/video-clipping", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }),
-  );
+  const res = await fetch("/api/video-clipping", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) {
     throw new Error(await readError(res, "Failed to start clipping"));
   }
