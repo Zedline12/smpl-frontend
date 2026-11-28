@@ -12,7 +12,14 @@ import {
 import SpeechToText from "./SpeechToText";
 
 /** Voice input + AI prompt enhancer, shown in the bottom-right corner of the prompt box. */
-export function PromptTools({ className }: { className?: string }) {
+export function PromptTools({
+  className,
+  tooltipAlign = "right",
+}: {
+  className?: string;
+  /** Which edge the hover hint lines up with (left when the tools sit bottom-left). */
+  tooltipAlign?: "left" | "right";
+}) {
   const { model, mediaType } = useAiGenerationControlStore();
   const { states, setField } = useAiModelStore();
   const prompt = (states[model] as { prompt?: string } | undefined)?.prompt ?? "";
@@ -62,7 +69,7 @@ export function PromptTools({ className }: { className?: string }) {
             className={`h-4 w-4 ${isEnhancing ? "animate-robot-glow" : "opacity-50 transition-opacity group-hover:opacity-100"}`}
           />
         </button>
-        <div className="pointer-events-none absolute right-0 bottom-full mb-2 rounded-md border border-white/10 bg-black/80 px-2 py-1 text-[11px] font-medium whitespace-nowrap text-white/80 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        <div className={`pointer-events-none absolute ${tooltipAlign === "left" ? "left-0" : "right-0"} bottom-full mb-2 rounded-md border border-white/10 bg-black/80 px-2 py-1 text-[11px] font-medium whitespace-nowrap text-white/80 opacity-0 transition-opacity duration-150 group-hover:opacity-100`}>
           {hint}
         </div>
       </div>

@@ -14,6 +14,7 @@ import { useStylesQuery } from "@/features/styles/api";
 import { HOW_IT_WORKS_MAP } from "@/features/generation/data/how-it-works";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MediaManagerDialog } from "@/features/generation/components/prompt/MediaManagerDialog";
+import { PromptTools } from "@/features/generation/components/prompt/PromptTools";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useAiGenerationControlStore,
@@ -235,13 +236,15 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
       </div>
 
       {/* Required prompts always show the input; optional ones when the toggle is on. */}
+      {/* Voice input + prompt enhancer sit inside the box, so they hide with it. */}
       {showInput && (
+        <div className="relative">
         <textarea
           value={s?.prompt ?? ""}
           onChange={(e) => setField(model, "prompt", e.target.value)}
           placeholder={placeholder}
           rows={4}
-          className="w-full resize-none rounded-[10px] border px-4 py-3 text-sm focus:outline-none transition-colors"
+          className="w-full resize-none rounded-[10px] border px-4 pt-3 pb-12 text-sm focus:outline-none transition-colors"
           style={{
             backgroundColor: "var(--bg-card)",
             borderColor: "var(--border-subtle)",
@@ -254,6 +257,8 @@ function PromptSection({ model }: { model: AiModelsEnum }) {
           onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.4)")}
           onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
         />
+        <PromptTools className="absolute bottom-2 left-2" tooltipAlign="left" />
+        </div>
       )}
     </div>
   );
