@@ -19,7 +19,7 @@ import {
   LineChart,
   Megaphone,
   Package,
-  Rocket,
+  // Rocket, // for the hidden Updates link below
   RotateCcw,
   Scale,
   Settings,
@@ -108,7 +108,9 @@ export const SETTINGS_SECTIONS: AdminNavSection[] = [
     links: [
       { icon: Scale, label: "Legal", href: "/admin/legal" },
       { icon: FileSpreadsheet, label: "Summary Reports", href: "/admin/summary-reports" },
-      { icon: Rocket, label: "Updates", href: "/admin/updates", ownerOrDev: true },
+      // Hidden for now (the page still works at /admin/updates). Uncomment to show it again,
+      // along with the Rocket import above.
+      // { icon: Rocket, label: "Updates", href: "/admin/updates", ownerOrDev: true },
     ],
   },
 ];
